@@ -1,0 +1,46 @@
+LePhare Photometric Redshifts and Physical Parameters
+Click to expand
+Column Name	Description
+zfinal	LePHARE Photometric redshift estimate, taken as the median of the likelihood distribution if the object is a galaxy. Set to 0 for stars and artifacts
+type	LePHARE classification 0: galaxy, 1: star, 2: qso
+zpdf_med	Photo-z, median of the zPDF
+zpdf_l68	Photo-z lower 1sigma confidence value, computed from the zPDF
+zpdf_u68	Photo-z upper 1sigma confidence value, computed from the zPDF
+zchi2	Photo-z computed from the minimum chi^2
+chi2_best	Value of the minimum chi^2 of the best fit galaxy template
+nbfilt	Number of filters used by LePHARE to do the SED fit
+zp_agn	Photo-z solution from the best AGN template
+chi2_agn	Value of the minimum chi^2 of the best agn template
+mod_agn	Model ID for the AGN template
+mod_star	Model ID for the star template
+chi_star	Value of the minimum chi^2 of the best star template
+mod_minchi2_phys	Model ID for the best fit BC03 template from the physical param. run
+ebv_minchi2	E(B-V) value from the minimum chi^2
+law_minchi2	Dust attenuation law from the minimum chi^2. 0: SB_calzetti, 1: Arnouts 2013; 2: Salim 2018
+age_minchi2	Age from the minimum chi^2
+mass_minchi2	log stellar mass [Msol] from BC03 best-fit template. Taken at the minimum chi2
+sfr_minchi2	log SFR [Msol yr-1] from BC03 best-fit template. Taken at the minimum chi2
+ssfr_minchi2	log sSFR [yr-1] from BC03 best-fit template. Taken at the minimum chi2
+age_l68	log age [yr] from BC03 best-fit template. lower 68% confidence limit
+age_med	log age [yr] from BC03 best-fit template. median of the PD
+age_u68	log age [yr] from BC03 best-fit template. upper 68% confidence limit
+mass_l68	log stellar mass [Msol] from BC03 best-fit template. lower 68% confidence limit
+mass_med	log stellar mass [Msol] from BC03 best-fit template. median of the PD
+mass_u68	log stellar mass [Msol] from BC03 best-fit template. upper 68% confidence limit
+sfr_l68	log SFR [Msol yr-1] from BC03 best-fit template. lower 68% confidence limit
+sfr_med	log SFR [Msol yr-1] from BC03 best-fit template. median of the PD
+sfr_u68	log SFR [Msol yr-1] from BC03 best-fit template. upper 68% confidence limit
+ssfr_l68	log sSFR [yr-1] from BC03 best-fit() template. lower 68% confidence limit
+ssfr_med	log sSFR [yr-1] from BC03 best-fit template. median of the PD
+ssfr_u68	log sSFR [yr-1] from BC03 best-fit template. upper 68% confidence limit
+l_nuv	NUV band luminosity
+l_r	R band luminosity
+l_k	K band luminosity
+mabs_nuv	NUV absolute magnitude, computed from BC03 best-fit template
+mabs_r	R absolute magnitude, computed from BC03 best-fit template
+mabs_j	J absolute magnitude, computed from BC03 best-fit template
+mabs_k	K absolute magnitude, computed from BC03 best-fit template
+flag_chandra	If X-ray detected by chandra, then flag=1
+zpdf_med_space	Photo-z from SED fitting of space-based bands (HST+NIRCam), median of the zPDF
+zpdf_l68_space	Photo-z lower 1sigma from SED fitting of space-based bands (HST+NIRCam), computed from the zPDF
+zpdf_u68_space	Photo-z upper 1sigma from SED fitting of space-based bands (HST+NIRCam), computed from the zPDF

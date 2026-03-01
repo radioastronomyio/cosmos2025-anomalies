@@ -1,0 +1,19 @@
+Quality Flags
+The catalog includes a number of quality flags, defined in the column warn_flag.
+
+Quality Flags
+Case	N
+Flag
+Total number of sources	784,016	
+Most secure sources	694,341	warn_flag = 0
+Hot pixels	13,241	warn_flag = 1
+Ground vs. space incons. 1	51,793
+warn_flag = 2
+Ground vs. space incons. 2	157
+warn_flag = 3
+Single NIRCam detection	17,520	warn_flag = 4
+Radius too small	133	warn_flag = 5
+Small flux ratio	6,831	warn_flag = 6
+ Number of objects affected by the flag.
+ Of which 39,137 are inside the HSC star mask.
+ Of which 71 are inside the HSC star mask.

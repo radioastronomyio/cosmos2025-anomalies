@@ -1,0 +1,153 @@
+Machine Learning Morphological Classification
+Click to expand
+Column Name	Description
+sph_0_f150w	Probability of being classified as Spheroid in F150W filter, bin 0/10
+disk_0_f150w	Probability of being classified as Disk in F150W filter, bin 0/10
+irr_0_f150w	Probability of being classified as Irregular in F150W filter, bin 0/10
+bd_0_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 0/10
+sph_1_f150w	Probability of being classified as Spheroid in F150W filter, bin 1/10
+disk_1_f150w	Probability of being classified as Disk in F150W filter, bin 1/10
+irr_1_f150w	Probability of being classified as Irregular in F150W filter, bin 1/10
+bd_1_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 1/10
+sph_2_f150w	Probability of being classified as Spheroid in F150W filter, bin 2/10
+disk_2_f150w	Probability of being classified as Disk in F150W filter, bin 2/10
+irr_2_f150w	Probability of being classified as Irregular in F150W filter, bin 2/10
+bd_2_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 2/10
+sph_3_f150w	Probability of being classified as Spheroid in F150W filter, bin 3/10
+disk_3_f150w	Probability of being classified as Disk in F150W filter, bin 3/10
+irr_3_f150w	Probability of being classified as Irregular in F150W filter, bin 3/10
+bd_3_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 3/10
+sph_4_f150w	Probability of being classified as Spheroid in F150W filter, bin 4/10
+disk_4_f150w	Probability of being classified as Disk in F150W filter, bin 4/10
+irr_4_f150w	Probability of being classified as Irregular in F150W filter, bin 4/10
+bd_4_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 4/10
+sph_5_f150w	Probability of being classified as Spheroid in F150W filter, bin 5/10
+disk_5_f150w	Probability of being classified as Disk in F150W filter, bin 5/10
+irr_5_f150w	Probability of being classified as Irregular in F150W filter, bin 5/10
+bd_5_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 5/10
+sph_6_f150w	Probability of being classified as Spheroid in F150W filter, bin 6/10
+disk_6_f150w	Probability of being classified as Disk in F150W filter, bin 6/10
+irr_6_f150w	Probability of being classified as Irregular in F150W filter, bin 6/10
+bd_6_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 6/10
+sph_7_f150w	Probability of being classified as Spheroid in F150W filter, bin 7/10
+disk_7_f150w	Probability of being classified as Disk in F150W filter, bin 7/10
+irr_7_f150w	Probability of being classified as Irregular in F150W filter, bin 7/10
+bd_7_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 7/10
+sph_8_f150w	Probability of being classified as Spheroid in F150W filter, bin 8/10
+disk_8_f150w	Probability of being classified as Disk in F150W filter, bin 8/10
+irr_8_f150w	Probability of being classified as Irregular in F150W filter, bin 8/10
+bd_8_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 8/10
+sph_9_f150w	Probability of being classified as Spheroid in F150W filter, bin 9/10
+disk_9_f150w	Probability of being classified as Disk in F150W filter, bin 9/10
+irr_9_f150w	Probability of being classified as Irregular in F150W filter, bin 9/10
+bd_9_f150w	Probability of being classified as Bulge-dominated in F150W filter, bin 9/10
+sph_0_f277w	Probability of being classified as Spheroid in F277W filter, bin 0/10
+disk_0_f277w	Probability of being classified as Disk in F277W filter, bin 0/10
+irr_0_f277w	Probability of being classified as Irregular in F277W filter, bin 0/10
+bd_0_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 0/10
+sph_1_f277w	Probability of being classified as Spheroid in F277W filter, bin 1/10
+disk_1_f277w	Probability of being classified as Disk in F277W filter, bin 1/10
+irr_1_f277w	Probability of being classified as Irregular in F277W filter, bin 1/10
+bd_1_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 1/10
+sph_2_f277w	Probability of being classified as Spheroid in F277W filter, bin 2/10
+disk_2_f277w	Probability of being classified as Disk in F277W filter, bin 2/10
+irr_2_f277w	Probability of being classified as Irregular in F277W filter, bin 2/10
+bd_2_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 2/10
+sph_3_f277w	Probability of being classified as Spheroid in F277W filter, bin 3/10
+disk_3_f277w	Probability of being classified as Disk in F277W filter, bin 3/10
+irr_3_f277w	Probability of being classified as Irregular in F277W filter, bin 3/10
+bd_3_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 3/10
+sph_4_f277w	Probability of being classified as Spheroid in F277W filter, bin 4/10
+disk_4_f277w	Probability of being classified as Disk in F277W filter, bin 4/10
+irr_4_f277w	Probability of being classified as Irregular in F277W filter, bin 4/10
+bd_4_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 4/10
+sph_5_f277w	Probability of being classified as Spheroid in F277W filter, bin 5/10
+disk_5_f277w	Probability of being classified as Disk in F277W filter, bin 5/10
+irr_5_f277w	Probability of being classified as Irregular in F277W filter, bin 5/10
+bd_5_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 5/10
+sph_6_f277w	Probability of being classified as Spheroid in F277W filter, bin 6/10
+disk_6_f277w	Probability of being classified as Disk in F277W filter, bin 6/10
+irr_6_f277w	Probability of being classified as Irregular in F277W filter, bin 6/10
+bd_6_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 6/10
+sph_7_f277w	Probability of being classified as Spheroid in F277W filter, bin 7/10
+disk_7_f277w	Probability of being classified as Disk in F277W filter, bin 7/10
+irr_7_f277w	Probability of being classified as Irregular in F277W filter, bin 7/10
+bd_7_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 7/10
+sph_8_f277w	Probability of being classified as Spheroid in F277W filter, bin 8/10
+disk_8_f277w	Probability of being classified as Disk in F277W filter, bin 8/10
+irr_8_f277w	Probability of being classified as Irregular in F277W filter, bin 8/10
+bd_8_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 8/10
+sph_9_f277w	Probability of being classified as Spheroid in F277W filter, bin 9/10
+disk_9_f277w	Probability of being classified as Disk in F277W filter, bin 9/10
+irr_9_f277w	Probability of being classified as Irregular in F277W filter, bin 9/10
+bd_9_f277w	Probability of being classified as Bulge-dominated in F277W filter, bin 9/10
+sph_0_f444w	Probability of being classified as Spheroid in F444W filter, bin 0/10
+disk_0_f444w	Probability of being classified as Disk in F444W filter, bin 0/10
+irr_0_f444w	Probability of being classified as Irregular in F444W filter, bin 0/10
+bd_0_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 0/10
+sph_1_f444w	Probability of being classified as Spheroid in F444W filter, bin 1/10
+disk_1_f444w	Probability of being classified as Disk in F444W filter, bin 1/10
+irr_1_f444w	Probability of being classified as Irregular in F444W filter, bin 1/10
+bd_1_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 1/10
+sph_2_f444w	Probability of being classified as Spheroid in F444W filter, bin 2/10
+disk_2_f444w	Probability of being classified as Disk in F444W filter, bin 2/10
+irr_2_f444w	Probability of being classified as Irregular in F444W filter, bin 2/10
+bd_2_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 2/10
+sph_3_f444w	Probability of being classified as Spheroid in F444W filter, bin 3/10
+disk_3_f444w	Probability of being classified as Disk in F444W filter, bin 3/10
+irr_3_f444w	Probability of being classified as Irregular in F444W filter, bin 3/10
+bd_3_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 3/10
+sph_4_f444w	Probability of being classified as Spheroid in F444W filter, bin 4/10
+disk_4_f444w	Probability of being classified as Disk in F444W filter, bin 4/10
+irr_4_f444w	Probability of being classified as Irregular in F444W filter, bin 4/10
+bd_4_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 4/10
+sph_5_f444w	Probability of being classified as Spheroid in F444W filter, bin 5/10
+disk_5_f444w	Probability of being classified as Disk in F444W filter, bin 5/10
+irr_5_f444w	Probability of being classified as Irregular in F444W filter, bin 5/10
+bd_5_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 5/10
+sph_6_f444w	Probability of being classified as Spheroid in F444W filter, bin 6/10
+disk_6_f444w	Probability of being classified as Disk in F444W filter, bin 6/10
+irr_6_f444w	Probability of being classified as Irregular in F444W filter, bin 6/10
+bd_6_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 6/10
+sph_7_f444w	Probability of being classified as Spheroid in F444W filter, bin 7/10
+disk_7_f444w	Probability of being classified as Disk in F444W filter, bin 7/10
+irr_7_f444w	Probability of being classified as Irregular in F444W filter, bin 7/10
+bd_7_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 7/10
+sph_8_f444w	Probability of being classified as Spheroid in F444W filter, bin 8/10
+disk_8_f444w	Probability of being classified as Disk in F444W filter, bin 8/10
+irr_8_f444w	Probability of being classified as Irregular in F444W filter, bin 8/10
+bd_8_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 8/10
+sph_9_f444w	Probability of being classified as Spheroid in F444W filter, bin 9/10
+disk_9_f444w	Probability of being classified as Disk in F444W filter, bin 9/10
+irr_9_f444w	Probability of being classified as Irregular in F444W filter, bin 9/10
+bd_9_f444w	Probability of being classified as Bulge-dominated in F444W filter, bin 9/10
+sph_f150w_mean	Mean probability of being classified as Spheroid in F150W filter
+sph_f150w_std	Standard deviation of probability for Spheroid classification in F150W filter
+disk_f150w_mean	Mean probability of being classified as Disk in F150W filter
+disk_f150w_std	Standard deviation of probability for Disk classification in F150W filter
+irr_f150w_mean	Mean probability of being classified as Irregular in F150W filter
+irr_f150w_std	Standard deviation of probability for Irregular classification in F150W filter
+bd_f150w_mean	Mean probability of being classified as Bulge-dominated in F150W filter
+bd_f150w_std	Standard deviation of probability for Bulge-dominated classification in F150W filter
+sph_f277w_mean	Mean probability of being classified as Spheroid in F277W filter
+sph_f277w_std	Standard deviation of probability for Spheroid classification in F277W filter
+disk_f277w_mean	Mean probability of being classified as Disk in F277W filter
+disk_f277w_std	Standard deviation of probability for Disk classification in F277W filter
+irr_f277w_mean	Mean probability of being classified as Irregular in F277W filter
+irr_f277w_std	Standard deviation of probability for Irregular classification in F277W filter
+bd_f277w_mean	Mean probability of being classified as Bulge-dominated in F277W filter
+bd_f277w_std	Standard deviation of probability for Bulge-dominated classification in F277W filter
+sph_f444w_mean	Mean probability of being classified as Spheroid in F444W filter
+sph_f444w_std	Standard deviation of probability for Spheroid classification in F444W filter
+disk_f444w_mean	Mean probability of being classified as Disk in F444W filter
+disk_f444w_std	Standard deviation of probability for Disk classification in F444W filter
+irr_f444w_mean	Mean probability of being classified as Irregular in F444W filter
+irr_f444w_std	Standard deviation of probability for Irregular classification in F444W filter
+bd_f444w_mean	Mean probability of being classified as Bulge-dominated in F444W filter
+bd_f444w_std	Standard deviation of probability for Bulge-dominated classification in F444W filter
+morph_flag_f277w	Morphological classification flag for F277W filter. 0: Spheroid, 1: Disk-dominated, 2: Irregular, 3: Bulge-dominated
+delta_f277w	Uncertainty on the morphology class for F277W filter. Estimated as the difference between the two largest probablility values
+morph_flag_f444w	Morphological classification flag for F444W filter. 0: Spheroid, 1: Disk-dominated, 2: Irregular, 3: Bulge-dominated
+delta_f444w	Uncertainty on the morphology class for F444W filter. Estimated as the difference between the two largest probablility values
+morph_flag_f150w	Morphological classification flag for F150W filter. 0: Spheroid, 1: Disk-dominated, 2: Irregular, 3: Bulge-dominated
+delta_f150w	Uncertainty on the morphology class for F150W filter. Estimated as the difference between the two largest probablility values

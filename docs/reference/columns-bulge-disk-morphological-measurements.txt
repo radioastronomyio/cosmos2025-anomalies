@@ -1,0 +1,464 @@
+Bulge+Disk Morphological Measurements & Photometry
+Click to expand
+Column Name	Description
+ra_detec_bd	Right ascencion of the B+D model
+dec_detec_bd	Declination of the B+D model
+disk_radius_deg	Radius of the disk component [deg]
+disk_radius_deg_err	Radius error of the disk component [deg]
+bulge_radius_deg	Radius of the bulge component [deg]
+bulge_radius_deg_err	Radius of the bulge component [deg]
+angle_bd	Angle of the B+D model in world coordinates
+angle_bd_err	Angle error of the B+D model in world coordinates
+disk_axratio	Axis ratio of the disk component
+disk_axratio_err	Axis ratio error of the disk component
+bulge_axratio	Axis ratio of the bulge component
+bulge_axratio_err	Axis ratio of the bulge component
+fmf_b+d_chi2	Reduced chi^2 of the B+D model
+mag_model_bd_total_f115w	Total B+D model AB magnitude
+mag_model_bd_total_f150w	Total B+D model AB magnitude
+mag_model_bd_total_f277w	Total B+D model AB magnitude
+mag_model_bd_total_f444w	Total B+D model AB magnitude
+mag_err_model_bd_total_f115w	Total B+D model AB magnitude error
+mag_err_model_bd_total_f150w	Total B+D model AB magnitude error
+mag_err_model_bd_total_f277w	Total B+D model AB magnitude error
+mag_err_model_bd_total_f444w	Total B+D model AB magnitude error
+mag_model_bulge_f115w	Bulge component model AB magnitude
+mag_model_bulge_f150w	Bulge component model AB magnitude
+mag_model_bulge_f277w	Bulge component model AB magnitude
+mag_model_bulge_f444w	Bulge component model AB magnitude
+mag_err_model_bulge_f115w	Bulge component model AB magnitude error
+mag_err_model_bulge_f150w	Bulge component model AB magnitude error
+mag_err_model_bulge_f277w	Bulge component model AB magnitude error
+mag_err_model_bulge_f444w	Bulge component model AB magnitude error
+mag_model_disk_f115w	Disk component model AB magnitude
+mag_model_disk_f150w	Disk component model AB magnitude
+mag_model_disk_f277w	Disk component model AB magnitude
+mag_model_disk_f444w	Disk component model AB magnitude
+mag_err_model_disk_f115w	Disk component model AB magnitude error
+mag_err_model_disk_f150w	Disk component model AB magnitude error
+mag_err_model_disk_f277w	Disk component model AB magnitude error
+mag_err_model_disk_f444w	Disk component model AB magnitude error
+flux_model_bd_total_f115w	Total B+D model flux [microJy]
+flux_model_bd_total_f150w	Total B+D model flux [microJy]
+flux_model_bd_total_f277w	Total B+D model flux [microJy]
+flux_model_bd_total_f444w	Total B+D model flux [microJy]
+flux_err_model_bd_total_f115w	Total B+D model flux error [microJy]
+flux_err_model_bd_total_f150w	Total B+D model flux error [microJy]
+flux_err_model_bd_total_f277w	Total B+D model flux error [microJy]
+flux_err_model_bd_total_f444w	Total B+D model flux error [microJy]
+flux_model_bulge_f115w	Bulge component model flux [microJy]
+flux_model_bulge_f150w	Bulge component model flux [microJy]
+flux_model_bulge_f277w	Bulge component model flux [microJy]
+flux_model_bulge_f444w	Bulge component model flux [microJy]
+flux_err_model_bulge_f115w	Bulge component model flux error [microJy]
+flux_err_model_bulge_f150w	Bulge component model flux error [microJy]
+flux_err_model_bulge_f277w	Bulge component model flux error [microJy]
+flux_err_model_bulge_f444w	Bulge component model flux error [microJy]
+flux_model_disk_f115w	Disk component model flux [microJy]
+flux_model_disk_f150w	Disk component model flux [microJy]
+flux_model_disk_f277w	Disk component model flux [microJy]
+flux_model_disk_f444w	Disk component model flux [microJy]
+flux_err_model_disk_f115w	Disk component model flux error [microJy]
+flux_err_model_disk_f150w	Disk component model flux error [microJy]
+flux_err_model_disk_f277w	Disk component model flux error [microJy]
+flux_err_model_disk_f444w	Disk component model flux error [microJy]
+b/t_f115w	Bulge-to-total ratio
+b/t_f150w	Bulge-to-total ratio
+b/t_f277w	Bulge-to-total ratio
+b/t_f444w	Bulge-to-total ratio
+b/t_err_f115w	Bulge-to-total ratio error
+b/t_err_f150w	Bulge-to-total ratio error
+b/t_err_f277w	Bulge-to-total ratio error
+b/t_err_f444w	Bulge-to-total ratio error
+mag_model_bd_total_hst-f814w	Total B+D model AB magnitude
+mag_model_bd_total_f770w	Total B+D model AB magnitude
+mag_model_bd_total_cfht-u	Total B+D model AB magnitude
+mag_model_bd_total_hsc-g	Total B+D model AB magnitude
+mag_model_bd_total_hsc-r	Total B+D model AB magnitude
+mag_model_bd_total_hsc-i	Total B+D model AB magnitude
+mag_model_bd_total_hsc-z	Total B+D model AB magnitude
+mag_model_bd_total_hsc-y	Total B+D model AB magnitude
+mag_model_bd_total_hsc-nb0816	Total B+D model AB magnitude
+mag_model_bd_total_hsc-nb0921	Total B+D model AB magnitude
+mag_model_bd_total_hsc-nb1010	Total B+D model AB magnitude
+mag_model_bd_total_uvista-y	Total B+D model AB magnitude
+mag_model_bd_total_uvista-j	Total B+D model AB magnitude
+mag_model_bd_total_uvista-h	Total B+D model AB magnitude
+mag_model_bd_total_uvista-ks	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia484	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia527	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia624	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia679	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia738	Total B+D model AB magnitude
+mag_model_bd_total_sc-ia767	Total B+D model AB magnitude
+mag_model_bd_total_sc-ib427	Total B+D model AB magnitude
+mag_model_bd_total_sc-ib505	Total B+D model AB magnitude
+mag_model_bd_total_sc-ib574	Total B+D model AB magnitude
+mag_model_bd_total_sc-ib709	Total B+D model AB magnitude
+mag_model_bd_total_sc-ib827	Total B+D model AB magnitude
+mag_model_bd_total_sc-nb711	Total B+D model AB magnitude
+mag_model_bd_total_sc-nb816	Total B+D model AB magnitude
+mag_err_model_bd_total_hst-f814w	Total B+D model AB magnitude error
+mag_err_model_bd_total_f770w	Total B+D model AB magnitude error
+mag_err_model_bd_total_cfht-u	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-g	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-r	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-i	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-z	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-y	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-nb0816	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-nb0921	Total B+D model AB magnitude error
+mag_err_model_bd_total_hsc-nb1010	Total B+D model AB magnitude error
+mag_err_model_bd_total_uvista-y	Total B+D model AB magnitude error
+mag_err_model_bd_total_uvista-j	Total B+D model AB magnitude error
+mag_err_model_bd_total_uvista-h	Total B+D model AB magnitude error
+mag_err_model_bd_total_uvista-ks	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia484	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia527	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia624	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia679	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia738	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ia767	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ib427	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ib505	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ib574	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ib709	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-ib827	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-nb711	Total B+D model AB magnitude error
+mag_err_model_bd_total_sc-nb816	Total B+D model AB magnitude error
+mag_model_bulge_hst-f814w	Bulge component model AB magnitude
+mag_model_bulge_f770w	Bulge component model AB magnitude
+mag_model_bulge_cfht-u	Bulge component model AB magnitude
+mag_model_bulge_hsc-g	Bulge component model AB magnitude
+mag_model_bulge_hsc-r	Bulge component model AB magnitude
+mag_model_bulge_hsc-i	Bulge component model AB magnitude
+mag_model_bulge_hsc-z	Bulge component model AB magnitude
+mag_model_bulge_hsc-y	Bulge component model AB magnitude
+mag_model_bulge_hsc-nb0816	Bulge component model AB magnitude
+mag_model_bulge_hsc-nb0921	Bulge component model AB magnitude
+mag_model_bulge_hsc-nb1010	Bulge component model AB magnitude
+mag_model_bulge_uvista-y	Bulge component model AB magnitude
+mag_model_bulge_uvista-j	Bulge component model AB magnitude
+mag_model_bulge_uvista-h	Bulge component model AB magnitude
+mag_model_bulge_uvista-ks	Bulge component model AB magnitude
+mag_model_bulge_sc-ia484	Bulge component model AB magnitude
+mag_model_bulge_sc-ia527	Bulge component model AB magnitude
+mag_model_bulge_sc-ia624	Bulge component model AB magnitude
+mag_model_bulge_sc-ia679	Bulge component model AB magnitude
+mag_model_bulge_sc-ia738	Bulge component model AB magnitude
+mag_model_bulge_sc-ia767	Bulge component model AB magnitude
+mag_model_bulge_sc-ib427	Bulge component model AB magnitude
+mag_model_bulge_sc-ib505	Bulge component model AB magnitude
+mag_model_bulge_sc-ib574	Bulge component model AB magnitude
+mag_model_bulge_sc-ib709	Bulge component model AB magnitude
+mag_model_bulge_sc-ib827	Bulge component model AB magnitude
+mag_model_bulge_sc-nb711	Bulge component model AB magnitude
+mag_model_bulge_sc-nb816	Bulge component model AB magnitude
+mag_err_model_bulge_hst-f814w	Bulge component model AB magnitude error
+mag_err_model_bulge_f770w	Bulge component model AB magnitude error
+mag_err_model_bulge_cfht-u	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-g	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-r	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-i	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-z	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-y	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-nb0816	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-nb0921	Bulge component model AB magnitude error
+mag_err_model_bulge_hsc-nb1010	Bulge component model AB magnitude error
+mag_err_model_bulge_uvista-y	Bulge component model AB magnitude error
+mag_err_model_bulge_uvista-j	Bulge component model AB magnitude error
+mag_err_model_bulge_uvista-h	Bulge component model AB magnitude error
+mag_err_model_bulge_uvista-ks	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia484	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia527	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia624	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia679	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia738	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ia767	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ib427	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ib505	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ib574	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ib709	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-ib827	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-nb711	Bulge component model AB magnitude error
+mag_err_model_bulge_sc-nb816	Bulge component model AB magnitude error
+mag_model_disk_hst-f814w	Disk component model AB magnitude
+mag_model_disk_f770w	Disk component model AB magnitude
+mag_model_disk_cfht-u	Disk component model AB magnitude
+mag_model_disk_hsc-g	Disk component model AB magnitude
+mag_model_disk_hsc-r	Disk component model AB magnitude
+mag_model_disk_hsc-i	Disk component model AB magnitude
+mag_model_disk_hsc-z	Disk component model AB magnitude
+mag_model_disk_hsc-y	Disk component model AB magnitude
+mag_model_disk_hsc-nb0816	Disk component model AB magnitude
+mag_model_disk_hsc-nb0921	Disk component model AB magnitude
+mag_model_disk_hsc-nb1010	Disk component model AB magnitude
+mag_model_disk_uvista-y	Disk component model AB magnitude
+mag_model_disk_uvista-j	Disk component model AB magnitude
+mag_model_disk_uvista-h	Disk component model AB magnitude
+mag_model_disk_uvista-ks	Disk component model AB magnitude
+mag_model_disk_sc-ia484	Disk component model AB magnitude
+mag_model_disk_sc-ia527	Disk component model AB magnitude
+mag_model_disk_sc-ia624	Disk component model AB magnitude
+mag_model_disk_sc-ia679	Disk component model AB magnitude
+mag_model_disk_sc-ia738	Disk component model AB magnitude
+mag_model_disk_sc-ia767	Disk component model AB magnitude
+mag_model_disk_sc-ib427	Disk component model AB magnitude
+mag_model_disk_sc-ib505	Disk component model AB magnitude
+mag_model_disk_sc-ib574	Disk component model AB magnitude
+mag_model_disk_sc-ib709	Disk component model AB magnitude
+mag_model_disk_sc-ib827	Disk component model AB magnitude
+mag_model_disk_sc-nb711	Disk component model AB magnitude
+mag_model_disk_sc-nb816	Disk component model AB magnitude
+mag_err_model_disk_hst-f814w	Disk component model AB magnitude error
+mag_err_model_disk_f770w	Disk component model AB magnitude error
+mag_err_model_disk_cfht-u	Disk component model AB magnitude error
+mag_err_model_disk_hsc-g	Disk component model AB magnitude error
+mag_err_model_disk_hsc-r	Disk component model AB magnitude error
+mag_err_model_disk_hsc-i	Disk component model AB magnitude error
+mag_err_model_disk_hsc-z	Disk component model AB magnitude error
+mag_err_model_disk_hsc-y	Disk component model AB magnitude error
+mag_err_model_disk_hsc-nb0816	Disk component model AB magnitude error
+mag_err_model_disk_hsc-nb0921	Disk component model AB magnitude error
+mag_err_model_disk_hsc-nb1010	Disk component model AB magnitude error
+mag_err_model_disk_uvista-y	Disk component model AB magnitude error
+mag_err_model_disk_uvista-j	Disk component model AB magnitude error
+mag_err_model_disk_uvista-h	Disk component model AB magnitude error
+mag_err_model_disk_uvista-ks	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia484	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia527	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia624	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia679	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia738	Disk component model AB magnitude error
+mag_err_model_disk_sc-ia767	Disk component model AB magnitude error
+mag_err_model_disk_sc-ib427	Disk component model AB magnitude error
+mag_err_model_disk_sc-ib505	Disk component model AB magnitude error
+mag_err_model_disk_sc-ib574	Disk component model AB magnitude error
+mag_err_model_disk_sc-ib709	Disk component model AB magnitude error
+mag_err_model_disk_sc-ib827	Disk component model AB magnitude error
+mag_err_model_disk_sc-nb711	Disk component model AB magnitude error
+mag_err_model_disk_sc-nb816	Disk component model AB magnitude error
+flux_model_bd_total_hst-f814w	Total B+D model flux [microJy]
+flux_model_bd_total_f770w	Total B+D model flux [microJy]
+flux_model_bd_total_cfht-u	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-g	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-r	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-i	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-z	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-y	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-nb0816	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-nb0921	Total B+D model flux [microJy]
+flux_model_bd_total_hsc-nb1010	Total B+D model flux [microJy]
+flux_model_bd_total_uvista-y	Total B+D model flux [microJy]
+flux_model_bd_total_uvista-j	Total B+D model flux [microJy]
+flux_model_bd_total_uvista-h	Total B+D model flux [microJy]
+flux_model_bd_total_uvista-ks	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia484	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia527	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia624	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia679	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia738	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ia767	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ib427	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ib505	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ib574	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ib709	Total B+D model flux [microJy]
+flux_model_bd_total_sc-ib827	Total B+D model flux [microJy]
+flux_model_bd_total_sc-nb711	Total B+D model flux [microJy]
+flux_model_bd_total_sc-nb816	Total B+D model flux [microJy]
+flux_err_model_bd_total_hst-f814w	Total B+D model flux error [microJy]
+flux_err_model_bd_total_f770w	Total B+D model flux error [microJy]
+flux_err_model_bd_total_cfht-u	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-g	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-r	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-i	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-z	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-y	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-nb0816	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-nb0921	Total B+D model flux error [microJy]
+flux_err_model_bd_total_hsc-nb1010	Total B+D model flux error [microJy]
+flux_err_model_bd_total_uvista-y	Total B+D model flux error [microJy]
+flux_err_model_bd_total_uvista-j	Total B+D model flux error [microJy]
+flux_err_model_bd_total_uvista-h	Total B+D model flux error [microJy]
+flux_err_model_bd_total_uvista-ks	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia484	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia527	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia624	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia679	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia738	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ia767	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ib427	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ib505	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ib574	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ib709	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-ib827	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-nb711	Total B+D model flux error [microJy]
+flux_err_model_bd_total_sc-nb816	Total B+D model flux error [microJy]
+flux_model_bulge_hst-f814w	Bulge component model flux [microJy]
+flux_model_bulge_f770w	Bulge component model flux [microJy]
+flux_model_bulge_cfht-u	Bulge component model flux [microJy]
+flux_model_bulge_hsc-g	Bulge component model flux [microJy]
+flux_model_bulge_hsc-r	Bulge component model flux [microJy]
+flux_model_bulge_hsc-i	Bulge component model flux [microJy]
+flux_model_bulge_hsc-z	Bulge component model flux [microJy]
+flux_model_bulge_hsc-y	Bulge component model flux [microJy]
+flux_model_bulge_hsc-nb0816	Bulge component model flux [microJy]
+flux_model_bulge_hsc-nb0921	Bulge component model flux [microJy]
+flux_model_bulge_hsc-nb1010	Bulge component model flux [microJy]
+flux_model_bulge_uvista-y	Bulge component model flux [microJy]
+flux_model_bulge_uvista-j	Bulge component model flux [microJy]
+flux_model_bulge_uvista-h	Bulge component model flux [microJy]
+flux_model_bulge_uvista-ks	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia484	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia527	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia624	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia679	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia738	Bulge component model flux [microJy]
+flux_model_bulge_sc-ia767	Bulge component model flux [microJy]
+flux_model_bulge_sc-ib427	Bulge component model flux [microJy]
+flux_model_bulge_sc-ib505	Bulge component model flux [microJy]
+flux_model_bulge_sc-ib574	Bulge component model flux [microJy]
+flux_model_bulge_sc-ib709	Bulge component model flux [microJy]
+flux_model_bulge_sc-ib827	Bulge component model flux [microJy]
+flux_model_bulge_sc-nb711	Bulge component model flux [microJy]
+flux_model_bulge_sc-nb816	Bulge component model flux [microJy]
+flux_err_model_bulge_hst-f814w	Bulge component model flux error [microJy]
+flux_err_model_bulge_f770w	Bulge component model flux error [microJy]
+flux_err_model_bulge_cfht-u	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-g	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-r	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-i	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-z	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-y	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-nb0816	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-nb0921	Bulge component model flux error [microJy]
+flux_err_model_bulge_hsc-nb1010	Bulge component model flux error [microJy]
+flux_err_model_bulge_uvista-y	Bulge component model flux error [microJy]
+flux_err_model_bulge_uvista-j	Bulge component model flux error [microJy]
+flux_err_model_bulge_uvista-h	Bulge component model flux error [microJy]
+flux_err_model_bulge_uvista-ks	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia484	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia527	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia624	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia679	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia738	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ia767	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ib427	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ib505	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ib574	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ib709	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-ib827	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-nb711	Bulge component model flux error [microJy]
+flux_err_model_bulge_sc-nb816	Bulge component model flux error [microJy]
+flux_model_disk_hst-f814w	Disk component model flux [microJy]
+flux_model_disk_f770w	Disk component model flux [microJy]
+flux_model_disk_cfht-u	Disk component model flux [microJy]
+flux_model_disk_hsc-g	Disk component model flux [microJy]
+flux_model_disk_hsc-r	Disk component model flux [microJy]
+flux_model_disk_hsc-i	Disk component model flux [microJy]
+flux_model_disk_hsc-z	Disk component model flux [microJy]
+flux_model_disk_hsc-y	Disk component model flux [microJy]
+flux_model_disk_hsc-nb0816	Disk component model flux [microJy]
+flux_model_disk_hsc-nb0921	Disk component model flux [microJy]
+flux_model_disk_hsc-nb1010	Disk component model flux [microJy]
+flux_model_disk_uvista-y	Disk component model flux [microJy]
+flux_model_disk_uvista-j	Disk component model flux [microJy]
+flux_model_disk_uvista-h	Disk component model flux [microJy]
+flux_model_disk_uvista-ks	Disk component model flux [microJy]
+flux_model_disk_sc-ia484	Disk component model flux [microJy]
+flux_model_disk_sc-ia527	Disk component model flux [microJy]
+flux_model_disk_sc-ia624	Disk component model flux [microJy]
+flux_model_disk_sc-ia679	Disk component model flux [microJy]
+flux_model_disk_sc-ia738	Disk component model flux [microJy]
+flux_model_disk_sc-ia767	Disk component model flux [microJy]
+flux_model_disk_sc-ib427	Disk component model flux [microJy]
+flux_model_disk_sc-ib505	Disk component model flux [microJy]
+flux_model_disk_sc-ib574	Disk component model flux [microJy]
+flux_model_disk_sc-ib709	Disk component model flux [microJy]
+flux_model_disk_sc-ib827	Disk component model flux [microJy]
+flux_model_disk_sc-nb711	Disk component model flux [microJy]
+flux_model_disk_sc-nb816	Disk component model flux [microJy]
+flux_err_model_disk_hst-f814w	Disk component model flux error [microJy]
+flux_err_model_disk_f770w	Disk component model flux error [microJy]
+flux_err_model_disk_cfht-u	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-g	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-r	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-i	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-z	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-y	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-nb0816	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-nb0921	Disk component model flux error [microJy]
+flux_err_model_disk_hsc-nb1010	Disk component model flux error [microJy]
+flux_err_model_disk_uvista-y	Disk component model flux error [microJy]
+flux_err_model_disk_uvista-j	Disk component model flux error [microJy]
+flux_err_model_disk_uvista-h	Disk component model flux error [microJy]
+flux_err_model_disk_uvista-ks	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia484	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia527	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia624	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia679	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia738	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ia767	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ib427	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ib505	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ib574	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ib709	Disk component model flux error [microJy]
+flux_err_model_disk_sc-ib827	Disk component model flux error [microJy]
+flux_err_model_disk_sc-nb711	Disk component model flux error [microJy]
+flux_err_model_disk_sc-nb816	Disk component model flux error [microJy]
+b/t_hst-f814w	Bulge-to-total ratio
+b/t_f770w	Bulge-to-total ratio
+b/t_cfht-u	Bulge-to-total ratio
+b/t_hsc-g	Bulge-to-total ratio
+b/t_hsc-r	Bulge-to-total ratio
+b/t_hsc-i	Bulge-to-total ratio
+b/t_hsc-z	Bulge-to-total ratio
+b/t_hsc-y	Bulge-to-total ratio
+b/t_hsc-nb0816	Bulge-to-total ratio
+b/t_hsc-nb0921	Bulge-to-total ratio
+b/t_hsc-nb1010	Bulge-to-total ratio
+b/t_uvista-y	Bulge-to-total ratio
+b/t_uvista-j	Bulge-to-total ratio
+b/t_uvista-h	Bulge-to-total ratio
+b/t_uvista-ks	Bulge-to-total ratio
+b/t_sc-ia484	Bulge-to-total ratio
+b/t_sc-ia527	Bulge-to-total ratio
+b/t_sc-ia624	Bulge-to-total ratio
+b/t_sc-ia679	Bulge-to-total ratio
+b/t_sc-ia738	Bulge-to-total ratio
+b/t_sc-ia767	Bulge-to-total ratio
+b/t_sc-ib427	Bulge-to-total ratio
+b/t_sc-ib505	Bulge-to-total ratio
+b/t_sc-ib574	Bulge-to-total ratio
+b/t_sc-ib709	Bulge-to-total ratio
+b/t_sc-ib827	Bulge-to-total ratio
+b/t_sc-nb711	Bulge-to-total ratio
+b/t_sc-nb816	Bulge-to-total ratio
+b/t_err_hst-f814w	Bulge-to-total ratio error
+b/t_err_f770w	Bulge-to-total ratio error
+b/t_err_cfht-u	Bulge-to-total ratio error
+b/t_err_hsc-g	Bulge-to-total ratio error
+b/t_err_hsc-r	Bulge-to-total ratio error
+b/t_err_hsc-i	Bulge-to-total ratio error
+b/t_err_hsc-z	Bulge-to-total ratio error
+b/t_err_hsc-y	Bulge-to-total ratio error
+b/t_err_hsc-nb0816	Bulge-to-total ratio error
+b/t_err_hsc-nb0921	Bulge-to-total ratio error
+b/t_err_hsc-nb1010	Bulge-to-total ratio error
+b/t_err_uvista-y	Bulge-to-total ratio error
+b/t_err_uvista-j	Bulge-to-total ratio error
+b/t_err_uvista-h	Bulge-to-total ratio error
+b/t_err_uvista-ks	Bulge-to-total ratio error
+b/t_err_sc-ia484	Bulge-to-total ratio error
+b/t_err_sc-ia527	Bulge-to-total ratio error
+b/t_err_sc-ia624	Bulge-to-total ratio error
+b/t_err_sc-ia679	Bulge-to-total ratio error
+b/t_err_sc-ia738	Bulge-to-total ratio error
+b/t_err_sc-ia767	Bulge-to-total ratio error
+b/t_err_sc-ib427	Bulge-to-total ratio error
+b/t_err_sc-ib505	Bulge-to-total ratio error
+b/t_err_sc-ib574	Bulge-to-total ratio error
+b/t_err_sc-ib709	Bulge-to-total ratio error
+b/t_err_sc-ib827	Bulge-to-total ratio error
+b/t_err_sc-nb711	Bulge-to-total ratio error
+b/t_err_sc-nb816	Bulge-to-total ratio error

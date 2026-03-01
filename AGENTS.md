@@ -1,0 +1,137 @@
+# Agent Instructions — COSMOS2025 Anomaly Detection
+
+## Project Identity
+
+Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog (Shuntov et al. 2025). The catalog contains 784,016 sources across 0.54 deg² with 37-band photometry (JWST NIRCam + MIRI, HST, HSC, UltraVISTA, Subaru, Spitzer), two independent SED fitting codes (LePhare, CIGALE), ML morphological classifications, bulge-disk decomposition, and environmental context from supplementary group and large-scale structure catalogs. The goal is high-ROI scientific discoveries — objects or small populations that are novel and publishable — found through catalog-level feature analysis without proprietary data or spectroscopy.
+
+## Current State
+
+**Phase**: ETL pipeline design complete
+**Status**: Repository scaffolded, data organized, competitive landscape surveyed, opportunities selected (O1 + O5), master catalog profiled, ETL schema designed, one-pager written for AI-assisted execution handoff.
+**Next**: Design PostgreSQL DDL → write structured prompt → execute ETL via GLM 4.7 + crystaldb Postgres MCP → verify data integrity → begin O1/O5 exploratory analysis.
+**Blockers**: None. CIGALE SED extraction complete (436GB, 784k files). LePhare SEDs archived as tar (not extracted — Phase 2).
+
+## Science Opportunities
+
+Two primary targets selected from five GDR-identified opportunities:
+
+**O1 — Algorithmic Disagreement (Lead paper):** LePhare vs CIGALE residuals for stellar mass and SFR. Objects with Δlog(M*) > 0.3 dex or Δlog(SFR) > 0.5 dex signal physically distinct populations — extreme emission line galaxies ("Line Imposters"), obscured AGN, or decoupled UV/IR star formation ("Dusty Decoupling"). Pure catalog operations, least scoopable, dual-code framing genuinely novel for COSMOS-Web.
+
+**O5 — Contextual Anomalies:** Environmental outliers found by cross-referencing galaxy properties against LSS density maps. Cluster starbursts (massive SF galaxies in highest-density peaks) and void quenched galaxies (low-mass passive in voids). Pairs naturally with O1 — objects anomalous in BOTH dimensions are "super-anomalies."
+
+**Deprioritized:** O2 (Morphological Imposters — enrichment only, dust degeneracy trap), O3 (Low-Delta Uncertainty — secondary analysis), O4 (Green Peas — too close to dropout searches).
+
+## Repository Structure
+
+```
+cosmos2025-anomalies/
+├── assets/                       # Banner images, diagrams
+├── configs/                      # data_paths.yaml, DB connection, parameters
+├── docs/
+│   ├── reference/                # Column schemas, quality flags, catalog profile
+│   └── research/                 # GDR results, ETL one-pager, opportunity analysis
+├── notebooks/                    # Exploration, EDA, analysis
+├── shared/                       # Cross-repo utilities (tree generator)
+├── src/
+│   ├── etl/                      # FITS → parquet → psql pipeline
+│   ├── features/                 # Derived feature computation
+│   ├── detection/                # Anomaly detection methods
+│   └── utils/                    # Config loading, DB helpers
+├── tests/
+├── AGENTS.md                     # This file
+└── README.md
+```
+
+## Data Location
+
+Data lives outside the repo, split across two drives due to SED archive size.
+
+| Path | Contents |
+|------|----------|
+| `E:\repositories-data-folder\cosmos-web-dr1-2025` | Primary data root — catalogs, images, calibration, supplementary |
+| `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds` | Extracted SED files (CIGALE extracted, LePhare not yet) |
+
+### Primary data root (E:)
+
+```
+E:\repositories-data-folder\cosmos-web-dr1-2025\
+├── raw/
+│   ├── catalogs/         # COSMOSWeb_mastercatalog_v1.fits (8.4GB), PDFz pickle (26GB)
+│   ├── seds/             # SED tar archives only (originals, not extracted here)
+│   ├── images/           # Detection images, segmentation maps (not used Phase 1)
+│   ├── calibration/      # PSFs, star masks (not used Phase 1)
+│   └── supplementary/    # Toni group catalog, Hatamnia LSS (hatamnia_lss_v1.fits)
+├── processed/
+│   ├── parquet/          # ETL output target — 4 parquet files
+│   └── derived/          # Computed features, anomaly scores
+├── reference-originals/  # Original download page HTML and docs (archived)
+└── staging/              # ETL temp workspace, disposable
+```
+
+### SED data root (D:)
+
+```
+D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds\
+├── CIGALE_SEDs_v1/       # ~784k individual best-fit SED FITS files (~436GB)
+│   └── n23data2/cosmosweb/catalogs/Release_v1/CIGALE_SEDs_v1/P1/
+│       └── {source_id}_best_model.fits
+└── LePHARE_SEDs_v1/      # ~784k individual best-fit SED FITS files (~141GB tar, not extracted)
+```
+
+Note: SED files are per-source lookups for Phase 2 candidate characterization, not bulk-loaded into psql.
+
+### Environment Summary
+
+| Environment | Catalog/Main Data | SED Data | Compute |
+|-------------|-------------------|----------|---------|
+| Local dev | `E:\repositories-data-folder\cosmos-web-dr1-2025` | `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds` | RTX 3080 12GB |
+| Production (gpu01) | TBD | TBD | A4000 16GB, 12 vCPU, 48GB RAM |
+| Database | psql01 (10.25.20.8) | N/A | PostgreSQL — `cosmos2025` database |
+
+## ETL Pipeline (Phase 1)
+
+Master catalog → 4 parquet files → PostgreSQL tables. Extensions 3 (SE++APER) and 6 (B+D) skipped entirely.
+
+| Parquet File | Source Extension | Columns | Notes |
+|--------------|-----------------|---------|-------|
+| `photometry_core.parquet` | 1 (Photometry) | ~85 scalar | Skip 18 array cols, ~200 band-repeated model fluxes |
+| `lephare.parquet` | 2 (LePhare) | 43 + id | All columns, id injected from ext 1 |
+| `cigale.parquet` | 4 (CIGALE) | 54 + id + ssfr_cigale | All columns, id injected, ssfr derived |
+| `morphology.parquet` | 5 (ML-Morpho) | ~30 + id | Mean/std probs + flags + deltas only |
+
+Sentinel conversion: `-999`/`-99`/`999999` → NULL. Column name sanitization: hyphens → underscores for PostgreSQL compatibility.
+
+Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
+
+## Tech Stack
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| Language | Python 3.x | All ETL, analysis, and pipeline code |
+| Catalog I/O | astropy, pyarrow | FITS reading, parquet conversion |
+| Database | PostgreSQL on psql01 (10.25.20.8) | `cosmos2025` database, catalog tables |
+| DB access | psycopg2 / crystaldb MCP | Bulk load and query |
+| ML/Stats | scikit-learn, scipy | Isolation Forest, SOM, statistical tests |
+| GPU compute | Local RTX 3080 12GB (dev), A4000 16GB on gpu01 (production) | |
+| Notebooks | Jupyter | Phase 1 exploration |
+| AI execution | GLM 4.7 via KiloCode | ETL code generation from structured prompts |
+
+## Conventions
+
+- Interior READMEs in every directory — the repo should speak for itself
+- Column schemas and data documentation live in `docs/reference/`, not inline
+- Raw data is immutable — never modify files under `raw/`
+- Config-driven paths — no hardcoded data paths in source code
+- Sentinel values converted to NULL at extraction time, not downstream
+
+## Key Reference Files
+
+| What | Where |
+|------|-------|
+| ETL pipeline specification | `docs/research/etl-pipeline-one-pager.md` |
+| Master catalog structural profile | `docs/reference/master-catalog-profile.md` |
+| Catalog column schemas (6 extensions) | `docs/reference/columns-*.txt` |
+| Quality flag definitions | `docs/reference/quality-flags.txt` |
+| LSS overdensity catalog schema | `docs/reference/large-scale-structure-in-cosmos-web-readme.txt` |
+| COSMOS-Web primary catalog readme | `docs/reference/cosmos-web-primary-readme.pdf` |
+| Infrastructure details | `docs/data-science-infrastructure.md` |

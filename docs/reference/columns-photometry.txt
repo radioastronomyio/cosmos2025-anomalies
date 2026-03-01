@@ -1,0 +1,289 @@
+Photometry (PSF-homogenized Aperture and SE++ Model-Based)
+Column Name	Description
+id	Unique ID of the source
+segment-id	ID that corresponds to the segmentation map for a given tile. The combination of tile and segment-id is unique.
+tile	Tile (A1–B10)
+id_specz_khostovan25	Unique ID of the source corresponding to the Id_specz of the Khostovan et al. (2025) spec-z compilation. -999 if no specz match
+ra	Right ascension in the detection catalog
+dec	Declination ascension in the detection catalog
+x_image	x-coordinate in given tile
+y_image	y-coordinate in given tile
+a_image	Isophotal major axis in pixels
+b_image	Isophotal minor axis in pixels
+theta_image	Isophotal image position angle (relative to the image x-axis)
+theta_world	Isophotoal position angle (N of E, offset 20 deg)
+chi2_max	Peak value of the chi2pos detection image within r=0.1 of the source centroid
+mode	Detection mode (hot or cold) this source was identified with
+snr_hst-f814w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_hst-f814w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_hst-f814w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_hst-f814w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_hst-f814w	Magnitude, computed from the auto flux AB mag
+flux_aper_hst-f814w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_hst-f814w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_hst-f814w	Magnitude, computed from the aper flux [AB mag]
+snr_f115w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_f115w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_f115w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_f115w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_f115w	Magnitude, computed from the auto flux AB mag
+flux_aper_f115w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_f115w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_f115w	Magnitude, computed from the aper flux [AB mag]
+snr_f150w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_f150w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_f150w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_f150w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_f150w	Magnitude, computed from the auto flux AB mag
+flux_aper_f150w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_f150w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_f150w	Magnitude, computed from the aper flux [AB mag]
+snr_f277w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_f277w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_f277w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_f277w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_f277w	Magnitude, computed from the auto flux AB mag
+flux_aper_f277w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_f277w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_f277w	Magnitude, computed from the aper flux [AB mag]
+snr_f444w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_f444w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_f444w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_f444w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_f444w	Magnitude, computed from the auto flux AB mag
+flux_aper_f444w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_f444w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_f444w	Magnitude, computed from the aper flux [AB mag]
+snr_f770w	Detection significance, measured from native-resolution (i.e. non-PSF homogenized) images in 0.2 diameter apertures
+wht_f770w	Median value of the WHT map in a 0.2 diameter aperture
+flux_auto_f770w	Flux, measured in small elliptical apertures with Kron aperture correction and PSF correction applied [microJy]
+flux_err_auto_f770w	Flux, adding in quadrature the propagated uncertainty from the ERR map with the random-aperture noise measurements [microJy]
+mag_auto_f770w	Magnitude, computed from the auto flux AB mag
+flux_aper_f770w	Flux, measured in circular apertures (diameters 0.2, 0.3, 0.5,0.75, and 1), with no PSF correction applied [microJy]
+flux_err_aper_f770w	Flux, uncertainty, computed as described for flux_err_auto_ [microJy]
+mag_aper_f770w	Magnitude, computed from the aper flux [AB mag]
+c_f444w	Compactness in F444W; defined as the ratio of f(d=0.2)/f(d=0.5)
+fwhm	FWHM
+mu_max_hst-f814w	Peak surface brightness above the background
+mu_max_f115w	Peak surface brightness above the background
+mu_max_f150w	Peak surface brightness above the background
+mu_max_f277w	Peak surface brightness above the background
+mu_max_f444w	Peak surface brightness above the background
+mu_max_f770w	Peak surface brightness above the background
+kron_rad	Semi-major (a) and Semi-minor (b) axis of kron ellipse 1 or 2
+kron1_a	Semi-major (a) and Semi-minor (b) axis of kron ellipse 1 or 2
+kron1_b	Semi-major (a) and Semi-minor (b) axis of kron ellipse 1 or 2
+kron1_area	Area of kron aperture 1 or 2
+kron2_a	Semi-major (a) and Semi-minor (b) axis of kron ellipse 1 or 2
+kron2_b	Semi-major (a) and Semi-minor (b) axis of kron ellipse 1 or 2
+kron2_area	Area of kron aperture 1 or 2
+seg_area	Area of segmentation mask
+kron_corr	Correction, already applied, from the F444W flux in the small elliptical aperture kron1 to the default Kron aperture kron2
+kron_f444w_psf_corr	Correction, already applied (to ACS+NIRCam bands), for the F444W PSF flux that falls outside the large kron2 aperture
+kron_f770w_psf_corr	Correction, already applied (to F770W), for the F770W PSF flux that falls outside the large kron2 aperture
+kron_f770w_ap_corr	Additional correction for F770W, already applied, accounting for the larger PSF relative to F444W
+flag_star	Flag if 0-80 percent of source pixels overlap the starmask defined on the JWST/NIRCam images
+flag_blend	Flag if kron aperture correction >3, i.e. source is blended in F444W
+ra_model	Right ascension of the modeled source
+dec_model	Right ascension in the modeled source
+radius_sersic	Effective radius of the Sersic model [deg]
+radius_sersic_err	Effective radius error of the Sersic model [deg]
+axratio_sersic	Axis ratio of the Sersic model
+axratio_sersic_err	Axis ratio error of the Sersic model [deg]
+sersic	Sersic index
+sersic_err	Sersic index error
+angle_sersic	Angle of the Sersic model in world coordinates
+angle_sersic_err	Angle error of the Sersic model in world coordinates
+e1	Ellipticity component 1
+e1_err	Ellipticity component 1 error
+e2	Ellipticity component 2
+e2_err	Ellipticity component 2 error
+fmf_chi2	Reduced chi^2 of the model
+group_id	ID of the group of sources that is fitted together
+mag_model_f115w	Sersic model total AB magnitude
+mag_model_f150w	Sersic model total AB magnitude
+mag_model_f277w	Sersic model total AB magnitude
+mag_model_f444w	Sersic model total AB magnitude
+mag_model_hst-f814w	Sersic model total AB magnitude
+mag_model_f770w	Sersic model total AB magnitude
+mag_model_cfht-u	Sersic model total AB magnitude
+mag_model_hsc-g	Sersic model total AB magnitude
+mag_model_hsc-r	Sersic model total AB magnitude
+mag_model_hsc-i	Sersic model total AB magnitude
+mag_model_hsc-z	Sersic model total AB magnitude
+mag_model_hsc-y	Sersic model total AB magnitude
+mag_model_hsc-nb0816	Sersic model total AB magnitude
+mag_model_hsc-nb0921	Sersic model total AB magnitude
+mag_model_hsc-nb1010	Sersic model total AB magnitude
+mag_model_uvista-y	Sersic model total AB magnitude
+mag_model_uvista-j	Sersic model total AB magnitude
+mag_model_uvista-h	Sersic model total AB magnitude
+mag_model_uvista-ks	Sersic model total AB magnitude
+mag_model_uvista-nb118	Sersic model total AB magnitude
+mag_model_sc-ia484	Sersic model total AB magnitude
+mag_model_sc-ia527	Sersic model total AB magnitude
+mag_model_sc-ia624	Sersic model total AB magnitude
+mag_model_sc-ia679	Sersic model total AB magnitude
+mag_model_sc-ia738	Sersic model total AB magnitude
+mag_model_sc-ia767	Sersic model total AB magnitude
+mag_model_sc-ib427	Sersic model total AB magnitude
+mag_model_sc-ib505	Sersic model total AB magnitude
+mag_model_sc-ib574	Sersic model total AB magnitude
+mag_model_sc-ib709	Sersic model total AB magnitude
+mag_model_sc-ib827	Sersic model total AB magnitude
+mag_model_sc-nb711	Sersic model total AB magnitude
+mag_model_sc-nb816	Sersic model total AB magnitude
+mag_model_irac-ch1	Sersic model total AB magnitude
+mag_model_irac-ch2	Sersic model total AB magnitude
+mag_model_irac-ch3	Sersic model total AB magnitude
+mag_model_irac-ch4	Sersic model total AB magnitude
+mag_err_model_f115w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_f150w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_f277w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_f444w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hst-f814w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_f770w	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_cfht-u	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-g	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-r	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-i	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-z	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-y	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-nb0816	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-nb0921	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_hsc-nb1010	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_uvista-y	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_uvista-j	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_uvista-h	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_uvista-ks	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_uvista-nb118	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia484	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia527	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia624	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia679	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia738	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ia767	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ib427	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ib505	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ib574	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ib709	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-ib827	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-nb711	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_sc-nb816	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_irac-ch1	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_irac-ch2	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_irac-ch3	Sersic model total AB magnitude uncertainty (uncalibrated)
+mag_err_model_irac-ch4	Sersic model total AB magnitude uncertainty (uncalibrated)
+flux_model_f115w	Sersic model total flux [microJy]
+flux_model_f150w	Sersic model total flux [microJy]
+flux_model_f277w	Sersic model total flux [microJy]
+flux_model_f444w	Sersic model total flux [microJy]
+flux_model_hst-f814w	Sersic model total flux [microJy]
+flux_model_f770w	Sersic model total flux [microJy]
+flux_model_cfht-u	Sersic model total flux [microJy]
+flux_model_hsc-g	Sersic model total flux [microJy]
+flux_model_hsc-r	Sersic model total flux [microJy]
+flux_model_hsc-i	Sersic model total flux [microJy]
+flux_model_hsc-z	Sersic model total flux [microJy]
+flux_model_hsc-y	Sersic model total flux [microJy]
+flux_model_hsc-nb0816	Sersic model total flux [microJy]
+flux_model_hsc-nb0921	Sersic model total flux [microJy]
+flux_model_hsc-nb1010	Sersic model total flux [microJy]
+flux_model_uvista-y	Sersic model total flux [microJy]
+flux_model_uvista-j	Sersic model total flux [microJy]
+flux_model_uvista-h	Sersic model total flux [microJy]
+flux_model_uvista-ks	Sersic model total flux [microJy]
+flux_model_uvista-nb118	Sersic model total flux [microJy]
+flux_model_sc-ia484	Sersic model total flux [microJy]
+flux_model_sc-ia527	Sersic model total flux [microJy]
+flux_model_sc-ia624	Sersic model total flux [microJy]
+flux_model_sc-ia679	Sersic model total flux [microJy]
+flux_model_sc-ia738	Sersic model total flux [microJy]
+flux_model_sc-ia767	Sersic model total flux [microJy]
+flux_model_sc-ib427	Sersic model total flux [microJy]
+flux_model_sc-ib505	Sersic model total flux [microJy]
+flux_model_sc-ib574	Sersic model total flux [microJy]
+flux_model_sc-ib709	Sersic model total flux [microJy]
+flux_model_sc-ib827	Sersic model total flux [microJy]
+flux_model_sc-nb711	Sersic model total flux [microJy]
+flux_model_sc-nb816	Sersic model total flux [microJy]
+flux_model_irac-ch1	Sersic model total flux [microJy]
+flux_model_irac-ch2	Sersic model total flux [microJy]
+flux_model_irac-ch3	Sersic model total flux [microJy]
+flux_model_irac-ch4	Sersic model total flux [microJy]
+flux_err-uncal_model_f115w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_f150w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_f277w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_f444w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hst-f814w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_f770w	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_cfht-u	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-g	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-r	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-i	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-z	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-y	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-nb0816	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-nb0921	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_hsc-nb1010	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_uvista-y	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_uvista-j	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_uvista-h	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_uvista-ks	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_uvista-nb118	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia484	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia527	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia624	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia679	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia738	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ia767	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ib427	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ib505	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ib574	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ib709	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-ib827	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-nb711	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_sc-nb816	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_irac-ch1	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_irac-ch2	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_irac-ch3	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flux_err-uncal_model_irac-ch4	Sersic model total flux uncertainty (uncalibrated) [microJy]
+flag_star_hsc	Flag for sources contaminated by bright stars defined on the HSC images. Affects mostly ground based photometry. 0: good, 1: masked out
+flux_err-cal_model_f115w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_f150w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_f277w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_f444w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hst-f814w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_f770w	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_cfht-u	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-g	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-r	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-i	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-z	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-y	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-nb0816	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-nb0921	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_hsc-nb1010	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_uvista-y	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_uvista-j	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_uvista-h	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_uvista-ks	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_uvista-nb118	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia484	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia527	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia624	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia679	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia738	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ia767	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ib427	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ib505	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ib574	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ib709	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-ib827	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-nb711	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_sc-nb816	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_irac-ch1	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_irac-ch2	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_irac-ch3	Sersic model total flux uncertainty (calibrated) [microJy]
+flux_err-cal_model_irac-ch4	Sersic model total flux uncertainty (calibrated) [microJy]
+warn_flag	Warning flag. 0: good object, 1: hot pixel, 2: ground-space inconsistency, 3: ground-space inconsistency, 4,5,6: other artifacts
