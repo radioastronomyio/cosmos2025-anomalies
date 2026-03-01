@@ -13,6 +13,8 @@ tags:
 related_documents:
   - "[COSMOS-Web DR1 Catalog](https://cosmos-web.astro.caltech.edu/)"
   - "[RadioAstronomy.io Organization](https://github.com/radioastronomyio)"
+  - "[Project Roadmap](ROADMAP.md)"
+  - "[ARD Framework](https://github.com/radioastronomyio/analysis-ready-dataset)"
 ---
 -->
 
@@ -27,12 +29,16 @@ related_documents:
 
 > Systematic anomaly detection on the COSMOS-Web DR1 galaxy catalog — hunting for high-value scientific discoveries in the largest contiguous JWST survey to date.
 
-This project applies outlier detection methods to the COSMOS2025 photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning 37 photometric bands from UV through mid-infrared. The approach exploits *tension between independent measurements* — where two SED fitting codes disagree on a galaxy's properties, or where a galaxy's star formation rate defies its environment, something physically interesting is happening.
+This project applies outlier detection methods to the COSMOS2025 photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning 37 photometric bands from UV through mid-infrared. The approach exploits *tension between independent measurements* — where two SED fitting codes disagree on a galaxy's properties, where a photo-z solution is ambiguous, where morphology contradicts star formation activity, or where a galaxy's behavior defies its environment, something physically interesting is happening.
 
-Two primary science opportunities drive the analysis:
+Each source receives a multi-component **tension vector** quantifying disagreement across four axes:
 
-- **O1 — Algorithmic Disagreement:** Mining residuals between LePhare and CIGALE SED fitting codes to find objects where standard templates fail. Δlog(M*) > 0.3 dex or Δlog(SFR) > 0.5 dex signal extreme emission line galaxies, obscured AGN, or decoupled UV/IR star formation.
-- **O5 — Contextual Anomalies:** Cross-referencing galaxy properties against large-scale structure density maps to find environmental outliers — massive starbursts in cluster cores, quenched dwarfs in cosmic voids.
+- **T_A — Algorithmic Tension:** LePhare vs CIGALE residuals in stellar mass, SFR, and sSFR. Catastrophic disagreements (Δlog M* > 0.3 dex, Δlog SFR > 0.5 dex) signal extreme emission line galaxies, obscured AGN, or decoupled UV/IR star formation.
+- **T_z — Redshift Tension:** Photo-z PDF pathology — multimodal distributions, zpdf vs zchi2 divergence, space-only vs full photo-z inconsistencies — exploiting the 26 GB PDF(z) pickle that most published work discards for "clean" samples.
+- **T_M — Morphological Tension:** High-confidence ML classifications that contradict SED type — confident spheroids that are strongly star-forming (Blue Nugget candidates), confident disks that are quenched (Passive Disk candidates) — filtered by the catalog's `delta` uncertainty metric.
+- **T_E — Environmental Tension:** Galaxy properties cross-referenced against LSS density maps and group membership to find contextual outliers — massive starbursts in cluster cores, quenched dwarfs in cosmic voids.
+
+Objects with high tension across *multiple* axes are "super-anomalies" — the primary targets for the ranked candidate list. The pipeline also produces a parallel community data product: an **Analysis Ready Dataset** (ARD) that materializes the tension metrics for reuse by other researchers. See the [Project Roadmap](ROADMAP.md) for the full opportunity landscape, phased execution plan, and ARD output track.
 
 The project is catalog-only — no image-level analysis, no spectroscopy, no proprietary data. Everything is derived from publicly available COSMOS-Web DR1 data products.
 
@@ -43,13 +49,14 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 | Area | Status | Description |
 |------|--------|-------------|
 | Data acquisition | ✅ Complete | All DR1 catalog products downloaded; CIGALE SEDs extracted (436GB); LePhare SEDs archived (not extracted) |
-| Literature landscape | ✅ Complete | GDR competitive survey identified 5 opportunity areas; O1 + O5 selected as primary targets |
+| Literature landscape | ✅ Complete | Independent deep research surveys (Gemini, GPT) converged on tension-first strategy; four-axis tension vector defined |
 | Catalog profiling | ✅ Complete | Master catalog structure characterized — 6 extensions, sentinel patterns mapped, column types inventoried |
 | ETL design | ✅ Complete | 4-file parquet schema defined; PostgreSQL target schema designed; GLM 4.7 execution strategy decided |
 | ETL execution | 🔲 Next | FITS → parquet → psql pipeline; delegated to GLM 4.7 via KiloCode + crystaldb Postgres MCP |
-| Feature engineering | 🔲 Planned | Derived tension metrics, quality cuts, cross-extension joins |
+| Feature engineering | 🔲 Planned | Tension vector components (T_A, T_z, T_M, T_E), quality cuts, cross-extension joins |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
 | Characterization | 🔲 Planned | Phase 2 — SED-level analysis of top candidates |
+| ARD release | 🔲 Planned | Tension scalars + anomaly scores packaged as community data product |
 
 ---
 
@@ -87,6 +94,7 @@ cosmos2025-anomalies/
 │   └── utils/                    # Config loading, DB helpers
 ├── tests/
 ├── AGENTS.md                     # Agent instructions and project context
+├── ROADMAP.md                    # Opportunity landscape, execution plan, ARD track
 └── README.md                     # This file
 ```
 
@@ -113,8 +121,20 @@ Of 784,016 sources, 694,341 carry `warn_flag = 0` (most secure). See `docs/refer
 | LSS overdensity catalog | Hatamnia et al. 2025 | 289 MB | O5 environmental context |
 | CIGALE best-fit SEDs | Shuntov et al. 2025 | 436 GB (extracted) | Phase 2 characterization |
 | LePhare best-fit SEDs | Shuntov et al. 2025 | 141 GB (compressed) | Phase 2 characterization |
-| LePhare PDFz distributions | Shuntov et al. 2025 | 26 GB | Future — photo-z multimodality |
+| LePhare PDFz distributions | Shuntov et al. 2025 | 26 GB | Phase 2 — T_z tension metrics |
 | Detection images (20 tiles) | COSMOS-Web DR1 | 31 GB | Not used — catalog-only project |
+
+---
+
+## 📦 Dual Output: Science Paper + Analysis Ready Dataset
+
+The anomaly detection pipeline produces two outputs serving different audiences:
+
+**Science paper** — A "Tension Catalog" interpreting the top anomaly candidates: classifying them into physical categories (Line Imposters, Dusty Decoupling, Blue Nuggets, Passive Disks, environmental outliers), proposing formation scenarios, and recommending spectroscopic follow-up targets.
+
+**Analysis Ready Dataset** — The tension scalars, anomaly scores, and ranked lists *without* interpretation, packaged as a reusable community data product following the [ARD methodology](https://github.com/radioastronomyio/analysis-ready-dataset). Every researcher working with COSMOS2025 who wants to assess cross-code consistency must independently compute Δlog M★, ΔSFR, χ² ratios, photo-z PDF metrics, and morphology-SED contradiction scores. This ARD front-loads that compute cost once with documented methodology.
+
+The ARD layers map directly to pipeline phases: raw catalog in PostgreSQL (Layer 0), materialized tension scalars (Layer 1), anomaly scores and SOM embeddings (Layer 2), and environmental context joins (Layer 3). See the [Project Roadmap](ROADMAP.md) for the full layer mapping and scope definition.
 
 ---
 
@@ -169,6 +189,7 @@ We practice open science and open methodology — our version of "showing your w
 - **Toni et al.** — Galaxy group catalog
 - **Hatamnia et al.** — Large-scale structure overdensity maps
 - [RadioAstronomy.io](https://github.com/radioastronomyio) — Research infrastructure
+- **ARD Methodology** — [Analysis Ready Dataset framework](https://github.com/radioastronomyio/analysis-ready-dataset)
 
 ---
 
