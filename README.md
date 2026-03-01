@@ -23,6 +23,8 @@ related_documents:
 [![JWST](https://img.shields.io/badge/Data-JWST_COSMOS--Web_DR1-orange)](https://cosmos-web.astro.caltech.edu/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
+![alt text](assets/repo-banner.jpg)
+
 > Systematic anomaly detection on the COSMOS-Web DR1 galaxy catalog — hunting for high-value scientific discoveries in the largest contiguous JWST survey to date.
 
 This project applies outlier detection methods to the COSMOS2025 photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning 37 photometric bands from UV through mid-infrared. The approach exploits *tension between independent measurements* — where two SED fitting codes disagree on a galaxy's properties, or where a galaxy's star formation rate defies its environment, something physically interesting is happening.
@@ -55,26 +57,7 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 
 ### Workflow
 
-```mermaid
-graph LR
-    subgraph "Data Layer"
-        A[COSMOS-Web DR1<br/>FITS catalog<br/>8.4 GB, 6 extensions] --> B[ETL Pipeline]
-        B --> C[4 Parquet files<br/>photometry_core<br/>lephare / cigale<br/>morphology]
-        B --> D[PostgreSQL<br/>psql01 cosmos2025]
-    end
-
-    subgraph "Analysis Layer"
-        C --> E[Feature Engineering<br/>Tension Vector computation]
-        D --> E
-        E --> F[Anomaly Detection<br/>O1: Code disagreements<br/>O5: Environmental outliers]
-        F --> G[Ranked Candidate List]
-    end
-
-    subgraph "Characterization"
-        G --> H[SED Inspection<br/>CIGALE + LePhare best-fits]
-        H --> I[Science Cases<br/>Publication targets]
-    end
-```
+![alt text](assets/architecture-section-infographic.jpg)
 
 ### Compute Environment
 
@@ -115,14 +98,7 @@ Data is stored outside the repository — see [AGENTS.md](AGENTS.md) for path co
 
 The master catalog provides six extensions per source, each offering a different view:
 
-| Extension | Content | Columns | Phase 1 |
-|-----------|---------|---------|---------|
-| 1. Photometry | 37-band fluxes, Sérsic model, detection flags | 287 | Core columns extracted |
-| 2. LePhare | Photo-z, stellar mass, SFR, chi² goodness-of-fit | 43 | All columns |
-| 3. SE++ Aperture | Multi-aperture photometry (5 sizes × 37 bands) | 148 | Skipped — all array columns |
-| 4. CIGALE | Non-parametric SFH, mass, instantaneous SFR | 54 | All columns |
-| 5. ML Morphology | Spheroid/Disk/Irregular probabilities, delta uncertainty | 150 | Mean/std + flags (~30 cols) |
-| 6. Bulge+Disk | Two-component decomposition | 461 | Deferred to Phase 2 |
+![alt text](assets/dataset-composition-section-infographic.jpg)
 
 Supplementary catalogs add 1,678 galaxy groups with membership probabilities (Toni et al. 2025) and per-source overdensity values across 314 redshift slices (Hatamnia et al. 2025).
 
