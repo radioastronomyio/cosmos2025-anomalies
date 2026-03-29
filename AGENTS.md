@@ -6,10 +6,10 @@ Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog (Shuntov 
 
 ## Current State
 
-**Phase**: ETL pipeline design complete
-**Status**: Repository scaffolded, data organized, competitive landscape surveyed, opportunities selected (O1 + O5), master catalog profiled, ETL schema designed, one-pager written for AI-assisted execution handoff.
-**Next**: Design PostgreSQL DDL → write structured prompt → execute ETL via GLM 4.7 + crystaldb Postgres MCP → verify data integrity → begin O1/O5 exploratory analysis.
-**Blockers**: None. CIGALE SED extraction complete (436GB, 784k files). LePhare SEDs archived as tar (not extracted — Phase 2).
+**Phase**: ETL execution
+**Status**: Repository scaffolded, data organized and migrated to ML01, competitive landscape surveyed, opportunities selected (O1 + O5), master catalog profiled, ETL schema designed (DDL complete at `src/etl/create_schema.sql`), one-pager written for AI-assisted execution handoff.
+**Next**: Create `cosmos2025` database on psql01 → execute DDL → write KC structured prompt for ETL script → execute ETL (FITS → parquet → psql) via CC/KC on ML01 → verify data integrity → begin O1/O5 exploratory analysis.
+**Blockers**: None. CIGALE SED extraction complete (436GB, 784k files on desktop). LePhare SEDs archived as tar (not extracted, Phase 2).
 
 ## Science Opportunities
 
@@ -44,49 +44,54 @@ cosmos2025-anomalies/
 
 ## Data Location
 
-Data lives outside the repo, split across two drives due to SED archive size.
+Catalog data and repo both live on ML01. SED archives remain on the desktop (too large to migrate until NAS or fs02 capacity is addressed).
+
+### ML01 — Primary execution environment
 
 | Path | Contents |
 |------|----------|
-| `E:\repositories-data-folder\cosmos-web-dr1-2025` | Primary data root — catalogs, images, calibration, supplementary |
-| `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds` | Extracted SED files (CIGALE extracted, LePhare not yet) |
-
-### Primary data root (E:)
+| `/opt/repos/cosmos2025-anomalies/` | Repository (cloned from GitHub) |
+| `/mnt/nvme02/cosmosweb2025-dr1/` | Catalog data root |
 
 ```
-E:\repositories-data-folder\cosmos-web-dr1-2025\
-├── raw/
-│   ├── catalogs/         # COSMOSWeb_mastercatalog_v1.fits (8.4GB), PDFz pickle (26GB)
-│   ├── seds/             # SED tar archives only (originals, not extracted here)
-│   ├── images/           # Detection images, segmentation maps (not used Phase 1)
-│   ├── calibration/      # PSFs, star masks (not used Phase 1)
-│   └── supplementary/    # Toni group catalog, Hatamnia LSS (hatamnia_lss_v1.fits)
+/mnt/nvme02/cosmosweb2025-dr1/
+├── catalogs/             # COSMOSWeb_mastercatalog_v1.fits (8.4GB), PDFz pickle (26GB)
+├── images/               # Detection images, segmentation maps (not used Phase 1)
+├── calibration/          # PSFs, star masks (not used Phase 1)
+├── supplementary/        # Toni group catalog, Hatamnia LSS (hatamnia_lss_v1.fits)
+└── reference-originals/  # Original download page HTML and docs (archived)
+```
+
+ETL output targets (created during pipeline execution):
+
+```
+/mnt/nvme02/cosmosweb2025-dr1/
 ├── processed/
-│   ├── parquet/          # ETL output target — 4 parquet files
+│   ├── parquet/          # 4 parquet files (ETL output)
 │   └── derived/          # Computed features, anomaly scores
-├── reference-originals/  # Original download page HTML and docs (archived)
 └── staging/              # ETL temp workspace, disposable
 ```
 
-### SED data root (D:)
+### Desktop — SED data only (Phase 2)
 
-```
-D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds\
-├── CIGALE_SEDs_v1/       # ~784k individual best-fit SED FITS files (~436GB)
-│   └── n23data2/cosmosweb/catalogs/Release_v1/CIGALE_SEDs_v1/P1/
-│       └── {source_id}_best_model.fits
-└── LePHARE_SEDs_v1/      # ~784k individual best-fit SED FITS files (~141GB tar, not extracted)
-```
+| Path | Contents |
+|------|----------|
+| `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds\CIGALE_SEDs_v1\` | ~784k individual best-fit SED FITS files (~436GB) |
+| `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds\LePHARE_SEDs_v1\` | ~141GB tar, not extracted |
 
-Note: SED files are per-source lookups for Phase 2 candidate characterization, not bulk-loaded into psql.
+SED files are per-source lookups for Phase 2 candidate characterization, not bulk-loaded into psql.
 
 ### Environment Summary
 
-| Environment | Catalog/Main Data | SED Data | Compute |
-|-------------|-------------------|----------|---------|
-| Local dev | `E:\repositories-data-folder\cosmos-web-dr1-2025` | `D:\repositories-data-folder\cosmos-web-dr1-2025\raw\seds` | RTX 3080 12GB |
-| Production (gpu01) | TBD | TBD | A4000 16GB, 12 vCPU, 48GB RAM |
-| Database | psql01 (10.25.20.8) | N/A | PostgreSQL — `cosmos2025` database |
+| Environment | Data | Compute |
+|-------------|------|---------|
+| ML01 (primary) | Catalogs, supplementary, images, calibration at `/mnt/nvme02/cosmosweb2025-dr1/` | 5950X / 128G / A4000 16GB |
+| Desktop (secondary) | SED archives only (`D:\`) | RTX 3080 12GB |
+| Database | psql01 (10.25.20.8) | PostgreSQL, `cosmos2025` database |
+
+### Credentials
+
+Database credentials are loaded from `/opt/agents/.env` on ML01. Scripts should use `dotenv` or shell sourcing, never hardcode connection strings. See `configs/data_paths.yaml` for env var names and path configuration.
 
 ## ETL Pipeline (Phase 1)
 
@@ -110,11 +115,11 @@ Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 | Language | Python 3.x | All ETL, analysis, and pipeline code |
 | Catalog I/O | astropy, pyarrow | FITS reading, parquet conversion |
 | Database | PostgreSQL on psql01 (10.25.20.8) | `cosmos2025` database, catalog tables |
-| DB access | psycopg2 / crystaldb MCP | Bulk load and query |
+| DB access | psycopg2 | Direct connection, credentials from `/opt/agents/.env` |
 | ML/Stats | scikit-learn, scipy | Isolation Forest, SOM, statistical tests |
-| GPU compute | Local RTX 3080 12GB (dev), A4000 16GB on gpu01 (production) | |
+| GPU compute | ML01 A4000 16GB (primary), desktop RTX 3080 12GB (secondary) | |
 | Notebooks | Jupyter | Phase 1 exploration |
-| AI execution | GLM 4.7 via KiloCode | ETL code generation from structured prompts |
+| AI execution | Claude Code / KiloCode on ML01 | ETL and pipeline code generation from structured prompts |
 
 ## Conventions
 
@@ -128,10 +133,10 @@ Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 
 | What | Where |
 |------|-------|
+| Data path configuration | `configs/data_paths.yaml` |
 | ETL pipeline specification | `docs/research/etl-pipeline-one-pager.md` |
 | Master catalog structural profile | `docs/reference/master-catalog-profile.md` |
 | Catalog column schemas (6 extensions) | `docs/reference/columns-*.txt` |
 | Quality flag definitions | `docs/reference/quality-flags.txt` |
 | LSS overdensity catalog schema | `docs/reference/large-scale-structure-in-cosmos-web-readme.txt` |
 | COSMOS-Web primary catalog readme | `docs/reference/cosmos-web-primary-readme.pdf` |
-| Infrastructure details | `docs/data-science-infrastructure.md` |

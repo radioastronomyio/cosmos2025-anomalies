@@ -1,0 +1,61 @@
+# COSMOS2025 Data Paths Configuration
+#
+# All paths are ML01-relative unless noted. ETL scripts and analysis code
+# should load this file rather than hardcoding paths.
+#
+# Database credentials: sourced from /opt/agents/.env on ML01,
+# not stored here. See the "database" section for env var names.
+
+# ---------------------------------------------------------------------------
+# Data root on ML01 NVMe
+# ---------------------------------------------------------------------------
+data_root: /mnt/nvme02/cosmosweb2025-dr1
+
+catalogs:
+  master_catalog: /mnt/nvme02/cosmosweb2025-dr1/catalogs/COSMOSWeb_mastercatalog_v1.fits
+  pdfz_pickle: /mnt/nvme02/cosmosweb2025-dr1/catalogs/COSMOSWeb_mastercatalog_v1_PDFz.pkl
+
+supplementary:
+  lss_overdensity: /mnt/nvme02/cosmosweb2025-dr1/supplementary/hatamnia_lss_v1.fits
+  group_catalog_groups: /mnt/nvme02/cosmosweb2025-dr1/supplementary/deep-galaxy-group-catalog-groups.txt
+  group_catalog_memberships: /mnt/nvme02/cosmosweb2025-dr1/supplementary/deep-galaxy-group-catalog-memberships.txt
+
+# ETL output directories (created by pipeline)
+processed:
+  parquet_dir: /mnt/nvme02/cosmosweb2025-dr1/processed/parquet
+  derived_dir: /mnt/nvme02/cosmosweb2025-dr1/processed/derived
+  staging_dir: /mnt/nvme02/cosmosweb2025-dr1/staging
+
+# ---------------------------------------------------------------------------
+# Database (psql01)
+# ---------------------------------------------------------------------------
+database:
+  host_env: PGSQL01_HOST          # 10.25.20.8
+  port_env: PGSQL01_PORT          # 5432
+  user_env: PGSQL01_ADMIN_USER
+  password_env: PGSQL01_ADMIN_PASSWORD
+  database_name: cosmos2025
+  schema: catalog
+
+  # Load credentials from the agent environment file:
+  #   set -a && source /opt/agents/.env && set +a
+  #
+  # Or in Python:
+  #   from dotenv import load_dotenv
+  #   load_dotenv('/opt/agents/.env')
+
+# ---------------------------------------------------------------------------
+# SED data (desktop only, Phase 2)
+# ---------------------------------------------------------------------------
+# SED archives are too large for NVMe migration. These paths are only
+# valid from the Windows desktop and will be updated if/when data moves
+# to NAS or fs02.
+seds:
+  cigale_root: "D:\\repositories-data-folder\\cosmos-web-dr1-2025\\raw\\seds\\CIGALE_SEDs_v1"
+  lephare_tar: "D:\\repositories-data-folder\\cosmos-web-dr1-2025\\raw\\seds\\LePHARE_SEDs_v1"
+  # Per-source pattern: {cigale_root}/n23data2/.../P1/{source_id}_best_model.fits
+
+# ---------------------------------------------------------------------------
+# Repository location on ML01
+# ---------------------------------------------------------------------------
+repo_root: /opt/repos/cosmos2025-anomalies
