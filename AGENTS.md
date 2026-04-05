@@ -6,10 +6,12 @@ Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog (Shuntov 
 
 ## Current State
 
-**Phase**: ETL execution
-**Status**: Repository scaffolded, data organized and migrated to ML01, competitive landscape surveyed, opportunities selected (O1 + O5), master catalog profiled, ETL schema designed (DDL complete at `src/etl/create_schema.sql`), one-pager written for AI-assisted execution handoff.
-**Next**: Create `cosmos2025` database on psql01 → execute DDL → write KC structured prompt for ETL script → execute ETL (FITS → parquet → psql) via CC/KC on ML01 → verify data integrity → begin O1/O5 exploratory analysis.
-**Blockers**: None. CIGALE SED extraction complete (436GB, 784k files on desktop). LePhare SEDs archived as tar (not extracted, Phase 2).
+**Phase**: Phase 1 complete. Phase 2 (feature engineering) ready to begin.
+**Status**: All 7 catalog tables loaded and verified on psql01. ETL pipeline (`src/etl/extract_catalog.py`) executed successfully: 784,016 rows across 4 core tables, 164,155 LSS sources, 1,678 galaxy groups, 1,745,652 group memberships. Verification report generated (`docs/verification-report.md`) with 47 passed, 0 failed across 93 checks covering row counts, sentinel residuals, NULL distributions, cross-table join integrity, unit validation, value ranges, and O1 readiness. Codex pre-commit review completed (`docs/research/phase1-precommit-codex-review.md`).
+**Next**: Phase 2 feature engineering. Define CIGALE plausibility filter (mass > 1e3, chi2 thresholds) to exclude zombie fits. Compute T_A tension scalars (Δlog M★, Δlog SFR, Δlog sSFR) for the dual-code clean sample. Begin O1 exploratory analysis.
+**Blockers**: None.
+
+**Critical unit note**: LePhare physical parameters (mass_med, sfr_med, ssfr_med) are in **log10** space. CIGALE parameters (mass, sfr_inst, ssfr_cigale) are in **linear** space. Cross-code comparison formula: `delta = lephare_log10_value - LOG10(cigale_linear_value)`. See `docs/verification-report.md` for full unit reference table.
 
 ## Science Opportunities
 
@@ -29,15 +31,17 @@ cosmos2025-anomalies/
 ├── configs/                      # data_paths.yaml, DB connection, parameters
 ├── docs/
 │   ├── reference/                # Column schemas, quality flags, catalog profile
-│   └── research/                 # GDR results, ETL one-pager, opportunity analysis
+│   └── research/                 # GDR results, ETL one-pager, Codex review
 ├── notebooks/                    # Exploration, EDA, analysis
 ├── shared/                       # Cross-repo utilities (tree generator)
+├── spec/                         # KC/OC structured prompts for agent execution
 ├── src/
 │   ├── etl/                      # FITS → parquet → psql pipeline
 │   ├── features/                 # Derived feature computation
 │   ├── detection/                # Anomaly detection methods
 │   └── utils/                    # Config loading, DB helpers
 ├── tests/
+├── work-logs/                    # Date-based session logs
 ├── AGENTS.md                     # This file
 └── README.md
 ```
@@ -62,13 +66,13 @@ Catalog data and repo both live on ML01. SED archives remain on the desktop (too
 └── reference-originals/  # Original download page HTML and docs (archived)
 ```
 
-ETL output targets (created during pipeline execution):
+ETL output (populated by pipeline):
 
 ```
 /mnt/nvme02/cosmosweb2025-dr1/
 ├── processed/
-│   ├── parquet/          # 4 parquet files (ETL output)
-│   └── derived/          # Computed features, anomaly scores
+│   ├── parquet/          # 4 parquet files (photometry_core, lephare, cigale, morphology)
+│   └── derived/          # Computed features, anomaly scores (Phase 2)
 └── staging/              # ETL temp workspace, disposable
 ```
 
@@ -87,24 +91,27 @@ SED files are per-source lookups for Phase 2 candidate characterization, not bul
 |-------------|------|---------|
 | ML01 (primary) | Catalogs, supplementary, images, calibration at `/mnt/nvme02/cosmosweb2025-dr1/` | 5950X / 128G / A4000 16GB |
 | Desktop (secondary) | SED archives only (`D:\`) | RTX 3080 12GB |
-| Database | psql01 (10.25.20.8) | PostgreSQL, `cosmos2025` database |
+| Database | psql01 (10.25.20.8) | PostgreSQL, `cosmos2025` database, `catalog` schema |
 
 ### Credentials
 
 Database credentials are loaded from `/opt/agents/.env` on ML01. Scripts should use `dotenv` or shell sourcing, never hardcode connection strings. See `configs/data_paths.yaml` for env var names and path configuration.
 
-## ETL Pipeline (Phase 1)
+## ETL Pipeline (Phase 1 — Complete)
 
 Master catalog → 4 parquet files → PostgreSQL tables. Extensions 3 (SE++APER) and 6 (B+D) skipped entirely.
 
-| Parquet File | Source Extension | Columns | Notes |
-|--------------|-----------------|---------|-------|
-| `photometry_core.parquet` | 1 (Photometry) | ~85 scalar | Skip 18 array cols, ~200 band-repeated model fluxes |
-| `lephare.parquet` | 2 (LePhare) | 43 + id | All columns, id injected from ext 1 |
-| `cigale.parquet` | 4 (CIGALE) | 54 + id + ssfr_cigale | All columns, id injected, ssfr derived |
-| `morphology.parquet` | 5 (ML-Morpho) | ~30 + id | Mean/std probs + flags + deltas only |
+| Table | Source Extension | Rows | Notes |
+|-------|-----------------|------|-------|
+| `catalog.photometry_core` | 1 (Photometry) | 784,016 | 158 scalar columns. Array cols and band-repeated flux_model skipped. |
+| `catalog.lephare` | 2 (LePhare) | 784,016 | 44 columns. id injected from ext 1. Values in **log10** space. |
+| `catalog.cigale` | 4 (CIGALE) | 784,016 | 56 columns. id injected, ssfr_cigale derived. Values in **linear** space. 24.9% NULL (unfittable). |
+| `catalog.morphology` | 5 (ML-Morpho) | 784,016 | 31 columns. Mean/std probs + flags + deltas. 42.1% NULL morph_flags. |
+| `catalog.lss_overdensity` | Hatamnia et al. | 164,155 | density_excess (1+delta). 20.9% coverage of full catalog. |
+| `catalog.galaxy_groups` | Toni et al. | 1,678 | Groups to z=3.7. |
+| `catalog.galaxy_group_memberships` | Toni et al. | 1,745,652 | 364,674 unique galaxies across 1,678 groups. |
 
-Sentinel conversion: `-999`/`-99`/`999999` → NULL. Column name sanitization: hyphens → underscores for PostgreSQL compatibility.
+Sentinel conversion: `-999`/`-99`/`999999` → NULL. Column name sanitization: hyphens → underscores for PostgreSQL compatibility. Verification report: `docs/verification-report.md`.
 
 Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 
@@ -114,12 +121,12 @@ Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 |-----------|-----------|-------|
 | Language | Python 3.x | All ETL, analysis, and pipeline code |
 | Catalog I/O | astropy, pyarrow | FITS reading, parquet conversion |
-| Database | PostgreSQL on psql01 (10.25.20.8) | `cosmos2025` database, catalog tables |
+| Database | PostgreSQL on psql01 (10.25.20.8) | `cosmos2025` database, `catalog` schema, 7 tables |
 | DB access | psycopg2 | Direct connection, credentials from `/opt/agents/.env` |
 | ML/Stats | scikit-learn, scipy | Isolation Forest, SOM, statistical tests |
 | GPU compute | ML01 A4000 16GB (primary), desktop RTX 3080 12GB (secondary) | |
-| Notebooks | Jupyter | Phase 1 exploration |
-| AI execution | Claude Code / KiloCode on ML01 | ETL and pipeline code generation from structured prompts |
+| Notebooks | Jupyter | Exploration and EDA |
+| AI execution | Claude Code / KiloCode / OpenCode on ML01 | Pipeline code generation from structured prompts |
 
 ## Conventions
 
@@ -134,6 +141,9 @@ Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 | What | Where |
 |------|-------|
 | Data path configuration | `configs/data_paths.yaml` |
+| ETL verification report | `docs/verification-report.md` |
+| Phase 1 verification (HTML with charts) | `docs/phase1-verification-report.html` |
+| Codex pre-commit review | `docs/research/phase1-precommit-codex-review.md` |
 | ETL pipeline specification | `docs/research/etl-pipeline-one-pager.md` |
 | Master catalog structural profile | `docs/reference/master-catalog-profile.md` |
 | Catalog column schemas (6 extensions) | `docs/reference/columns-*.txt` |

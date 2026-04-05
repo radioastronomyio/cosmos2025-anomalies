@@ -1,15 +1,15 @@
 # COSMOS-Web DR1 ETL Pipeline — Schema Design & AI-Assisted Execution
 
 **Domain:** Astronomy / Data Engineering
-**Status:** Ready for schema design → code generation
+**Status:** Complete (executed 2026-04-05)
 **Date:** 2026-03-01
-**Version:** 1.0
+**Version:** 1.1
 
 ---
 
 ## Vision
 
-Design the PostgreSQL schema and FITS-to-parquet-to-psql ETL pipeline for the COSMOS-Web DR1 master catalog, then hand off code generation to GLM 4.7 via KiloCode with crystaldb Postgres MCP access. We define every decision; the model writes the code.
+Design the PostgreSQL schema and FITS-to-parquet-to-psql ETL pipeline for the COSMOS-Web DR1 master catalog, then hand off code generation to AI coding agents on ML01. We define every decision; the model writes the code.
 
 ---
 
@@ -25,6 +25,8 @@ We are building an anomaly detection research pipeline targeting two primary sci
 
 The ETL pipeline exists to make the master catalog queryable in PostgreSQL for these analyses. Everything downstream (feature engineering, anomaly scoring, candidate characterization) depends on this being done correctly.
 
+**Critical unit note (added post-execution):** LePhare physical parameters (mass_med, sfr_med, ssfr_med) are stored in **log10** space. CIGALE parameters (mass, sfr_inst) are in **linear** space. Cross-code comparison formula: `delta = lephare_log10_value - LOG10(cigale_linear_value)`. An earlier draft of this document contained a double-log bug in the verification query; it has been corrected below.
+
 ---
 
 ## Source Data
@@ -32,7 +34,7 @@ The ETL pipeline exists to make the master catalog queryable in PostgreSQL for t
 ### Master Catalog
 
 **File:** `COSMOSWeb_mastercatalog_v1.fits` (8.4 GB)
-**Location:** `E:\repositories-data-folder\cosmos-web-dr1-2025\raw\catalogs\`
+**Location:** `/mnt/nvme02/cosmosweb2025-dr1/catalogs/` (ML01)
 
 Six BINTABLE extensions, all sharing 784,016 rows in positional lockstep (join by row index, not shared key column). Only Extension 1 has an `id` column — all other extensions are implicitly aligned by row order.
 
@@ -49,16 +51,16 @@ Six BINTABLE extensions, all sharing 784,016 rows in positional lockstep (join b
 
 | Catalog | File | Location | Rows | Purpose |
 |---------|------|----------|------|---------|
-| LSS Overdensity | `hatamnia_lss_v1.fits` | `E:\...\raw\supplementary\` | ~164k sources | `density_excess` values for O5 environmental context |
-| Galaxy Groups | Toni et al. group catalog | `E:\...\raw\supplementary\` | 1,678 groups | `group_id`, `prob_assoc` for O5 membership |
+| LSS Overdensity | `hatamnia_lss_v1.fits` | `/mnt/nvme02/.../supplementary/` | ~164k sources | `density_excess` values for O5 environmental context |
+| Galaxy Groups | `deep-galaxy-group-catalog-groups.txt` | `/mnt/nvme02/.../supplementary/` | 1,678 groups | `group_id`, `prob_assoc` for O5 membership |
+| Galaxy Memberships | `deep-galaxy-group-catalog-memberships.txt` | `/mnt/nvme02/.../supplementary/` | ~1.7M rows | Galaxy-group associations |
 
 ### Output Locations
 
 | Product | Location |
 |---------|----------|
-| Parquet files | `E:\...\processed\parquet\` |
-| PostgreSQL | psql01 (10.25.20.8), database `cosmos2025` |
-| Staging/temp | `E:\...\staging\` |
+| Parquet files | `/mnt/nvme02/cosmosweb2025-dr1/processed/parquet/` |
+| PostgreSQL | psql01 (10.25.20.8), database `cosmos2025`, schema `catalog` |
 
 ---
 
@@ -71,8 +73,8 @@ These sentinel patterns are consistent across the catalog. The ETL must convert 
 | `-999` / `-999.0` | No measurement | mag_err, model parameters across all extensions |
 | `-99` / `-99.0` | No redshift solution | LePhare `zfinal`, `mod_minchi2_phys` |
 | `999999` | No classification | ML-MORPHO `morph_flag` variants |
-| `0.0` in `wht_*` columns | No coverage for that band | Photometry extension (55% of sources lack MIRI F770W) |
-| NaN | Genuine missing (source couldn't be fit) | CIGALE has 16.1% NaN across all columns |
+| `0.0` in `wht_*` columns | No coverage for that band | Photometry extension (66% of sources lack MIRI F770W) |
+| NaN | Genuine missing (source couldn't be fit) | CIGALE has 24.9% fully-NULL rows (unfittable sources) |
 
 **Decision:** Convert `-999`, `-999.0`, `-99`, `-99.0`, and `999999` to NULL/NaN during extraction. Preserve `0.0` in weight columns as-is (it's informative, not missing). NaN passes through naturally.
 
@@ -109,6 +111,8 @@ Source: Extension 2 (LEPHARE) — all 43 columns + `id` injected from Extension 
 
 Key columns for O1: `mass_med`, `sfr_med`, `ssfr_med`, `chi2_best`, `zfinal`, `zpdf_med`, `zpdf_l68`, `zpdf_u68`, `nbfilt`, `mod_minchi2_phys`
 
+**Unit note:** All mass, SFR, sSFR, and age columns are in **log10** space (e.g., `mass_med` = log10(M/M_sun)).
+
 No array columns. Small extension — take everything.
 
 ### 3. `cigale.parquet`
@@ -116,6 +120,8 @@ No array columns. Small extension — take everything.
 Source: Extension 4 (CIGALE) — all 54 columns + `id` injected from Extension 1
 
 Key columns for O1: `mass`, `sfr_inst`, `sfr_100myr`, `chi2_best_fit`, `chi2_red_best_fit`
+
+**Unit note:** All mass and SFR columns are in **linear** space (e.g., `mass` = M_sun, `sfr_inst` = M_sun/yr).
 
 **Derived column:** Compute `ssfr_cigale = sfr_inst / mass` during extraction (CIGALE has no native sSFR column). Handle division by zero/NaN → NaN.
 
@@ -151,14 +157,13 @@ One table per parquet file, plus supplementary tables. All joined on `id` (BIGIN
 | `lephare` | `zfinal` for redshift slicing; `mass_med` for mass binning |
 | `cigale` | `mass` for cross-code comparison |
 | `morphology` | `morph_flag_f444w` for class selection; `delta_f444w` for uncertainty filtering |
-| `lss_overdensity` | `id` PK; whatever spatial/redshift columns the catalog uses |
-| `galaxy_groups` | `group_id`; `id` for member lookup |
-
-Consider PostGIS for spatial indexing on (ra, dec) if cross-match queries become frequent.
+| `lss_overdensity` | `id` PK; `(ra, dec)` spatial; `density_excess` for range queries |
+| `galaxy_groups` | `group_id`; `z` for redshift slicing |
+| `galaxy_group_memberships` | `(galid, group_id)` composite PK; `galid`; `group_id` |
 
 ### Bulk Load Strategy
 
-Parquet → psql via `COPY FROM` with CSV intermediary, or direct psycopg2/psycopg3 bulk insert from pyarrow tables. The dataset is under 1M rows — either approach completes in minutes.
+Parquet → psql via `COPY FROM` with CSV intermediary, or direct psycopg2 bulk insert from pyarrow tables. The dataset is under 1M rows — either approach completes in minutes.
 
 ---
 
@@ -172,19 +177,19 @@ FITS (8.4GB, memmap)
   ├── Read Extension 4 → inject id → sanitize names → convert sentinels → derive ssfr_cigale → write cigale.parquet
   └── Read Extension 5 → inject id → select columns → sanitize names → convert sentinels → write morphology.parquet
 
-Parquet files (E:\...\processed\parquet\)
+Parquet files
   ├── CREATE SCHEMA catalog; CREATE TABLEs with proper types
   ├── Load each parquet → psql table via COPY or bulk insert
   └── CREATE INDEXes
 
-Supplementary FITS (LSS, Groups)
+Supplementary (LSS FITS + Group text files)
   ├── Read → convert → load to psql
   └── Index on id/group_id
 ```
 
 ### Technical Requirements
 
-- Python 3.x with `astropy`, `numpy`, `pyarrow`, `psycopg2` (or `psycopg[binary]`)
+- Python 3.x with `astropy`, `numpy`, `pyarrow`, `psycopg2` (or `psycopg[binary]`), `pyyaml`, `python-dotenv`
 - FITS reading via `astropy.io.fits` with `memmap=True` (critical — 8.4GB file)
 - Parquet writing via `pyarrow.parquet`
 - Chunk processing not strictly required (784k rows fits in memory once column-selected) but good practice
@@ -205,11 +210,12 @@ SELECT COUNT(*) FILTER (WHERE mass_med IS NULL) AS lephare_mass_null,
 FROM catalog.lephare;
 
 -- Cross-code join sanity check
-SELECT l.id, l.mass_med AS mass_lephare, c.mass AS mass_cigale,
-       ABS(LOG10(l.mass_med) - LOG10(c.mass)) AS delta_log_mass
+-- NOTE: mass_med is already log10(M/M_sun); mass is linear M_sun
+SELECT l.id, l.mass_med AS log_mass_lephare, LOG10(c.mass) AS log_mass_cigale,
+       ABS(l.mass_med - LOG10(c.mass)) AS delta_log_mass
 FROM catalog.lephare l
 JOIN catalog.cigale c ON l.id = c.id
-WHERE l.mass_med > 0 AND c.mass > 0
+WHERE l.mass_med IS NOT NULL AND c.mass > 0
 ORDER BY delta_log_mass DESC
 LIMIT 20;
 
@@ -219,49 +225,12 @@ SELECT COUNT(*) FROM catalog.lss_overdensity;
 
 ---
 
-## AI Execution Strategy
-
-### Model Choice: GLM 4.7 (not GLM 5)
-
-**Because:** The task is well-bounded code generation from a precise specification, not open-ended reasoning. GLM 4.7 excels at focused coding with tool use (SWE-bench verified #1 among open models, +16.5% Terminal Bench). GLM 5's advantages (deeper multi-step planning, 744B params) don't justify the 3× cost increase ($0.95 vs $0.30/M input tokens) for execution of a fully-specified plan.
-
-### Tool Access: crystaldb Postgres MCP
-
-Run locally as Docker container pointed at psql01:
-
-```bash
-docker run -p 8000:8000 \
-  -e DATABASE_URI=postgresql://user:pass@10.25.20.8:5432/cosmos2025 \
-  crystaldba/postgres-mcp --access-mode=unrestricted --transport=sse
-```
-
-Configure KiloCode MCP client to connect at `http://localhost:8000/sse`. This gives GLM 4.7 ability to: create schemas/tables, execute SQL, run COPY commands, verify row counts, create indexes, and run spot-check queries — all through the MCP interface.
-
-**Safety:** Scoped to the `cosmos2025` database only. Cannot touch any other databases on psql01.
-
-### Division of Labor
-
-| We Design (Human + Claude) | GLM 4.7 Executes |
-|----------------------------|-------------------|
-| This one-pager (complete ETL spec) | Python FITS → parquet conversion script |
-| PostgreSQL DDL (table definitions, types, constraints) | SQL DDL execution via MCP |
-| Column inclusion/exclusion lists | Parquet → psql bulk load script |
-| Sentinel-to-NULL mapping rules | Verification queries |
-| Verification query definitions | Index creation |
-| Structured prompt packaging all of the above | Bug fixes if verification fails |
-
-### Risk: Drift
-
-The primary risk with AI-generated ETL is the model "improving" something we didn't ask for — different sentinel handling, creative column renaming, reordering that breaks row alignment. Mitigation: the structured prompt pins every decision, and the verification queries catch discrepancies. If row counts don't match or null patterns are wrong, we catch it immediately.
-
----
-
 ## Scope
 
 **In scope:**
-- PostgreSQL DDL for all 4 Phase 1 tables + 2 supplementary tables
+- PostgreSQL DDL for all 4 Phase 1 tables + 3 supplementary tables
 - Python script: FITS → parquet (4 files)
-- Python script or SQL: parquet → psql bulk load
+- Python script: parquet → psql bulk load
 - Sentinel-to-NULL conversion during extraction
 - Column name sanitization (hyphens → underscores)
 - `ssfr_cigale` derived column computation
@@ -278,23 +247,6 @@ The primary risk with AI-generated ETL is the model "improving" something we did
 - Feature engineering for anomaly detection
 - Any analysis or science
 
-**Deferred decisions:**
-- PostGIS for spatial indexing (evaluate after initial queries reveal need)
-- pgvector for embedding storage (Phase 2 if we vectorize SEDs)
-- Partitioning strategy (784k rows doesn't need it, but revisit if derived tables grow)
-
----
-
-## Next Steps
-
-1. **Design DDL** — Write CREATE TABLE statements for all 6 tables with exact column names, types, constraints, and indexes
-2. **Write structured prompt** — Package this one-pager + DDL into a kc-structured-prompt for GLM 4.7
-3. **Spin up crystaldb MCP** — Docker container on local machine pointing at psql01
-4. **Execute** — GLM 4.7 writes and runs the ETL scripts via KiloCode
-5. **Verify** — Run verification queries, check row counts, spot-check values
-6. **Load supplementary** — Hatamnia LSS + Toni groups into psql
-7. **Begin O1 analysis** — First exploratory queries on LePhare vs CIGALE residuals
-
 ---
 
 ## Key Reference Files
@@ -302,14 +254,16 @@ The primary risk with AI-generated ETL is the model "improving" something we did
 | What | Where |
 |------|-------|
 | Master catalog profile | `docs/reference/master-catalog-profile.md` |
-| Column schema (Photometry) | `docs/reference/columns-photometry-and-sepp-measurements.txt` |
-| Column schema (LePhare) | `docs/reference/columns-lephare-physical-parameters.txt` |
+| Column schema (Photometry) | `docs/reference/columns-photometry.txt` |
+| Column schema (LePhare) | `docs/reference/columns-lephare-photometrric-redshifts.txt` |
 | Column schema (CIGALE) | `docs/reference/columns-cigale-physical-parameters.txt` |
-| Column schema (ML-Morpho) | `docs/reference/columns-ml-morphological-classification.txt` |
+| Column schema (ML-Morpho) | `docs/reference/columns-machine-learning-morphological-classifications.txt` |
 | Column schema (B+D) | `docs/reference/columns-bulge-disk-morphological-measurements.txt` |
-| GDR opportunity landscape | `docs/research/COSMOS-Web_Anomaly_Detection_Opportunity.md` (to be placed) |
 | Quality flag definitions | `docs/reference/quality-flags.txt` |
 | Profiling script | `src/etl/profile_master_catalog.py` |
+| ETL script | `src/etl/extract_catalog.py` |
+| Verification script | `src/etl/verify_catalog.py` |
+| Verification report | `docs/verification-report.md` |
 | AGENTS.md | Repository root |
 
 ---
@@ -320,15 +274,5 @@ The primary risk with AI-generated ETL is the model "improving" something we did
 |---|---|
 | Author | CrainBramp + Claude (Opus 4.6) |
 | Created | 2026-03-01 |
-| Version | 1.0 |
-| Status | Ready for schema design |
-
----
-
-## Sources
-
-- COSMOS-Web DR1 master catalog profiling (this session, 2026-03-01)
-- GDR competitive landscape analysis (Gemini Deep Research, 2026-02-07)
-- GLM 4.7 vs GLM 5 comparison research (WaveSpeedAI, CometAPI, Vertu reviews)
-- crystaldb/postgres-mcp documentation (GitHub)
-- Prior session: repo scaffolding, data organization, AGENTS.md creation (2026-02-07)
+| Updated | 2026-04-05 (v1.1: fixed unit bug in verification query, updated paths and file references, added unit notes) |
+| Status | Complete (ETL executed and verified) |

@@ -3,9 +3,9 @@
 title: "COSMOS2025 Anomaly Detection"
 description: "Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog — exploiting tension between independent measurements to find scientifically valuable outliers"
 author: "VintageDon"
-date: "2026-03-01"
-version: "0.2"
-status: "Phase 1 — ETL Pipeline Design"
+date: "2026-04-05"
+version: "0.3"
+status: "Phase 1 Complete — ETL Verified"
 tags:
   - type: project-root
   - domain: [astronomy, anomaly-detection, data-science]
@@ -51,9 +51,10 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 | Data acquisition | ✅ Complete | All DR1 catalog products downloaded; CIGALE SEDs extracted (436GB); LePhare SEDs archived (not extracted) |
 | Literature landscape | ✅ Complete | Independent deep research surveys (Gemini, GPT) converged on tension-first strategy; four-axis tension vector defined |
 | Catalog profiling | ✅ Complete | Master catalog structure characterized — 6 extensions, sentinel patterns mapped, column types inventoried |
-| ETL design | ✅ Complete | 4-file parquet schema defined; PostgreSQL target schema designed; GLM 4.7 execution strategy decided |
-| ETL execution | 🔲 Next | FITS → parquet → psql pipeline; delegated to GLM 4.7 via KiloCode + crystaldb Postgres MCP |
-| Feature engineering | 🔲 Planned | Tension vector components (T_A, T_z, T_M, T_E), quality cuts, cross-extension joins |
+| ETL design | ✅ Complete | 4-file parquet schema defined; PostgreSQL DDL written; execution specs for agent handoff |
+| ETL execution | ✅ Complete | 784,016 sources loaded across 4 core tables + 3 supplementary tables on psql01 |
+| ETL verification | ✅ Complete | 93 checks (47 pass, 0 fail); sentinels, joins, units, ranges, O1 readiness confirmed |
+| Feature engineering | 🔲 Next | Tension vector components (T_A, T_z, T_M, T_E), quality cuts, CIGALE plausibility filter |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
 | Characterization | 🔲 Planned | Phase 2 — SED-level analysis of top candidates |
 | ARD release | 🔲 Planned | Tension scalars + anomaly scores packaged as community data product |
@@ -70,9 +71,9 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 
 | Stage | Environment | Hardware |
 |-------|-------------|----------|
-| ETL, exploration, feature engineering | Local workstation | RTX 3080 12GB |
-| Production pipelines | gpu01 (cluster) | A4000 16GB, 12 vCPU, 48GB RAM |
-| Catalog queries | psql01 (cluster) | PostgreSQL with pgvector, PostGIS |
+| ETL, exploration, feature engineering | ML01 bare metal | 5950X / 128G / A4000 16GB |
+| Catalog queries | psql01 (cluster VM) | PostgreSQL with pgvector, PostGIS |
+| SED characterization (Phase 2) | Desktop workstation | RTX 3080 12GB |
 
 ---
 
@@ -84,21 +85,23 @@ cosmos2025-anomalies/
 ├── configs/                      # Data paths, DB connection, parameters
 ├── docs/
 │   ├── reference/                # Column schemas, quality flags, catalog profile
-│   └── research/                 # GDR results, ETL one-pager, opportunity analysis
+│   └── research/                 # GDR results, ETL one-pager, Codex review
 ├── notebooks/                    # Exploration, EDA, analysis
 ├── shared/                       # Cross-repo utilities (tree generator)
+├── spec/                         # Agent execution prompts (KC, OC, Codex)
 ├── src/
 │   ├── etl/                      # FITS → parquet → psql pipeline
 │   ├── features/                 # Derived feature computation
 │   ├── detection/                # Anomaly detection methods
 │   └── utils/                    # Config loading, DB helpers
 ├── tests/
+├── work-logs/                    # Date-based session logs
 ├── AGENTS.md                     # Agent instructions and project context
 ├── ROADMAP.md                    # Opportunity landscape, execution plan, ARD track
 └── README.md                     # This file
 ```
 
-Data is stored outside the repository — see [AGENTS.md](AGENTS.md) for path conventions and the two-drive data layout.
+Data is stored outside the repository — see [AGENTS.md](AGENTS.md) for path conventions and the data layout on ML01.
 
 ---
 
@@ -143,7 +146,7 @@ The ARD layers map directly to pipeline phases: raw catalog in PostgreSQL (Layer
 ### Prerequisites
 
 - Python 3.10+ with astropy, pyarrow, numpy, psycopg2
-- PostgreSQL access to psql01 (see `docs/data-science-infrastructure.md`)
+- PostgreSQL access to psql01 (see [AGENTS.md](AGENTS.md) for connection details)
 - COSMOS-Web DR1 data products (login-gated at [cosmos-web.astro.caltech.edu](https://cosmos-web.astro.caltech.edu/))
 
 ### Setup
@@ -153,10 +156,10 @@ git clone https://github.com/radioastronomyio/cosmos2025-anomalies.git
 cd cosmos2025-anomalies
 
 # Install dependencies
-pip install astropy pyarrow numpy psycopg2-binary scipy scikit-learn jupyter
+pip install astropy pyarrow numpy psycopg2-binary scipy scikit-learn jupyter pyyaml python-dotenv
 
 # Configure data paths (see AGENTS.md for expected data layout)
-# Edit configs/data_paths.yaml with your DATA_ROOT paths
+# Edit configs/data_paths.yaml with your data root paths
 ```
 
 ### Data Access
@@ -193,4 +196,4 @@ We practice open science and open methodology — our version of "showing your w
 
 ---
 
-Last Updated: March 1, 2026 | Phase 1 — ETL Pipeline Design
+Last Updated: April 5, 2026 | Phase 1 Complete — ETL Verified

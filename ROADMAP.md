@@ -3,9 +3,9 @@
 title: "COSMOS2025 Project Roadmap"
 description: "Consolidated opportunity landscape, phased execution plan, and ARD output track"
 author: "CrainBramp"
-date: "2026-03-01"
-version: "0.1"
-status: "Draft"
+date: "2026-04-05"
+version: "0.2"
+status: "Active"
 tags:
   - type: roadmap
   - domain: [astronomy, anomaly-detection, data-science]
@@ -119,20 +119,22 @@ Objects with high values across *multiple* components are "super-anomalies" — 
 
 ## 2. Phased Execution Plan
 
-### Phase 1: Foundation (Current → ETL Complete)
+### Phase 1: Foundation (Complete)
 
-**Objective:** Quality-filtered COSMOS2025 catalog queryable in PostgreSQL with all six extensions joined.
+**Objective:** Quality-filtered COSMOS2025 catalog queryable in PostgreSQL with all extensions joined.
 
 | Task | Status | Detail |
 |------|--------|--------|
 | Data acquisition | ✅ Complete | All DR1 catalog products downloaded |
 | Catalog profiling | ✅ Complete | 6 extensions characterized, sentinel patterns mapped |
 | ETL schema design | ✅ Complete | 4-file parquet schema + PostgreSQL DDL |
-| ETL execution | 🔲 Next | FITS → Parquet → psql via GLM 4.7 + crystaldb |
-| Supplementary catalog ingest | 🔲 Next | Group catalog + LSS density catalog joined by source ID |
-| Data integrity verification | 🔲 Next | Row counts, null patterns, sentinel values, cross-extension consistency |
+| ETL execution | ✅ Complete | FITS → Parquet → psql via OpenCode/KC on ML01. 784,016 rows across 4 core tables. |
+| Supplementary catalog ingest | ✅ Complete | 164,155 LSS sources, 1,678 groups, 1,745,652 memberships loaded |
+| Data integrity verification | ✅ Complete | 93 checks (47 pass, 0 fail). Sentinels, joins, units, ranges verified. |
 
-**Exit criteria:** `SELECT count(*) FROM cosmos2025.sources WHERE warn_flag = 0` returns ~694K rows; all extensions joinable; supplementary catalogs linked.
+**Exit criteria (met):** `SELECT count(*) FROM catalog.photometry_core WHERE warn_flag = 0` returns 694,341 rows; all 4 core tables join on `id` with zero orphans; supplementary catalogs linked; sentinel residuals eliminated; unit validation passed (LePhare log10, CIGALE linear).
+
+**Known issue for Phase 2:** CIGALE returned non-NULL but astrophysically impossible values (mass < 10⁻¹⁰ M_sun) for some sources. These "zombie fits" contaminate O1 disagreement counts. A CIGALE plausibility filter is the first Phase 2 task.
 
 ### Phase 2: Feature Engineering (Tension Scalars)
 
@@ -140,6 +142,7 @@ Objects with high values across *multiple* components are "super-anomalies" — 
 
 | Task | Detail |
 |------|--------|
+| CIGALE plausibility filter | Exclude zombie fits: mass floor (~10³ M_sun), chi2_red_best_fit threshold, photometric coverage requirements |
 | Quality cuts | Apply DR1 tutorial recipe: `type=0`, `warn_flag=0`, `|mag_model_f444w|<30`, `flag_star_hsc=0` |
 | T_A: Algorithmic tension | Δlog M★, Δlog SFR, Δlog sSFR, χ² ratio features, AGN-galaxy χ² comparison |
 | T_z: Redshift tension | Load PDF(z) pickle; compute PDF width, multimodality index, zpdf_med vs zchi2 offset, space-vs-all divergence |
@@ -147,7 +150,7 @@ Objects with high values across *multiple* components are "super-anomalies" — 
 | T_E: Environmental tension | Join LSS `density_excess`; compute percentile ranks; flag group membership extremes |
 | Combined tension magnitude | Per-component ranks + multi-axis "super-anomaly" flag |
 
-**Exit criteria:** Tension scalar table materialized in PostgreSQL; summary statistics and distributions documented; obvious artifacts (flag leakage, photometric edge effects) identified and excluded.
+**Exit criteria:** Tension scalar table materialized in PostgreSQL; summary statistics and distributions documented; obvious artifacts (flag leakage, photometric edge effects) identified and excluded; zombie fits excluded from all tension metrics.
 
 ### Phase 3: Anomaly Detection (Vectors + Ranking)
 
@@ -231,4 +234,4 @@ The science paper interprets the anomalies — classifying candidates, proposing
 
 ---
 
-*Last Updated: March 1, 2026 | Draft v0.1*
+*Last Updated: April 5, 2026 | v0.2*
