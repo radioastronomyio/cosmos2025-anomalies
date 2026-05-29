@@ -6,9 +6,10 @@ Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog (Shuntov 
 
 ## Current State
 
-**Phase**: Phase 1 complete. Phase 2 (feature engineering) ready to begin.
-**Status**: All 7 catalog tables loaded and verified on psql01. ETL pipeline (`src/etl/extract_catalog.py`) executed successfully: 784,016 rows across 4 core tables, 164,155 LSS sources, 1,678 galaxy groups, 1,745,652 group memberships. Verification report generated (`docs/verification-report.md`) with 47 passed, 0 failed across 93 checks covering row counts, sentinel residuals, NULL distributions, cross-table join integrity, unit validation, value ranges, and O1 readiness. Codex pre-commit review completed (`docs/research/phase1-precommit-codex-review.md`).
-**Next**: Phase 2 feature engineering. Define CIGALE plausibility filter (mass > 1e3, chi2 thresholds) to exclude zombie fits. Compute T_A tension scalars (Δlog M★, Δlog SFR, Δlog sSFR) for the dual-code clean sample. Begin O1 exploratory analysis.
+**Phase**: Phase 2 in progress. Plausibility filter and T_A tension scalars computed.
+**Status**: All 7 Phase 1 catalog tables remain loaded and verified on psql01. Phase 2 feature engineering has started: materialized view `catalog.v_analysis_sample` defines the clean analysis sample with 553,830 sources from 784,016 total. The view applies four plausibility gates: catalog security (`warn_flag = 0`, `type = 0`, `flag_star_hsc = 0`), convergence (CIGALE mass and SFR not NULL), physical plausibility (CIGALE mass > 1e6, LePhare `mass_med > 6.0`, CIGALE SFR > 0), and information content (`nbfilt >= 5`). No chi2 threshold is applied; quality assessment is absorbed into the error-normalized tension metric. Persistent table `catalog.tension_scalars` stores per-source error-normalized tension metrics (`t_mass`, `t_sfr_inst`, `t_sfr_100` primary), raw deltas, propagated uncertainties, chi2 context, and quality metadata (`has_f770w`, `is_quiescent_lp`). Diagnostic report generated at `docs/phase2-tension-diagnostic-report.md`.
+**Diagnostic findings**: `sigma_sys_mass = 0.1` dex and `sigma_sys_sfr = 0.2` dex are empirically adequate. `t_mass` has a systematic offset (mean = -1.0) reflecting known inter-code mass bias (CIGALE approximately 0.23 dex higher than LePhare). `t_sfr_100` is well calibrated (mean = 0.30, std = 0.98). `sfr_100myr` is confirmed as the primary SFR metric over `sfr_inst` because top-1000 ranking instability is 37.7%.
+**Next**: Remaining tension components: T_z redshift, T_M morphological, and T_E environmental. Then Phase 3 anomaly detection.
 **Blockers**: None.
 
 **Critical unit note**: LePhare physical parameters (mass_med, sfr_med, ssfr_med) are in **log10** space. CIGALE parameters (mass, sfr_inst, ssfr_cigale) are in **linear** space. Cross-code comparison formula: `delta = lephare_log10_value - LOG10(cigale_linear_value)`. See `docs/verification-report.md` for full unit reference table.
@@ -38,6 +39,7 @@ cosmos2025-anomalies/
 ├── src/
 │   ├── etl/                      # FITS → parquet → psql pipeline
 │   ├── features/                 # Derived feature computation
+│   │   └── compute_tension_scalars.py
 │   ├── detection/                # Anomaly detection methods
 │   └── utils/                    # Config loading, DB helpers
 ├── tests/
@@ -115,6 +117,17 @@ Sentinel conversion: `-999`/`-99`/`999999` → NULL. Column name sanitization: h
 
 Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 
+## Feature Engineering (Phase 2)
+
+The first Phase 2 data products are live on psql01. They define the plausibility-filtered analysis sample and the first Analysis Ready Dataset scalar layer for algorithmic disagreement.
+
+| Object | Type | Rows | Notes |
+|--------|------|------|-------|
+| `catalog.v_analysis_sample` | Materialized view | 553,830 | One-column `id` filter view. Four plausibility gates applied; no chi2 threshold. Refreshable after view redefinition. |
+| `catalog.tension_scalars` | Persistent table | 553,830 | 20 columns. Stores raw cross-code deltas, propagated uncertainties, `t_mass`, `t_sfr_inst`, `t_sfr_100`, chi2 context, F770W coverage, and LePhare quiescent flag. |
+
+Diagnostic report: `docs/phase2-tension-diagnostic-report.md`. Script: `src/features/compute_tension_scalars.py`.
+
 ## Tech Stack
 
 | Component | Technology | Notes |
@@ -143,6 +156,7 @@ Full ETL specification: `docs/research/etl-pipeline-one-pager.md`
 | Data path configuration | `configs/data_paths.yaml` |
 | ETL verification report | `docs/verification-report.md` |
 | Phase 1 verification (HTML with charts) | `docs/phase1-verification-report.html` |
+| Phase 2 tension diagnostic report | `docs/phase2-tension-diagnostic-report.md` |
 | Codex pre-commit review | `docs/research/phase1-precommit-codex-review.md` |
 | ETL pipeline specification | `docs/research/etl-pipeline-one-pager.md` |
 | Master catalog structural profile | `docs/reference/master-catalog-profile.md` |

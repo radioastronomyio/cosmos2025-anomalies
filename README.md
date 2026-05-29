@@ -3,9 +3,9 @@
 title: "COSMOS2025 Anomaly Detection"
 description: "Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog — exploiting tension between independent measurements to find scientifically valuable outliers"
 author: "VintageDon"
-date: "2026-04-05"
-version: "0.3"
-status: "Phase 1 Complete — ETL Verified"
+date: "2026-05-01"
+version: "0.4"
+status: "Phase 2 In Progress: Feature Engineering"
 tags:
   - type: project-root
   - domain: [astronomy, anomaly-detection, data-science]
@@ -54,7 +54,7 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 | ETL design | ✅ Complete | 4-file parquet schema defined; PostgreSQL DDL written; execution specs for agent handoff |
 | ETL execution | ✅ Complete | 784,016 sources loaded across 4 core tables + 3 supplementary tables on psql01 |
 | ETL verification | ✅ Complete | 93 checks (47 pass, 0 fail); sentinels, joins, units, ranges, O1 readiness confirmed |
-| Feature engineering | 🔲 Next | Tension vector components (T_A, T_z, T_M, T_E), quality cuts, CIGALE plausibility filter |
+| Feature engineering | 🚧 In Progress | T_A complete: `catalog.v_analysis_sample` (553,830 sources) and `catalog.tension_scalars` live on psql01; T_z, T_M, T_E planned |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
 | Characterization | 🔲 Planned | Phase 2 — SED-level analysis of top candidates |
 | ARD release | 🔲 Planned | Tension scalars + anomaly scores packaged as community data product |
@@ -196,4 +196,4 @@ We practice open science and open methodology — our version of "showing your w
 
 ---
 
-Last Updated: April 5, 2026 | Phase 1 Complete — ETL Verified
+Last Updated: May 1, 2026 | Phase 2 In Progress: Feature Engineering

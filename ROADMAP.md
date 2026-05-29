@@ -3,8 +3,8 @@
 title: "COSMOS2025 Project Roadmap"
 description: "Consolidated opportunity landscape, phased execution plan, and ARD output track"
 author: "CrainBramp"
-date: "2026-04-05"
-version: "0.2"
+date: "2026-05-01"
+version: "0.3"
 status: "Active"
 tags:
   - type: roadmap
@@ -134,23 +134,25 @@ Objects with high values across *multiple* components are "super-anomalies" — 
 
 **Exit criteria (met):** `SELECT count(*) FROM catalog.photometry_core WHERE warn_flag = 0` returns 694,341 rows; all 4 core tables join on `id` with zero orphans; supplementary catalogs linked; sentinel residuals eliminated; unit validation passed (LePhare log10, CIGALE linear).
 
-**Known issue for Phase 2:** CIGALE returned non-NULL but astrophysically impossible values (mass < 10⁻¹⁰ M_sun) for some sources. These "zombie fits" contaminate O1 disagreement counts. A CIGALE plausibility filter is the first Phase 2 task.
+**Resolved Phase 2 issue:** CIGALE returned non-NULL but astrophysically impossible values (mass < 10⁻¹⁰ M_sun) for some sources. These "zombie fits" contaminated first-look O1 disagreement counts. `catalog.v_analysis_sample` now removes them with physical plausibility gates before tension computation.
 
 ### Phase 2: Feature Engineering (Tension Scalars)
 
 **Objective:** Per-source tension metrics computed and materialized as queryable columns.
 
-| Task | Detail |
-|------|--------|
-| CIGALE plausibility filter | Exclude zombie fits: mass floor (~10³ M_sun), chi2_red_best_fit threshold, photometric coverage requirements |
-| Quality cuts | Apply DR1 tutorial recipe: `type=0`, `warn_flag=0`, `|mag_model_f444w|<30`, `flag_star_hsc=0` |
-| T_A: Algorithmic tension | Δlog M★, Δlog SFR, Δlog sSFR, χ² ratio features, AGN-galaxy χ² comparison |
-| T_z: Redshift tension | Load PDF(z) pickle; compute PDF width, multimodality index, zpdf_med vs zchi2 offset, space-vs-all divergence |
-| T_M: Morphological tension | Delta-filtered morphology-SED contradiction scores; cross-check parametric vs ML classifications |
-| T_E: Environmental tension | Join LSS `density_excess`; compute percentile ranks; flag group membership extremes |
-| Combined tension magnitude | Per-component ranks + multi-axis "super-anomaly" flag |
+| Task | Status | Detail |
+|------|--------|--------|
+| CIGALE plausibility filter | ✅ Complete | `catalog.v_analysis_sample` excludes zombie fits with CIGALE mass > 1e6, LePhare `mass_med > 6.0`, positive SFR, convergence, catalog-security, and `nbfilt >= 5` gates |
+| Quality cuts | ✅ Complete | Absorbed into plausibility gates; no chi2 hard cut |
+| T_A: Algorithmic tension | ✅ Complete | `catalog.tension_scalars` stores `t_mass`, `t_sfr_inst`, and `t_sfr_100` with error normalization |
+| T_z: Redshift tension | 🔲 Planned | Load PDF(z) pickle; compute PDF width, multimodality index, zpdf_med vs zchi2 offset, space-vs-all divergence |
+| T_M: Morphological tension | 🔲 Planned | Delta-filtered morphology-SED contradiction scores; cross-check parametric vs ML classifications |
+| T_E: Environmental tension | 🔲 Planned | Join LSS `density_excess`; compute percentile ranks; flag group membership extremes |
+| Combined tension magnitude | 🔲 Planned | Per-component ranks + multi-axis "super-anomaly" flag |
 
-**Exit criteria:** Tension scalar table materialized in PostgreSQL; summary statistics and distributions documented; obvious artifacts (flag leakage, photometric edge effects) identified and excluded; zombie fits excluded from all tension metrics.
+Filtering architecture decision: Phase 2 uses error-normalized tension with a systematic floor instead of chi2 thresholding. This keeps genuinely poor-template, physically interesting sources in the sample while preventing zombie CIGALE fits from dominating. The choice was informed by two independent literature reviews (Gemini Deep Research and GPT Pro Deep Research) and validated in `docs/phase2-tension-diagnostic-report.md`.
+
+**Exit criteria (partial):** `catalog.v_analysis_sample` and `catalog.tension_scalars` are materialized in PostgreSQL; T_A summary statistics and distributions are documented; obvious zombie fits are excluded from T_A. Remaining exit criteria: T_z, T_M, T_E, and combined tension magnitude still need to be computed.
 
 ### Phase 3: Anomaly Detection (Vectors + Ranking)
 
@@ -234,4 +236,4 @@ The science paper interprets the anomalies — classifying candidates, proposing
 
 ---
 
-*Last Updated: April 5, 2026 | v0.2*
+*Last Updated: May 1, 2026 | v0.3*
