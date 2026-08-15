@@ -3,8 +3,8 @@
 # All paths are ML01-relative unless noted. ETL scripts and analysis code
 # should load this file rather than hardcoding paths.
 #
-# Database credentials: sourced from /opt/agents/.env on ML01,
-# not stored here. See the "database" section for env var names.
+# Database credentials: injected from Doppler project `ml01`, config `prd`,
+# and not stored here. See the "database" section for env var names.
 
 # ---------------------------------------------------------------------------
 # Data root on ML01 NVMe
@@ -37,12 +37,10 @@ database:
   database_name: cosmos2025
   schema: catalog
 
-  # Load credentials from the agent environment file:
-  #   set -a && source /opt/agents/.env && set +a
+  # Inject credentials through the ML01 scoped runtime:
+  #   doppler run --project ml01 --config prd -- python your_script.py
   #
-  # Or in Python:
-  #   from dotenv import load_dotenv
-  #   load_dotenv('/opt/agents/.env')
+  # Python reads the injected values from os.environ by the names above.
 
 # ---------------------------------------------------------------------------
 # SED data (desktop only, Phase 2)

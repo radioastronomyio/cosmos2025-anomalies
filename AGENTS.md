@@ -97,7 +97,7 @@ SED files are per-source lookups for Phase 2 candidate characterization, not bul
 
 ### Credentials
 
-Database credentials are loaded from `/opt/agents/.env` on ML01. Scripts should use `dotenv` or shell sourcing, never hardcode connection strings. See `configs/data_paths.yaml` for env var names and path configuration.
+Database credentials are injected from `ml01/prd` with `doppler run` on ML01. Scripts read the resulting environment contract and never hardcode connection strings. See `configs/data_paths.yaml` for env var names and path configuration.
 
 ## ETL Pipeline (Phase 1 — Complete)
 
@@ -135,7 +135,7 @@ Diagnostic report: `docs/phase2-tension-diagnostic-report.md`. Script: `src/feat
 | Language | Python 3.x | All ETL, analysis, and pipeline code |
 | Catalog I/O | astropy, pyarrow | FITS reading, parquet conversion |
 | Database | PostgreSQL on psql01 (10.25.20.8) | `cosmos2025` database, `catalog` schema, 7 tables |
-| DB access | psycopg2 | Direct connection, credentials from `/opt/agents/.env` |
+| DB access | psycopg2 | Direct connection, credentials injected from `ml01/prd` with `doppler run` |
 | ML/Stats | scikit-learn, scipy | Isolation Forest, SOM, statistical tests |
 | GPU compute | ML01 A4000 16GB (primary), desktop RTX 3080 12GB (secondary) | |
 | Notebooks | Jupyter | Exploration and EDA |
