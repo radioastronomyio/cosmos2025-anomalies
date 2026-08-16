@@ -171,6 +171,27 @@ Outcome: In progress. Checkpoints below, one per gate.
 - speczcompilation absolute path resolved at gate 1.5 planning and confirmed here: `/opt/agents/repos/reference-files/speczcompilation` (the operator's `reference-files/speczcompilation` is relative to the repos root, not the repository).
 - Disk-hygiene: no redundant archives or stray downloads found in the holdings at manifest time; noted in the md rather than acted on.
 
+---
+
+## Gate 1.8 — v1.1 structural profile
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.7 commit: `f927204`.
+- Wrote `src/inspection/profile_v11.py` (deterministic; `--check` mode regenerates inventories to a temp dir and diffs). Profiled all nine catalog-family FITS products to HDU/row/column level; star masks and detection images at header level.
+- `docs/reference/master-catalog-profile-v1.1.md` written from the generated facts; nine column inventories at `docs/reference/columns-v1.1-*.txt` mirroring the v1 pattern.
+- **Master extension count: 7** (PHOTOMETRY HOTCOLD AND SE++ / LEPHARE / SE++APER / CIGALE / ML-MORPHO / B+D / **GALIGHT-MORPHO**), all 784,016 rows; GALIGHT-MORPHO (204 cols) is the extension v1 lacked.
+- All seven per-extension products verified column-name-identical to their master HDUs. `agngal_desi.fits` = AGNCAT + AUXDATA, 17,995,599 rows each (~23× catalog size — reference product, not per-source).
+- Manifest md corrected: star masks are 20 FITS (not 25; the 103-file count was always right, the prose miscounted).
+
+**Validation results:**
+
+- `python src/inspection/profile_v11.py --check` → all inventories regenerate byte-identical (9 unique files; 16 writes across master + standalone duplicates).
+- Profile states extension count 7 with the EXTNAME table as evidence.
+- Row counts recorded for every extension of every profiled file (master 7, each standalone product, agngal 2).
+- Frontmatter checker: 46 files clean.
+
+
 
 
 

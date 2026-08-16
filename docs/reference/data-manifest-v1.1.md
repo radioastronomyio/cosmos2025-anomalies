@@ -67,6 +67,6 @@ The manifest hashes the pointer files as they exist on disk; after operator mate
 
 ## 3. Holdings Shape (top-level)
 
-103 files: 10 master/per-extension catalog FITS + AGN-DESI cross-id FITS, PDFz pickle, LePhare SEDs HDF5, 25 JWST star-mask FITS + 1 DS9 region file, 20 detection images + README, arXiv paper source (LaTeX + 29 figures), column-description text, flag-construction PNG, flowchart PNG, LSS supplement (catalog + readme), group supplements (groups, memberships).
+103 files: 10 master/per-extension catalog FITS + AGN-DESI cross-id FITS, PDFz pickle, LePhare SEDs HDF5, 20 JWST star-mask FITS + 1 DS9 region file, 20 detection images + README, arXiv paper source (LaTeX + 29 figures), column-description text, flag-construction PNG, flowchart PNG, LSS supplement (catalog + readme), group supplements (groups, memberships).
 
 Disk-hygiene observations recorded for the operator (no action taken; raw root is immutable): none — the holdings directory contains no redundant archives or stray downloads at manifest time.
