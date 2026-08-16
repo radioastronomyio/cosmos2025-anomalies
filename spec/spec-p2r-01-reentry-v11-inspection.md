@@ -4,7 +4,7 @@ title: "Phase 2 Restart Unit 1: Lifecycle Re-entry and v1.1 Structural Inspectio
 description: "Bring the repository current with the project template and lifecycle skills, repair retired environment assumptions, and produce a pinned, evidence-backed characterization of the local COSMOS-Web v1.1 file set ending at the ETL v2 approval surface"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-15"
-version: "1.0"
+version: "1.1"
 status: "Active"
 tags:
   - type: specification
@@ -109,7 +109,7 @@ Prior findings from the May/July diagnostic work (the ~0.24 dex conditional mass
 ### Do not touch
 
 - **Any DDL or DML against psql01.** The rebuild is not approved. The live v1 tables are the comparison baseline for gate 1.10; a stray write invalidates the baseline this unit exists to use. Read-only `SELECT` is the entire database surface of this spec.
-- **Anything under `/mnt/nvme01/`.** Raw data is immutable, and gate 1.7 hashes it. A single modified byte after the manifest lands makes the manifest a lie. This includes the tempting cleanup of `detection_images.tar`, which duplicates the extracted directory: that is an operator disk decision, out of scope, and belongs as a note in the readiness review.
+- **Anything under `/mnt/nvme01/`.** Raw data is immutable, and gate 1.7 hashes it. A single modified byte after the manifest lands makes the manifest a lie. Disk-hygiene decisions about the holdings (redundant archives, stray downloads) are the operator's and are out of scope; note them in the readiness review rather than acting.
 - **Science logic in `compute_tension_scalars.py`.** Gate 1.5 touches environment loading and path strings only. The broken `chi2_ratio`, the SFR censoring handling, and the tension formulas are T_A v2 design decisions reserved to a later spec with operator sign-off. An executor that "fixes" them here changes the recorded semantics of the v1 baseline products mid-comparison. If the repair work surfaces a defect, it is a finding for the review document, not an edit.
 - **Git remote operations.** No fetch, no push, no PR. Closeout is local; the operator carries the push.
 - **Deletion of any tracked file.** Retired content moves to `recycle-bin/` with a one-line justification in the worklog.
@@ -171,12 +171,12 @@ Rewrite `spec/README.md` for the lifecycle convention: flat active queue, `spec/
 
 ### Deliverable 5: Executable environment repair (gate 1.5)
 
-`configs/data_paths.yaml`: point `data_root` and every catalog, supplementary, PDFz, SED, and processed path at the actual v1.1 holdings under `/mnt/nvme01/cosmos-web-dr1-catalog`; add the per-extension v1.1 files and the speczcompilation path (absolute, as resolved in gate 1.7 planning; if 1.5 runs first, resolve it here and 1.7 confirms); remove the desktop `D:\` SED section, recording its retirement in the worklog. `src/features/compute_tension_scalars.py`: remove the retired `/opt/agents/.env` loading in favor of reading Doppler-injected environment variables per the config contract; correct usage text and docstring paths. No other change to that script (see Do not touch).
+`configs/data_paths.yaml`: point `data_root` and every catalog, supplementary, PDFz, SED, and processed path at the actual v1.1 holdings under `/mnt/nvme01/cosmos-web-dr1-catalog`; add the per-extension v1.1 files and the speczcompilation path (absolute, as resolved in gate 1.7 planning; if 1.5 runs first, resolve it here and 1.7 confirms). The supplement files are present locally as of 2026-08-15: LSS at `hatamnia-lss/hatamnia-lss-catalog.fits`, groups at `toni/groups.txt`, memberships at `toni/memberships.txt`; wire these named paths and do not let generic discovery select any other file. Replace the desktop `D:\` SED section with an `external_holdings` section recording the CIGALE SED root on the storage server (`vps3557752:/opt/agents/repos/cosmosweb2025-data/CIGALE_SEDs_v1/`); this section is annotated as off-box and is exempt from the local exists-check. Record the desktop path retirement in the worklog. `src/features/compute_tension_scalars.py`: remove the retired `/opt/agents/.env` loading in favor of reading Doppler-injected environment variables per the config contract; correct usage text and docstring paths. No other change to that script (see Do not touch).
 
 **Validation:**
 
 - [ ] `grep -rn '/opt/agents/.env\|/mnt/nvme02\|/opt/repos/' src/ configs/` returns nothing
-- [ ] Every filesystem path value in `data_paths.yaml` exists on disk, verified by a loop over the parsed config (processed/staging dirs may be created-on-demand; they are annotated as such and exempted explicitly, not silently)
+- [ ] Every local filesystem path value in `data_paths.yaml` exists on disk, verified by a loop over the parsed config (processed/staging dirs may be created-on-demand, and the `external_holdings` section is off-box; both are annotated as such and exempted explicitly, not silently)
 - [ ] `doppler run --project ml01 --config prd -- python -c "<load config, connect, SELECT 1>"` succeeds
 - [ ] `pytest tests/` passes unchanged
 
@@ -191,7 +191,7 @@ Every directory created or materially changed by gates 1.1 through 1.5 (`docs/do
 
 ### Deliverable 7: Pinned data manifest (gate 1.7)
 
-SHA-256, byte size, and mtime for every file under `/mnt/nvme01/cosmos-web-dr1-catalog/` recursively, and for the speczcompilation checkout: resolve its absolute path, record its git HEAD SHA, and verify LFS materialization for every LFS-tracked file (a pointer is a ~130-byte text file; the data is not). The `*_unique.fits` compilation catalog specifically must open under astropy with its row count recorded. Output: `docs/reference/data-manifest-v1.1.csv` (machine layer) and `data-manifest-v1.1.md` (summary with totals and the checkout SHA).
+SHA-256, byte size, and mtime for every file under `/mnt/nvme01/cosmos-web-dr1-catalog/` recursively, and for the speczcompilation checkout: resolve its absolute path, record its git HEAD SHA, and verify LFS materialization for every LFS-tracked file (a pointer is a ~130-byte text file; the data is not). The `*_unique.fits` compilation catalog specifically must open under astropy with its row count recorded. Three provenance roots are recorded in the summary: the NVMe DR1.1 catalog holdings and the speczcompilation checkout are hashed here; the storage-server CIGALE SED holding (`vps3557752:/opt/agents/repos/cosmosweb2025-data/CIGALE_SEDs_v1/`) is off-box and is recorded as a named root with its host and path only, not hashed. Output: `docs/reference/data-manifest-v1.1.csv` (machine layer) and `data-manifest-v1.1.md` (summary with totals, the checkout SHA, and the three named roots).
 
 **Validation:**
 
@@ -232,10 +232,11 @@ The central question: did v1.1 recompute CIGALE physical parameters, or only pho
 
 ### Deliverable 11: Supplement and spec-z readiness evidence (gate 1.11)
 
-Record the provenance of the LSS overdensity and group catalogs as held on disk and as loaded in the database (file hashes from gate 1.7, any version strings in headers or readmes). From on-disk v1.1 documentation only (the arXiv paper directory, column descriptions, shipped readmes; no web access assumed), extract what v1.1 changed and state whether the supplements shipped updated versions in the local holding. If local evidence cannot settle skew, record it as an open finding with a closed question for the operator. Separately, establish spec-z join readiness: count live `catalog` sources whose `id_specz_khostovan25` matches an `Id_specz` in the compilation's `_unique.fits`, reported against the known 37,219 linked sources and the 26,323 in the current analysis sample.
+Record the provenance of the LSS overdensity and group catalogs as held on disk and as loaded in the database (file hashes from gate 1.7, any version strings in headers or readmes). Compare the on-disk supplement content against the loaded tables at the value level: row counts (the on-disk files are expected to hold 164,155 LSS objects, 1,678 groups, 1,745,652 memberships, matching the live table counts; confirm from the files, do not assume), and a sampled value check on the join key and one payload column per supplement to establish whether the local files are byte-identical in content to what was loaded or a refreshed release. From on-disk v1.1 documentation only (the arXiv paper directory, column descriptions, shipped readmes; no web access assumed), extract what v1.1 changed and state whether the supplements shipped updated versions in the local holding. If local evidence cannot settle skew against the recomputed photo-z, record it as an open finding with a closed question for the operator. Separately, establish spec-z join readiness: count live `catalog` sources whose `id_specz_khostovan25` matches an `Id_specz` in the compilation's `_unique.fits`, reported against the known 37,219 linked sources and the 26,323 in the current analysis sample.
 
 **Validation:**
 
+- [ ] Supplement row counts and the sampled value check are computed from the on-disk files and stated against the live table counts
 - [ ] Supplement skew status is stated with file-level citations, or recorded as an open finding with a closed question; it is not resolved by assumption
 - [ ] The spec-z join count is computed by an actual ID join and reported against both prior counts, with discrepancies stated rather than reconciled away
 
@@ -249,13 +250,14 @@ Record the provenance of the LSS overdensity and group catalogs as held on disk 
 4. Are the LSS and group supplements version-skewed against the v1.1 photo-z recompute?
 5. Which photometry product (primary versus secondary) feeds ETL v2, and what distinguishes them structurally?
 6. Is the speczcompilation join fully materialized and consistent with the 37,219 linked sources?
+7. Does a v1 master FITS still exist on-box (report the path if so), given upstream replaced it in place and Task 2's schema drop will leave the pg_dump and any surviving FITS as the only v1 primary sources? This is a report-and-locate finding, not a retention mandate; the operator decides disposition.
 
 Close the document with the ETL v2 design questions the answers imply (extension-to-table mapping, per-extension file strategy, supplement handling, spec-z ingest as an ETL v2 gate), each as a closed question with a recommendation.
 
 **Validation:**
 
 - [ ] Every finding carries all four parts: ID, statement, evidence, closed question
-- [ ] The six suspected findings are each addressed from the evidence produced by gates 1.7 through 1.11
+- [ ] The seven suspected findings are each addressed from the evidence produced by gates 1.7 through 1.11
 - [ ] The document passes the frontmatter checker and follows the writing style guide
 
 ### Deliverable 13: Closeout (gate 1.13)
