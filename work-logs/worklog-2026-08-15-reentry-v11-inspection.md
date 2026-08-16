@@ -151,6 +151,27 @@ Outcome: In progress. Checkpoints below, one per gate.
 - Tree walk over tracked directories (plus staged new files): zero directories without README.md.
 - Frontmatter checker over staged set: `45 file(s) clean, zero violations`.
 
+---
+
+## Gate 1.7 — Pinned data manifest
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.6 commit: `36e9734`.
+- Wrote `src/inspection/build_data_manifest.py` (config-driven, read-only against roots): walks both local roots, SHA-256/bytes/mtime per file, records checkout HEAD, LFS-pattern materialization check, astropy open attempt on `_unique.fits`.
+- Outputs: `docs/reference/data-manifest-v1.1.csv` (184 rows; gitignore exception added for this committed deliverable) and `docs/reference/data-manifest-v1.1.md` (summary, three named roots, pointer-oid table, findings).
+- Roots: NVMe holdings 103 files / 130,197,210,900 bytes; speczcompilation 81 files / 245,107,236 bytes / HEAD `1924f5d0ee6c221b820035c8d3cd7302c02532b0`; external CIGALE SED root recorded host+path only (off-box, not hashed).
+
+**Validation results:**
+
+- Row-count parity: `find | wc -l` gives 103 and 81; manifest rows 184 = 103 + 81 (stated in the md).
+- Re-hash of three randomly chosen files (seed 20260815): all three reproduce manifest SHA-256 and size exactly.
+- LFS materialization: **FAILED — all seven LFS-pattern files are pointers** (133–134 bytes). Finding F-LFS recorded with expected oids/sizes in the manifest md and carried into the readiness review; materialization is operator action (git-lfs absent on ML01; network fetch outside executor authority).
+- `_unique.fits` row count: **not obtainable** — astropy open fails (`No SIMPLE card found`); the file is a pointer. Recorded in the md; blocks gate 1.11's spec-z join leg, which becomes a finding rather than a computed number.
+- speczcompilation absolute path resolved at gate 1.5 planning and confirmed here: `/opt/agents/repos/reference-files/speczcompilation` (the operator's `reference-files/speczcompilation` is relative to the repos root, not the repository).
+- Disk-hygiene: no redundant archives or stray downloads found in the holdings at manifest time; noted in the md rather than acted on.
+
+
 
 
 

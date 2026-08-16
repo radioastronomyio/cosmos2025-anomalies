@@ -146,6 +146,8 @@ data/external/
 *.arrow
 *.tsv
 !data/.gitkeep
+# Pinned data manifest is a committed deliverable (spec P2R-01 gate 1.7)
+!docs/reference/data-manifest-v1.1.csv
 
 # FITS and astronomical data
 *.fits
