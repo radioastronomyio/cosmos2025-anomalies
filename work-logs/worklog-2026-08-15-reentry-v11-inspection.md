@@ -209,6 +209,24 @@ Outcome: In progress. Checkpoints below, one per gate.
 - GALIGHT-MORPHO (204 columns) and AGNCAT/AUXDATA have no v1 counterpart.
 - ID space by set operations: 784,016 = 784,016; retained 784,016; dropped 0; new 0. Code path stated in the delta md.
 
+---
+
+## Gate 1.10 — Parameter migration evidence
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.9 commit: `d82de71`.
+- Wrote `src/inspection/param_migration_evidence.py`: seeded sample of 60,000 IDs common to both sides (of 784,016), join on source ID asserted equal to sample size, per-column exact-match fractions and delta distributions per code per tile group (B5/B9/B10 = 8,479 rows; others = 51,521). One mid-gate fix: psycopg2 Decimal → float64 coercion in the DB fetch.
+- Evidence committed at `docs/reference/parameter-migration-evidence-v1.1.md`; machine record `staging/param-migration-evidence.json`.
+
+**Validation results:**
+
+- Joined rows = 60,000 = sample size for every comparison; join verified in code (assert) and recorded in the evidence doc.
+- **CIGALE: match fraction 0.000000 on all four columns, both tile groups** — fully recomputed (mass median −6%, sfr_inst +30%, chi2_red +95%; 63–95% of sources shift >10%).
+- **LePhare: match fractions 0.0096–0.0291 (INTERMEDIATE — flagged per the stated rule)** — rerun with near-zero medians and heavy tails (8% of zfinal and ~19% of sfr_med move >0.1); the 1–3% bitwise-identical fraction recorded as its own finding, never averaged.
+- Tile concentration: hot vs other distributions agree within ~0.5 pp on every tail fraction — changes are field-wide, NOT concentrated in B5/B9/B10.
+
+
 
 
 
