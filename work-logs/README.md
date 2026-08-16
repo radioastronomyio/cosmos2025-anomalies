@@ -1,20 +1,23 @@
 <!--
 ---
 title: "Work Logs"
-description: "Session-by-session execution logs documenting pipeline development and infrastructure work"
-author: "VintageDon"
-date: "2026-04-05"
-version: "1.0"
+description: "Session-by-session execution logs for spec runs and standalone work"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "2.0"
 status: "Active"
 tags:
   - type: directory-readme
   - domain: work-logs
+related_documents:
+  - "[Worklog Template](../docs/documentation-standards/worklog-readme-template.md)"
+  - "[Agent Instructions](../AGENTS.md)"
 ---
 -->
 
 # Work Logs
 
-Chronological execution logs documenting what was done, what failed, and what was decided during each work session.
+Chronological execution logs documenting what was done, what failed, and what was decided during each work session. Spec-gated runs append a checkpoint per gate and seal the log at closeout (see [AGENTS.md](../AGENTS.md), "Executing a Work Spec"); structure follows the [worklog template](../docs/documentation-standards/worklog-readme-template.md).
 
 ---
 
@@ -22,14 +25,15 @@ Chronological execution logs documenting what was done, what failed, and what wa
 
 | File | Description |
 |------|-------------|
-| `worklog-2026-03-29-phase1-etl-design.md` | Phase 1 ETL design session — schema DDL, extraction logic, sentinel handling strategy |
-| `worklog-2026-04-05-phase1-verification.md` | Phase 1 verification — running verify_catalog.py, reviewing results, HTML report generation |
+| `worklog-2026-08-15-reentry-v11-inspection.md` | P2R-01 per-gate checkpoints: template conformance, environment repair, v1.1 manifest/profile/delta, readiness review |
 
 ---
 
 ## Naming Convention
 
-`worklog-YYYY-MM-DD-topic.md` — date-prefixed, kebab-case topic description.
+`worklog-YYYY-MM-DD-<slug>.md` — date-prefixed, slug mirroring the spec that authorized the work (`<slug>` shared with the spec filename).
+
+The v1-era Phase 1 worklogs were removed with the old specs in commit `2b71b1b` and are retrievable from history.
 
 ---
 
@@ -38,4 +42,4 @@ Chronological execution logs documenting what was done, what failed, and what wa
 | Directory | Relationship |
 |-----------|--------------|
 | [Repository Root](../README.md) | Parent directory |
-| [spec/](../spec/) | Specs that correspond to logged work sessions |
+| [spec/](../spec/README.md) | Specs that correspond to logged work sessions |

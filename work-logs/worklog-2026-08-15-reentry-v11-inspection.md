@@ -100,4 +100,21 @@ Outcome: In progress. Checkpoints below, one per gate.
 - `docs/phase2-tension-diagnostic-report.md` and `docs/verification-report.md` are generator outputs (`src/features/compute_tension_scalars.py`, `src/etl/verify_catalog.py`); a future regeneration overwrites the frontmatter added here. Regenerators would need a frontmatter-emitting change under a future spec; this run only repairs environment/path loading in those scripts (gate 1.5, tension script only).
 - The project-brief template's frontmatter schema uses `created` instead of `date`; the checker accepts either, noted in the script.
 
+---
+
+## Gate 1.4 — Spec and worklog directory reconciliation
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.3 commit: `aa6bac2`; spec v1.1 amendment commit: `fa39814` (operator amendment carried from the dirty tree, split out of the gate commit for clean history).
+- Rewrote `spec/README.md` for the lifecycle convention: flat active queue, `spec/YYYY-MM/` archive, `spec-<series>-NN-<slug>.md` naming, execution contract pointer to AGENTS.md.
+- Removed-content note cites `2b71b1b` for the removal of spec01–spec05 and the two Phase 1 worklogs ("Also removes centralized specs and worklogs post-migration" — the phrase is that commit's body line, verified by `git show`; subject is "feat: add phase 2 tension scalar workflow"). No removed file is described as present.
+- Aligned `work-logs/README.md` with the worklog convention and the worklog template.
+
+**Validation results:**
+
+- Generated listing diff: `diff <(ls spec/ minus README) <(Files-table extraction)` → empty (LISTING DIFF EMPTY).
+- `2b71b1b` confirmed as the diff-filter=D commit for all five old specs and both old worklogs.
+
+
 
