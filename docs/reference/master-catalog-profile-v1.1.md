@@ -43,7 +43,7 @@ The v1 documented profile records six extensions (PHOTOMETRY, LEPHARE, SE++APER,
 
 ## 2. Per-Extension Products
 
-Each standalone product mirrors its master-catalog HDU **exactly** — same EXTNAME, row count, and column list, verified name-by-name identical to the master HDU:
+Each standalone product mirrors its master-catalog HDU **exactly**, same EXTNAME, row count, and column list, verified name-by-name identical to the master HDU:
 
 | File | EXTNAME | Rows | Columns | Master HDU |
 |------|---------|------:|--------:|:----------:|

@@ -27,14 +27,14 @@ Operating state of `cosmos2025-anomalies`: phase, live database inventory, data 
 
 ## 1. Phase and Posture
 
-The project restarted on 2026-08-15. The v1 catalog is retired as the source of truth; the rebuild on v1.1 (ETL v2) is designed but not approved — it dispatches only after the operator approves the readiness review produced by spec P2R-01 (`docs/research/v11-readiness-review.md`).
+The project restarted on 2026-08-15. The v1 catalog is retired as the source of truth; the rebuild on v1.1 (ETL v2) is designed but not approved, and it dispatches only after the operator approves the readiness review produced by spec P2R-01 (`docs/research/v11-readiness-review.md`).
 
 Until ETL v2 lands, the live v1 database objects below are the comparison baseline and are read-only by policy. No DDL or DML runs against psql01 outside an approved spec.
 
 Open items the restart addresses, carried from the May/July diagnostic work as frozen inputs to the T_A v2 design unit (not facts to re-verify, not defects to fix in passing):
 
 - The ~0.24 dex conditional mass offset between LePhare and CIGALE (unconditional `t_mass` mean -1.001 with `sigma_sys_mass = 0.1` dex, per the May report).
-- The censoring-dominated SFR tension ranking: the analysis sample gates on `sfr_inst > 0 AND sfr_100myr > 0`, so `t_sfr_100` is **not** well calibrated as a ranking statistic despite its bulk pull statistics (mean 0.302, std 0.980) looking nominal — the top of the ranking is dominated by sources censored near the positivity floor. The phrase "well calibrated" does not apply to `t_sfr_100` without this qualification.
+- The censoring-dominated SFR tension ranking: the analysis sample gates on `sfr_inst > 0 AND sfr_100myr > 0`, so `t_sfr_100` is **not** well calibrated as a ranking statistic despite its bulk pull statistics (mean 0.302, std 0.980) looking nominal: the top of the ranking is dominated by sources censored near the positivity floor. The phrase "well calibrated" does not apply to `t_sfr_100` without this qualification.
 - The dimensionally incoherent `chi2_ratio` column in `catalog.tension_scalars` (a ratio of LePhare `chi2_best` to CIGALE `chi2_red_best_fit`, which are not commensurable quantities). It stays as recorded; its repair is a T_A v2 decision.
 
 ---

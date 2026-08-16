@@ -36,7 +36,7 @@ Evidence sources: documented v1 inventories (`columns-*.txt`), live `information
 | CIGALE | 54 | 56 | 54 | 0 | 0 | **2** | ✓ |
 | ML-MORPHO | 150 | 150 | 150 | 0 | 0 | 0 | ✓ |
 | B+D | 461 | 461 | 461 | 0 | 0 | 0 | ✓ |
-| GALIGHT-MORPHO | — | 204 | — | — | — | 204 | (no v1 counterpart) |
+| GALIGHT-MORPHO |, | 204 |, |, |, | 204 | (no v1 counterpart) |
 
 **The only column-level change across the six shared extensions: CIGALE gains `ebv_stars` and `ebv_stars_err`.** Verified against the live load: neither column exists in `catalog.cigale` (information_schema), so these are genuine v1.1 additions, not a v1 documentation gap. No renames claimed (none needed: every non-added column matches by exact name). No dtype changes: every common column's v1.1 FITS format maps to its loaded PostgreSQL type (D→double precision, E→real, J/K→integer/bigint, A→text).
 
@@ -46,12 +46,12 @@ Evidence sources: documented v1 inventories (`columns-*.txt`), live `information
 |-------------------|---------------:|----------:|------:|
 | PHOTOMETRY → `photometry_core` | 784,016 | 784,016 | 0 |
 | LEPHARE → `lephare` | 784,016 | 784,016 | 0 |
-| SE++APER (not loaded in v1) | — | 784,016 | — |
+| SE++APER (not loaded in v1) |, | 784,016 |, |
 | CIGALE → `cigale` | 784,016 | 784,016 | 0 |
 | ML-MORPHO → `morphology` | 784,016 | 784,016 | 0 |
-| B+D (not loaded in v1) | — | 784,016 | — |
-| GALIGHT-MORPHO (new) | — | 784,016 | — |
-| AGNCAT / AUXDATA (new, reference file) | — | 17,995,599 | — |
+| B+D (not loaded in v1) |, | 784,016 |, |
+| GALIGHT-MORPHO (new) |, | 784,016 |, |
+| AGNCAT / AUXDATA (new, reference file) |, | 17,995,599 |, |
 
 ## 3. ID-Space Delta (set operations, not assumption)
 

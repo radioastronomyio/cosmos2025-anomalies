@@ -56,7 +56,7 @@ SUMMARY_JSON = REPO_ROOT / "staging" / "manifest-summary-v1.1.json"
 
 # HUMAN NOTE: LFS patterns mirror the checkout's .gitattributes (fitted
 # dynamically at runtime; this constant is only the pointer-detection size
-# threshold — anything smaller than this cannot be the data).
+# threshold, anything smaller than this cannot be the data).
 POINTER_MAX_BYTES = 1024
 
 # =============================================================================

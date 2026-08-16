@@ -74,7 +74,7 @@ Agents working on this repository should load context in this order:
 The repo-mode contract for spec runs. A spec in `spec/` is the authorization; this section is the procedure.
 
 - **Branch:** `task/<n>-<slug>` off `main`, created at startup after `spec-startup` preflight. The executor notes the starting branch and base commit for the worklog.
-- **Commits:** one commit per gate, each referencing its gate number. Closeout commits stop at local commits — **no push, no PR, no remote operations by the executor**; the operator reviews, pushes, and owns merges.
+- **Commits:** one commit per gate, each referencing its gate number. Closeout commits stop at local commits: **no push, no PR, no remote operations by the executor**; the operator reviews, pushes, and owns merges.
 - **Worklog:** `work-logs/worklog-YYYY-MM-DD-<slug>.md`, appended per gate as checkpoints, sealed at close with per-gate commit SHAs and runtime facts.
 - **Specs:** live in `spec/`, named `spec-<series>-NN-<slug>.md`. Active queue is flat; completed specs archive to `spec/YYYY-MM/` as part of the closeout commit.
 - **Closeout:** append one row to the central registry at `/opt/agents/repos/work-logs/work-registry.csv` following `spec-closeout` (ML01 estate: attestation trailers on the closeout commit, registry row with the same model string).

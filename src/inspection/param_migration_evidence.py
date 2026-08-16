@@ -12,7 +12,7 @@ Description
 Spec P2R-01 gate 1.10 utility. Draws a seeded random sample of source IDs
 present in both the v1.1 extension files and the live v1 tables, joins on
 source ID, and reports per-column exact-match fractions and delta
-distributions — per code (CIGALE, LePhare) and per tile group (B5/B9/B10
+distributions, per code (CIGALE, LePhare) and per tile group (B5/B9/B10
 vs all others, tile taken from the master PHOTOMETRY extension). CIGALE
 columns: mass, sfr_inst, sfr_100myr, chi2_red_best_fit (linear space;
 deltas as relative differences). LePhare columns: zfinal, mass_med,
