@@ -136,6 +136,22 @@ Outcome: In progress. Checkpoints below, one per gate.
 
 **Finding (carried to gate 1.7/1.12):** the speczcompilation checkout's seven LFS-tracked files (`*.fits`, `*.pkl` per `.gitattributes`) are 133–134 byte pointer files; `git-lfs` is not installed on ML01; no materialized copies exist on-box. The `*_unique.fits` (expected ~70 MB per its pointer oid) cannot open under astropy. This blocks gate 1.7's LFS-materialization validation and gate 1.11's spec-z join; recorded as findings with closed questions rather than worked around (materializing requires operator action: git-lfs install + network fetch, both outside executor authority).
 
+---
+
+## Gate 1.6 — Interior README pass
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.5 commit: `8117c7b`.
+- Interior READMEs added for every tracked directory that lacked one: `assets/`, `docs/reference/`, `docs/research/`, `notebooks/`, `src/detection/`, `src/inspection/` (with check_frontmatter.py listed), `src/utils/` — all per the interior-readme template with hydrated frontmatter.
+- `docs/README.md` contents tree and link tables refreshed: project-state.md, documentation-standards/, generator reports, updated reference/ and research/ descriptions with README links.
+
+**Validation results:**
+
+- Tree walk over tracked directories (plus staged new files): zero directories without README.md.
+- Frontmatter checker over staged set: `45 file(s) clean, zero violations`.
+
+
 
 
 
