@@ -116,5 +116,26 @@ Outcome: In progress. Checkpoints below, one per gate.
 - Generated listing diff: `diff <(ls spec/ minus README) <(Files-table extraction)` → empty (LISTING DIFF EMPTY).
 - `2b71b1b` confirmed as the diff-filter=D commit for all five old specs and both old worklogs.
 
+---
+
+## Gate 1.5 — Executable environment repair
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.4 commit: `0a71bc5`.
+- `configs/data_paths.yaml` rewritten: `data_root` at `/mnt/nvme01/cosmos-web-dr1-catalog`; all v1.1 per-extension catalog files keyed by name (master, photom primary/secondary, lephare, cigale, bulgedisk, galight_morph, ml_morph, agngal_desi, PDFz pickle, LePhare SEDs HDF5, detection_images dir); named supplement paths (`hatamnia-lss/hatamnia-lss-catalog.fits`, `toni/groups.txt`, `toni/memberships.txt`) — no generic discovery; specz compilation paths added (resolved to `/opt/agents/repos/reference-files/speczcompilation`, confirmed in gate 1.7); desktop `D:\` SED section replaced by `external_holdings` (vps3557752 root, annotated off-box); `repo_root` corrected; processed dirs moved to repo-local `staging/` (created-on-demand; nothing may write under `data_root`). Desktop SED path retirement recorded here per spec.
+- `src/features/compute_tension_scalars.py`: `load_dotenv`/`ENV_FILE` removed in favor of Doppler-injected env vars; usage/docstring paths corrected. No other change.
+- Stale-pattern sweep beyond the two named files (objective: no retired references anywhere in executable code/config): same env-loading repair applied to `src/etl/verify_catalog.py` and `src/etl/extract_catalog.py`; usage blocks and `REPO_ROOT` corrected; `src/features/README.md` and `configs/README.md` credential wording corrected.
+
+**Validation results:**
+
+- `grep -rnF '/opt/agents/.env'` + `grep -rn '/mnt/nvme02'` + `grep -rn '/opt/repos/'` over `src/ configs/` (excluding `__pycache__` build artifacts): zero hits. Note: the spec's written pattern `/opt/agents/.env` with an unescaped dot also regex-matches `/opt/agents/venv`; the check is applied as fixed-string per evident intent. Recorded as a spec nit, not a defect.
+- Config existence loop: every local path present; processed dirs exempted as created-on-demand, `external_holdings` exempted as off-box — both annotated in the config itself.
+- `doppler run --project ml01 --config prd -- python -c "<load config, connect, SELECT 1>"` → `SELECT 1 -> 1`.
+- `pytest tests/` → 3 passed.
+
+**Finding (carried to gate 1.7/1.12):** the speczcompilation checkout's seven LFS-tracked files (`*.fits`, `*.pkl` per `.gitattributes`) are 133–134 byte pointer files; `git-lfs` is not installed on ML01; no materialized copies exist on-box. The `*_unique.fits` (expected ~70 MB per its pointer oid) cannot open under astropy. This blocks gate 1.7's LFS-materialization validation and gate 1.11's spec-z join; recorded as findings with closed questions rather than worked around (materializing requires operator action: git-lfs install + network fetch, both outside executor authority).
+
+
 
 

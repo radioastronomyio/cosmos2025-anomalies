@@ -39,11 +39,11 @@ Derived feature computation for the COSMOS2025 anomaly detection pipeline. This 
 
 ```bash
 source /opt/agents/venv/bin/activate
-cd /opt/repos/cosmos2025-anomalies
-python src/features/compute_tension_scalars.py
+doppler run --project ml01 --config prd -- \
+    python src/features/compute_tension_scalars.py
 ```
 
-The script is idempotent: it drops and recreates the materialized view and table, then writes the diagnostic report.
+Run from `/opt/agents/repos/cosmos2025-anomalies`. The script is idempotent: it drops and recreates the materialized view and table, then writes the diagnostic report.
 
 ---
 

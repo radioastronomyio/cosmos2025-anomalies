@@ -15,15 +15,16 @@ Purpose:
 
 Usage:
     source /opt/agents/venv/bin/activate
-    cd /opt/repos/cosmos2025-anomalies
-    python src/etl/verify_catalog.py
+    doppler run --project ml01 --config prd -- \
+        python src/etl/verify_catalog.py
+    (run from /opt/agents/repos/cosmos2025-anomalies)
 
 Output:
     docs/verification-report.md         — Markdown summary of all checks
     docs/phase1-verification-report.html — Full HTML report with embedded charts
 
 Dependencies:
-    matplotlib (Agg backend), numpy, psycopg2, pyyaml, python-dotenv
+    matplotlib (Agg backend), numpy, psycopg2, pyyaml
 """
 
 import base64
@@ -41,7 +42,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import psycopg2
 import yaml
-from dotenv import load_dotenv
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,8 +50,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-REPO_ROOT = "/opt/repos/cosmos2025-anomalies"
-ENV_FILE = "/opt/agents/.env"
+REPO_ROOT = "/opt/agents/repos/cosmos2025-anomalies"
 REPORT_PATH = os.path.join(REPO_ROOT, "docs", "verification-report.md")
 HTML_REPORT_PATH = os.path.join(REPO_ROOT, "docs", "phase1-verification-report.html")
 
@@ -75,7 +74,7 @@ def load_config():
 
 
 def get_db_connection(config):
-    """Connect to PostgreSQL on psql01 using credentials from /opt/agents/.env.
+    """Connect to PostgreSQL on psql01 using Doppler-injected credentials.
 
     Args:
         config: Parsed data_paths.yaml dict.
@@ -83,7 +82,6 @@ def get_db_connection(config):
     Returns:
         psycopg2.connection: Open connection to the cosmos2025 database.
     """
-    load_dotenv(ENV_FILE)
     db = config["database"]
     return psycopg2.connect(
         host=os.environ[db["host_env"]],
