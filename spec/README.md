@@ -35,7 +35,7 @@ Active queue contents, generated from the directory listing:
 
 | File | Description |
 |------|-------------|
-| `spec-p2r-01-reentry-v11-inspection.md` | P2R-01: lifecycle re-entry and v1.1 structural inspection, ending at the ETL v2 approval surface |
+| — | Queue empty; spec P2R-01 completed 2026-08-16 and archived to [spec/2026-08/](2026-08/) pending operator review |
 
 ---
 

@@ -261,3 +261,40 @@ Outcome: In progress. Checkpoints below, one per gate.
 
 
 
+
+---
+
+## Gate 1.13 — Closeout (seal)
+
+**Runtime facts:** Executor Kilo CLI, model `kilo/zai-coding/glm-5.3`, host ml01, session start 2026-08-15T22:44 EDT, close 2026-08-16T01:0x EDT (~2.3 h wall). Agent short name recorded as `glm` (model family) with the full model string carried in the registry row and commit trailer.
+
+**Starting state:** branch `main` at base `ad67687`, carrying the operator-authorized spec v1.1 amendment (dirty file carried in per dispatch instruction; committed as `fa39814`). Working branch `task/1-reentry-v11-inspection`, no upstream set, no remote operation performed at any point.
+
+**Per-gate commit SHAs:**
+
+| Gate | Commit | Subject |
+|------|--------|---------|
+| 1.1 | `2ca9c47` | template documentation structure |
+| 1.2 | `d12c917` | AGENTS.md restructure and work-spec contract |
+| 1.3 | `aa6bac2` | frontmatter/tagging pass and checker |
+| spec amendment | `fa39814` | spec P2R-01 v1.0 to v1.1 |
+| 1.4 | `0a71bc5` | spec and work-logs README rewrite |
+| 1.5 | `8117c7b` | executable environment repair |
+| 1.6 | `36e9734` | interior README pass |
+| 1.7 | `f927204` | pinned SHA-256 manifest |
+| 1.8 | `bc0cf9f` | v1.1 structural profile |
+| 1.9 | `d82de71` | v1-to-v1.1 delta |
+| 1.10 | `57051ab` | parameter migration evidence |
+| 1.11 | `2696df2` | supplement and spec-z evidence |
+| 1.12 | `abb653d` | readiness review |
+| 1.13 | this commit | closeout: docs pass, spec archive, seal |
+
+**Consistency pass (run at close):** frontmatter checker 50 files zero violations; `pytest tests/` 3 passed; spec README table matches emptied active queue; no remote tracking branch. Validation exceptions, stated not papered over: gate 1.7 LFS materialization and `_unique.fits` row count are unmet on-box (finding F6, operator action required); the configs/ leg of the gate 1.2 grep was satisfied at gate 1.5 by design (gate order).
+
+**Spec defect note (for the operator's review):** the gate 1.5 validation pattern `/opt/agents/.env` written with an unescaped dot also regex-matches `/opt/agents/venv`; the check was applied as a fixed string per evident intent. No in-repo spec-defect register exists yet; creating one is the operator's call.
+
+**Registry:** one row appended to `/opt/agents/repos/work-logs/work-registry.csv`, category `astronomy`, model string identical to the commit trailer.
+
+**Next steps (operator):** (1) review `docs/research/v11-readiness-review.md` and answer the nine closed questions and four design questions; (2) materialize the speczcompilation LFS files (git-lfs install + pull) or supply the compilation by another channel, then run the F6 join verification; (3) approve and dispatch Task 2 (ETL v2), whose spec is written against the approved answers; (4) push and merge this branch.
+
+**Recycle actions:** none; no tracked file was deleted or recycled this run.

@@ -43,8 +43,10 @@ reference/
 |------|-------------|--------|
 | [unit-conventions.md](unit-conventions.md) | Verbatim cross-code delta formula and error-propagation rules | ✅ Active |
 | [master-catalog-profile.md](master-catalog-profile.md) | Documented v1 profile; historical baseline for the v1→v1.1 delta | 🗄️ Archived |
-| [master-catalog-profile-v1.1.md](master-catalog-profile-v1.1.md) | v1.1 extension/column structural profile | 🔄 In Progress |
-| [data-manifest-v1.1.md](data-manifest-v1.1.md) | SHA-256 manifest summary for the v1.1 holdings | 🔄 In Progress |
+| [master-catalog-profile-v1.1.md](master-catalog-profile-v1.1.md) | v1.1 extension/column structural profile | ✅ Active |
+| [data-manifest-v1.1.md](data-manifest-v1.1.md) | SHA-256 manifest summary for the v1.1 holdings | ✅ Active |
+| [v1-to-v11-delta.md](v1-to-v11-delta.md) | Column, row, and ID-space classification, v1 to v1.1 | ✅ Active |
+| [parameter-migration-evidence-v1.1.md](parameter-migration-evidence-v1.1.md) | CIGALE/LePhare value comparison against the live v1 tables | ✅ Active |
 | [quality-flags.txt](quality-flags.txt) | Upstream quality flag definitions | ✅ Active |
 | [columns-photometry.txt](columns-photometry.txt) | v1 photometry column inventory | 🗄️ Archived |
 | [columns-lephare-photometrric-redshifts.txt](columns-lephare-photometrric-redshifts.txt) | v1 LePhare column inventory | 🗄️ Archived |

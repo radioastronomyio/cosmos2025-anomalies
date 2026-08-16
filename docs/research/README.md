@@ -38,7 +38,7 @@ research/
 | File | Description | Status |
 |------|-------------|--------|
 | [science-opportunities.md](science-opportunities.md) | O1 algorithmic disagreement (lead) and O5 contextual anomalies; deprioritization record | ✅ Active |
-| [v11-readiness-review.md](v11-readiness-review.md) | Findings and closed questions the operator answers to approve ETL v2 | 🔄 In Progress |
+| [v11-readiness-review.md](v11-readiness-review.md) | Findings and closed questions the operator answers to approve ETL v2 | ✅ Active |
 | [etl-pipeline-one-pager.md](etl-pipeline-one-pager.md) | v1 ETL schema design and execution record | 🗄️ Archived |
 | [phase1-precommit-codex-review.md](phase1-precommit-codex-review.md) | Codex review of the Phase 1 pipeline | 🗄️ Archived |
 
