@@ -20,6 +20,8 @@ config.local.*
 *-pending.md
 staging/
 internal-files/
+recycle-bin/*
+!recycle-bin/README.md
 
 # ----------------------------------------------------------------------------
 # IDE & EDITOR
