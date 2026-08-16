@@ -226,6 +226,21 @@ Outcome: In progress. Checkpoints below, one per gate.
 - **LePhare: match fractions 0.0096–0.0291 (INTERMEDIATE — flagged per the stated rule)** — rerun with near-zero medians and heavy tails (8% of zfinal and ~19% of sfr_med move >0.1); the 1–3% bitwise-identical fraction recorded as its own finding, never averaged.
 - Tile concentration: hot vs other distributions agree within ~0.5 pp on every tail fraction — changes are field-wide, NOT concentrated in B5/B9/B10.
 
+---
+
+## Gate 1.11 — Supplement and spec-z readiness evidence
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.10 commit: `57051ab`.
+- Wrote `src/inspection/supplement_evidence.py`: row counts from the files (never assumed) plus seeded sampled value checks vs the live tables. Machine record `staging/supplement-evidence.json`; findings carried into the readiness review (gate 1.12).
+- **Row counts from files, matching live tables exactly:** LSS OVERDENSITY 164,155 = 164,155; groups.txt 1,678 (1,679 lines minus header) = 1,678; memberships.txt 1,745,652 (1,745,653 lines minus header) = 1,745,652.
+- **Value checks:** LSS sampled 2,000 (id, density_excess) → 2,000/2,000 bitwise exact; groups all 1,678 (ID, LAMBDA) → 1,678/1,678 exact; memberships sampled 5,000 (galid, group_id, assoc_prob) → 5,000/5,000 exact. **The on-disk supplements are content-identical to the loaded v1 tables — same release, not refreshed.**
+- Provenance: LSS readme = Hatamnia et al. 2025 (KDE on ~160k galaxies with "robust photometric redshifts", i.e. v1 photo-z); detection images README cites Max Franco's v0.8 internal reductions, Jul 3 2024; groups/memberships carry no version strings on disk.
+- On-disk v1.1 documentation (arXiv-2506.03243v1 tex, v1.1 column descriptions, shipped readmes) mentions no supplement refresh for v1.1 → **skew against the v1.1 photo-z recompute cannot be settled from local evidence; recorded as an open finding with a closed question in the review** (the supplements join on source ID whether or not skewed — the spec's stated danger).
+- **Spec-z join readiness:** live side confirmed by query: 37,219 sources with non-sentinel `id_specz_khostovan25`, 26,323 of them in `catalog.v_analysis_sample`. The compilation-side join (`Id_specz` in `_unique.fits`) is **blocked on-box by the LFS pointer** (finding F-LFS) — the count cannot be computed, the discrepancy against 37,219 cannot be reconciled, and this is stated rather than papered over.
+
+
 
 
 
