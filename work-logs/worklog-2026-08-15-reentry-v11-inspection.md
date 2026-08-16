@@ -58,4 +58,25 @@ Outcome: In progress. Checkpoints below, one per gate.
 - `grep -rn 'HYDRATE'` over docs/, CLAUDE.md, recycle-bin/ → zero hits.
 - Tag-slot placeholders eliminated; `git check-ignore` confirms README tracked / contents ignored.
 
-**Per-gate commit SHA:** pending until commit lands.
+**Per-gate commit SHA:** `2ca9c47`
+
+---
+
+## Gate 1.2 — AGENTS.md restructure and work-spec contract
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Rebuilt `AGENTS.md` to template shape: Repository Identity, Context Loading, Architectural Constraints, Documentation Conventions, Commit Messages, Session Pattern, plus the new **Executing a Work Spec** section carrying the repo-mode contract verbatim (branch pattern `task/<n>-<slug>`, per-gate commits, worklog convention, no-push closeout, spec naming/archive, central registry row). Added YAML frontmatter (AGENTS.md is not in the 1.3 exemption set).
+- Created `docs/project-state.md`: phase/posture (v1 retired, ETL v2 gated on readiness review approval), full table inventory (seven `catalog.*` tables + both Phase 2 products), v1.1 data holdings with corrected paths, repository layout, compute environment, key reference files.
+- Created `docs/reference/unit-conventions.md` with the verbatim formula `delta = lephare_log10_value - LOG10(cigale_linear_value)`, error-propagation and guard rules, systematic floors.
+- Created `docs/research/science-opportunities.md` (O1 lead, O5 contextual, deprioritization record; frozen input to T_A v2).
+- Diagnostics reconciliation in project state: `t_sfr_100` stated as NOT well calibrated as a ranking statistic (censoring-dominated), ~0.24 dex conditional mass offset and incoherent `chi2_ratio` recorded as frozen open items.
+
+**Validation results:**
+
+- `grep -r '/mnt/nvme02\|/opt/repos/' AGENTS.md docs/project-state.md` → no hits (one historical "formerly nvme02" note caught and removed; retirement lives in this worklog).
+- The configs/ leg of that grep still hits until gate 1.5 repairs `data_paths.yaml`; noted as deferred, not silent.
+- Formula appears verbatim; all nine object names present; branch pattern and no-push rule literal in AGENTS.md; "well calibrated" survives only inside the negated, qualified censoring statement.
+
+**Retirement record:** v1 catalog file set at the old nvme02 root and the desktop `D:\` SED archives are retired as data sources; nothing in the repo references them after gate 1.5.
+
