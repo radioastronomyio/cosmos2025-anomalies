@@ -191,6 +191,25 @@ Outcome: In progress. Checkpoints below, one per gate.
 - Row counts recorded for every extension of every profiled file (master 7, each standalone product, agngal 2).
 - Frontmatter checker: 46 files clean.
 
+---
+
+## Gate 1.9 — v1 to v1.1 delta
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.8 commit: `bc0cf9f`.
+- Wrote `src/inspection/diff_v1_v11.py`: per-extension classification against both v1 evidence sources (documented `columns-*.txt` and live `information_schema`), similarity-scored rename detection (none triggered), FITS-format↔PG-type dtype check, and numpy set-operation ID-space comparison. Run under `doppler run` (read-only).
+- One parser fix mid-gate: v1 inventory files have variable header depth (photometry 2 lines; others 3 with a `Click to expand` line); the parser now anchors on the literal `Column Name` header. First run's `removed: Column Name` artifacts eliminated.
+- Evidence: `docs/reference/v1-to-v11-delta.md`; machine record `staging/v1-v11-delta.json`.
+
+**Validation results:**
+
+- Per-extension invariants hold: unchanged + renamed + removed = v1 documented count for all six shared extensions (sum check ✓ in the machine record).
+- Sole column-level change across shared extensions: **CIGALE +2 (`ebv_stars`, `ebv_stars_err`)**, confirmed absent from live `catalog.cigale` (genuine addition, not a documentation gap). Zero renames (none claimed, none needed). Zero dtype changes.
+- GALIGHT-MORPHO (204 columns) and AGNCAT/AUXDATA have no v1 counterpart.
+- ID space by set operations: 784,016 = 784,016; retained 784,016; dropped 0; new 0. Code path stated in the delta md.
+
+
 
 
 
