@@ -1,3 +1,17 @@
+<!--
+---
+title: "Code Commenting: Dual Audience"
+description: "Methodology for writing comments that serve human reviewers and AI agents"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Active"
+tags:
+  - type: guide
+  - domain: documentation
+---
+-->
+
 # Dual-Audience Code Commenting Standard
 
 ## Philosophy

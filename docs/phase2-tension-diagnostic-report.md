@@ -1,3 +1,17 @@
+<!--
+---
+title: "Phase 2 Tension Scalar Diagnostic Report"
+description: "2026-05-02 tension pull distributions and diagnostics for the v1 analysis sample"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Active"
+tags:
+  - type: report
+  - domain: sed-fitting
+---
+-->
+
 # Phase 2 Tension Scalar Diagnostic Report
 
 Generated: 2026-05-02T01:01:36.552805+00:00

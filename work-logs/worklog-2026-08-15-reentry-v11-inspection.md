@@ -80,3 +80,24 @@ Outcome: In progress. Checkpoints below, one per gate.
 
 **Retirement record:** v1 catalog file set at the old nvme02 root and the desktop `D:\` SED archives are retired as data sources; nothing in the repo references them after gate 1.5.
 
+---
+
+## Gate 1.3 — Frontmatter and tagging pass
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Gate 1.2 commit: `d12c917`.
+- Added frontmatter to ten previously uncovered tracked files: CLAUDE.md, three script-header templates, code-commenting-dual-audience.md, phase2-tension-diagnostic-report.md (type: report, domain: sed-fitting), reference/master-catalog-profile.md (reference, cosmos-web, Archived), research/etl-pipeline-one-pager.md (one-pager, etl, Archived), verification-report.md (report, etl, Archived), shared/README.md (directory-readme, source-code).
+- Built `src/inspection/check_frontmatter.py`: enumerates `git ls-files '*.md'` minus the closed exemption set (CONTRIBUTING/SECURITY/CODE_OF_CONDUCT/licenses), parses HTML-comment-wrapped YAML, validates structure (mapping, title, date-or-created) and every type/domain/tech/framework value against the vocabulary parsed live from tagging-strategy.md (no hardcoded vocab). `--file` supports single-file checks.
+
+**Validation results:**
+
+- Full run: `frontmatter check: 38 file(s) clean, zero violations` (exit 0).
+- Mutation test: scratch copy at `/tmp/kilo/p2r01/mutation-test.md` with `domain: quantum-basketweaving` added → checker fails with exit 1 and the violation `domain tag 'quantum-basketweaving' not in tagging-strategy.md vocabulary`.
+
+**Findings recorded (not fixed):**
+
+- `docs/phase2-tension-diagnostic-report.md` and `docs/verification-report.md` are generator outputs (`src/features/compute_tension_scalars.py`, `src/etl/verify_catalog.py`); a future regeneration overwrites the frontmatter added here. Regenerators would need a frontmatter-emitting change under a future spec; this run only repairs environment/path loading in those scripts (gate 1.5, tension script only).
+- The project-brief template's frontmatter schema uses `created` instead of `date`; the checker accepts either, noted in the script.
+
+

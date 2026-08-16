@@ -1,3 +1,17 @@
+<!--
+---
+title: "Shell Script Header Template"
+description: "Header convention for .sh files"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Active"
+tags:
+  - type: guide
+  - domain: documentation
+---
+-->
+
 # Shell Script Header Template
 
 > Template Version: 2.0

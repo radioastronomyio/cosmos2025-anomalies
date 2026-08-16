@@ -1,3 +1,18 @@
+<!--
+---
+title: "COSMOS-Web DR1 ETL Pipeline One-Pager"
+description: "v1 ETL schema design and execution record"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Archived"
+tags:
+  - type: one-pager
+  - domain: etl
+  - domain: data-engineering
+---
+-->
+
 # COSMOS-Web DR1 ETL Pipeline — Schema Design & AI-Assisted Execution
 
 **Domain:** Astronomy / Data Engineering

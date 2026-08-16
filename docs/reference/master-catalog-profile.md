@@ -1,3 +1,17 @@
+<!--
+---
+title: "COSMOS-Web DR1 Master Catalog Profile (v1)"
+description: "Documented v1 structural profile; historical record superseded by the v1.1 profile"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Archived"
+tags:
+  - type: reference
+  - domain: cosmos-web
+---
+-->
+
 # COSMOS-Web DR1 Master Catalog Profile
 
 **File:** `COSMOSWeb_mastercatalog_v1.fits`

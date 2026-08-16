@@ -1,3 +1,17 @@
+<!--
+---
+title: "PowerShell Script Header Template"
+description: "Header convention for .ps1 files"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Active"
+tags:
+  - type: guide
+  - domain: documentation
+---
+-->
+
 # PowerShell Script Header Template
 
 > Template Version: 2.0
