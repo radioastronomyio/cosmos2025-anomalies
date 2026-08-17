@@ -1,30 +1,59 @@
 # COSMOS2025 Data Paths Configuration
 #
-# All paths are ML01-relative unless noted. ETL scripts and analysis code
-# should load this file rather than hardcoding paths.
+# All paths are ML01-relative unless noted. Inspection, ETL, and analysis
+# code load this file rather than hardcoding paths.
 #
 # Database credentials: injected from Doppler project `ml01`, config `prd`,
 # and not stored here. See the "database" section for env var names.
+#
+# Path-existence contract: every local filesystem path below exists on disk
+# at spec P2R-01 gate 1.5. Two annotated exemptions:
+#   - processed/ dirs are created on demand by a future pipeline run
+#   - external_holdings/ is off-box (host:path on the storage server)
 
 # ---------------------------------------------------------------------------
-# Data root on ML01 NVMe
+# Data root on ML01 NVMe (COSMOS-Web DR1 v1.1 holdings; raw and immutable)
 # ---------------------------------------------------------------------------
-data_root: /mnt/nvme02/cosmosweb2025-dr1
+data_root: /mnt/nvme01/cosmos-web-dr1-catalog
 
 catalogs:
-  master_catalog: /mnt/nvme02/cosmosweb2025-dr1/catalogs/COSMOSWeb_mastercatalog_v1.fits
-  pdfz_pickle: /mnt/nvme02/cosmosweb2025-dr1/catalogs/COSMOSWeb_mastercatalog_v1_PDFz.pkl
+  # v1.1 master catalog and per-extension products (Shuntov et al. 2025, v1.1)
+  master_catalog: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1.fits
+  photom_primary: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_photom_primary.fits
+  photom_secondary: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_photom_secondary.fits
+  lephare: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_lephare.fits
+  cigale: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_cigale.fits
+  bulgedisk: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_bulgedisk.fits
+  galight_morph: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_galight_morph.fits
+  ml_morph: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb_mastercatalog_v1.1_ml_morph.fits
+  agngal_desi: /mnt/nvme01/cosmos-web-dr1-catalog/agngal_desi.fits
+  pdfz_pickle: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb-LePhare-PDFz_v1.1.pkl
+  lephare_seds_h5: /mnt/nvme01/cosmos-web-dr1-catalog/COSMOSWeb-LePhare-SEDs_v1.1.h5
+  detection_images_dir: /mnt/nvme01/cosmos-web-dr1-catalog/detection_images
 
 supplementary:
-  lss_overdensity: /mnt/nvme02/cosmosweb2025-dr1/supplementary/hatamnia_lss_v1.fits
-  group_catalog_groups: /mnt/nvme02/cosmosweb2025-dr1/supplementary/deep-galaxy-group-catalog-groups.txt
-  group_catalog_memberships: /mnt/nvme02/cosmosweb2025-dr1/supplementary/deep-galaxy-group-catalog-memberships.txt
+  # Named supplement files only; discovery must not select any other file
+  lss_overdensity: /mnt/nvme01/cosmos-web-dr1-catalog/hatamnia-lss/hatamnia-lss-catalog.fits
+  lss_readme: /mnt/nvme01/cosmos-web-dr1-catalog/hatamnia-lss/readme.txt
+  group_catalog_groups: /mnt/nvme01/cosmos-web-dr1-catalog/toni/groups.txt
+  group_catalog_memberships: /mnt/nvme01/cosmos-web-dr1-catalog/toni/memberships.txt
 
-# ETL output directories (created by pipeline)
+specz:
+  # Khostovan et al. spec-z compilation checkout (git, LFS-backed).
+  # NOTE (P2R-01 gate 1.7): the LFS-tracked FITS/PKL files in this checkout
+  # are pointer files on this box, not materialized data. Recorded as a
+  # readiness-review finding; do not treat these paths as data until
+  # materialized by the operator.
+  compilation_root: /opt/agents/repos/reference-files/speczcompilation
+  unique_fits: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_unique.fits
+
+# ETL output directories (repo-local; created on demand by a future approved
+# pipeline run and exempt from the local exists-check; nothing may write
+# under data_root)
 processed:
-  parquet_dir: /mnt/nvme02/cosmosweb2025-dr1/processed/parquet
-  derived_dir: /mnt/nvme02/cosmosweb2025-dr1/processed/derived
-  staging_dir: /mnt/nvme02/cosmosweb2025-dr1/staging
+  parquet_dir: /opt/agents/repos/cosmos2025-anomalies/staging/parquet
+  derived_dir: /opt/agents/repos/cosmos2025-anomalies/staging/derived
+  staging_dir: /opt/agents/repos/cosmos2025-anomalies/staging
 
 # ---------------------------------------------------------------------------
 # Database (psql01)
@@ -43,17 +72,17 @@ database:
   # Python reads the injected values from os.environ by the names above.
 
 # ---------------------------------------------------------------------------
-# SED data (desktop only, Phase 2)
+# Off-box holdings (storage server; NOT local paths, exempt from the
+# local exists-check)
 # ---------------------------------------------------------------------------
-# SED archives are too large for NVMe migration. These paths are only
-# valid from the Windows desktop and will be updated if/when data moves
-# to NAS or fs02.
-seds:
-  cigale_root: "D:\\repositories-data-folder\\cosmos-web-dr1-2025\\raw\\seds\\CIGALE_SEDs_v1"
-  lephare_tar: "D:\\repositories-data-folder\\cosmos-web-dr1-2025\\raw\\seds\\LePHARE_SEDs_v1"
-  # Per-source pattern: {cigale_root}/n23data2/.../P1/{source_id}_best_model.fits
+external_holdings:
+  cigale_seds_root:
+    host: vps3557752
+    path: /opt/agents/repos/cosmosweb2025-data/CIGALE_SEDs_v1/
+    note: ~175 GB CIGALE per-source best-model SEDs; download deferred;
+      per-source lookup only after candidate triage, never bulk-loaded
 
 # ---------------------------------------------------------------------------
 # Repository location on ML01
 # ---------------------------------------------------------------------------
-repo_root: /opt/repos/cosmos2025-anomalies
+repo_root: /opt/agents/repos/cosmos2025-anomalies

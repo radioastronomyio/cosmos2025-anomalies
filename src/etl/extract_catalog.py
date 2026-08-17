@@ -14,15 +14,16 @@ Purpose:
 
 Usage:
     source /opt/agents/venv/bin/activate
-    cd /opt/repos/cosmos2025-anomalies
-    python src/etl/extract_catalog.py
+    doppler run --project ml01 --config prd -- \
+        python src/etl/extract_catalog.py
+    (run from /opt/agents/repos/cosmos2025-anomalies)
 
 Dependencies:
-    astropy, numpy, pandas, psycopg2, pyarrow, pyyaml, python-dotenv
+    astropy, numpy, pandas, psycopg2, pyarrow, pyyaml
 
 Output:
     Parquet files written to the directory specified in configs/data_paths.yaml
-    (default: /mnt/nvme02/cosmosweb2025-dr1/processed/parquet/).
+    (default: staging/parquet under the repository root).
     Tables loaded into the ``catalog`` schema on psql01.
 
 Unit conventions (critical for downstream analysis):
@@ -42,7 +43,6 @@ import pandas as pd
 import psycopg2
 import yaml
 from astropy.io import fits
-from dotenv import load_dotenv
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,8 +51,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-REPO_ROOT = "/opt/repos/cosmos2025-anomalies"
-ENV_FILE = "/opt/agents/.env"
+REPO_ROOT = "/opt/agents/repos/cosmos2025-anomalies"
 
 
 def load_config():
@@ -67,7 +66,7 @@ def load_config():
 
 
 def get_db_connection(config):
-    """Connect to PostgreSQL on psql01 using credentials from /opt/agents/.env.
+    """Connect to PostgreSQL on psql01 using Doppler-injected credentials.
 
     The config stores *environment variable names* (not values) for each
     connection parameter.  This script reads the actual credentials from
@@ -79,7 +78,6 @@ def get_db_connection(config):
     Returns:
         psycopg2.connection: Open connection to the cosmos2025 database.
     """
-    load_dotenv(ENV_FILE)
     db = config["database"]
     return psycopg2.connect(
         host=os.environ[db["host_env"]],

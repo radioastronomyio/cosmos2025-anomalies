@@ -1,0 +1,60 @@
+AUXDATA (v1.1, from agngal_desi.fits, 17995599 rows)
+Column Name	Format	Unit
+TARGETID	K	
+SURVEY	7A	
+PROGRAM	6A	
+LOGMSTAR	E	log(solMass)
+FLUX_W1	E	nanomaggy
+FLUX_W2	E	nanomaggy
+FLUX_W3	E	nanomaggy
+FLUX_IVAR_W1	E	nanomaggy^-2
+FLUX_IVAR_W2	E	nanomaggy^-2
+FLUX_IVAR_W3	E	nanomaggy^-2
+CIV_1549_FLUX	E	10**-17 erg/(s cm2)
+CIV_1549_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+CIV_1549_SIGMA	E	km / s
+MGII_2796_FLUX	E	10**-17 erg/(s cm2)
+MGII_2796_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+MGII_2796_SIGMA	E	km / s
+MGII_2803_FLUX	E	10**-17 erg/(s cm2)
+MGII_2803_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+MGII_2803_SIGMA	E	km / s
+OII_3726_FLUX	E	10**-17 erg/(s cm2)
+OII_3726_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+OII_3726_EW	E	Angstrom
+OII_3726_EW_IVAR	E	Angstrom^-2
+OII_3729_FLUX	E	10**-17 erg/(s cm2)
+OII_3729_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+OII_3729_EW	E	Angstrom
+OII_3729_EW_IVAR	E	Angstrom^-2
+NEV_3426_FLUX	E	10**-17 erg/(s cm2)
+NEV_3426_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HEII_4686_FLUX	E	10**-17 erg/(s cm2)
+HEII_4686_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HBETA_EW	E	Angstrom
+HBETA_EW_IVAR	E	Angstrom^-2
+HBETA_FLUX	E	10**-17 erg/(s cm2)
+HBETA_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HBETA_BROAD_FLUX	E	10**-17 erg/(s cm2)
+HBETA_BROAD_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HBETA_BROAD_SIGMA	E	km / s
+HBETA_BROAD_CHI2	E	Angstrom
+OIII_5007_FLUX	E	10**-17 erg/(s cm2)
+OIII_5007_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+OIII_5007_SIGMA	E	km / s
+OI_6300_FLUX	E	10**-17 erg/(s cm2)
+OI_6300_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HALPHA_EW	E	Angstrom
+HALPHA_EW_IVAR	E	Angstrom^-2
+HALPHA_FLUX	E	10**-17 erg/(s cm2)
+HALPHA_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HALPHA_BROAD_FLUX	E	10**-17 erg/(s cm2)
+HALPHA_BROAD_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+HALPHA_BROAD_VSHIFT	E	km / s
+HALPHA_BROAD_SIGMA	E	km / s
+NII_6584_FLUX	E	10**-17 erg/(s cm2)
+NII_6584_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+SII_6716_FLUX	E	10**-17 erg/(s cm2)
+SII_6716_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2
+SII_6731_FLUX	E	10**-17 erg/(s cm2)
+SII_6731_FLUX_IVAR	E	10**+34 (s2 cm4) / erg2

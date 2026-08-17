@@ -29,7 +29,7 @@ Configuration files consumed by pipeline source code. All paths and connection p
 
 ## Credential Pattern
 
-Database credentials are NOT stored in this repository. Scripts load them at runtime from `/opt/agents/.env` using `python-dotenv`. The `data_paths.yaml` file stores only the *names* of environment variables (`host_env`, `port_env`, `user_env`, `password_env`), not the values themselves.
+Database credentials are NOT stored in this repository. Scripts read them at runtime from Doppler-injected environment variables (`doppler run --project ml01 --config prd -- <cmd>`). The `data_paths.yaml` file stores only the *names* of environment variables (`host_env`, `port_env`, `user_env`, `password_env`), not the values themselves.
 
 ---
 

@@ -7,8 +7,9 @@ LePhare/CIGALE disagreement metrics, and writes a markdown diagnostic report.
 
 Usage:
     source /opt/agents/venv/bin/activate
-    cd /opt/repos/cosmos2025-anomalies
-    python src/features/compute_tension_scalars.py
+    doppler run --project ml01 --config prd -- \
+        python src/features/compute_tension_scalars.py
+    (run from /opt/agents/repos/cosmos2025-anomalies)
 
 Outputs:
     catalog.v_analysis_sample
@@ -29,7 +30,6 @@ from pathlib import Path
 
 import psycopg2
 import yaml
-from dotenv import load_dotenv
 
 # AI NOTE: These sigma_sys values are calibration parameters, not permanent
 # physical constants. Starting values come from Pacifici et al. 2023
@@ -40,7 +40,6 @@ SIGMA_SYS_SFR = 0.2
 LN10 = 2.302585
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ENV_FILE = Path("/opt/agents/.env")
 REPORT_PATH = REPO_ROOT / "docs" / "phase2-tension-diagnostic-report.md"
 
 
@@ -68,9 +67,9 @@ def get_db_connection(config):
         psycopg2.connection: Open connection to the configured database.
 
     Side effects:
-        Loads `/opt/agents/.env` into the process environment.
+        Reads Doppler-injected environment variables (the caller runs this
+        module under `doppler run --project ml01 --config prd`).
     """
-    load_dotenv(ENV_FILE)
     db = config["database"]
     return psycopg2.connect(
         host=os.environ[db["host_env"]],

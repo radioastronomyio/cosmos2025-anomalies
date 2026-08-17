@@ -1,3 +1,17 @@
+<!--
+---
+title: "COSMOS2025 ETL Verification Report"
+description: "v1 ETL verification record generated 2026-04-05"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Archived"
+tags:
+  - type: report
+  - domain: etl
+---
+-->
+
 # COSMOS2025 ETL Verification Report
 
 Generated: 2026-04-05 04:57 UTC

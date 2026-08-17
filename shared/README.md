@@ -1,3 +1,17 @@
+<!--
+---
+title: "Shared"
+description: "Cross-project utilities and scripts used consistently across repositories"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-15"
+version: "1.0"
+status: "Active"
+tags:
+  - type: directory-readme
+  - domain: source-code
+---
+-->
+
 # Shared
 
 Cross-project utilities and scripts used consistently across repositories.
