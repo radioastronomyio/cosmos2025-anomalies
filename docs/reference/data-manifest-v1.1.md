@@ -4,7 +4,7 @@ title: "Data Manifest v1.1"
 description: "SHA-256 pin of the COSMOS-Web v1.1 holdings and the spec-z compilation checkout"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "1.3"
+version: "1.4"
 status: "Active"
 tags:
   - type: reference
@@ -12,6 +12,7 @@ tags:
   - domain: data-engineering
 related_documents:
   - "[Project State](../project-state.md)"
+  - "[CIGALE SED Subtree Digest](data-manifest-v1.1-cigale-seds.md)"
   - "[v1.1 Structural Profile](master-catalog-profile-v1.1.md)"
   - "[v1.1 Readiness Review](../research/v11-readiness-review.md)"
 ---
@@ -19,7 +20,7 @@ related_documents:
 
 # Data Manifest v1.1
 
-Provenance anchor for the v1.1 rebuild. Machine layer: [data-manifest-v1.1.csv](data-manifest-v1.1.csv) (1,185,477 rows: SHA-256, bytes, mtime UTC per file). Builder: `src/inspection/build_data_manifest.py` (read-only against the roots). Generated 2026-08-16T03:32:50Z; amended 2026-08-17 by spec P2R-02A to exclude mutable Git internals and establish a durable worktree-only boundary; amended 2026-08-17 by spec P2R-02C under operator disposition to pin the CIGALE SED subtree that completed the on-disk dataset after the original pin (the 155 rows retained from the prior boundary are byte-identical, in original order and serialization). **Nothing under either hashed root may change after this point; a single modified byte unpins every downstream artifact.**
+Provenance anchor for the v1.1 rebuild. Machine layer: [data-manifest-v1.1.csv](data-manifest-v1.1.csv) (155 rows: SHA-256, bytes, mtime UTC per file). Builder: `src/inspection/build_data_manifest.py` (read-only against the roots). Generated 2026-08-16T03:32:50Z; amended 2026-08-17 by spec P2R-02A to exclude mutable Git internals and establish a durable worktree-only boundary; the CIGALE SED subtree was pinned into root 1 by P2R-02C under operator disposition and then lifted back out by P2R-02D, which pins it by aggregate digest in [data-manifest-v1.1-cigale-seds.md](data-manifest-v1.1-cigale-seds.md) rather than per-file rows. The tracked CSV is byte-identical to the `0f3e31d` baseline minus its 29 `.git/**` records, in original order and serialization. **Nothing under either hashed root may change after this point; a single modified byte unpins every downstream artifact.**
 
 ---
 
@@ -27,9 +28,9 @@ Provenance anchor for the v1.1 rebuild. Machine layer: [data-manifest-v1.1.csv](
 
 | # | Root | Location | Files | Bytes | Role |
 |---|------|----------|------:|------:|------|
-| 1 | NVMe v1.1 holdings | `/mnt/nvme01/cosmos-web-dr1-catalog` | 1,185,425 | 598,751,934,594 | Hashed here; raw and immutable. Includes the `cigale-seds/` subtree pinned 2026-08-17 (P2R-02C operator disposition) after it completed the dataset post-original-pin |
+| 1 | NVMe v1.1 holdings | `/mnt/nvme01/cosmos-web-dr1-catalog` | 103 | 130,197,210,900 | Hashed here per file; raw and immutable. Excludes the `cigale-seds/` subtree, which is a declared out-of-boundary region pinned by aggregate digest |
 | 2 | speczcompilation checkout | `/opt/agents/repos/reference-files/speczcompilation` | 52 | 1,465,763,774 | Hashed here; worktree-only boundary excludes `.git/**`, git HEAD `1924f5d0ee6c221b820035c8d3cd7302c02532b0` |
-| 3 | CIGALE SEDs (now local) | `/mnt/nvme01/cosmos-web-dr1-catalog/cigale-seds/` (P1: 1,154,766 files; P2: 30,556 files; 468,554,723,694 bytes) | 1,185,322 | 468,554,723,694 | Staged onto NVMe 2026-08-16 19:42 EDT — after the 2026-08-16T03:32:50Z pin, when row 3 recorded them off-box on `vps3557752`; pinned into root 1 on 2026-08-17 by operator disposition |
+| 3 | CIGALE SED subtree | `/mnt/nvme01/cosmos-web-dr1-catalog/cigale-seds/` (P1: 1,154,766 files; P2: 30,556 files) | 1,185,322 | 468,554,723,694 | Local since 2026-08-16 19:42 EDT. Pinned by aggregate digest, not per-file rows; see [data-manifest-v1.1-cigale-seds.md](data-manifest-v1.1-cigale-seds.md) |
 
 Row-count verification (manifest vs filesystem, run 2026-08-16, **P2R-01**):
 
@@ -39,18 +40,22 @@ find /opt/agents/repos/reference-files/speczcompilation -type f ! -path '*/.git/
 manifest rows: 155 = 103 + 52
 ```
 
-Row-count verification (manifest vs filesystem, run 2026-08-17, **P2R-02C**):
+Row-count verification (manifest vs filesystem, run 2026-08-17, **P2R-02D**):
 
 ```
-find /mnt/nvme01/cosmos-web-dr1-catalog -type f | wc -l   → 1,185,425
-manifest rows: 1,185,477 = 1,185,425 + 52
-retained-subset proof: committed CSV minus cigale-seds/ rows is byte-identical
-to the 0f3e31d baseline minus its 29 .git/** records (order and CRLF preserved)
+find /mnt/nvme01/cosmos-web-dr1-catalog -type f ! -path '*/cigale-seds/*' | wc -l   → 103
+find /opt/agents/repos/reference-files/speczcompilation -type f ! -path '*/.git/*' | wc -l   → 52
+manifest rows: 155 = 103 + 52
+baseline proof: committed CSV is byte-identical to the 0f3e31d baseline
+minus its 29 .git/** records (order and CRLF preserved)
+cigale-seds/ subtree: 1,185,322 files pinned by aggregate digest
 ```
 
 Amendment 2026-08-17 (P2R-02A): provenance boundary corrected to worktree-only by excluding `.git/**` from the speczcompilation hash set. The mutable Git transport layer (config, index, hooks, LFS store, temporaries) is outside the manifest; the manifest records worktree artifacts and the Git commit SHA, not repository internals. All 52 worktree files were freshly hash-verified against disk at amendment gate A1.1 and match the CSV rows.
 
-Amendment 2026-08-17 (P2R-02C): the CIGALE SED store — recorded off-box and un-hashed at P2R-01 time because it had not yet been downloaded — was staged into `/mnt/nvme01/cosmos-web-dr1-catalog/cigale-seds/` at 2026-08-16 19:42 EDT, completing the dataset on disk. The operator dispositioned pinning it into root 1 rather than recording it as a named un-hashed subtree. The 155 rows retained from the prior boundary are unchanged byte-for-byte; 1,185,322 SED rows were added by the same deterministic builder walk. The discriminating full verifier (exact header, duplicate-key rejection, bidirectional path-set equality, hash/bytes/mtime agreement) now passes with zero mismatch over the complete boundary.
+Amendment 2026-08-17 (P2R-02C): the CIGALE SED store — recorded off-box and un-hashed at P2R-01 time because it had not yet been downloaded — was staged into `/mnt/nvme01/cosmos-web-dr1-catalog/cigale-seds/` at 2026-08-16 19:42 EDT, completing the dataset on disk. The operator dispositioned pinning it into root 1 rather than recording it as a named un-hashed subtree. 1,185,322 SED rows were added by the same deterministic builder walk, and the discriminating full verifier passed with zero mismatch over the complete boundary.
+
+Amendment 2026-08-17 (P2R-02D): those per-file rows made the tracked CSV a 192 MB artifact, past GitHub's 100 MB object limit and past what a reviewable provenance anchor should be. The subtree was lifted back out and pinned by aggregate digest instead; the tracked CSV returns to the 155-row catalog boundary and is now byte-identical to the `0f3e31d` baseline minus its 29 `.git/**` records, verified by `cmp` rather than asserted. The per-file pins are preserved intact in the full listing on NVMe, whose own SHA-256 and row-block digest are recorded in [data-manifest-v1.1-cigale-seds.md](data-manifest-v1.1-cigale-seds.md). No file was re-hashed and no pin was retaken: the SED rows in the digest are the same bytes P2R-02C computed.
 
 ---
 
@@ -74,7 +79,7 @@ Amendment 2026-08-17 (P2R-02C): the CIGALE SED store — recorded off-box and un
 
 With content materialized, `astropy.io.fits.open` succeeds: `specz_compilation_COSMOS_DR1.1_unique.fits` carries a 261,975-row binary table and `_all.fits` a 482,579-row binary table.
 
-**CIGALE SED subtree pin (2026-08-17, P2R-02C operator disposition).** The SED store (per-source best-model SEDs used for per-source lookup after candidate triage) was recorded at P2R-01 as off-box on `vps3557752`, un-hashed, because the ~200+ GB download had not completed. It was staged into the NVMe root at 2026-08-16 19:42 EDT (subtree mtimes preserve the 2025-04-14 source timestamps), landing after the 2026-08-16T03:32:50Z pin. The operator dispositioned full pinning: 1,185,322 rows (P1 1,154,766; P2 30,556; 468,554,723,694 bytes) were added by the same builder walk, and the retained prior-boundary rows are byte-identical to the `0f3e31d` baseline minus its 29 `.git/**` records. Root 1's boundary is now the complete on-disk dataset.
+**CIGALE SED subtree (2026-08-17, P2R-02C pin, P2R-02D digest).** The SED store (per-source best-model SEDs used for per-source lookup after candidate triage) was recorded at P2R-01 as off-box on `vps3557752`, un-hashed, because the ~200+ GB download had not completed. It was staged into the NVMe root at 2026-08-16 19:42 EDT (subtree mtimes preserve the 2025-04-14 source timestamps), landing after the 2026-08-16T03:32:50Z pin. P2R-02C hashed all 1,185,322 files under operator disposition; P2R-02D moved those rows out of the tracked CSV into an aggregate digest without recomputing them. Root 1's per-file boundary is the 103 catalog files; the subtree is pinned separately and is a declared exclusion in the builder and validator.
 
 **Naming caution.** The compilation's data files are named `..._COSMOS_DR1.1_...`: that `DR1.1` is the spectroscopic compilation's own release version and is **unrelated to COSMOS-Web v1.1**. Two different "1.1" versions appear on adjacent manifest rows; do not conflate them.
 
@@ -82,6 +87,6 @@ With content materialized, `astropy.io.fits.open` succeeds: `specz_compilation_C
 
 ## 3. Holdings Shape (top-level)
 
-35 root-level files: 10 master/per-extension catalog FITS + AGN-DESI cross-id FITS, PDFz pickle, LePhare SEDs HDF5, 20 JWST star-mask FITS + 1 DS9 region file, column-description text, flag-construction PNG, flowchart PNG. Plus subdirectories: 20 detection images + README, arXiv paper source (LaTeX + 29 figures), LSS supplement (catalog + readme), group supplements (groups, memberships), and the pinned `cigale-seds/` subtree (P1 + P2 per-source SED FITS).
+35 root-level files: 10 master/per-extension catalog FITS + AGN-DESI cross-id FITS, PDFz pickle, LePhare SEDs HDF5, 20 JWST star-mask FITS + 1 DS9 region file, column-description text, flag-construction PNG, flowchart PNG. Plus subdirectories: 20 detection images + README, arXiv paper source (LaTeX + 29 figures), LSS supplement (catalog + readme), group supplements (groups, memberships), and the `cigale-seds/` subtree (P1 + P2 per-source SED FITS), which is pinned by aggregate digest rather than per-file rows.
 
 Disk-hygiene observations recorded for the operator (no action taken; raw root is immutable): none beyond the SED staging event recorded in §2 — the holdings directory contains no redundant archives or stray downloads at manifest time.

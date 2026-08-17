@@ -21,6 +21,13 @@ Production tests prove the committed CSV is the exact serialized 0f3e31d
 baseline minus its 29 .git/** records, with 103/52 root counts, unique
 keys, and no git machinery. The full production verifier runs as the
 required integration check.
+
+P2R-02d additions: one further mutation asserts that a `cigale-seds/` row
+in the manifest fails with the out-of-boundary diagnostic, and one
+production test recomputes the SED aggregate digest from the NVMe full
+listing and compares it to the tracked sidecar. Together they keep the
+exclusion honest in both directions: the subtree may not creep back into
+the per-file pin, and the aggregate that replaced it must reproduce.
 """
 
 import csv
@@ -36,6 +43,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BUILDER = REPO_ROOT / "src" / "inspection" / "build_data_manifest.py"
 PRODUCTION_CSV = REPO_ROOT / "docs" / "reference" / "data-manifest-v1.1.csv"
+SED_DIGEST_CSV = REPO_ROOT / "docs" / "reference" / "data-manifest-v1.1-cigale-seds.csv"
 BASELINE_COMMIT = "0f3e31d"
 FIXED_TIME = 1786000000  # deterministic fixture mtime
 
@@ -243,6 +251,44 @@ def test_mtime_only_drift_fails_with_mtime_diagnostic_only(tmp_path):
     assert "Size mismatch" not in result.stdout
 
 
+def test_out_of_boundary_subtree_row_fails_with_subtree_diagnostic(tmp_path):
+    """A cigale-seds/ row may not re-enter the per-file pin. The subtree is
+    pinned by aggregate digest; a per-file row for it is a contract violation
+    even when the file exists on disk."""
+
+    def add_sed_row(root, csv_path):
+        sed_dir = root / "cigale-seds" / "P1"
+        sed_dir.mkdir(parents=True)
+        sed = sed_dir / "0.0_SFH.fits"
+        sed.write_bytes(b"sed-content")
+        os.utime(sed, (FIXED_TIME, FIXED_TIME))
+        lines = csv_path.read_text().splitlines(keepends=True)
+        row = row_for(root, "cigale-seds/P1/0.0_SFH.fits")
+        csv_path.write_text("".join(lines) + ",".join(row) + "\n")
+
+    result = mutate(tmp_path, add_sed_row)
+    assert result.returncode != 0
+    assert "Out-of-boundary subtree path" in result.stdout
+
+
+def test_excluded_subtree_on_disk_does_not_trip_path_set_equality(tmp_path):
+    """The mirror of the test above: SED files present on disk and absent from
+    the manifest are correct, not a finding. This is the assertion that would
+    have caught the A3.1 verify failure as a boundary question rather than a
+    missing-rows question."""
+
+    def add_sed_file_only(root, _csv_path):
+        sed_dir = root / "cigale-seds" / "P2"
+        sed_dir.mkdir(parents=True)
+        sed = sed_dir / "9.9_SFH.fits"
+        sed.write_bytes(b"unmanifested-by-design")
+        os.utime(sed, (FIXED_TIME, FIXED_TIME))
+
+    result = mutate(tmp_path, add_sed_file_only)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "PASSED" in result.stdout
+
+
 # =============================================================================
 # Production tests: committed CSV equals the filtered 0f3e31d baseline
 # =============================================================================
@@ -262,27 +308,13 @@ def filtered_baseline_bytes() -> bytes:
     return b"\r\n".join([header] + kept) + b"\r\n"
 
 
-def test_production_csv_is_retained_baseline_plus_pinned_seds():
-    """Strip the operator-dispositioned cigale-seds block from the committed
-    CSV; the remainder must be byte-identical to the 0f3e31d baseline minus
-    its 29 .git/** records, in original order and serialization."""
-    expected = filtered_baseline_bytes()
-    raw = PRODUCTION_CSV.read_bytes()
-    records = raw.split(b"\r\n")
-    assert records[-1] == b""
-    header, data = records[0], records[1:-1]
-    retained, sed_rows = [], 0
-    for rec in data:
-        if rec.split(b",", 2)[1].startswith(b"cigale-seds/"):
-            sed_rows += 1
-        else:
-            retained.append(rec)
-    assert sed_rows > 0, "expected the pinned cigale-seds block"
-    actual = b"\r\n".join([header] + retained) + b"\r\n"
-    assert actual == expected, (
-        "committed CSV minus cigale-seds rows differs from the "
-        "0f3e31d-minus-29 retained baseline"
-    )
+def test_production_csv_equals_filtered_baseline():
+    """The committed CSV must be byte-identical to the 0f3e31d baseline minus
+    its 29 .git/** records, in original order and serialization. P2R-02C
+    added 1,185,322 cigale-seds rows here; P2R-02D lifted them back out to an
+    aggregate digest, so the tracked file is once again exactly the reviewed
+    pin and carries no SED row at all."""
+    assert PRODUCTION_CSV.read_bytes() == filtered_baseline_bytes()
 
 
 def test_production_csv_structure():
@@ -292,10 +324,45 @@ def test_production_csv_structure():
     assert header == ["root", "relative_path", "sha256", "bytes", "mtime_utc"]
     root1 = [r for r in data if r[0] == "/mnt/nvme01/cosmos-web-dr1-catalog"]
     root2 = [r for r in data if r[0] == "/opt/agents/repos/reference-files/speczcompilation"]
+    assert len(root1) == 103
     assert len(root2) == 52
+    assert len(data) == 155
+    assert all(not r[1].startswith("cigale-seds/") for r in data), (
+        "cigale-seds rows belong in the aggregate digest, not the per-file pin"
+    )
     assert all("/.git/" not in r[1] and not r[1].startswith(".git/") for r in data)
     keys = {r[0] + "\x00" + r[1] for r in data}
     assert len(keys) == len(data), "duplicate (root, relative_path) keys"
+
+
+def test_sed_digest_sidecar_reproduces_from_full_listing():
+    """Recompute the aggregate from the NVMe full listing and compare it to the
+    tracked sidecar. This is what makes the digest a pin rather than an
+    assertion: the per-file rows still exist and still hash to the recorded
+    value."""
+    with open(SED_DIGEST_CSV, newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 1, "digest sidecar carries exactly one row"
+    pin = rows[0]
+
+    full = Path(pin["full_listing_path"])
+    if not full.exists():
+        pytest.skip(f"full listing not present at {full}")
+
+    raw = full.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == pin["full_listing_sha256"], (
+        "full listing on NVMe does not match its recorded SHA-256"
+    )
+
+    # Mirror `awk -F, 'NR>1 && $2 ~ /^cigale-seds\//' | LC_ALL=C sort | sha256sum`:
+    # records keep their trailing CR, sort is bytewise, each line re-terminated \n.
+    records = raw.split(b"\n")[1:]
+    sed = [r for r in records if r.split(b",", 2)[1:2] and r.split(b",", 2)[1].startswith(b"cigale-seds/")]
+    digest = hashlib.sha256(b"".join(r + b"\n" for r in sorted(sed))).hexdigest()
+
+    assert len(sed) == int(pin["file_count"])
+    assert sum(int(r.split(b",")[3]) for r in sed) == int(pin["total_bytes"])
+    assert digest == pin["rows_sha256"]
 
 
 def test_production_full_verifier():

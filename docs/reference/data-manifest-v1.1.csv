@@ -102,6 +102,8 @@ root,relative_path,sha256,bytes,mtime_utc
 /mnt/nvme01/cosmos-web-dr1-catalog,hatamnia-lss/readme.txt,e40402a510cad8e3d7069de759514090a16602ea7eb5f46715d13d64d1487e97,6701,2026-01-14T16:16:00+00:00
 /mnt/nvme01/cosmos-web-dr1-catalog,toni/groups.txt,c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a,243453,2025-04-14T15:19:03+00:00
 /mnt/nvme01/cosmos-web-dr1-catalog,toni/memberships.txt,c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77,69826118,2025-04-14T15:19:15+00:00
+/opt/agents/repos/reference-files/speczcompilation,.gitattributes,b839af5d02fcfe2a8397e7818afd926952859e97162bee6ba620486e4fda5474,85,2026-08-15T10:53:52+00:00
+/opt/agents/repos/reference-files/speczcompilation,.gitignore,c8aae33ce739c1f5e230d2377c26847a1d9a636ad9c4c4b6a2a3e0109b83f442,442,2026-08-15T10:53:52+00:00
 /opt/agents/repos/reference-files/speczcompilation,README.md,1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23,8307,2026-08-15T10:53:52+00:00
 /opt/agents/repos/reference-files/speczcompilation,sed_fitting/README.md,18a73bff600aafdaac56ed5925e060c4fa36d5dd735ef0b4449962804ae41419,863,2026-08-15T10:53:52+00:00
 /opt/agents/repos/reference-files/speczcompilation,sed_fitting/lephare/README.md,017053b342ce4f24216b7346b269b8298277e7178bac8aa6d68e3b37e79a21ce,3800,2026-08-15T10:53:53+00:00
@@ -152,5 +154,3 @@ root,relative_path,sha256,bytes,mtime_utc
 /opt/agents/repos/reference-files/speczcompilation,soms/trained_som_midz_i_band_26.0_magnitude_limit.pkl,4e3f9c0393b8351fb468214f5ceac609d029d4556c167446f150657ffbd62296,359533902,2026-08-17T01:42:12+00:00
 /opt/agents/repos/reference-files/speczcompilation,logo/cosmos-logo-dark.png,c689d64ecb77fd9dddc70bd3e5ed6008fa42c94a195246ca68600d33c5b55e61,10859,2026-08-15T10:53:52+00:00
 /opt/agents/repos/reference-files/speczcompilation,logo/cosmos-logo-light.png,b076b0c505b2771c265929634e5c5163401628b834a1eae8feac148445c97431,10064,2026-08-15T10:53:52+00:00
-/opt/agents/repos/reference-files/speczcompilation,.gitattributes,b839af5d02fcfe2a8397e7818afd926952859e97162bee6ba620486e4fda5474,85,2026-08-15T10:53:52+00:00
-/opt/agents/repos/reference-files/speczcompilation,.gitignore,c8aae33ce739c1f5e230d2377c26847a1d9a636ad9c4c4b6a2a3e0109b83f442,442,2026-08-15T10:53:52+00:00

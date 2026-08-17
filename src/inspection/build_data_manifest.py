@@ -26,6 +26,16 @@ commit SHA, not repository internals. The validator rejects any row with
 `/.git/` in its path or starting `.git/`, and raises if a declared row does
 not match on-disk in full verification mode.
 
+Amendment P2R-02d: the `cigale-seds/` subtree under the NVMe root is a
+declared out-of-boundary subtree. It holds 1,185,322 per-source SED files
+whose per-file rows made the tracked CSV a 192 MB artifact, which is not a
+reviewable provenance anchor and exceeds what a source repository should
+carry. The subtree is pinned instead by an aggregate digest recorded in
+`docs/reference/data-manifest-v1.1-cigale-seds.md`, over the same rows this
+builder would emit. The full per-file listing lives on NVMe beside the data.
+The builder does not walk the subtree, and the validator rejects any row
+under it and skips it on the disk side, exactly as it does for `.git`.
+
 Usage
 -----
     python src/inspection/build_data_manifest.py [--verify]
@@ -70,6 +80,12 @@ SUMMARY_JSON = REPO_ROOT / "staging" / "manifest-summary-v1.1.json"
 # threshold, anything smaller than this cannot be the data).
 POINTER_MAX_BYTES = 1024
 
+# HUMAN NOTE: declared out-of-boundary subtrees under a non-git root. These
+# are pinned by aggregate digest rather than per-file rows; see the P2R-02d
+# note above. Membership here is a provenance decision, not a performance
+# tweak: adding a name here removes those files from the per-file pin.
+EXCLUDED_SUBTREES = {"cigale-seds"}
+
 # =============================================================================
 # Functions
 # =============================================================================
@@ -90,9 +106,12 @@ def manifest_root(root: Path, git_checkout: bool = False) -> list[dict]:
 
     For git_checkout roots, exclude the .git directory entirely.
     The manifest records worktree artifacts, not mutable repository machinery.
+
+    For non-git roots, exclude any subtree named in EXCLUDED_SUBTREES. Those
+    are pinned by aggregate digest instead of per-file rows.
     """
     rows = []
-    excluded_dirs = {".git"} if git_checkout else set()
+    excluded_dirs = {".git"} if git_checkout else set(EXCLUDED_SUBTREES)
     for dirpath, dirnames, filenames in os.walk(root, topdown=True):
         dirpath_path = Path(dirpath)
         if excluded_dirs & set(dirpath_path.parts):
@@ -127,9 +146,10 @@ def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[st
     Machine contract enforced, each with a condition-specific diagnostic:
     exact ordered five-field header; one row per (root, relative_path) key
     with duplicates rejected before any overwrite; zero .git/** relative
-    paths; rows only under declared roots; complete path-set equality in
-    both directions; and exact SHA-256, integer byte count, and normalized
-    second-resolution UTC mtime agreement for every row.
+    paths; zero rows under a declared out-of-boundary subtree; rows only
+    under declared roots; complete path-set equality in both directions;
+    and exact SHA-256, integer byte count, and normalized second-resolution
+    UTC mtime agreement for every row.
 
     Returns a list of diagnostic strings. An empty list means valid.
     """
@@ -162,6 +182,12 @@ def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[st
             if "/.git/" in rel or rel.startswith(".git/"):
                 errors.append(f"Git-internal path in manifest: {root}/{rel}")
                 continue
+            if Path(rel).parts and Path(rel).parts[0] in EXCLUDED_SUBTREES:
+                errors.append(
+                    f"Out-of-boundary subtree path in manifest: {root}/{rel} "
+                    f"(pinned by aggregate digest, not per-file rows)"
+                )
+                continue
             key = (root, rel)
             if key in manifest_rows:
                 errors.append(f"Duplicate key: {root}/{rel}")
@@ -184,6 +210,12 @@ def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[st
         for dirpath, dirnames, filenames in os.walk(root, topdown=True):
             dirpath_path = Path(dirpath)
             if is_git_checkout and ".git" in dirpath_path.parts:
+                dirnames.clear()
+                filenames.clear()
+                continue
+            if not is_git_checkout and EXCLUDED_SUBTREES & set(
+                dirpath_path.relative_to(root).parts
+            ):
                 dirnames.clear()
                 filenames.clear()
                 continue
@@ -400,6 +432,10 @@ def main() -> None:
                 "total_bytes": sum(r["bytes"] for r in specz_rows),
             },
             "external_cigale_seds": config["external_holdings"]["cigale_seds_root"],
+            "excluded_subtrees": {
+                name: "pinned by aggregate digest; see docs/reference/data-manifest-v1.1-cigale-seds.md"
+                for name in sorted(EXCLUDED_SUBTREES)
+            },
         },
         "lfs_patterns": patterns,
         "lfs_materialization": check_lfs_materialization(specz_root, patterns),
