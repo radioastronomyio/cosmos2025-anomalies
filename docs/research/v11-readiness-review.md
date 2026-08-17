@@ -3,8 +3,8 @@
 title: "v1.1 Readiness Review"
 description: "Evidence-backed findings and closed questions constituting the ETL v2 approval surface"
 author: "VintageDon (https://github.com/vintagedon/)"
-date: "2026-08-16"
-version: "1.0"
+date: "2026-08-17"
+version: "1.1"
 status: "Active"
 tags:
   - type: report
@@ -22,6 +22,8 @@ related_documents:
 
 The approval surface for ETL v2. Every finding below carries an ID, a statement, evidence with exact numbers, and a closed question. The evidence comes from gates 1.7 through 1.11 of spec P2R-01; nothing here cites the spec's own assertions. Task 2 does not dispatch until the operator answers these questions.
 
+**Amendment 2026-08-17 (spec P2R-02).** F6 is closed with materialization evidence, and F1, F5, F7, F9, and Q1 carry resolution blocks reconciling them with the subsequently approved lossless-mirror architecture. Resolutions are append-only: original finding text, evidence, and closed questions are unchanged so that every finding remains legible as it stood when written. The Approval section is now a record with an operator-confirmation table and signature line; the executor prepared the structure and disposition summaries and left every confirmation cell and the signature empty.
+
 ---
 
 ## Findings
@@ -31,6 +33,8 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 **Evidence:** `COSMOSWeb_mastercatalog_v1.1.fits` enumerated by EXTNAME (`docs/reference/master-catalog-profile-v1.1.md` §1, generator `src/inspection/profile_v11.py`): PHOTOMETRY HOTCOLD AND SE++ (287 cols), LEPHARE (43), SE++APER (148), CIGALE (56), ML-MORPHO (150), B+D (461), GALIGHT-MORPHO (204), all 784,016 rows. The v1 documented profile records six extensions; GALIGHT-MORPHO is absent from v1 (`docs/reference/columns-bulge-disk-morphological-measurements.txt` era) and ships both in the master and as `COSMOSWeb_mastercatalog_v1.1_galight_morph.fits`. The v1.1 column-description file lists it as extension 7.
 
 **Closed question:** Load GALIGHT-MORPHO as a new `catalog` table in ETL v2 (204 columns, id-keyed, same column-skip policy as ML-MORPHO)? Yes/No.
+
+**Resolution (2026-08-17, spec P2R-02, per the approved lossless-mirror architecture):** All 204 GALIGHT-MORPHO source columns are in scope; no ML-MORPHO subset policy carries forward. The mirror is complete per extension, and the column-skip question this finding posed is superseded by that completeness rule.
 
 ### F2. CIGALE physical parameters were fully recomputed for v1.1
 
@@ -44,11 +48,13 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 
 **Closed question:** Confirm ETL v2 treats the photo-z change as field-wide (no per-tile special casing in extraction or verification)? Yes/No.
 
-### F4. The LSS and group supplements are the v1 release, unchanged; skew against the v1.1 photo-z recompute is unresolved (OPEN)
+### F4. The LSS and group supplements are the v1 release, unchanged; skew against the v1.1 photo-z recompute is unresolved (CLOSED 2026-08-17 per operator disposition)
 
 **Evidence:** On-disk files compared at value level against the live tables (`src/inspection/supplement_evidence.py`, seed 20260815): row counts from the files are 164,155 LSS (OVERDENSITY HDU), 1,678 groups, 1,745,652 memberships, each equal to its live table count; sampled value checks are bitwise exact throughout (2,000/2,000 LSS on (id, density_excess); 1,678/1,678 groups on (ID, LAMBDA); 5,000/5,000 memberships on (galid, group_id, assoc_prob)). The local files are therefore the same release that was loaded, not a refresh. The on-disk v1.1 documentation says nothing about updated supplements: the arXiv paper source (arXiv-2506.03243v1) predates v1.1 and mentions no supplement reissue; the v1.1 column-description file covers only the master catalog; the LSS readme describes Hatamnia et al. 2025 KDE built on "robust photometric redshifts" (the v1 photo-z that v1.1 reran per F2/F3). Whether upstream ships refreshed supplements is not determinable on-box.
 
 **Closed question:** Accept the v1 supplements into ETL v2 with their skew against the v1.1 photo-z documented as a known limitation (O5 contextual-anomaly work proceeds with that caveat), or hold supplement ingest pending an upstream refresh? Accept / Hold.
+
+**Resolution (2026-08-17, operator disposition):** CLOSED. Ingest the unchanged v1 supplement release into the lossless source mirror, label their provenance as v1 release-on-v1.1-holdings in the provenance table, and treat the photo-z skew as an analytical limitation rather than an ETL exclusion. Revisit only if upstream ships a refreshed release.
 
 ### F5. ETL v2 should feed from the primary photometry product; the two products are structurally distinct
 
@@ -56,17 +62,23 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 
 **Closed question:** Adopt photom_primary as the ETL v2 photometry source (secondary either skipped or loaded as a reference table)? Primary / Primary+secondary.
 
-### F6. The spec-z join cannot be verified on-box: the compilation's data files are LFS pointers (OPEN)
+**Resolution (2026-08-17, spec P2R-02A, per the approved lossless-mirror architecture):** Both primary photometry (PHOTOMETRY HOTCOLD AND SE++) and SE++APER are loaded completely; vector-valued columns remain arrays in the source mirror. The either/or framing of the closed question is superseded: the mirror does not choose products.
+
+### F6. The spec-z join cannot be verified on-box: the compilation's data files are LFS pointers (CLOSED 2026-08-17)
 
 **Evidence:** All seven LFS-pattern files in `/opt/agents/repos/reference-files/speczcompilation` (`.gitattributes`: `*.fits`, `*.pkl`) are 133–134 byte pointer files; `git-lfs` is not installed on ML01; no materialized copy exists anywhere on-box (searched `/mnt/nvme01`, `/opt/agents`, home). The `_unique.fits` pointer declares its true content as SHA-256 `6ffd1145...336e99`, 70,223,040 bytes; the astropy open attempt fails with "No SIMPLE card found". Live side verified by query: 37,219 sources carry a non-sentinel `id_specz_khostovan25` and 26,323 of them sit in `catalog.v_analysis_sample`; the compilation-side count (compilation `Id_specz` values matching live links) is therefore uncomputable on-box, and any discrepancy against 37,219 remains unstated rather than reconciled. Manifest: `docs/reference/data-manifest-v1.1.md` §2.
 
 **Closed question:** Operator materializes the checkout (git-lfs install on ML01 plus `git lfs pull`, an operator action by the no-network rule), after which the gate 1.11 join runs as a zero-gate verification; or supplies the compilation by another channel. Materialize / Alternate channel?
+
+**Resolution (2026-08-17, spec P2R-02):** CLOSED. The operator chose materialization by action: git-lfs 3.4.1 installed on ML01 and the checkout materialized 2026-08-17T01:38–01:42Z at pinned HEAD `1924f5d0` (checkout clean, HEAD unmoved). Gate 2.2 reconciliation: for all seven LFS files the SHA-256 of the materialized content equals the `oid sha256:` declared by the pointer blob at the pinned commit, and byte counts equal the declared sizes — 7/7 on both; `astropy.io.fits.open` succeeds on `_unique.fits` (261,975 rows) and `_all.fits` (482,579 rows). The manifest's seven rows are re-pinned to content hashes (`data-manifest-v1.1.md` §2). Live-side counts stand as recorded above: 37,219 linked sources, 26,323 within `catalog.v_analysis_sample`. Compilation side: `_unique.fits` carries 261,975 rows; the link-level join of compilation `Id_specz` against the live 37,219 is recomputed and reported as a P2R-03 gate, which this closure unblocks.
 
 ### F7. No v1 master FITS survives on-box
 
 **Evidence:** Filesystem search over `/mnt/nvme01`, `/opt/agents`, and the home directory for any `*mastercatalog*` file outside the v1.1 holdings returns nothing; the NVMe root holds only the v1.1 directory and unrelated DESI data. After Task 2's schema drop, the only v1 primary sources will be the Task 2 pg_dump (not yet taken) and the git-tracked v1 records (`docs/reference/columns-*.txt`, `master-catalog-profile.md`, `verification-report.md`). This is a report-and-locate finding; disposition is the operator's.
 
 **Closed question:** Proceed with Task 2 on the strength of the pg_dump plus tracked v1 records as the v1 baseline (no re-download of the v1 FITS)? Yes / No, obtain v1 FITS first.
+
+**Resolution (2026-08-17, spec P2R-02, per the approved lossless-mirror architecture):** Superseded as an execution concern. `cosmos2025` remains untouched and `cosmos2025_v11` is built alongside it; no v1 schema drop and no v1 archive are part of P2R-03. The no-v1-FITS risk this finding weighed is retired for the rebuild because nothing v1 is destroyed by it.
 
 ### F8. LePhare match fractions are intermediate (1.0–2.9%) and are reported as their own finding, per the rule stated in advance
 
@@ -80,6 +92,8 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 
 **Closed question:** ETL v2 treats agngal_desi as a deferred reference file (hashed and pinned by the gate 1.7 manifest, loaded only if a spec later needs it), or loads it as reference tables now? Defer / Load.
 
+**Resolution (2026-08-17, spec P2R-02, per the approved lossless-mirror architecture):** AGN/DESI remains deferred because it is a separate 18-million-row reference product outside the declared catalog-mirror boundary, not because it lacks a current research consumer. The boundary rationale, not consumer demand, is the basis; a future spec that brings it inside a declared boundary reopens the load decision on its own terms.
+
 ---
 
 ## ETL v2 Design Questions
@@ -88,9 +102,13 @@ Each question is closed, with the recommendation the evidence supports.
 
 **Q1. Extension-to-table mapping.** Load the seven master extensions as id-keyed tables (photometry lineage per F5's answer, lephare, cigale including `ebv_stars*`, ml_morpho subset policy as v1, b+d, galight_morpho new per F1), with agngal_desi deferred per F9? Recommendation: yes, seven tables plus existing supplement tables per F4's answer. Proceed / amend?
 
+**Resolution (2026-08-17, spec P2R-02, per the approved lossless-mirror architecture):** The frozen mapping is all seven complete master extensions, three complete supplements, and the spec-z compilation, with no science-driven column projection. The v1 ML-MORPHO subset policy referenced in the question does not carry into the mirror.
+
 **Q2. Per-extension file strategy.** Extract from the standalone per-extension FITS products rather than the 10 GB master, since gate 1.8 verified them column-identical to the master HDUs; the master remains pinned by the manifest as the reference artifact. Recommendation: standalone files. Proceed / amend?
 
 **Q3. Supplement handling.** Per F4: reload the identical v1-content files (accept documented skew), or hold for an upstream refresh. Recommendation: reload now, mark `supplement_version = v1-content-on-v1.1-holdings` in the provenance table, revisit if upstream refreshes. Proceed / hold?
+
+**Resolution (2026-08-17, operator disposition):** Load the unchanged v1 supplement release with provenance labeled as v1 release-on-v1.1-holdings. Photo-z skew is documented in the supplement README and treated as an analytical limitation for any consumer, not as an ETL exclusion. Revisit only if upstream ships a refreshed release.
 
 **Q4. Spec-z ingest as an ETL v2 gate.** Per F6: the operator materializes the compilation before ETL v2 dispatch (it is a precondition for the spec-z ingest gate and for recomputing the 37,219-link join), and ETL v2 ingests `_unique.fits` with the join rebuilt and reported against 37,219 / 26,323. Recommendation: yes, spec-z ingest is an ETL v2 gate contingent on F6 materialization. Proceed / defer spec-z?
 
@@ -98,4 +116,24 @@ Each question is closed, with the recommendation the evidence supports.
 
 ## Approval
 
-Operator signature on the nine closed questions and four design questions authorizes Task 2 (ETL v2) to dispatch. Until then the v1 database stays untouched and the v1.1 holdings stay pinned at manifest `data-manifest-v1.1.csv`.
+The operator's merge of this branch to `main` authorizes the lossless v1.1 source mirror and enables P2R-03. Until then the v1 database stays untouched and the v1.1 holdings stay pinned at manifest `data-manifest-v1.1.csv` (amended 2026-08-17 by spec P2R-02A to the durable worktree-only boundary, and again 2026-08-17 by spec P2R-02C under operator disposition to pin the CIGALE SED subtree into root 1: 1,185,477 data rows, with the 155 rows retained from the prior boundary proven byte-identical). P2R-03 dispatches only after this branch is merged to `main`.
+
+**Record of operator disposition (structure prepared by spec P2R-02, 2026-08-17; row language reconciled by spec P2R-02c, 2026-08-17; recorded by the operator 2026-08-17).** Each row separates `Evidence:` (measured facts) from `Recommendation:` (a proposed course of action). Only F4 and Q3 carry `Accepted operator disposition:` for the supplement-skew decision the operator accepted earlier. The authorization for P2R-03 is the operator's merge of this branch to `main`; this table records what that merge dispositions, finding by finding.
+
+| ID | Disposition summary | Operator disposition |
+|----|---------------------|----------------------|
+| F1 | Evidence: GALIGHT-MORPHO confirmed as seventh master extension (204 cols, 784,016 rows), absent from v1. Recommendation: load as id-keyed table in ETL v2 with all 204 columns in scope; no ML-MORPHO subset policy carries forward | Confirmed 2026-08-17 |
+| F2 | Evidence: CIGALE fully recomputed for v1.1 (0.000000 exact-match; mass −6%, sfr_inst +30%, chi2 +95%; `ebv_stars*` new). Recommendation: v1.1 loads as new baseline with no v1 carry-over; tension products recomputed from scratch | Confirmed 2026-08-17 |
+| F3 | Evidence: LePhare change is field-wide, not tile-concentrated (tail fractions agree within ~0.5 pp across tile groups). Recommendation: treat as field-wide; no per-tile special casing | Confirmed 2026-08-17 |
+| F4 | Evidence: supplements are the v1 release, bitwise identical to live tables; skew against v1.1 photo-z unresolved upstream. Accepted operator disposition: ingest the unchanged v1 supplements with release provenance labeled and skew documented as an analytical limitation; revisit on upstream refresh | Confirmed 2026-08-17 |
+| F5 | Evidence: photometry products structurally distinct, same 784,016-source ID set; standalone files column-identical to master HDUs. Recommendation: load both primary photometry and SE++APER completely; vector-valued columns remain arrays in the source mirror | Confirmed 2026-08-17. Reverses the earlier v1-era exclusion of SE++APER; the lossless mirror loads it complete |
+| F6 | Evidence: checkout materialized 2026-08-17T01:38–01:42Z at pinned HEAD `1924f5d0`; 7/7 pointer-content reconciliation; `_unique.fits` 261,975 rows / `_all.fits` 482,579 rows open cleanly; live side 37,219 / 26,323 stands | Acknowledged 2026-08-17 |
+| F7 | Evidence: no v1 master FITS survives on-box; v1 baseline would rest on the pg_dump plus tracked records. Recommendation: superseded for the rebuild — `cosmos2025` stays untouched, `cosmos2025_v11` built alongside, no v1 drop or archive in P2R-03 | Confirmed 2026-08-17 |
+| F8 | Evidence: LePhare match fractions 1.0–2.9% recorded as a bounding finding per the stated rule; medians ~0 with heavy tails. Recommendation: no action beyond F2/F3 | Acknowledged 2026-08-17 |
+| F9 | Evidence: AGN/DESI is a 17,995,599-row reference product (~23× the source count), outside the declared catalog-mirror boundary. Recommendation: defer; a future spec that brings it inside a declared boundary reopens the load decision | Confirmed 2026-08-17 |
+| Q1 | Evidence: seven master extensions, three supplements, and the spec-z compilation enumerated and verified structurally. Recommendation: frozen mapping loads all seven complete extensions, the supplements, and the compilation, with no science-driven column projection | Confirmed 2026-08-17 |
+| Q2 | Evidence: standalone per-extension FITS verified column-identical to the master HDUs (gate 1.8). Recommendation: extract from the standalone files; the master stays manifest-pinned as the reference artifact | Confirmed 2026-08-17 |
+| Q3 | Evidence: supplement files are bitwise identical to the live v1 tables; photo-z skew documented in the supplement README. Accepted operator disposition: reload now with `supplement_version = v1-content-on-v1.1-holdings` provenance; treat skew as an analytical limitation | Confirmed 2026-08-17 |
+| Q4 | Evidence: F6 materialization complete; the 37,219-link join is recomputable on-box. Recommendation: spec-z ingest is an ETL v2 gate; `_unique.fits` loaded with the join rebuilt and reported against 37,219 / 26,323 and compilation 261,975 | Confirmed 2026-08-17 |
+
+The merge of `task/2a-provenance-closeout-amendment` to `main` is the authorization. There is no separate signature artifact.
