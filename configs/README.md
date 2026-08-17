@@ -4,7 +4,7 @@ title: "Configuration"
 description: "Configuration files for data paths, database connections, and pipeline parameters"
 author: "VintageDon"
 date: "2026-04-05"
-version: "1.3"
+version: "1.4"
 status: "Active"
 tags:
   - type: directory-readme
@@ -22,7 +22,7 @@ Configuration files consumed by pipeline source code. All paths and connection p
 
 | File | Description |
 |------|-------------|
-| `data_paths.yaml` | Master config. Defines catalog and semantic evidence paths, dictionary/report and staging outputs, database connection parameter names, and supplementary file locations |
+| `data_paths.yaml` | Master config. Defines catalog, semantic evidence, provenance-pin, dictionary/report, staging, database environment-name, and supplement paths |
 | `.gitkeep` | Placeholder to preserve directory in git |
 
 ---

@@ -71,6 +71,12 @@ semantic_sources:
   unit_conventions: /opt/agents/repos/cosmos2025-anomalies/docs/reference/unit-conventions.md
   etl_v2_spec: /opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
 
+# Existing immutable-source pins consumed read-only by ETL v2 preflight.
+# Gate 3.5 validates these files but never regenerates or replaces them.
+provenance:
+  source_manifest_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1.csv
+  cigale_seds_aggregate_pin: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1-cigale-seds.csv
+
 # ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------

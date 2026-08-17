@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.3"
+version: "3.4"
 status: "Active"
 tags:
   - type: directory-readme
@@ -96,6 +96,33 @@ Run the fast seal suite and production validator:
 ```bash
 pytest tests/test_dictionary_seal.py -v
 python src/etl/validate_dictionary_seal.py
+```
+
+## Source integrity and FITS fidelity
+
+`test_verify_source_fidelity.py` proves the Gate 3.5 read-only preflight and
+standalone/master comparison contract:
+
+- exact manifest header, root/count boundary, unique keys, and explicit
+  rejection of undeclared, duplicate, `.git/**`, and `cigale-seds/**` rows;
+- absent consumed inputs and separate declared/observed SHA-256 or byte-count
+  drift halt with named diagnostics;
+- the CIGALE-SED subtree/root metadata and row-block digest retain the exact
+  full-listing boundary and CRLF serialization;
+- the consumed-input enumeration remains the exact configured 16-name/path set;
+- the shared ordinal sample is seeded, deterministic, sorted, distinct, and
+  the exact requested size;
+- standalone/master row, ordered name, and FITS TFORM drift fail separately;
+- scalar, vector-element, FITS-mask-position, and NaN-position mismatches are
+  independent exact counts;
+- complete primary-ID equality, native-ID presence/absence, zero-based
+  `source_row`, and injected-ID construction cover their full populations.
+
+Run the focused mutations and the live verifier:
+
+```bash
+pytest tests/test_verify_source_fidelity.py -v
+python src/etl/verify_source_fidelity.py
 ```
 
 ## Manifest validator
