@@ -108,4 +108,29 @@ Outcome: In progress. Checkpoints below, one per gate.
 - No mismatch to record; had one occurred, both values would be recorded here and the unit halted. N/A. ✓
 - astropy opens both `_unique.fits` and `_all.fits`; row counts 261,975 / 482,579 recorded above. ✓
 
+**Per-gate commit SHA:** `95776d7`
+
+---
+
+## Gate 2.3, Manifest re-pin
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Seven CSV rows updated with gate 2.2 verified hashes, byte sizes, and materialization mtimes (UTC, format matching existing rows). `git diff` on the CSV: 7 insertions, 7 deletions, no other row touched.
+- `data-manifest-v1.1.md` §2 rewritten: materialized state (2026-08-17T01:38–01:42Z), pointer-versus-content reconciliation 7/7, explicit note that these seven rows were re-pinned 2026-08-17 under spec P2R-02 while the other 177 rows carry their original 2026-08-16T03:32:50Z pin. §2 now carries the `DR1.1` tag facts (lightweight ref at `a634a9ed`, 2025-10-31T01:50:32Z; HEAD two commits past; intervening commits README-only, no LFS paths) and the DR1.1-vs-v1.1 naming caution. FITS row counts (261,975 / 482,579) replace the "not obtainable on-box" blocker.
+- §1 updated: root-2 bytes 245,107,236 → 1,546,861,535 (recomputed from the full CSV byte column: 74 untouched root-2 rows sum 245,106,301 + seven re-pinned rows sum 1,301,755,234; root-1 unchanged at 130,197,210,900; 103+81=184 rows unchanged). Amendment note added to the header paragraph, the row-count block, and the re-hash paragraph (seed 20260817 three-row re-verification: all match).
+- Interior-README check: `docs/reference/README.md` describes the manifest generically ("SHA-256 pin of the v1.1 holdings"); no pointer-state or stale-figure claim. Not stale; unchanged.
+
+**Finding F-P2R02-1 (recorded, not absorbed): materialization mutated two hashed `.git` rows and added 22 unmanifested `.git` files.** P2R-01's root-2 hash set includes 29 files under the checkout's `.git/`. Diagnostic full re-hash of all 74 non-re-pinned root-2 rows (beyond the spec's three-row requirement, run because the three-row sample drew a `.git` pack file) shows exactly two drifted rows: `.git/config` (git-lfs filter section added) and `.git/index` (smudge checkout). Neither is data. Per this spec's freeze (exactly seven rows change), both keep their P2R-01 pin; a future whole-root re-hash will flag them, which is this finding, not corruption. 22 new unmanifested files exist under `.git/`: 7 `lfs/objects/<oid>` store files (each named by the verified oid), 11 `lfs/tmp/*` transfer temporaries, 4 `git lfs install` hooks. All 52 worktree files outside the seven are byte-identical to their pins. Recorded in manifest §2 "Materialization side effects" and left for operator disposition (tag-vs-HEAD pin question and pin-policy for `.git` machinery generally).
+
+**Validation results:**
+
+- `git diff --stat` on the CSV: 7 insertions / 7 deletions; no other row changed. ✓
+- Every re-pinned CSV hash equals its gate 2.2 computed value (spot-checked row-by-row against the gate 2.2 table). ✓
+- §2 no longer asserts any file is an unmaterialized pointer. ✓
+- §1 root-2 total bytes = sum of root-2 CSV byte column = 1,546,861,535, recomputed via awk and shown above. ✓
+- `DR1.1` tag (lightweight, `a634a9ed`, 2025-10-31T01:50:32Z), HEAD two commits past it, and the fact that the intervening commits touch no LFS path are all stated in §2. ✓
+- DR1.1 naming distinction stated explicitly in §2. ✓
+- Three randomly chosen untouched rows (seed 20260817) re-hashed and match: `.git/objects/pack/pack-8d499080...pack`, `COSMOSWeb_mastercatalog_v1.1_photom_primary.fits`, `detection_images/detection_chi2pos_SWLW_A7.fits`. ✓
+
 **Per-gate commit SHA:** (pending)
