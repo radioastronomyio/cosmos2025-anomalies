@@ -1,34 +1,56 @@
+<!--
+---
+title: "Manifest Validator Tests"
+description: "Discriminating tests for the v1.1 data manifest contract (spec P2R-02c gate A3.1)"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-08-17"
+version: "2.0"
+status: "Active"
+tags:
+  - type: documentation
+  - domain: testing
+related_documents:
+  - "[Data Manifest v1.1](../docs/reference/data-manifest-v1.1.md)"
+  - "[Builder](../src/inspection/build_data_manifest.py)"
+---
+-->
+
 # Manifest Validator Tests
 
-Tests for `src/inspection/build_data_manifest.py` validate the manifest contract:
+`test_build_data_manifest.py` proves the manifest machine contract in two layers.
 
-## Quick Tests (no filesystem access)
-- `test_csv_has_valid_header`: CSV must have exact ordered header
-- `test_csv_has_no_duplicate_keys`: (root, relative_path) must be unique
-- `test_csv_excludes_git_paths`: No path may contain /.git/ or start with .git/
-- `test_csv_row_counts_match_expected`: Exactly 103 root-1 + 52 root-2 rows
+## Isolated fixture tests
 
-## Full Verification Tests (require filesystem access)
-- `test_csv_verify_passes`: The validator must succeed against the committed CSV
-- `test_csv_missing_header_fails`: Validator must reject headerless CSV
-- `test_csv_reordered_header_fails`: Validator must reject header with reordered fields
-- `test_csv_git_config_row_fails`: Validator must reject .git/config row
-- `test_csv_omitted_worktree_file_fails`: Validator must detect missing worktree file
-- `test_csv_extra_disk_artifact_fails`: Validator must detect extra disk artifact
-- `test_csv_hash_size_drift_fails`: Validator must reject changed hash/size
+A passing temporary control (small root + its exact manifest) is mutated one
+property at a time; each test asserts a nonzero exit and the named diagnostic:
 
-## Running Tests
+| Mutation | Diagnostic |
+|----------|------------|
+| Missing header | `Header mismatch` |
+| Renamed header field | `Header mismatch` |
+| Reordered header | `Header mismatch` |
+| Duplicate key | `Duplicate key` |
+| Added `.git/config` row | `Git-internal path` |
+| Manifest-only row missing on disk | `Manifest row missing on disk` |
+| Disk-only file | `Disk file missing from manifest` |
+| Hash-only drift | `Hash mismatch` (only) |
+| Size-only drift | `Size mismatch` (only) |
+| Mtime-only drift | `Mtime mismatch` (only) |
+
+## Production tests
+
+- The committed CSV is byte-for-byte the serialized `0f3e31d` baseline minus
+  its 29 `.git/**` records (CRLF convention, order, and final newline included).
+- Structure: exact ordered header, 155 data rows, 103 root-1 / 52 root-2,
+  unique `(root, relative_path)` keys, zero `.git/**` paths.
+- Full read-only production verify over both configured roots (integration;
+  hashes ~131 GB, allow several minutes).
+
+## Running
 
 ```bash
-# Quick tests (run in ~0.1s)
-pytest tests/test_build_data_manifest.py::test_csv_has_valid_header -v
-pytest tests/test_build_data_manifest.py::test_csv_has_no_duplicate_keys -v
-pytest tests/test_build_data_manifest.py::test_csv_excludes_git_paths -v
-pytest tests/test_build_data_manifest.py::test_csv_row_counts_match_expected -v
-
-# All tests (full verification takes several minutes to hash all files)
-pytest tests/test_build_data_manifest.py -v
-
-# Run the validator directly
-python src/inspection/build_data_manifest.py --verify
+pytest tests/test_build_data_manifest.py -v              # full suite
+python src/inspection/build_data_manifest.py --verify    # production verify
+python src/inspection/build_data_manifest.py --verify \
+  --csv <csv> --root <dir> [--root <dir>:git]            # isolated target
 ```

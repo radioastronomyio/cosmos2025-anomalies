@@ -117,22 +117,69 @@ def manifest_root(root: Path, git_checkout: bool = False) -> list[dict]:
     return rows
 
 
+EXPECTED_HEADER = ["root", "relative_path", "sha256", "bytes", "mtime_utc"]
+
+
 def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[str]:
     """
-    Validate an existing manifest CSV against live filesystem.
+    Validate an existing manifest CSV against the live filesystem (read-only).
 
-    Returns list of error messages. Empty list means valid.
-    Raises if any row has .git/ in its path (violation of durable boundary).
+    Machine contract enforced, each with a condition-specific diagnostic:
+    exact ordered five-field header; one row per (root, relative_path) key
+    with duplicates rejected before any overwrite; zero .git/** relative
+    paths; rows only under declared roots; complete path-set equality in
+    both directions; and exact SHA-256, integer byte count, and normalized
+    second-resolution UTC mtime agreement for every row.
+
+    Returns a list of diagnostic strings. An empty list means valid.
     """
-    errors = []
-    manifest_rows = {}
-    for r in csv.DictReader(csv_path.open()):
-        path = r["relative_path"]
-        if "/.git/" in path or path.startswith(".git/"):
-            raise AssertionError(f"Manifest contains .git/ path: {r['root']}/{path}")
-        manifest_rows[(r["root"], path)] = r
+    errors: list[str] = []
 
-    disk_files = {}
+    # Header: exact, ordered, nothing renamed/reordered/missing/extra.
+    with csv_path.open("rb") as handle:
+        first_line = handle.readline()
+    header_text = first_line.decode("utf-8").rstrip("\r\n")
+    if header_text.split(",") != EXPECTED_HEADER:
+        errors.append(
+            f"Header mismatch: expected exactly '{','.join(EXPECTED_HEADER)}', got '{header_text}'"
+        )
+        return errors
+
+    # Rows: field count, git-internal paths, duplicate keys (before assignment).
+    manifest_rows: dict[tuple[str, str], dict] = {}
+    with csv_path.open(newline="") as handle:
+        reader = csv.reader(handle)
+        next(reader, None)
+        for lineno, fields in enumerate(reader, start=2):
+            if not fields:
+                continue
+            if len(fields) != 5:
+                errors.append(
+                    f"Row {lineno}: expected 5 fields, got {len(fields)}"
+                )
+                continue
+            root, rel, sha, bytes_str, mtime = fields
+            if "/.git/" in rel or rel.startswith(".git/"):
+                errors.append(f"Git-internal path in manifest: {root}/{rel}")
+                continue
+            key = (root, rel)
+            if key in manifest_rows:
+                errors.append(f"Duplicate key: {root}/{rel}")
+                continue
+            manifest_rows[key] = {
+                "sha256": sha,
+                "bytes": bytes_str,
+                "mtime_utc": mtime,
+            }
+
+    # Declared roots: manifest rows may not name an undeclared root.
+    declared_roots = {str(root) for root, _ in roots}
+    for root, rel in manifest_rows:
+        if root not in declared_roots:
+            errors.append(f"Undeclared root in manifest: {root}")
+
+    # Disk inventory (excluding .git machinery for git-checkout roots).
+    disk_files: dict[tuple[str, str], Path] = {}
     for root, is_git_checkout in roots:
         for dirpath, dirnames, filenames in os.walk(root, topdown=True):
             dirpath_path = Path(dirpath)
@@ -145,21 +192,41 @@ def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[st
                 relative = path.relative_to(root)
                 disk_files[(str(root), str(relative))] = path
 
-    for key, row in manifest_rows.items():
+    # Field agreement: manifest -> disk.
+    for key, row in sorted(manifest_rows.items()):
         if key not in disk_files:
-            errors.append(f"Missing on disk: {key[0]}/{key[1]}")
+            errors.append(f"Manifest row missing on disk: {key[0]}/{key[1]}")
             continue
         path = disk_files[key]
-        h = sha256_of(path)
-        sz = path.stat().st_size
-        if h != row["sha256"]:
-            errors.append(f"Hash mismatch {key[0]}/{key[1]}: manifest {row['sha256'][:16]}... vs disk {h[:16]}...")
-        if sz != int(row["bytes"]):
-            errors.append(f"Size mismatch {key[0]}/{key[1]}: manifest {row['bytes']} vs disk {sz}")
+        stat = path.stat()
+        try:
+            declared_bytes = int(row["bytes"])
+        except ValueError:
+            errors.append(
+                f"Non-integer byte count {key[0]}/{key[1]}: {row['bytes']!r}"
+            )
+            continue
+        if stat.st_size != declared_bytes:
+            errors.append(
+                f"Size mismatch {key[0]}/{key[1]}: manifest {declared_bytes} vs disk {stat.st_size}"
+            )
+        disk_mtime = datetime.fromtimestamp(
+            stat.st_mtime, tz=timezone.utc
+        ).isoformat(timespec="seconds")
+        if disk_mtime != row["mtime_utc"]:
+            errors.append(
+                f"Mtime mismatch {key[0]}/{key[1]}: manifest {row['mtime_utc']} vs disk {disk_mtime}"
+            )
+        disk_hash = sha256_of(path)
+        if disk_hash != row["sha256"]:
+            errors.append(
+                f"Hash mismatch {key[0]}/{key[1]}: manifest {row['sha256']} vs disk {disk_hash}"
+            )
 
-    for key in disk_files:
+    # Path-set equality: disk -> manifest.
+    for key in sorted(disk_files):
         if key not in manifest_rows:
-            errors.append(f"Extra file on disk not in manifest: {key[0]}/{key[1]}")
+            errors.append(f"Disk file missing from manifest: {key[0]}/{key[1]}")
 
     return errors
 
@@ -251,8 +318,44 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Build or validate the COSMOS-Web v1.1 data manifest.")
-    parser.add_argument("--verify", action="store_true", help="Validate existing manifest without rewriting.")
+    parser.add_argument("--verify", action="store_true", help="Validate existing manifest without rewriting (read-only).")
+    parser.add_argument("--csv", type=Path, default=None, help="Manifest CSV to verify (default: production path from config).")
+    parser.add_argument(
+        "--root",
+        action="append",
+        type=Path,
+        default=None,
+        metavar="PATH[:git]",
+        help="Root to verify against (repeatable). Suffix ':git' marks a git checkout whose .git is excluded. Defaults to the two configured production roots.",
+    )
     args = parser.parse_args()
+
+    if args.verify:
+        if args.csv is not None and args.root is not None:
+            verify_csv = args.csv
+            verify_roots: list[tuple[Path, bool]] = []
+            for spec in args.root:
+                if str(spec).endswith(":git"):
+                    verify_roots.append((Path(str(spec)[:-len(":git")]), True))
+                else:
+                    verify_roots.append((Path(spec), False))
+        elif args.csv is None and args.root is None:
+            config = yaml.safe_load(CONFIG_PATH.read_text())
+            verify_csv = CSV_PATH
+            verify_roots = [
+                (Path(config["data_root"]), False),
+                (Path(config["specz"]["compilation_root"]), True),
+            ]
+        else:
+            parser.error("--csv and --root must be used together when overriding the verification target.")
+        errors = validate_manifest(verify_csv, verify_roots)
+        if errors:
+            print("Manifest validation FAILED:")
+            for e in errors:
+                print(f"  {e}")
+            sys.exit(1)
+        print("Manifest validation PASSED: all rows match live filesystem.")
+        sys.exit(0)
 
     config = yaml.safe_load(CONFIG_PATH.read_text())
     data_root = Path(config["data_root"])
