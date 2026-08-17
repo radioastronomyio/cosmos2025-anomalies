@@ -19,15 +19,26 @@ its row count. Read-only against the roots: it opens files for hashing and
 nothing else. The off-box CIGALE SED root is recorded in the summary by
 host and path only, never hashed.
 
+Amendment P2R-02a: Git-checkout roots now exclude the `.git` directory from
+the manifest boundary. The `.git` directory is mutable transport machinery,
+not a data artifact. The manifest records worktree artifacts and the Git
+commit SHA, not repository internals. The validator rejects any row with
+`/.git/` in its path or starting `.git/`, and raises if a declared row does
+not match on-disk in full verification mode.
+
 Usage
 -----
-    python src/inspection/build_data_manifest.py
+    python src/inspection/build_data_manifest.py [--verify]
 
 Examples
 --------
     python src/inspection/build_data_manifest.py
         Writes docs/reference/data-manifest-v1.1.csv and a summary JSON to
         stdout capture for the markdown summary.
+
+    python src/inspection/build_data_manifest.py --verify
+        Validates the existing CSV against the live filesystem without
+        rewriting. Raises on mismatch or missing/extra files.
 """
 
 # =============================================================================
@@ -73,17 +84,29 @@ def sha256_of(path: Path) -> str:
     return digest.hexdigest()
 
 
-def manifest_root(root: Path) -> list[dict]:
-    """Hash every regular file under root, newest-stable order (walk order)."""
+def manifest_root(root: Path, git_checkout: bool = False) -> list[dict]:
+    """
+    Hash every regular file under root.
+
+    For git_checkout roots, exclude the .git directory entirely.
+    The manifest records worktree artifacts, not mutable repository machinery.
+    """
     rows = []
-    for dirpath, _dirnames, filenames in os.walk(root):
+    excluded_dirs = {".git"} if git_checkout else set()
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True):
+        dirpath_path = Path(dirpath)
+        if excluded_dirs & set(dirpath_path.parts):
+            dirnames.clear()
+            filenames.clear()
+            continue
         for name in sorted(filenames):
-            path = Path(dirpath) / name
+            path = dirpath_path / name
             stat = path.stat()
+            relative = path.relative_to(root)
             rows.append(
                 {
                     "root": str(root),
-                    "relative_path": str(path.relative_to(root)),
+                    "relative_path": str(relative),
                     "sha256": sha256_of(path),
                     "bytes": stat.st_size,
                     "mtime_utc": datetime.fromtimestamp(
@@ -92,6 +115,53 @@ def manifest_root(root: Path) -> list[dict]:
                 }
             )
     return rows
+
+
+def validate_manifest(csv_path: Path, roots: list[tuple[Path, bool]]) -> list[str]:
+    """
+    Validate an existing manifest CSV against live filesystem.
+
+    Returns list of error messages. Empty list means valid.
+    Raises if any row has .git/ in its path (violation of durable boundary).
+    """
+    errors = []
+    manifest_rows = {}
+    for r in csv.DictReader(csv_path.open()):
+        path = r["relative_path"]
+        if "/.git/" in path or path.startswith(".git/"):
+            raise AssertionError(f"Manifest contains .git/ path: {r['root']}/{path}")
+        manifest_rows[(r["root"], path)] = r
+
+    disk_files = {}
+    for root, is_git_checkout in roots:
+        for dirpath, dirnames, filenames in os.walk(root, topdown=True):
+            dirpath_path = Path(dirpath)
+            if is_git_checkout and ".git" in dirpath_path.parts:
+                dirnames.clear()
+                filenames.clear()
+                continue
+            for name in filenames:
+                path = dirpath_path / name
+                relative = path.relative_to(root)
+                disk_files[(str(root), str(relative))] = path
+
+    for key, row in manifest_rows.items():
+        if key not in disk_files:
+            errors.append(f"Missing on disk: {key[0]}/{key[1]}")
+            continue
+        path = disk_files[key]
+        h = sha256_of(path)
+        sz = path.stat().st_size
+        if h != row["sha256"]:
+            errors.append(f"Hash mismatch {key[0]}/{key[1]}: manifest {row['sha256'][:16]}... vs disk {h[:16]}...")
+        if sz != int(row["bytes"]):
+            errors.append(f"Size mismatch {key[0]}/{key[1]}: manifest {row['bytes']} vs disk {sz}")
+
+    for key in disk_files:
+        if key not in manifest_rows:
+            errors.append(f"Extra file on disk not in manifest: {key[0]}/{key[1]}")
+
+    return errors
 
 
 def git_head(root: Path) -> str:
@@ -177,14 +247,32 @@ def try_unique_fits(path: Path) -> dict:
 
 
 def main() -> None:
-    """Build the pinned manifest for both local provenance roots."""
+    """Build the pinned manifest for both local provenance roots, or validate existing."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Build or validate the COSMOS-Web v1.1 data manifest.")
+    parser.add_argument("--verify", action="store_true", help="Validate existing manifest without rewriting.")
+    args = parser.parse_args()
+
     config = yaml.safe_load(CONFIG_PATH.read_text())
     data_root = Path(config["data_root"])
     specz_root = Path(config["specz"]["compilation_root"])
     unique_fits = Path(config["specz"]["unique_fits"])
 
-    rows = manifest_root(data_root)
-    specz_rows = manifest_root(specz_root)
+    roots_spec = [(data_root, False), (specz_root, True)]
+
+    if args.verify:
+        errors = validate_manifest(CSV_PATH, roots_spec)
+        if errors:
+            print("Manifest validation FAILED:")
+            for e in errors:
+                print(f"  {e}")
+            sys.exit(1)
+        print("Manifest validation PASSED: all rows match live filesystem.")
+        sys.exit(0)
+
+    rows = manifest_root(data_root, git_checkout=False)
+    specz_rows = manifest_root(specz_root, git_checkout=True)
     all_rows = rows + specz_rows
 
     CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
