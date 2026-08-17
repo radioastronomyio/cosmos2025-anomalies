@@ -194,3 +194,37 @@ Outcome: Complete. All five gates executed; 7/7 pointer-content reconciliation; 
 Runtime facts: Kilo CLI, model `kilo/zai-coding/glm-5.3`, host ml01, shared venv `/opt/agents/venv` (Python 3.12.3, astropy 7.2.0). Run window 2026-08-17T01:35–02:10Z (approximately; unattended). Data touched: none — no write to either manifest root at any point; the only hashed-root observation was read-only re-hashing. The live `cosmos2025` database was never connected.
 
 Deferred to the operator: the 13 confirmation cells and signature in `docs/research/v11-readiness-review.md`; finding F-P2R02-1's disposition (`.git` machinery drift rows and the tag-vs-HEAD pin question, both recorded in manifest §2); the decision recorded in spec P2R-02's notes on pinning `DR1.1` versus `1924f5d0`.
+
+---
+
+# Amendment 1 (P2R-02a): Durable Provenance Boundary and Closeout Repair
+
+Executed on stacked branch `task/2a-provenance-closeout-amendment` from `0f3e31d`. Runtime identity: Kilo CLI, `kilo/zai-coding/glm-5.3`, host ml01. The amendment addresses three authored defects discovered during review: mutable `.git/**` included in the provenance boundary, incorrect tag assertion (annotated vs lightweight), and lifecycle template misalignment. Operator dispositions recorded at spec amendment start: (1) exclude `.git/**` from boundary, (2) retain HEAD `1924f5d0`, (3) load v1 supplements into the source mirror with skew documented.
+
+---
+
+## Gate A1.1, Prove the durable manifest boundary
+
+**Commit:** (recorded below)
+
+- Root 1 (NVMe): 103 manifest rows, untouched — zero paths examined, no re-hash. ✓
+- Root 2 inventory: live worktree at `1924f5d0` contains **52 files** when excluding the entire `.git` directory. Zero `.git/**` paths appear in the inventory. The current manifest contains exactly 52 non-`.git` rows and 29 `.git/**` rows (total 81 root-2). Set equality confirmed: the 52 worktree paths are exactly the 52 non-`.git` manifest paths.
+- Retained row verification: for all 52 non-`.git` root-2 rows, freshly computed SHA-256 and byte size match the CSV row values. Zero mismatches. The manifest `.git/**` rows are deliberately omitted from this comparison; their drift (`.git/config`, `.git/index`) was F-P2R02-1 and is now a removal target.
+- LFS pointer reconciliation: read the seven committed pointer blobs at `1924f5d0` via `git show <pinned-commit>:<path>`, extracted complete 64-hex oids and declared sizes. Computed SHA-256 and size of the seven materialized files: **7/7 match on both**. The same reconciliation as gate 2.2, re-verified here as a boundary proof before manifest rewrite.
+- HEAD and tag verification: HEAD = `1924f5d0`; `DR1.1` resolves as a **lightweight** tag (object type `commit`, no tag object) at `a634a9ed5c1c17ea2629b2326e4dc99f235d8027`. Tag-to-HEAD diff (`git diff DR1.1..HEAD`) contains exactly two paths: `README.md` and `sed_fitting/cigale/README.md`. Neither is an LFS-tracked path (`*.fits`, `*.pkl`). The tag commit date is 2025-10-31; HEAD sits two commits past it. The earlier §2 claim "annotated tag" was incorrect; the manifest amendment (gate A1.2) records the observed lightweight ref type.
+- Worktree byte total: sum of the 52 worktree files = **1,465,763,774 bytes**. This is the proven root-2 boundary after `.git/**` removal (the current manifest's root-2 total of 1,546,861,535 bytes includes the drift-compensated LFS content plus the `.git/**` totals; the corrected boundary is revalidated in A1.2).
+- Scratch mutation proofs (to be executed by the validator written in A1.2): a modified CSV that adds a `.git/config` row must be rejected (pattern `/\.git/` or `\.git/`); a modified CSV that omits a known worktree file must be rejected (manifest must equal disk in both directions). These tests confirm the validator enforces the durable boundary before any write.
+
+**Validation results:**
+
+- Root 1 untouched, no re-hash, 103 rows retained. ✓
+- Root 2 inventory contains zero `.git/**` paths; equals the complete live worktree set bidirectionally (52 each). ✓
+- All 52 retained root-2 rows freshly match path, SHA-256, and bytes. ✓
+- All 7 LFS files match committed pointer OID and size at `1924f5d0`. ✓
+- HEAD is `1924f5d0`; `DR1.1` confirmed lightweight; tag-to-HEAD diff contains only `README.md` paths, no LFS paths. ✓
+- Worktree byte total proven: 1,465,763,774 bytes. ✓
+- Evidence checkpointed before any manifest write. ✓
+
+**Per-gate commit SHA:** (pending)
+
+---
