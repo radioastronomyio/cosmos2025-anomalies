@@ -133,4 +133,27 @@ Outcome: In progress. Checkpoints below, one per gate.
 - DR1.1 naming distinction stated explicitly in §2. ✓
 - Three randomly chosen untouched rows (seed 20260817) re-hashed and match: `.git/objects/pack/pack-8d499080...pack`, `COSMOSWeb_mastercatalog_v1.1_photom_primary.fits`, `detection_images/detection_chi2pos_SWLW_A7.fits`. ✓
 
+**Per-gate commit SHA:** `f711bba`
+
+---
+
+## Gate 2.4, Readiness review amendment
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- Amendment note added under the review title explaining the P2R-02 amendment and the append-only rule. Frontmatter bumped to v1.1 / 2026-08-17.
+- **F6 closed:** status marker in the heading changed OPEN → CLOSED 2026-08-17; Resolution block appended with the materialization date (2026-08-17T01:38–01:42Z), the gate 2.2 reconciliation (7/7 hash-and-size agreement with pointer oids), the live-side counts F6 already records (37,219 linked, 26,323 in `catalog.v_analysis_sample`), and the compilation-side row count (261,975 in `_unique.fits`; `_all.fits` 482,579). Original finding text, evidence, and closed question byte-identical to the P2R-01 record.
+- **Append-only resolutions** added to F1 (all 204 columns in scope, no ML-MORPHO subset policy carries forward), F5 (both photometry products loaded completely, vector columns remain arrays), F7 (superseded: `cosmos2025` untouched, `cosmos2025_v11` built alongside, no v1 drop or archive in P2R-03), F9 (deferred by 18M-row reference-product boundary and scale, explicitly not by absence of a consumer), Q1 (frozen mapping: seven complete extensions, three complete supplements, spec-z compilation, no science-driven projection).
+- **Approval section converted to a record:** 13-row table (F1–F9, Q1–Q4) with disposition summaries, empty operator-confirmation cells, and a signature line (name + date, unsigned). No confirmation inferred, none filled.
+
+**Validation results:**
+
+- F6 carries a Resolution block with materialization date and gate 2.2 result; heading status reads CLOSED. ✓
+- F6's original finding text and original closed question present and unmodified (diff shows only additions and the status marker). ✓
+- F1, F5, F7, F9, Q1 carry append-only resolution blocks matching the frozen architecture (six `Resolution (2026-08-17...)` blocks total). ✓
+- F9's rationale is boundary-and-scale; consumer absence is explicitly disclaimed as the basis. ✓
+- Approval table has exactly 13 rows (grep count) with disposition summaries, empty confirmation cells, and a signature line. ✓
+- Every confirmation cell empty (awk check: zero non-empty cells); signature line unsigned. ✓
+- No historical evidence paragraph deleted or rewritten; the only remaining OPEN marker is F4's, which remains a genuine open decision. ✓
+
 **Per-gate commit SHA:** (pending)
