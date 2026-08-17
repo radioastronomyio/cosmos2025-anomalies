@@ -22,7 +22,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | 🔄 In Progress |
+| Status | ✅ Complete |
 | Spec | /opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-02-manifest-amendment.md (v1.1) |
 | Branch | task/2-manifest-amendment |
 | Base commit | 4944876 (main) |
@@ -30,7 +30,7 @@ related_documents:
 
 Objective: Execute spec P2R-02 gates 2.1 through 2.5. Re-pin the seven materialized LFS rows in `data-manifest-v1.1.csv` against their pointer declarations at pinned commit `1924f5d0`, close readiness-review finding F6 with evidence, append resolution blocks to F1/F5/F7/F9/Q1 per the approved mirror architecture, and convert the Approval section into an unsigned operator record.
 
-Outcome: In progress. Checkpoints below, one per gate.
+Outcome: Complete. All five gates executed; 7/7 pointer-content reconciliation; seven rows re-pinned; F6 closed; approval surface prepared and unsigned. One finding recorded (F-P2R02-1, `.git` machinery drift). P2R-03 remains blocked until the operator fills the confirmation cells, signs, and the signed review is on `main`.
 
 ---
 
@@ -156,4 +156,41 @@ Outcome: In progress. Checkpoints below, one per gate.
 - Every confirmation cell empty (awk check: zero non-empty cells); signature line unsigned. ✓
 - No historical evidence paragraph deleted or rewritten; the only remaining OPEN marker is F4's, which remains a genuine open decision. ✓
 
-**Per-gate commit SHA:** (pending)
+**Per-gate commit SHA:** `e7040de`
+
+---
+
+## Gate 2.5, Closeout
+
+**Commit:** this gate's own commit (SHA in seal below)
+
+- Worklog sealed with per-gate SHAs and runtime facts.
+- `assets/icon.svg` (pre-existing untracked file carried from `main`) committed on this branch per operator instruction of 2026-08-17, recorded here in lieu of a clean-tree closeout. One-off repo furniture; no spec deliverable depends on it.
+- Consistency pass: `pytest` 3/3 passed; CSV integrity re-checked (184 data rows + header, 7-row diff confirmed at gate 2.3); no project-state or science-opportunities text references the retired pointer state (grep clean); interior README pass at gate 2.3 found nothing stale.
+- No push, no remote operations at any point. `main` untouched.
+- Post-commit lifecycle records outside the target repo: one row appended to `/opt/agents/repos/work-logs/work-registry.csv` (category `astronomy`), and the central spec moved to `/opt/agents/repos/spec/2026-08/`.
+
+**Validation results:**
+
+- `main` contained P2R-01 closeout `cd0a8c0f7625836c7928ece4177a5ccce2dd3dfe` before branch creation (verified at startup). ✓
+- Branch `task/2-manifest-amendment`; zero remote operations. ✓
+- One commit per gate, each referencing its gate number. ✓
+- Worklog checkpointed per gate; sealed below. ✓
+- Registry row appended, category `astronomy`. ✓
+- Central spec archived to `/opt/agents/repos/spec/2026-08/`, absent from the active queue. ✓
+
+---
+
+## Seal
+
+| Gate | Commit |
+|------|--------|
+| 2.1 Pointer-declaration capture | `6788d0b` |
+| 2.2 Re-hash and reconcile | `95776d7` |
+| 2.3 Manifest re-pin | `f711bba` |
+| 2.4 Readiness review amendment | `e7040de` |
+| 2.5 Closeout | this commit |
+
+Runtime facts: Kilo CLI, model `kilo/zai-coding/glm-5.3`, host ml01, shared venv `/opt/agents/venv` (Python 3.12.3, astropy 7.2.0). Run window 2026-08-17T01:35–02:10Z (approximately; unattended). Data touched: none — no write to either manifest root at any point; the only hashed-root observation was read-only re-hashing. The live `cosmos2025` database was never connected.
+
+Deferred to the operator: the 13 confirmation cells and signature in `docs/research/v11-readiness-review.md`; finding F-P2R02-1's disposition (`.git` machinery drift rows and the tag-vs-HEAD pin question, both recorded in manifest §2); the decision recorded in spec P2R-02's notes on pinning `DR1.1` versus `1924f5d0`.
