@@ -48,11 +48,13 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 
 **Closed question:** Confirm ETL v2 treats the photo-z change as field-wide (no per-tile special casing in extraction or verification)? Yes/No.
 
-### F4. The LSS and group supplements are the v1 release, unchanged; skew against the v1.1 photo-z recompute is unresolved (OPEN)
+### F4. The LSS and group supplements are the v1 release, unchanged; skew against the v1.1 photo-z recompute is unresolved (CLOSED 2026-08-17 per operator disposition)
 
 **Evidence:** On-disk files compared at value level against the live tables (`src/inspection/supplement_evidence.py`, seed 20260815): row counts from the files are 164,155 LSS (OVERDENSITY HDU), 1,678 groups, 1,745,652 memberships, each equal to its live table count; sampled value checks are bitwise exact throughout (2,000/2,000 LSS on (id, density_excess); 1,678/1,678 groups on (ID, LAMBDA); 5,000/5,000 memberships on (galid, group_id, assoc_prob)). The local files are therefore the same release that was loaded, not a refresh. The on-disk v1.1 documentation says nothing about updated supplements: the arXiv paper source (arXiv-2506.03243v1) predates v1.1 and mentions no supplement reissue; the v1.1 column-description file covers only the master catalog; the LSS readme describes Hatamnia et al. 2025 KDE built on "robust photometric redshifts" (the v1 photo-z that v1.1 reran per F2/F3). Whether upstream ships refreshed supplements is not determinable on-box.
 
 **Closed question:** Accept the v1 supplements into ETL v2 with their skew against the v1.1 photo-z documented as a known limitation (O5 contextual-anomaly work proceeds with that caveat), or hold supplement ingest pending an upstream refresh? Accept / Hold.
+
+**Resolution (2026-08-17, operator disposition):** CLOSED. Ingest the unchanged v1 supplement release into the lossless source mirror, label their provenance as v1 release-on-v1.1-holdings in the provenance table, and treat the photo-z skew as an analytical limitation rather than an ETL exclusion. Revisit only if upstream ships a refreshed release.
 
 ### F5. ETL v2 should feed from the primary photometry product; the two products are structurally distinct
 
@@ -60,7 +62,7 @@ The approval surface for ETL v2. Every finding below carries an ID, a statement,
 
 **Closed question:** Adopt photom_primary as the ETL v2 photometry source (secondary either skipped or loaded as a reference table)? Primary / Primary+secondary.
 
-**Resolution (2026-08-17, spec P2R-02, per the approved lossless-mirror architecture):** Both primary photometry (PHOTOMETRY HOTCOLD AND SE++) and SE++APER are loaded completely; vector-valued columns remain arrays in the source mirror. The either/or framing of the closed question is superseded: the mirror does not choose products.
+**Resolution (2026-08-17, spec P2R-02A, per the approved lossless-mirror architecture):** Both primary photometry (PHOTOMETRY HOTCOLD AND SE++) and SE++APER are loaded completely; vector-valued columns remain arrays in the source mirror. The either/or framing of the closed question is superseded: the mirror does not choose products.
 
 ### F6. The spec-z join cannot be verified on-box: the compilation's data files are LFS pointers (CLOSED 2026-08-17)
 
@@ -106,13 +108,15 @@ Each question is closed, with the recommendation the evidence supports.
 
 **Q3. Supplement handling.** Per F4: reload the identical v1-content files (accept documented skew), or hold for an upstream refresh. Recommendation: reload now, mark `supplement_version = v1-content-on-v1.1-holdings` in the provenance table, revisit if upstream refreshes. Proceed / hold?
 
+**Resolution (2026-08-17, operator disposition):** Load the unchanged v1 supplement release with provenance labeled as v1 release-on-v1.1-holdings. Photo-z skew is documented in the supplement README and treated as an analytical limitation for any consumer, not as an ETL exclusion. Revisit only if upstream ships a refreshed release.
+
 **Q4. Spec-z ingest as an ETL v2 gate.** Per F6: the operator materializes the compilation before ETL v2 dispatch (it is a precondition for the spec-z ingest gate and for recomputing the 37,219-link join), and ETL v2 ingests `_unique.fits` with the join rebuilt and reported against 37,219 / 26,323. Recommendation: yes, spec-z ingest is an ETL v2 gate contingent on F6 materialization. Proceed / defer spec-z?
 
 ---
 
 ## Approval
 
-Operator signature on the nine closed questions and four design questions authorizes Task 2 (ETL v2) to dispatch. Until then the v1 database stays untouched and the v1.1 holdings stay pinned at manifest `data-manifest-v1.1.csv`.
+Operator signature on the nine findings and four design questions authorizes the lossless v1.1 source mirror and enables P2R-03. Until then the v1 database stays untouched and the v1.1 holdings stay pinned at manifest `data-manifest-v1.1.csv` (amended 2026-08-17 by spec P2R-02A to durable worktree-only boundary). P2R-03 dispatches only after (1) the operator fills the confirmation cells and signs below, and (2) both the signed readiness review and the completed amendment manifest are present on `main`.
 
 **Record of operator confirmation (structure prepared by spec P2R-02, 2026-08-17).** Each row carries a disposition summary of the evidence and any resolution above. The confirmation column is the operator's alone; it is empty until filled by hand, and nothing in this record infers or presumes an answer.
 
@@ -121,7 +125,7 @@ Operator signature on the nine closed questions and four design questions author
 | F1 | Seventh extension GALIGHT-MORPHO confirmed in v1.1 (204 cols, 784,016 rows); resolved: all 204 columns in scope, no subset policy carries forward | |
 | F2 | CIGALE fully recomputed for v1.1 (0.000000 exact-match; mass −6%, sfr_inst +30%, chi2 +95%; `ebv_stars*` new); v1.1 loads as new baseline, tension products recomputed from scratch | |
 | F3 | LePhare change is field-wide, not tile-concentrated (tail fractions agree within ~0.5 pp); no per-tile special casing | |
-| F4 | Supplements are v1 release, bitwise identical to live tables; skew against v1.1 photo-z unresolved upstream; accept-with-documented-skew or hold is the operator's call | |
+| F4 | Supplements are v1 release, bitwise identical to live tables; skew against v1.1 photo-z unresolved upstream. Resolved: ingest with documented skew, provenance label, revisit on upstream refresh | |
 | F5 | Photometry products structurally distinct, same 784,016-source ID set; resolved: both loaded completely, vector columns remain arrays | |
 | F6 | CLOSED 2026-08-17: checkout materialized, 7/7 pointer-content reconciliation, `_unique.fits` 261,975 rows / `_all.fits` 482,579 rows open cleanly; live side 37,219 / 26,323 stands | |
 | F7 | No v1 master FITS on-box; resolved: superseded — `cosmos2025` untouched, `cosmos2025_v11` built alongside, no v1 drop or archive in P2R-03 | |

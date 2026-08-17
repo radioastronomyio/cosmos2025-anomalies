@@ -225,6 +225,113 @@ Executed on stacked branch `task/2a-provenance-closeout-amendment` from `0f3e31d
 - Worktree byte total proven: 1,465,763,774 bytes. ✓
 - Evidence checkpointed before any manifest write. ✓
 
+**Per-gate commit SHA:** `6ace698`
+
+---
+
+## Gate A1.3, Correct the approval surface
+
+**Commit:** (recorded below)
+
+- F4: amended heading from "(OPEN)" to "(CLOSED 2026-08-17 per operator disposition)". Original evidence retained. Appended Resolution block: operator chose to ingest the unchanged v1 supplements into the lossless source mirror, label their release provenance in the provenance table, and treat the photo-z skew as an analytical limitation rather than an ETL exclusion.
+- Q3: appended Resolution block matching F4's disposition (supplements reload with documented skew, provenance label, revisit on upstream refresh).
+- Approval introduction changed from "nine closed questions" to "nine findings and four design questions" to accurately reflect the structure.
+- Rows whose decisions still await signature use explicit recommendation language ("Proceed", "Accept-with-documented-skew", "Defer", "Hold/accept is operator's call").
+- F4/Q3 rows now state the accepted disposition in the summary column but keep their confirmation cells empty.
+- P2R-03 block language refined: explicitly states that P2R-03 dispatches only after the signed readiness review and the completed amendment manifest are both on `main`.
+
+**Validation results:**
+
+- Original finding evidence and questions remain legible; new decisions are append-only resolutions. ✓
+- F4 is closed by the operator's accepted disposition and Q3 carries the same rule. ✓
+- No unsigned row phrases an unconfirmed recommendation as an already-signed decision. ✓
+- Approval table still has exactly thirteen empty confirmation cells and an unsigned signature line. ✓
+- P2R-03 blocked status explicitly mentions both the signed review and completed amendment as prerequisites. ✓
+
+**Per-gate commit SHA:** (pending)
+
+---
+
+## Gate A1.2, Repair and seal the manifest
+
+**Commit:** (recorded below)
+
+- Modified `src/inspection/build_data_manifest.py` to exclude `.git/**` from Git-checkout roots and to generate a deterministic worktree-only inventory. The script now:
+  - For git-checkout roots: walks `os.walk(root, exclude=['.git'])` to enumerate worktree only.
+  - For all roots: writes CSV rows with full `root,relative_path,sha256,bytes,mtime_utc`.
+  - Rejects any path containing `/.git/` or starting `.git/` via assertion.
+  - Raises if a manifest row does not match on-disk (path, hash, bytes) on full verification.
+  - Added focused tests covering: (a) `.git/**` rejection, (b) missing worktree file detection, (c) extra worktree file detection, (d) hash/size drift detection.
+- Regenerated `docs/reference/data-manifest-v1.1.csv` from A1.1 evidence:
+  - Root 1: 103 rows unchanged, hash-verified via random-sample (seed 20260817). Zero drift.
+  - Root 2: 52 rows (worktree only), all paths, hashes, sizes from the A1.1 fresh compute. The 29 `.git/**` rows removed.
+  - CSV diff: exactly 29 deletions (`.git/**` paths), zero retained-row modifications. `git diff --stat` confirmed.
+  - Final row count: 103 + 52 = **155 rows**.
+  - Root byte totals recomputed from final CSV: root-1 = 130,197,210,900 bytes (unchanged); root-2 = 1,465,763,774 bytes (sum of 52 worktree files, matches A1.1). Grand total = 131,662,974,674 bytes.
+- Rewrote `docs/reference/data-manifest-v1.1.md` §1 and §2:
+  - §1 table: root-2 bytes updated to 1,465,763,774; root-2 files corrected from 81 to 52; total rows corrected from 184 to 155.
+  - §1 row-count verification block: `find ... -type f | wc -l` → 52 for root-2 (excluding `.git`), 103 for root-1; manifest rows 155 = 103 + 52. Amendment note: root-2 now excludes `.git/**` by durable boundary design.
+  - §2 completely rewritten:
+    - Headline: "Provenance boundary: manifest records worktree artifacts and Git commit, not mutable repository machinery. The `.git` directory is excluded because it is mutable transport layer, not data."
+    - Approved repository pin: HEAD `1924f5d0ee6c221b820035c8d3cd7302c02532b0`. Lightweight release ref: `DR1.1` (resolves to `a634a9ed`, 2025-10-31; HEAD two commits past it). Tag-to-HEAD diff: `README.md` and `sed_fitting/cigale/README.md` only, no LFS paths. Operator disposition (recorded in spec amendment): retain HEAD pin rather than retarget to tag; both commit and tag record the same data.
+    - Materialization event (2026-08-17T01:38–01:42Z) and pointer-vs-content reconciliation: 7/7 LFS files match their committed pointer OIDs at `1924f5d0` (full oids recorded in A1.1 table). The manifest rows are content pins, validated by that reconciliation.
+    - DR1.1 naming caution unchanged (compilation's `..._COSMOS_DR1.1_...` is its own release version, unrelated to COSMOS-Web v1.1).
+    - Removed: the "Materialization side effects (finding F-P2R02-1)" block about `.git/config` drift. The `.git/**` exclusion renders that finding obsolete; the note about re-hashing `.git` machinery as a future-finding is replaced with the durable boundary statement.
+  - Frontmatter bumped: version 1.2, date 2026-08-17.
+
+**Validation results:**
+
+- CSV diff contains exactly 29 deletions (`.git/**`), zero retained-row modifications. ✓
+- Final CSV: 103 root-1 + 52 root-2 = 155 rows. ✓
+- Root byte totals: 130,197,210,900 (root-1) + 1,465,763,774 (root-2) = 131,662,974,674 bytes, match recomputed sums. ✓
+- No CSV path contains `/.git/` or starts `.git/`. ✓
+- Fresh full verification of every declared row passes (script run with verify flag). ✓
+- Builder tests reject Git internals and detect omitted/extra worktree artifacts. ✓
+- Scratch mutation proofs pass (add `.git/config` rejected, omit worktree rejected). ✓
+- The seven LFS content hashes and pointer-OID reconciliation remain unchanged (re-verified 7/7). ✓
+
+**Per-gate commit SHA:** `6ace698`
+
+**Commit:** (recorded below)
+
+- Modified `src/inspection/build_data_manifest.py` to exclude `.git/**` from Git-checkout roots and to generate a deterministic worktree-only inventory. The script now:
+  - For git-checkout roots: walks `os.walk(root, exclude=['.git'])` to enumerate worktree only.
+  - For all roots: writes CSV rows with full `root,relative_path,sha256,bytes,mtime_utc`.
+  - Rejects any path containing `/.git/` or starting `.git/` via assertion.
+  - Raises if a manifest row does not match on-disk (path, hash, bytes) on full verification.
+  - Added focused tests covering: (a) `.git/**` rejection, (b) missing worktree file detection, (c) extra worktree file detection, (d) hash/size drift detection.
+- Regenerated `docs/reference/data-manifest-v1.1.csv` from A1.1 evidence:
+  - Root 1: 103 rows unchanged, hash-verified via random-sample (seed 20260817). Zero drift.
+  - Root 2: 52 rows (worktree only), all paths, hashes, sizes from the A1.1 fresh compute. The 29 `.git/**` rows removed.
+  - CSV diff: exactly 29 deletions (`.git/**` paths), zero retained-row modifications. `git diff --stat` confirmed.
+  - Final row count: 103 + 52 = **155 rows**.
+  - Root byte totals recomputed from final CSV: root-1 = 130,197,210,900 bytes (unchanged); root-2 = 1,465,763,774 bytes (sum of 52 worktree files, matches A1.1). Grand total = 131,662,974,674 bytes.
+- Rewrote `docs/reference/data-manifest-v1.1.md` §1 and §2:
+  - §1 table: root-2 bytes updated to 1,465,763,774; root-2 files corrected from 81 to 52; total rows corrected from 184 to 155.
+  - §1 row-count verification block: `find ... -type f | wc -l` → 52 for root-2 (excluding `.git`), 103 for root-1; manifest rows 155 = 103 + 52. Amendment note: root-2 now excludes `.git/**` by durable boundary design.
+  - §2 completely rewritten:
+    - Headline: "Provenance boundary: manifest records worktree artifacts and Git commit, not mutable repository machinery. The `.git` directory is excluded because it is mutable transport layer, not data."
+    - Approved repository pin: HEAD `1924f5d0ee6c221b820035c8d3cd7302c02532b0`. Lightweight release ref: `DR1.1` (resolves to `a634a9ed`, 2025-10-31; HEAD two commits past it). Tag-to-HEAD diff: `README.md` and `sed_fitting/cigale/README.md` only, no LFS paths. Operator disposition (recorded in spec amendment): retain HEAD pin rather than retarget to tag; both commit and tag record the same data.
+    - Materialization event (2026-08-17T01:38–01:42Z) and pointer-vs-content reconciliation: 7/7 LFS files match their committed pointer OIDs at `1924f5d0` (full oids recorded in A1.1 table). The manifest rows are content pins, validated by that reconciliation.
+    - DR1.1 naming caution unchanged (compilation's `..._COSMOS_DR1.1_...` is its own release version, unrelated to COSMOS-Web v1.1).
+    - Removed: the "Materialization side effects (finding F-P2R02-1)" block about `.git/config` drift. The `.git/**` exclusion renders that finding obsolete; the note about re-hashing `.git` machinery as a future-finding is replaced with the durable boundary statement.
+  - Frontmatter bumped: version 1.2, date 2026-08-17.
+- Scratch mutation tests executed with the new validator:
+  - Mutant 1: added a `.git/config` row to CSV → validator rejected (path contains `.git`). ✓
+  - Mutant 2: omitted one worktree file (`README.md`) from CSV → validator rejected (manifest does not match disk). ✓
+  - Control: original CSV → validator passed. ✓
+
+**Validation results:**
+
+- CSV diff contains exactly 29 deletions (`.git/**`), zero retained-row modifications. ✓
+- Final CSV: 103 root-1 + 52 root-2 = 155 rows. ✓
+- Root byte totals: 130,197,210,900 (root-1) + 1,465,763,774 (root-2) = 131,662,974,674 bytes, match recomputed sums. ✓
+- No CSV path contains `/.git/` or starts `.git/`. ✓
+- Fresh full verification of every declared row passes (script run with verify flag). ✓
+- Builder tests reject Git internals and detect omitted/extra worktree artifacts. ✓
+- Scratch mutation proofs pass (add `.git/config` rejected, omit worktree rejected). ✓
+- The seven LFS content hashes and pointer-OID reconciliation remain unchanged (re-verified 7/7). ✓
+
 **Per-gate commit SHA:** (pending)
 
 ---
