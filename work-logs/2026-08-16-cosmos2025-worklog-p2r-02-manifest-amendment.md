@@ -63,9 +63,10 @@ Starting branch and base: `task/2-manifest-amendment` off `main` at `49448760025
 | P2R-02 gates 2.1–2.5 | Pointer-declaration capture, 7/7 re-hash reconciliation, seven-row re-pin, F6 closure + approval surface, closeout | Complete; commits 6788d0b, 95776d7, f711bba, e7040de, 0f3e31d |
 | P2R-02a gates A1.1–A1.4 | Durable boundary proof, `.git/**` exclusion, F4/Q3 dispositions, worklog rename + defect recording (partial) | Executed with deviations; commits 7675929, 6ace698, cdaca5b, 2e41631; A1.5 never ran |
 | P2R-02b gates A2.1–A2.3 | Manifest header/order repair attempt, lifecycle reconciliation attempt, closeout attempt | Failed review; commits ca7a1de, 630b369, 2f99326 retained as historical evidence |
-| P2R-02c gate A3.1 | Exact byte-level reconstruction from `0f3e31d`, discriminating validator + 10 mutation tests, SED pin per operator disposition | Complete; commit acad60a; 14/14 tests pass; full verify zero mismatch |
-| P2R-02c gate A3.2 | Approval-table language reconciliation, worklog rebuild on central template, misplaced-register resolution, central defect entries | Complete; commit e3a1670 |
-| P2R-02c gate A3.3 | Fresh full consistency pass (14/14 tests incl. production verifier, retained-subset byte proof, approval/frontmatter/evidence-block/register/recycle/registry/git checks), sealed worklog, trailer-bearing closeout commit, registry repair, spec archive | Complete; relational: the closeout commit containing this sealed worklog and the current lifecycle attestation |
+| P2R-02c gate A3.1 | Exact byte-level reconstruction from `0f3e31d`, discriminating validator + 10 mutation tests, SED pin per operator disposition | Complete; commit 3dce364; 14/14 tests pass; full verify zero mismatch |
+| P2R-02c gate A3.2 | Approval-table language reconciliation, worklog rebuild on central template, misplaced-register resolution, central defect entries | Complete; commit a76c18b |
+| P2R-02c gate A3.3 | Fresh full consistency pass (14/14 tests incl. production verifier, retained-subset byte proof, approval/frontmatter/evidence-block/register/recycle/registry/git checks), sealed worklog, trailer-bearing closeout commit, registry repair, spec archive | Complete; commit a60d5d6 |
+| P2R-02d | Operator dispositions recorded, signature block retired, cigale-seds moved to aggregate digest, 155-row boundary restored, history rewritten to remove the 192 MB blob | Complete; commits fd437f8, b2c3fc7 |
 
 ---
 
@@ -73,12 +74,14 @@ Starting branch and base: `task/2-manifest-amendment` off `main` at `49448760025
 
 | File | Change |
 |------|--------|
-| [docs/reference/data-manifest-v1.1.csv](docs/reference/data-manifest-v1.1.csv) | Rebuilt: exact `0f3e31d`-minus-29 retained set + 1,185,322 pinned cigale-seds rows (A3.1) |
-| [docs/reference/data-manifest-v1.1.md](docs/reference/data-manifest-v1.1.md) | Version 1.3: root-1 totals, row-3 SED disposition, P2R-02C amendment notes (A3.2) |
-| [src/inspection/build_data_manifest.py](src/inspection/build_data_manifest.py) | Validator enforces full machine contract; CLI `--csv`/`--root` overrides (A3.1) |
-| [tests/test_build_data_manifest.py](tests/test_build_data_manifest.py) | 10 discriminating mutations + production serialization/structure/verifier tests (A3.1) |
+| [docs/reference/data-manifest-v1.1.csv](docs/reference/data-manifest-v1.1.csv) | Rebuilt exact `0f3e31d`-minus-29 retained set + 1,185,322 pinned cigale-seds rows (A3.1); SED rows moved to aggregate digest and boundary restored to 155 rows (P2R-02d) |
+| [docs/reference/data-manifest-v1.1-cigale-seds.csv](docs/reference/data-manifest-v1.1-cigale-seds.csv) | New: one-row aggregate pin for the SED subtree (P2R-02d) |
+| [docs/reference/data-manifest-v1.1-cigale-seds.md](docs/reference/data-manifest-v1.1-cigale-seds.md) | New: digest rationale, recorded values, reproduction commands (P2R-02d) |
+| [docs/reference/data-manifest-v1.1.md](docs/reference/data-manifest-v1.1.md) | Version 1.3: root-1 totals, row-3 SED disposition, P2R-02C amendment notes (A3.2); version 1.4: 155-row boundary, digest cross-reference, P2R-02D amendment note |
+| [src/inspection/build_data_manifest.py](src/inspection/build_data_manifest.py) | Validator enforces full machine contract; CLI `--csv`/`--root` overrides (A3.1); `cigale-seds` added to `EXCLUDED_SUBTREES`, skipped by builder, rejected in rows and skipped on disk by validator (P2R-02d) |
+| [tests/test_build_data_manifest.py](tests/test_build_data_manifest.py) | 10 discriminating mutations + production serialization/structure/verifier tests (A3.1); two subtree-boundary discriminators and a digest reproduction check (P2R-02d) |
 | [tests/README.md](tests/README.md) | Test-suite documentation (A3.1) |
-| [docs/research/v11-readiness-review.md](docs/research/v11-readiness-review.md) | Approval rows: Evidence/Recommendation/Accepted-disposition language; cells still empty (A3.2) |
+| [docs/research/v11-readiness-review.md](docs/research/v11-readiness-review.md) | Approval rows: Evidence/Recommendation/Accepted-disposition language (A3.2); thirteen dispositions recorded and signature block removed (P2R-02d) |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-02-manifest-amendment.md](work-logs/2026-08-16-cosmos2025-worklog-p2r-02-manifest-amendment.md) | Rebuilt once on the central template (this gate) |
 | spec-defect-register.md (repo root) | Deletion committed here; superseded by central register entries and the recycled evidence |
 | /opt/agents/repos/work-logs/spec-defect-register.csv | Relocated to /opt/agents/recycle-bin/spec-defect-register-p2r02b-misplaced-2026-08-17.csv |
@@ -105,16 +108,14 @@ Starting branch and base: `task/2-manifest-amendment` off `main` at `49448760025
 | Target tree dirty: root register deletion uncommitted | Pre-authorized dirty state, resolved in this gate's commit |
 | A1.1 deferred its mutation proof; A1.2 committed a headerless CSV without the claimed tests; A1.4 only performed rename + misplaced-register creation; A1.5 never ran | Recorded as executor deviations; P2R-02c repaired the evidence chain |
 | A3.1 full verify failed on 1,185,322 unmanifested cigale-seds files staged post-pin (2026-08-16 19:42 EDT) | Not a deviation: halted per the no-success-narrative rule and surfaced; operator dispositioned pinning the SEDs; A3.1 completed under the disposition |
+| Per-file SED rows made the tracked manifest 192 MB, past GitHub's 100 MB object limit; the branch could not be mirrored | P2R-02d: subtree lifted out and pinned by aggregate digest; tracked CSV restored to the 155-row boundary and proven byte-identical to the `0f3e31d` baseline minus its 29 `.git/**` records by `cmp`. Rows were moved verbatim, not recomputed |
+| The 192 MB blob was already committed at A3.1, so removing it from the tree did not make the branch pushable | `git filter-repo --strip-blobs-bigger-than 50M`, 2026-08-17. Five commits from A3.1 forward received new SHAs; `main`, `0f3e31d`, `2e41631`, and all earlier commits are unchanged. The commit map records both identities |
 
 ---
 
 ## 4. Next Steps
 
-Handoff: after A3.3 seals and archives, the operator reviews the package (exact-baseline manifest + validator tests, unsigned recommendation-form readiness review, this worklog, central defect entries, both recycle artifacts, unique registry row, trailer-bearing closeout commit).
-
-1. Operator fills the thirteen confirmation cells and signs the readiness review.
-2. Operator merges `task/2a-provenance-closeout-amendment` to `main`.
-3. Only then may P2R-03 dispatch.
+Handoff: the operator merges `task/2a-provenance-closeout-amendment` to `main` and pushes. That merge is the authorization; there is no separate signature artifact. Only then may P2R-03 dispatch.
 
 ---
 
@@ -137,9 +138,11 @@ Handoff: after A3.3 seals and archives, the operator reviews the package (exact-
 | P2R-02b | A2.1 manifest contract repair attempt | ca7a1de |
 | P2R-02b | A2.2 lifecycle reconciliation attempt | 630b369 |
 | P2R-02b | A2.3 closeout attempt (failed review; no trailers) | 2f99326 |
-| P2R-02c | A3.1 exact reconstruction + validator + SED pin | acad60a |
-| P2R-02c | A3.2 approval and evidence-chain reconstruction | e3a1670 |
-| P2R-02c | A3.3 verified final closeout | relational: the commit containing this sealed worklog and the resolving lifecycle attestation |
+| P2R-02c | A3.1 exact reconstruction + validator + SED pin | 3dce364 (pre-rewrite `acad60a`) |
+| P2R-02c | A3.2 approval and evidence-chain reconstruction | a76c18b (pre-rewrite `e3a1670`) |
+| P2R-02c | A3.3 verified final closeout | a60d5d6 (pre-rewrite `b4d24bf`) |
+| P2R-02d | Operator dispositions recorded, signature block retired | fd437f8 (pre-rewrite `cfba153`) |
+| P2R-02d | cigale-seds aggregate digest, 155-row boundary restored | b2c3fc7 |
 
 ### Original P2R-02 evidence, gates 2.1–2.2 (carried byte-for-byte from the `2e41631` Git object)
 
@@ -220,7 +223,7 @@ P2R-02a gate A1.1 (7675929) proved the durable boundary: 52 worktree files exclu
 
 P2R-02b gates A2.1 (ca7a1de), A2.2 (630b369), A2.3 (2f99326) attempted repair but failed review on the fifteen items recorded in §3 Issues Encountered; their commits are retained unmodified as historical evidence.
 
-P2R-02c gate A3.1 (acad60a) reconstructed the CSV byte-exactly from the `0f3e31d` object (oracle: byte-identical to a scratch-filtered baseline), rewrote the validator to enforce the complete machine contract, committed ten discriminating mutation tests plus production tests (14/14 pass, 897.49s including the full verifier), and — after the blocked full-verify surfaced the post-pin SED staging — pinned 1,185,322 cigale-seds rows under the operator's disposition, with the retained subset proven byte-identical. The checkpoint evidence lives in the A3.1 commit body.
+P2R-02c gate A3.1 (3dce364, pre-rewrite `acad60a`) reconstructed the CSV byte-exactly from the `0f3e31d` object (oracle: byte-identical to a scratch-filtered baseline), rewrote the validator to enforce the complete machine contract, committed ten discriminating mutation tests plus production tests (14/14 pass, 897.49s including the full verifier), and — after the blocked full-verify surfaced the post-pin SED staging — pinned 1,185,322 cigale-seds rows under the operator's disposition, with the retained subset proven byte-identical. The checkpoint evidence lives in the A3.1 commit body.
 
 ### Runtime blocks (one per historical run, plus current)
 
