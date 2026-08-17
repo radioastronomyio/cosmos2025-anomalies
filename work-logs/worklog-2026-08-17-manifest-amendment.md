@@ -73,4 +73,39 @@ Outcome: In progress. Checkpoints below, one per gate.
 - Checkout clean; `HEAD` = `1924f5d0ee6c221b820035c8d3cd7302c02532b0`. ✓
 - All seven paths exist; none is 133/134 bytes. ✓
 
+**Per-gate commit SHA:** `6788d0b`
+
+---
+
+## Gate 2.2, Re-hash and reconcile against pointer declarations
+
+**Commit:** (recorded in next gate's checkpoint)
+
+- SHA-256 and byte size computed for each of the seven materialized files (`sha256sum`, `stat`). Reconciliation against the gate 2.1 pointer-declaration baseline (hashes abbreviated here for layout; full 64-hex values in the gate 2.1 table):
+
+| Path | Computed SHA-256 | = pointer oid | Computed bytes | = pointer size |
+|------|------------------|:---:|----------------:|:---:|
+| `specz_compilation/specz_compilation_COSMOS_DR1.1_unique.fits` | `6ffd1145...b6336e99` | ✓ | 70,223,040 | ✓ |
+| `specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits` | `30675493...d3068fd3` | ✓ | 129,343,680 | ✓ |
+| `sed_fitting/cigale/cigale_results_specz_compilation_DR1.1.fits` | `43bd6bb6...dae37710` | ✓ | 309,882,240 | ✓ |
+| `sed_fitting/lephare/lephare_results_specz_compilation_DR1.1.fits` | `555487d5...0c47dd1b3` | ✓ | 49,271,040 | ✓ |
+| `soms/trained_som_lowz_i_band_26.0_magnitude_limit.pkl` | `2784dd9a...021f12b28` | ✓ | 359,235,918 | ✓ |
+| `soms/trained_som_midz_i_band_26.0_magnitude_limit.pkl` | `4e3f9c03...fbd62296` | ✓ | 359,533,902 | ✓ |
+| `soms/trained_som_highz_i_band_26.0_magnitude_limit.pkl` | `c1ded80b...caeb6b052` | ✓ | 24,265,414 | ✓ |
+
+- **Reconciliation: 7/7 agree on both SHA-256 and byte count.** Every computed hash equals the complete pointer `oid sha256:` captured at gate 2.1, so the materialized bytes are the bytes the pinned commit declared. No mismatch; the unit does not halt.
+- `specz_compilation_COSMOS_DR1.1_unique.fits` reports exactly 70,223,040 bytes. ✓
+- `astropy.io.fits.open` succeeds on both data FITS:
+  - `_unique.fits`: PRIMARY + 1 binary table, **261,975 rows**
+  - `_all.fits`: PRIMARY + 1 binary table, **482,579 rows**
+- Provenance facts gathered for the §2 rewrite (gate 2.3): tag `DR1.1` present; resolves to commit `a634a9ed5c1c17ea2629b2326e4dc99f235d8027` dated 2025-10-31T01:50:32Z ("finalized DR1.1 for release. 138 total programs included in this release"). HEAD `1924f5d0` sits exactly two commits past the tag (`1c40d27` "Update DOI badge in README.md", `1924f5d` "Fix typo in SFR parameter description within README for Cigale results"); neither touches an LFS-tracked path (`*.fits`, `*.pkl`) — both are README-only changes. One deviation from the spec's wording recorded for accuracy: the `DR1.1` ref in this checkout is lightweight (object type `commit`, no tag object), not annotated. The manifest records the observed ref type.
+
+**Validation results:**
+
+- All seven computed SHA-256 values equal gate 2.1 expected values. ✓
+- All seven computed byte counts equal gate 2.1 expected values. ✓
+- `_unique.fits` = 70,223,040 bytes exactly. ✓
+- No mismatch to record; had one occurred, both values would be recorded here and the unit halted. N/A. ✓
+- astropy opens both `_unique.fits` and `_all.fits`; row counts 261,975 / 482,579 recorded above. ✓
+
 **Per-gate commit SHA:** (pending)
