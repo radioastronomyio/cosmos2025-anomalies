@@ -3,7 +3,7 @@
 # All paths are ML01-relative unless noted. Inspection, ETL, and analysis
 # code load this file rather than hardcoding paths.
 #
-# Database credentials: injected from Doppler project `ml01`, config `prd`,
+# Database credentials: injected from Doppler project `ml01`, config `dev`,
 # and not stored here. See the "database" section for env var names.
 #
 # Path-existence contract: every local filesystem path below exists on disk
@@ -58,6 +58,7 @@ processed:
 # Repository data products built deterministically from the immutable sources.
 dictionary:
   columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
+  schema_v11_sql: /opt/agents/repos/cosmos2025-anomalies/src/etl/schema_v11.sql
   sentinel_candidates_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/sentinel-candidates-v11.md
 
 # Pinned semantic evidence consumed read-only by the load-dictionary builder.
@@ -85,11 +86,13 @@ database:
   port_env: PGSQL01_PORT          # 5432
   user_env: PGSQL01_ADMIN_USER
   password_env: PGSQL01_ADMIN_PASSWORD
+  maintenance_database: postgres
+  scratch_prefix: cosmos2025_v11_scratch_
   database_name: cosmos2025
   schema: catalog
 
   # Inject credentials through the ML01 scoped runtime:
-  #   doppler run --project ml01 --config prd -- python your_script.py
+  #   doppler run --project ml01 --config dev -- python your_script.py
   #
   # Python reads the injected values from os.environ by the names above.
 

@@ -2,7 +2,7 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-17"
-version: "0.4"
+version: "0.5"
 status: "partial"
 tags:
   - type: worklog
@@ -42,6 +42,11 @@ related_documents:
   - "tests/test_dictionary_seal.py"
   - "src/etl/verify_source_fidelity.py"
   - "tests/test_verify_source_fidelity.py"
+  - "src/etl/generate_schema_v11.py"
+  - "src/etl/schema_v11.sql"
+  - "src/etl/verify_schema_v11_scratch.py"
+  - "tests/test_generate_schema_v11.py"
+  - "tests/test_verify_schema_v11_scratch.py"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -50,7 +55,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 through 3.5 complete; later gates remain |
+| Status | Partial: Gates 3.1 through 3.6 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
@@ -65,8 +70,10 @@ rows: 1,403 native fields, seven zero-based `source_row` rows, and six `id` rows
 injected from primary photometry by matching row ordinal. Native rows carry
 separate semantic, type-appropriate profile, null-state, documented-sentinel,
 and candidate-sentinel fields. Gate 3.5 then verified the complete immutable
-input boundary and exact seven-extension fidelity before extraction. No source
-data, PostgreSQL object, sealed artifact, or remote Git state was modified.
+input boundary and exact seven-extension fidelity before extraction. Gate 3.6
+generated the complete source-mirror DDL and validated it in a disposable
+database. No source data, protected PostgreSQL object, sealed artifact, or
+remote Git state was modified.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -529,6 +536,82 @@ report. The repository-wide checker retained the four inherited violations
 already listed in section 3. Repository-wide Ruff retained fifteen unrelated
 base-tree errors; the two Gate 3.5 Python files pass independently.
 
+### Gate 3.6 generated mirror DDL and scratch validation
+
+Gate 3.6 added a generated-only SQL artifact driven by the sealed dictionary
+and importable provenance contract version 1.0.0. Fresh generation and
+`--check` produced byte-identical 2,208,501-byte SQL. The DDL creates schema
+`source`, eleven mirror tables in dependency-safe order, and one provenance
+table. Mirror column counts read from the dictionary are
+288/150/45/58/152/463/206/4/14/4/32, totaling 1,416. The provenance table has
+thirteen fixed columns. No analysis schema, view, materialized view, function,
+trigger, sequence, staging table, science-derived column, or extra metadata
+column appears.
+
+The generated SQL contains 166 nullable-safe one-dimensional exact-cardinality
+array checks and 192 named constraints: 166 array checks, twenty master-key
+constraints, and six provenance constraints. Every constraint name is unique
+and at most 63 bytes. The master contract is limited to the primary photometry
+`id` primary key and non-null unique `source_row`, plus `source_row` primary
+keys and non-null unique foreign-key `id` columns on the six ID-less master
+extensions. The pinned supplement and spec-z sources do not establish exact
+uniqueness or relationship contracts, so those tables have no generated key
+constraints.
+
+Exactly 1,416 mirror comments preserve separate description/status,
+description provenance, unit/provenance, semantic note/provenance,
+null/profile, documented-sentinel, and candidate-observation fields. Thirteen
+fixed provenance comments complete the 1,429-column boundary. Apostrophes in
+source prose are SQL-escaped. Finite documented and candidate sentinels are
+described as retained source values rather than null-conversion directives.
+
+Static strict TDD began with `10 failed` at the absent DDL generator and
+reached `10 passed in 0.39s`. Scratch strict TDD began with `13 failed` at the
+absent verifier. One test mutation initially reused the real `bigint` type;
+changing the independent mutation expectation to `text` made it
+discriminating. The combined focused suite then returned `23 passed in 0.48s`.
+The near-full baseline before edits returned `94 passed, 1 deselected in
+120.03s`; the only deselection was the established long live dictionary
+regeneration test.
+
+The first Doppler `ml01/dev` invocation halted before database creation because
+the inventory query encoded a two-character PostgreSQL escape string. A focused
+RED reproduced the literal boundary. The query now uses one explicit `!`
+escape character; the focused suite returned `23 passed in 0.47s` before the
+second live attempt.
+
+The successful live lifecycle used scratch database
+`cosmos2025_v11_scratch_3903051_3034d480bb13135e` on PostgreSQL 16.14
+(`Ubuntu 16.14-1.pgdg24.04+1`). Catalog inspection proved twelve tables,
+1,416 mirror columns, thirteen provenance columns, 1,429 exact comments, 166
+array checks, and 192 exact named constraints. A wrong-length non-null
+`photometry_primary.flux_aper_hst_f814w` array was rejected by constraint
+`photometry_primary_flux_aper_hst_f814w_array_shape_8c4ff19f7a7e`. Seven
+dependency-satisfied rows with NULL arrays were accepted inside an isolated
+rollback. Transactionally removing the final sealed column produced
+`mirror column conformance mismatch: expected 1416, observed 1415, first
+mismatch 1416`; rollback restored the exact production scratch schema.
+
+The verifier dropped only its exact validated scratch name in `finally`.
+Its cleanup inspection and an independent post-run maintenance query both
+reported zero matching scratch databases. The independent query also confirmed
+`cosmos2025` remained present while `cosmos2025_v11` and
+`cosmos2025_v11_ro` remained absent. No connection to or mutation of
+`cosmos2025` occurred, and no target database or role was created.
+
+After formatting, the focused Gate 3.6 suite returned `23 passed in 0.51s`;
+Ruff, format, and generated-byte checks passed. A final-code live rerun used
+`cosmos2025_v11_scratch_3909607_26fe32c9a4c3a01e`, reproduced every object,
+column, comment, constraint, and mutation result above, and again left zero
+scratch databases. The complete repository suite, including the long live
+dictionary regeneration, returned `118 passed in 2173.01s (0:36:13)`. The
+timed invocation completed in 36:13.26 with 5,732,672 KiB maximum RSS and exit
+status zero. Fresh final generator `--check`, focused Ruff, format, four
+changed/new HTML-comment frontmatter checks, and `git diff --check` passed.
+Repository-wide Ruff retained the same fifteen unrelated base-tree errors and
+repository-wide frontmatter retained the same four inherited violations
+already recorded in section 3.
+
 ---
 
 ## 2. Files Changed
@@ -536,8 +619,8 @@ base-tree errors; the two Gate 3.5 Python files pass independently.
 | File | Change |
 |------|--------|
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
-| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic-evidence, and Gate 3.5 provenance-pin paths |
-| [configs/README.md](../configs/README.md) | Documented dictionary, report, semantic-source, and provenance-pin roles |
+| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic-evidence, Gate 3.5 provenance-pin, generated-DDL, maintenance-database, and scratch-prefix paths/settings |
+| [configs/README.md](../configs/README.md) | Documented dictionary, report, semantic-source, provenance-pin, and `ml01/dev` scratch roles |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
 | [data/dictionary/README.md](../data/dictionary/README.md) | Expanded the 32-field formal seal, all controlled vocabularies, provenance, profile/JSON schemas, sentinels, and ignore contract |
 | [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added generated structural, semantic, profile, null-state, and sentinel fields |
@@ -548,12 +631,17 @@ base-tree errors; the two Gate 3.5 Python files pass independently.
 | [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 builder, profiler, seal validator, and source-fidelity verifier |
 | [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [src/etl/verify_source_fidelity.py](../src/etl/verify_source_fidelity.py) | Added the Gate 3.5 immutable-input and standalone/master verifier |
+| [src/etl/generate_schema_v11.py](../src/etl/generate_schema_v11.py) | Added the Gate 3.6 sealed-dictionary DDL generator and versioned provenance contract |
+| [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Added the generated-only eleven-mirror plus provenance SQL artifact |
+| [src/etl/verify_schema_v11_scratch.py](../src/etl/verify_schema_v11_scratch.py) | Added the prefix-guarded disposable database verifier and mutations |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
 | [tests/test_dictionary_seal.py](../tests/test_dictionary_seal.py) | Added Gate 3.4 field-coverage, mutation, CSV-shape, and ignore tests |
 | [tests/test_verify_source_fidelity.py](../tests/test_verify_source_fidelity.py) | Added Gate 3.5 manifest, hash, sample, value, and ID mutation tests |
-| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, and fidelity suites |
+| [tests/test_generate_schema_v11.py](../tests/test_generate_schema_v11.py) | Added Gate 3.6 generated DDL, constraint, comment, and byte-drift tests |
+| [tests/test_verify_schema_v11_scratch.py](../tests/test_verify_schema_v11_scratch.py) | Added unauthenticated scratch guards and conformance mutations |
+| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, and scratch suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---
@@ -571,6 +659,7 @@ base-tree errors; the two Gate 3.5 Python files pass independently.
 | The seal brief requests categorical payload documentation while the reviewed artifact contains only `numeric`, `text`, and `boolean` profile kinds | Documented categorical distributions as the exact `top_values` component within those three frozen kinds; no new kind or profile decision was introduced |
 | Independent review found a hardcoded artifact default, a tracked-file ignore blind spot, and missing documented/candidate disjointness | Added strict RED/GREEN regressions and repaired all three without changing the sealed CSV or science/profile decisions |
 | The first live Gate 3.5 verifier retained the large full-listing and memory-mapped FITS working sets, reaching 23,590,708 KiB maximum RSS | Recorded the measured resource fact; the run stayed read-only, completed in 3:00.32, and remained within ML01 capacity |
+| The first Gate 3.6 scratch invocation encoded a two-character PostgreSQL `ESCAPE` literal | No database was created; added a focused regression and changed the inventory query to a single `!` escape character before the successful rerun |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -578,14 +667,14 @@ base-tree errors; the two Gate 3.5 Python files pass independently.
 
 ## 4. Next Steps
 
-Handoff: Gate 3.5 has verified the source boundary and exact seven-table
-standalone/master fidelity. Later gates may consume the sealed dictionary and
-machine-readable verifier evidence but may not change source science, profiles,
-values, or mappings without new authorization.
+Handoff: Gate 3.6 has generated the complete source mirror and proven it in a
+disposable database. Later gates may consume the sealed dictionary, generated
+DDL, importable provenance contract, and verifier evidence but may not change
+source science, profiles, values, or mappings without new authorization.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
-2. Preserve the frozen structural, semantic, profile, null-state, and sentinel
-   mappings during later DDL/load work.
+2. Preserve the frozen structural, semantic, profile, null-state, sentinel,
+   generated DDL, and provenance contracts during later extraction/load work.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->
