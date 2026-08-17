@@ -118,22 +118,22 @@ Each question is closed, with the recommendation the evidence supports.
 
 Operator signature on the nine findings and four design questions authorizes the lossless v1.1 source mirror and enables P2R-03. Until then the v1 database stays untouched and the v1.1 holdings stay pinned at manifest `data-manifest-v1.1.csv` (amended 2026-08-17 by spec P2R-02A to durable worktree-only boundary). P2R-03 dispatches only after (1) the operator fills the confirmation cells and signs below, and (2) both the signed readiness review and the completed amendment manifest are present on `main`.
 
-**Record of operator confirmation (structure prepared by spec P2R-02, 2026-08-17).** Each row carries a disposition summary of the evidence and any resolution above. The confirmation column is the operator's alone; it is empty until filled by hand, and nothing in this record infers or presumes an answer.
+**Record of operator confirmation (structure prepared by spec P2R-02, 2026-08-17; row language reconciled by spec P2R-02c, 2026-08-17).** Each row separates `Evidence:` (measured facts) from `Recommendation:` (a proposed course of action awaiting the signature). Only F4 and Q3 carry `Accepted operator disposition:` for the supplement-skew decision the operator already accepted; a closed provenance fact such as F6 is recorded as evidence, not authorization. The confirmation column is the operator's alone; it is empty until filled by hand, and nothing in this record infers or presumes an answer.
 
 | ID | Disposition summary | Operator confirmation |
 |----|---------------------|-----------------------|
-| F1 | Seventh extension GALIGHT-MORPHO confirmed in v1.1 (204 cols, 784,016 rows); resolved: all 204 columns in scope, no subset policy carries forward | |
-| F2 | CIGALE fully recomputed for v1.1 (0.000000 exact-match; mass −6%, sfr_inst +30%, chi2 +95%; `ebv_stars*` new); v1.1 loads as new baseline, tension products recomputed from scratch | |
-| F3 | LePhare change is field-wide, not tile-concentrated (tail fractions agree within ~0.5 pp); no per-tile special casing | |
-| F4 | Supplements are v1 release, bitwise identical to live tables; skew against v1.1 photo-z unresolved upstream. Resolved: ingest with documented skew, provenance label, revisit on upstream refresh | |
-| F5 | Photometry products structurally distinct, same 784,016-source ID set; resolved: both loaded completely, vector columns remain arrays | |
-| F6 | CLOSED 2026-08-17: checkout materialized, 7/7 pointer-content reconciliation, `_unique.fits` 261,975 rows / `_all.fits` 482,579 rows open cleanly; live side 37,219 / 26,323 stands | |
-| F7 | No v1 master FITS on-box; resolved: superseded — `cosmos2025` untouched, `cosmos2025_v11` built alongside, no v1 drop or archive in P2R-03 | |
-| F8 | LePhare intermediate match fractions 1.0–2.9% recorded as bounding finding per the stated rule; no action beyond F2/F3 | |
-| F9 | AGN/DESI is a 17,995,599-row reference product (~23× source count); resolved: deferred by mirror-boundary and scale, not by absence of a consumer | |
-| Q1 | Resolved: frozen mapping is all seven complete master extensions, three complete supplements, and the spec-z compilation, no science-driven column projection | |
-| Q2 | Standalone per-extension FITS verified column-identical to master HDUs; extract from standalone, master stays manifest-pinned as reference artifact | |
-| Q3 | Supplements reload now marked `supplement_version = v1-content-on-v1.1-holdings`, skew documented; revisit on upstream refresh | |
-| Q4 | Spec-z ingest is an ETL v2 gate, unblocked by F6 closure; join recomputed and reported against 37,219 / 26,323 and compilation 261,975 | |
+| F1 | Evidence: GALIGHT-MORPHO confirmed as seventh master extension (204 cols, 784,016 rows), absent from v1. Recommendation: load as id-keyed table in ETL v2 with all 204 columns in scope; no ML-MORPHO subset policy carries forward | |
+| F2 | Evidence: CIGALE fully recomputed for v1.1 (0.000000 exact-match; mass −6%, sfr_inst +30%, chi2 +95%; `ebv_stars*` new). Recommendation: v1.1 loads as new baseline with no v1 carry-over; tension products recomputed from scratch | |
+| F3 | Evidence: LePhare change is field-wide, not tile-concentrated (tail fractions agree within ~0.5 pp across tile groups). Recommendation: treat as field-wide; no per-tile special casing | |
+| F4 | Evidence: supplements are the v1 release, bitwise identical to live tables; skew against v1.1 photo-z unresolved upstream. Accepted operator disposition: ingest the unchanged v1 supplements with release provenance labeled and skew documented as an analytical limitation; revisit on upstream refresh | |
+| F5 | Evidence: photometry products structurally distinct, same 784,016-source ID set; standalone files column-identical to master HDUs. Recommendation: load both primary photometry and SE++APER completely; vector-valued columns remain arrays in the source mirror | |
+| F6 | Evidence: checkout materialized 2026-08-17T01:38–01:42Z at pinned HEAD `1924f5d0`; 7/7 pointer-content reconciliation; `_unique.fits` 261,975 rows / `_all.fits` 482,579 rows open cleanly; live side 37,219 / 26,323 stands | |
+| F7 | Evidence: no v1 master FITS survives on-box; v1 baseline would rest on the pg_dump plus tracked records. Recommendation: superseded for the rebuild — `cosmos2025` stays untouched, `cosmos2025_v11` built alongside, no v1 drop or archive in P2R-03 | |
+| F8 | Evidence: LePhare match fractions 1.0–2.9% recorded as a bounding finding per the stated rule; medians ~0 with heavy tails. Recommendation: no action beyond F2/F3 | |
+| F9 | Evidence: AGN/DESI is a 17,995,599-row reference product (~23× the source count), outside the declared catalog-mirror boundary. Recommendation: defer; a future spec that brings it inside a declared boundary reopens the load decision | |
+| Q1 | Evidence: seven master extensions, three supplements, and the spec-z compilation enumerated and verified structurally. Recommendation: frozen mapping loads all seven complete extensions, the supplements, and the compilation, with no science-driven column projection | |
+| Q2 | Evidence: standalone per-extension FITS verified column-identical to the master HDUs (gate 1.8). Recommendation: extract from the standalone files; the master stays manifest-pinned as the reference artifact | |
+| Q3 | Evidence: supplement files are bitwise identical to the live v1 tables; photo-z skew documented in the supplement README. Accepted operator disposition: reload now with `supplement_version = v1-content-on-v1.1-holdings` provenance; treat skew as an analytical limitation | |
+| Q4 | Evidence: F6 materialization complete; the 37,219-link join is recomputable on-box. Recommendation: spec-z ingest is an ETL v2 gate; `_unique.fits` loaded with the join rebuilt and reported against 37,219 / 26,323 and compilation 261,975 | |
 
 Operator signature: ______________________  Name: ______________________  Date: ____________
