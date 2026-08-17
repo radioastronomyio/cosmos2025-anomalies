@@ -1,3 +1,4 @@
+root,relative_path,sha256,bytes,mtime_utc
 /mnt/nvme01/cosmos-web-dr1-catalog,COSMOSWeb-LePhare-PDFz_v1.1.pkl,b49e9f30463b9d844d8c02a10bab15ed09dcc0f0b272b05cdde41a4ce28d4cb3,28316699572,2026-08-15T09:27:11+00:00
 /mnt/nvme01/cosmos-web-dr1-catalog,COSMOSWeb-LePhare-SEDs_v1.1.h5,8eacb8a35bb94ffff4addcb231399e114c62a48d2bfbb7f1e5c1dfec38128777,24371069581,2026-08-15T07:55:17+00:00
 /mnt/nvme01/cosmos-web-dr1-catalog,COSMOSWeb_mastercatalog_v1.1.fits,92bd5904677360f0bc9d26db3ac5f606f4c49ec64544eea1eb980220d744e712,10282628160,2026-08-15T02:20:09+00:00
