@@ -55,6 +55,10 @@ processed:
   derived_dir: /opt/agents/repos/cosmos2025-anomalies/staging/derived
   staging_dir: /opt/agents/repos/cosmos2025-anomalies/staging
 
+# Repository data products built deterministically from the immutable sources.
+dictionary:
+  columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
+
 # ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------

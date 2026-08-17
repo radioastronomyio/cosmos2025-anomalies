@@ -1,21 +1,43 @@
 <!--
 ---
-title: "Manifest Validator Tests"
-description: "Discriminating tests for the v1.1 data manifest contract (spec P2R-02c gate A3.1)"
+title: "Repository Test Suites"
+description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "2.0"
+version: "3.0"
 status: "Active"
 tags:
-  - type: documentation
+  - type: directory-readme
   - domain: testing
 related_documents:
   - "[Data Manifest v1.1](../docs/reference/data-manifest-v1.1.md)"
   - "[Builder](../src/inspection/build_data_manifest.py)"
+  - "[Load Dictionary](../data/dictionary/README.md)"
 ---
 -->
 
-# Manifest Validator Tests
+# Repository Test Suites
+
+## Load dictionary
+
+`test_load_dictionary.py` proves the ETL v2 Gate 3.1 structural contract:
+
+- literal FITS scalar, string, and vector mappings;
+- deterministic PostgreSQL identifier generation;
+- named mutation diagnostics for wrong `D` mapping, collision, and
+  overlength identifiers;
+- all eleven configured source tables and thirteen authorized metadata rows;
+- live `TFIELDS`, native-ID, vector-count, and Toni `ID` to `id` reconciliation;
+- byte-identical regeneration of `data/dictionary/columns-v11.csv`.
+
+Run the focused suite and production reproducibility check:
+
+```bash
+pytest tests/test_load_dictionary.py -v
+python src/etl/load_dictionary.py --check
+```
+
+## Manifest validator
 
 `test_build_data_manifest.py` proves the manifest machine contract in two layers.
 
