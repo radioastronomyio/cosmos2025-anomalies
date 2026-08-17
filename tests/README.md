@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.0"
+version: "3.1"
 status: "Active"
 tags:
   - type: directory-readme
@@ -35,6 +35,22 @@ Run the focused suite and production reproducibility check:
 ```bash
 pytest tests/test_load_dictionary.py -v
 python src/etl/load_dictionary.py --check
+```
+
+`test_load_dictionary_semantics.py` proves the Gate 3.2 semantic contract:
+
+- canonical source-description whitespace and evidence hashes;
+- exact status precedence, including thirteen project-derived rows and
+  upstream gaps;
+- the 204-row asymmetric Yang Table 1 expansion and rejection of a 208-row
+  mutation;
+- independently cited units and separation of LePhare/CIGALE semantic notes;
+- fixed-width CSV serialization with no embedded newlines.
+
+Run both dictionary gates together:
+
+```bash
+pytest tests/test_load_dictionary.py tests/test_load_dictionary_semantics.py -v
 ```
 
 ## Manifest validator

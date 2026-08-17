@@ -1,10 +1,10 @@
 <!--
 ---
 title: "ETL v2 Load Dictionary"
-description: "Structural source-to-target dictionary for the COSMOS-Web v1.1 lossless mirror"
+description: "Structural and semantic dictionary for the COSMOS-Web v1.1 lossless mirror"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "0.1"
+version: "0.2"
 status: "Active"
 tags:
   - type: directory-readme
@@ -17,10 +17,12 @@ related_documents:
 
 # ETL v2 Load Dictionary
 
-Gate 3.1 structural skeleton for the COSMOS-Web v1.1 lossless mirror. The
-CSV records native source fields and the thirteen authorized master-table
-metadata rows. Descriptions, units, semantic notes, null encodings, and
-sentinel provenance are reserved for later dictionary gates.
+Gate 3.1 structural skeleton and Gate 3.2 semantic reconciliation for the
+COSMOS-Web v1.1 lossless mirror. The CSV records native source fields, the
+thirteen authorized master-table metadata rows, canonical source descriptions,
+independently evidenced units, description status, and sourced project semantic
+notes. Null encodings and sentinel provenance remain reserved for later gates;
+Gate 3.4 remains responsible for the formal dictionary seal.
 
 ---
 
@@ -28,7 +30,7 @@ sentinel provenance are reserved for later dictionary gates.
 
 ```
 dictionary/
-├── columns-v11.csv     # Generated source-to-target structural mapping
+├── columns-v11.csv     # Generated structural and semantic mapping
 └── README.md           # Scope and regeneration contract
 ```
 
@@ -38,7 +40,7 @@ dictionary/
 
 | File | Description | Status |
 |------|-------------|--------|
-| [columns-v11.csv](columns-v11.csv) | One row per native field plus seven `source_row` and six injected `id` rows | Active skeleton |
+| [columns-v11.csv](columns-v11.csv) | One row per native field plus seven `source_row` and six injected `id` rows, with Gate 3.2 semantics | Active, not yet sealed |
 
 ---
 

@@ -34,6 +34,7 @@ related_documents:
   - "data/dictionary/columns-v11.csv"
   - "src/etl/load_dictionary.py"
   - "tests/test_load_dictionary.py"
+  - "tests/test_load_dictionary_semantics.py"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -42,20 +43,21 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gate 3.1 complete; later gates remain |
+| Status | Partial: Gates 3.1 and 3.2 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
 | Duration | unknown (not exposed to the executor) |
 
-Objective: Build the unified load-dictionary skeleton from the eleven live
-source tables as the structural contract for the COSMOS-Web v1.1 lossless
-mirror.
+Objective: Build the unified load-dictionary skeleton and reconcile its source
+descriptions, units, provenance status, and project semantic notes for the
+COSMOS-Web v1.1 lossless mirror.
 
-Outcome: Gate 3.1 generated and validated 1,416 dictionary rows: 1,403 native
-fields, seven zero-based `source_row` rows, and six `id` rows injected from
-primary photometry by matching row ordinal. No source data, PostgreSQL object,
-or remote Git state was modified.
+Outcome: Gates 3.1 and 3.2 generated and validated 1,416 dictionary rows: 1,403
+native fields, seven zero-based `source_row` rows, and six `id` rows injected
+from primary photometry by matching row ordinal. All rows now carry separate
+description, unit, and semantic-note evidence fields. No source data,
+PostgreSQL object, or remote Git state was modified.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -150,6 +152,85 @@ Fresh verification after regeneration:
 - Toni native source columns remained exact: both `ID` fields still map to
   target identifier `id`.
 
+### Gate 3.2 semantic reconciliation
+
+Gate 3.2 adds thirteen semantic fields to the fixed CSV schema. Every row now
+has a description status, explicit unit value or `unknown`, and separate
+description, unit, and semantic-note provenance fields. Whitespace in source
+descriptions is limited to trimming ends and collapsing internal runs to one
+ASCII space. The resulting CSV has 23 columns, 1,416 data rows, no ragged rows,
+and no embedded newlines.
+
+Description status reconciliation:
+
+| Status | Rows | Evidence basis |
+|--------|-----:|----------------|
+| `verified` | 1,150 | 1,143 detailed master definitions, four Hatamnia definitions, and three exact spec-z repository definitions |
+| `pattern_expanded` | 204 | Yang et al. 2026, exact `arXiv:2606.14869v1` Table 1 |
+| `undocumented_upstream` | 49 | Two CIGALE, eighteen Toni, and twenty-nine spec-z native fields without exact definitions |
+| `project_derived` | 13 | Seven `source_row` and six injected `id` rows authorized by the central spec |
+
+The two CIGALE gaps are exactly `ebv_stars` and `ebv_stars_err`; both retain an
+empty description and unit `unknown`. Toni headers establish names and table
+shape but contain no field definitions, so all eighteen Toni fields remain
+undocumented. The pinned spec-z repository provides exact native semantics for
+`flag`, `Confidence_level`, and `survey`; the other twenty-nine fields remain
+undocumented rather than receiving prose inferred from their names.
+
+The GALIGHT evidence cache is outside the repository at its configured path.
+The fetched PDF is 5,310,696 bytes and has SHA-256
+`f4d369c1f3c093dc5990895ac7f95ceecead318339e9fe1b8b823fb51675f0bc`.
+Each of the four filters has 51 live fields:
+
+| Table 1 category | Per filter | Total |
+|------------------|-----------:|------:|
+| Single-Sersic | 10 | 40 |
+| Bulge-disk parameters | 10 | 40 |
+| Bulge-disk errors | 8 | 32 |
+| Point-source | 11 | 44 |
+| Fit statistics | 6 | 24 |
+| Statmorph | 6 | 24 |
+
+No bulge or disk `nsersic` error pattern exists. The validator rejects a
+deliberate 208-row mutation that adds one absent symmetric error pattern per
+filter. Every accepted GALIGHT row records the exact Table 1 pattern, filter,
+page, arXiv v1 reference, category, and observed PDF digest.
+
+Observed semantic source hashes:
+
+| Source | SHA-256 |
+|--------|---------|
+| Detailed master descriptions | `3e7dde1db9d541ce8593b12cbf0690130422e746ce7db78cc238f27ed724366b` |
+| Yang v1 PDF | `f4d369c1f3c093dc5990895ac7f95ceecead318339e9fe1b8b823fb51675f0bc` |
+| Hatamnia README | `e40402a510cad8e3d7069de759514090a16602ea7eb5f46715d13d64d1487e97` |
+| speczcompilation root README | `1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23` |
+| speczcompilation schema README | `43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1` |
+| Unit conventions | `8a4d3a724ba435fe5668260e50be45c41f067214567a8723d27d004d3df9ca4a` |
+| Central ETL v2 spec | `6f627d9941843f2d8643eca5227aced1d8bc9216310079dc0fed25352cd09b16` |
+
+Units are populated only where a cited block states one. The dictionary has 15
+sourced semantic notes: nine LePhare mass/SFR/sSFR and quantile fields record
+the log10 convention; six native CIGALE mass/SFR value and error fields record
+the linear convention. These facts occur only in `semantic_note`. The retired
+derived `ssfr_cigale` field remains absent.
+
+Strict TDD evidence:
+
+| Cycle | RED evidence | GREEN evidence |
+|-------|--------------|----------------|
+| Canonicalization | Focused test failed because no canonicalizer existed | CRLF, newline, tab, repeated-space, and end trimming produced one literal expected string |
+| Status and provenance | Live rows lacked the thirteen required semantic fields | Exact 1,150/204/49/13 counts and complete sourced evidence passed |
+| Negative mutations | No semantic validator existed | Composed undocumented prose, native project status, and missing hashes raised named diagnostics |
+| GALIGHT asymmetry | Category evidence was absent | Exact 204-row expansion passed and the 208-row mutation raised `GALIGHT pattern set mismatch` |
+| Units and notes | Rows had no independent unit fields | Explicit units and exact 15-row parameter-space coverage passed |
+| CSV schema | Serialization retained the 10-column Gate 3.1 header | Fixed 23-column rectangular output with no embedded newlines passed |
+
+The Gate 3.2 focused suite returned `8 passed in 4.27s`. The combined Gate 3.1
+and 3.2 suites returned `19 passed in 20.42s`; regeneration returned
+`dictionary check PASSED: 1416 rows reproduce byte-identical`. Fresh full
+repository verification after implementation returned `39 passed in 129.19s
+(0:02:09)`.
+
 ---
 
 ## 2. Files Changed
@@ -157,14 +238,15 @@ Fresh verification after regeneration:
 | File | Change |
 |------|--------|
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
-| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added the dictionary output path |
-| [configs/README.md](../configs/README.md) | Documented the dictionary output role |
+| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added the dictionary output path and Gate 3.2 semantic evidence paths |
+| [configs/README.md](../configs/README.md) | Documented the dictionary and semantic source roles |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
-| [data/dictionary/README.md](../data/dictionary/README.md) | Documented the Gate 3.1 skeleton and regeneration contract |
-| [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added the generated unified dictionary skeleton |
-| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added the source inspection, mapping, validation, CSV, and check-mode implementation |
+| [data/dictionary/README.md](../data/dictionary/README.md) | Documented the Gate 3.1 structure, Gate 3.2 semantics, and regeneration contract without claiming the Gate 3.4 seal |
+| [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added the generated structural dictionary and Gate 3.2 semantic fields |
+| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural inspection, semantic reconciliation, validation, CSV, and check-mode implementation |
 | [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 dictionary builder |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
+| [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/README.md](../tests/README.md) | Documented the new focused suite |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
@@ -176,18 +258,19 @@ Fresh verification after regeneration:
 |-------|------------|
 | Startup instructions and repository docs name Doppler `ml01/prd`, but the operator corrected the active config to `ml01/dev` | Recorded for eventual defect registration. Gate 3.1 made no PostgreSQL connection, so no credential config was consumed or changed |
 | Ruff reported test import `E402` after the repository root was inserted into `sys.path` | Matched the existing test-suite pattern with a narrow `# noqa: E402`; rerun passed |
+| Toni headers and twenty-nine spec-z native field names lack exact field definitions in their pinned documentation | Preserved them as `undocumented_upstream` with empty descriptions; no prose or units were inferred from names |
 
 ---
 
 ## 4. Next Steps
 
-Handoff: later P2R-03 gates can consume the validated dictionary skeleton.
-Gate 3.4 remains responsible for the formally sealed dictionary documentation;
-the current interior README accurately limits itself to Gate 3.1 structure.
+Handoff: Gate 3.3 can consume the structurally and semantically reconciled
+dictionary. Gate 3.4 remains responsible for the formally sealed dictionary
+documentation; the current interior README states that boundary explicitly.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
-2. Preserve the frozen identifier and type mappings while adding only the
-   later-gate dictionary fields authorized by the spec.
+2. Preserve the frozen structural and semantic mappings while adding only the
+   Gate 3.3 profiling fields authorized by the spec.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

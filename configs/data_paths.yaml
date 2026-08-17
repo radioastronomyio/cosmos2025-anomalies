@@ -59,6 +59,17 @@ processed:
 dictionary:
   columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
 
+# Pinned semantic evidence consumed read-only by the load-dictionary builder.
+# The Yang PDF cache is outside the repository and immutable source-data root.
+semantic_sources:
+  master_descriptions: /mnt/nvme01/cosmos-web-dr1-catalog/cosmosweb-dr1-detailed-column-descriptions.txt
+  yang_v1_pdf: /opt/agents/cache/cosmos2025/references/yang-2026-arxiv-2606.14869v1.pdf
+  lss_readme: /mnt/nvme01/cosmos-web-dr1-catalog/hatamnia-lss/readme.txt
+  specz_root_readme: /opt/agents/repos/reference-files/speczcompilation/README.md
+  specz_schema_readme: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md
+  unit_conventions: /opt/agents/repos/cosmos2025-anomalies/docs/reference/unit-conventions.md
+  etl_v2_spec: /opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
+
 # ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------
