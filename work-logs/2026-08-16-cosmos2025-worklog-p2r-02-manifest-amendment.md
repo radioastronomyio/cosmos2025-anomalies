@@ -3,7 +3,7 @@ title: "Worklog: Manifest Re-pin and Readiness Review Amendment (P2R-02 with ame
 description: "Per-gate checkpoint log for spec P2R-02 and its three execution-repair amendments"
 date: "2026-08-17"
 version: "3.0"
-status: "partial"
+status: "completed"
 tags:
   - type: worklog
   - domain: work-logs
@@ -15,7 +15,7 @@ runtime: "Kilo CLI"
 runtime_version: ""
 model: "kilo/zai-coding/glm-5.3"
 hostname: "ml01"
-spec_ref: spec/2026-08-16-cosmos2025-spec-p2r-02-manifest-amendment.md
+spec_ref: spec/2026-08/2026-08-16-cosmos2025-spec-p2r-02-manifest-amendment.md
 repo: "cosmos2025-anomalies"
 category: "astronomy"
 duration_seconds: null
@@ -42,7 +42,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | 🔄 partial |
+| Status | ✅ completed |
 | Agent | glm / Kilo CLI / kilo/zai-coding/glm-5.3 |
 | Hostname | ml01 |
 | Spec | 2026-08-16-cosmos2025-spec-p2r-02-manifest-amendment.md (v1.4) |
@@ -50,7 +50,7 @@ related_documents:
 
 Objective: Execute spec P2R-02 (re-pin seven materialized LFS rows, close finding F6, prepare the unsigned approval surface), then its amendments: P2R-02a (durable `.git/**`-excluded worktree boundary), P2R-02b (evidence-contract repair; run failed review), and P2R-02c (exact provenance reconstruction, discriminating validator, lifecycle finalization).
 
-Outcome (through A3.2): manifest CSV is the exact serialized `0f3e31d` baseline minus its 29 `.git/**` records plus the operator-dispositioned CIGALE SED pin (1,185,477 data rows; retained subset byte-identical to the filtered baseline); validator and 14 committed tests discriminate every frozen invariant; full production verify passes with zero mismatch; approval table separates Evidence / Recommendation / Accepted operator disposition with thirteen empty cells; this worklog replaces the malformed prior rebuild on the central template. Awaiting A3.3 closeout.
+Outcome (through A3.2): manifest CSV is the exact serialized `0f3e31d` baseline minus its 29 `.git/**` records plus the operator-dispositioned CIGALE SED pin (1,185,477 data rows; retained subset byte-identical to the filtered baseline); validator and 14 committed tests discriminate every frozen invariant; full production verify passes with zero mismatch; approval table separates Evidence / Recommendation / Accepted operator disposition with thirteen empty cells; this worklog replaces the malformed prior rebuild on the central template. Sealed at A3.3 after the full consistency pass passed with zero failures.
 
 Starting branch and base: `task/2-manifest-amendment` off `main` at `494487600255933ffa1394913f1066c6b3801f12` (P2R-01 merge); amendment work continues on stacked branch `task/2a-provenance-closeout-amendment` from `0f3e31d`.
 
@@ -64,7 +64,8 @@ Starting branch and base: `task/2-manifest-amendment` off `main` at `49448760025
 | P2R-02a gates A1.1–A1.4 | Durable boundary proof, `.git/**` exclusion, F4/Q3 dispositions, worklog rename + defect recording (partial) | Executed with deviations; commits 7675929, 6ace698, cdaca5b, 2e41631; A1.5 never ran |
 | P2R-02b gates A2.1–A2.3 | Manifest header/order repair attempt, lifecycle reconciliation attempt, closeout attempt | Failed review; commits ca7a1de, 630b369, 2f99326 retained as historical evidence |
 | P2R-02c gate A3.1 | Exact byte-level reconstruction from `0f3e31d`, discriminating validator + 10 mutation tests, SED pin per operator disposition | Complete; commit acad60a; 14/14 tests pass; full verify zero mismatch |
-| P2R-02c gate A3.2 | Approval-table language reconciliation, worklog rebuild on central template, misplaced-register resolution, central defect entries | This commit |
+| P2R-02c gate A3.2 | Approval-table language reconciliation, worklog rebuild on central template, misplaced-register resolution, central defect entries | Complete; commit e3a1670 |
+| P2R-02c gate A3.3 | Fresh full consistency pass (14/14 tests incl. production verifier, retained-subset byte proof, approval/frontmatter/evidence-block/register/recycle/registry/git checks), sealed worklog, trailer-bearing closeout commit, registry repair, spec archive | Complete; relational: the closeout commit containing this sealed worklog and the current lifecycle attestation |
 
 ---
 
@@ -137,8 +138,8 @@ Handoff: after A3.3 seals and archives, the operator reviews the package (exact-
 | P2R-02b | A2.2 lifecycle reconciliation attempt | 630b369 |
 | P2R-02b | A2.3 closeout attempt (failed review; no trailers) | 2f99326 |
 | P2R-02c | A3.1 exact reconstruction + validator + SED pin | acad60a |
-| P2R-02c | A3.2 approval and evidence-chain reconstruction | relational: the commit containing this partial checkpoint |
-| P2R-02c | A3.3 verified final closeout | pending |
+| P2R-02c | A3.2 approval and evidence-chain reconstruction | e3a1670 |
+| P2R-02c | A3.3 verified final closeout | relational: the commit containing this sealed worklog and the resolving lifecycle attestation |
 
 ### Original P2R-02 evidence, gates 2.1–2.2 (carried byte-for-byte from the `2e41631` Git object)
 
