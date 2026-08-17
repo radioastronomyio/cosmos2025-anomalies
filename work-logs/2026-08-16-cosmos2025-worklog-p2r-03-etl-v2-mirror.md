@@ -2,7 +2,7 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-17"
-version: "0.2"
+version: "0.3"
 status: "partial"
 tags:
   - type: worklog
@@ -38,6 +38,8 @@ related_documents:
   - "src/etl/profile_values.py"
   - "tests/test_profile_values.py"
   - "docs/reference/sentinel-candidates-v11.md"
+  - "src/etl/validate_dictionary_seal.py"
+  - "tests/test_dictionary_seal.py"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -46,21 +48,21 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 through 3.3 complete; later gates remain |
+| Status | Partial: Gates 3.1 through 3.4 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
 | Duration | unknown (not exposed to the executor) |
 
-Objective: Build the unified load-dictionary skeleton, reconcile its semantics,
-and profile every native value/null/sentinel state for the COSMOS-Web v1.1
-lossless mirror.
+Objective: Build and seal the unified load-dictionary skeleton, reconcile its
+semantics, and profile every native value/null/sentinel state for the
+COSMOS-Web v1.1 lossless mirror.
 
-Outcome: Gates 3.1 through 3.3 generated and validated 1,416 dictionary rows: 1,403
-native fields, seven zero-based `source_row` rows, and six `id` rows injected
-from primary photometry by matching row ordinal. Native rows now carry separate
-semantic, type-appropriate profile, null-state, documented-sentinel, and
-candidate-sentinel fields. No source data, PostgreSQL object, or remote Git
+Outcome: Gates 3.1 through 3.4 generated, validated, and sealed 1,416 dictionary
+rows: 1,403 native fields, seven zero-based `source_row` rows, and six `id` rows
+injected from primary photometry by matching row ordinal. Native rows carry
+separate semantic, type-appropriate profile, null-state, documented-sentinel,
+and candidate-sentinel fields. No source data, PostgreSQL object, or remote Git
 state was modified.
 
 Starting branch and base: startup began on `main` at
@@ -354,6 +356,83 @@ individual frontmatter checks for all six changed/new HTML-comment Markdown
 files and `git diff --check`. The repository-wide frontmatter checker retains
 four base-commit violations described below.
 
+### Gate 3.4 unified dictionary seal
+
+Gate 3.4 freezes the reviewed artifact at 1,416 rows and 32 fields. The exact
+scope remains 1,403 native rows plus 13 project metadata rows. The native rows
+contain 1,349 master fields, 4 Hatamnia fields, 18 Toni fields, and 32 spec-z
+fields. The metadata contract remains seven `source_row_metadata` rows and six
+`id_injected` rows. All 13 and only those 13 rows have `project_derived`
+descriptions.
+
+The formal dictionary README now defines every header field by exact name,
+purpose, allowed/empty representation, provenance, and serialization. It also
+records the exact source-family, target-table, origin, description-status,
+unit, FITS/source-type, PostgreSQL target-type, boolean, profile-kind, JSON,
+and sentinel-rule vocabularies. Source-description whitespace canonicalization,
+separate description/unit/note provenance, metadata not-applicable values,
+numeric scalar/vector, text, boolean and categorical top-value payloads, and
+the future mirror NULL policy are explicit. The README states that profiling
+is observation rather than proof and that finite sentinels remain source
+values.
+
+The fast production seal validator composes the existing Gate 3.1 structural,
+Gate 3.2 semantic, and Gate 3.3 profile validators. It independently checks the
+32-field README coverage, exact source/native/metadata/status counts, complete
+provenance groups, null/sentinel representations, exact JSON schemas and
+ordering, vector cardinality, the first 23 fields, unauthorized derived-field
+absence, rectangular physical-line CSV, and the narrow Git ignore exception.
+The sealed CSV SHA-256 is
+`623e98f82f435c2ee5112af2d07d4553864f665a82a895c175a47d3edfa883cf`;
+the canonical first-23-field projection SHA-256 is
+`8d9eec917a7e51ef4aa02c0660549b8e80481c34fb5e9e7fbe6a58894a8f1218`.
+
+Strict TDD evidence:
+
+| Cycle | RED evidence | GREEN evidence |
+|-------|--------------|----------------|
+| README field coverage | Existing README documented only 9 of the 32 tracked header fields | Formal field table covers exactly 32/32 fields |
+| Executable seal | Focused CLI test failed because the production validator did not exist | Tracked artifact validates in under one second with exact audited counts |
+| Mutation target selection | Three temporary-artifact mutations passed because the CLI ignored supplied validation paths | Empty origin, candidate schema/order drift, and first-23-field drift fail with named diagnostics |
+| Controlled README vocabulary | Removing `toni_groups` from a temporary README did not fail validation | Missing controlled values/schema keys/empty representations halt validation |
+| Config-driven seal path | `--config` was unrecognized and a configured artifact relocation could not select the default target | Default artifact resolves from `dictionary.columns_v11`; explicit mutation overrides remain available |
+| Documented/candidate exclusion | A correctly counted documented `-999` also passed as a candidate in mutation mode | Any candidate value present in the row's documented-sentinel array halts validation |
+| Narrow ignore negation | Tracked-file `git check-ignore` queries could not detect removal of the negation rule | A temporary Git repository proves `--no-index` selects the exact `!data/dictionary/columns-v11.csv` rule and fails when removed |
+
+No mutation test changed the tracked CSV. Temporary CSVs were written only
+under pytest temporary directories. After independent review fixes, the fast
+Gate 3.4 suite returned `12 passed in 2.56s`. The fresh repository suite
+excluding only the intentional live byte-reproduction test returned `66
+passed, 1 deselected in 122.75s (0:02:02)`.
+
+The pre-review exact live suite, `/usr/bin/time -v pytest -v`, returned `64
+passed in 2149.88s (0:35:49)`. The timed process exited 0 after 35:50.12 wall
+time, 2,020.00 user seconds, 128.77 system seconds, and 5,724,576 KiB maximum
+RSS. It included byte-identical regeneration of both the 1,416-row dictionary
+and the candidate report.
+
+The post-review final exact live suite, `/usr/bin/time -v pytest -v`, returned
+`67 passed in 2154.14s (0:35:54)`. The timed process exited 0 after 35:54.38
+wall time, 2,031.86 user seconds, 126.51 system seconds, and 5,728,892 KiB
+maximum RSS. This run includes all three independent-review regressions and
+the live byte-identical dictionary/candidate-report reproduction.
+
+Git ignore evidence:
+
+- `git check-ignore data/dictionary/columns-v11.csv` returned 1 with no output;
+- `git check-ignore -v data/dictionary/columns-v11.csv` returned 1 with no output;
+- `git check-ignore -v --no-index data/dictionary/columns-v11.csv` selected the
+  exact `!data/dictionary/columns-v11.csv` negation rule;
+- `git ls-files --error-unmatch` found both the sealed CSV and interior README;
+- arbitrary `data/arbitrary.csv`, `data/staging/profile-temp.csv`,
+  `data/interim/staging.parquet`, and
+  `data/dictionary/profiler-temp.csv` remain ignored by their existing rules.
+
+Ruff check and format verification passed for the new validator and test.
+Individual frontmatter checks passed for the three changed HTML-comment
+Markdown files. `git diff --check` passed. The repository-wide inherited
+frontmatter exception remains recorded in section 3.
+
 ---
 
 ## 2. Files Changed
@@ -364,17 +443,19 @@ four base-commit violations described below.
 | [configs/data_paths.yaml](../configs/data_paths.yaml) | Added the dictionary output path and Gate 3.2 semantic evidence paths |
 | [configs/README.md](../configs/README.md) | Documented the dictionary, report, and semantic source roles |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
-| [data/dictionary/README.md](../data/dictionary/README.md) | Documented Gate 3.3 payloads, evidence fields, candidate rule, and regeneration without claiming the Gate 3.4 seal |
+| [data/dictionary/README.md](../data/dictionary/README.md) | Expanded the 32-field formal seal, all controlled vocabularies, provenance, profile/JSON schemas, sentinels, and ignore contract |
 | [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added generated structural, semantic, profile, null-state, and sentinel fields |
 | [docs/reference/sentinel-candidates-v11.md](../docs/reference/sentinel-candidates-v11.md) | Added the generated Gate 3.3 state and candidate report |
 | [docs/reference/README.md](../docs/reference/README.md) | Indexed the candidate report |
 | [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
 | [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 dictionary builder and value profiler |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 builder, profiler, and fast seal validator |
+| [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
-| [tests/README.md](../tests/README.md) | Documented the dictionary and profiler suites |
+| [tests/test_dictionary_seal.py](../tests/test_dictionary_seal.py) | Added Gate 3.4 field-coverage, mutation, CSV-shape, and ignore tests |
+| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, and seal suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---
@@ -389,19 +470,21 @@ four base-commit violations described below.
 | Direct execution of the new profiler initially could not import the repository namespace | Added and passed a direct-CLI regression test, then used package-aware module/local imports |
 | Expanding the CSV schema initially made the Gate 3.2 validator demand Gate 3.3 fields before profiling | Separated the frozen Gate 3.2 semantic field list from later CSV fields; the existing semantic integration test passed |
 | The first exact profile required 32:02 elapsed and reached 5,599.793 MiB RSS | Recorded measured runtime/memory; retained exact per-index/top-three behavior and bounded the largest text table with chunking plus temporary disk aggregation |
+| The seal brief requests categorical payload documentation while the reviewed artifact contains only `numeric`, `text`, and `boolean` profile kinds | Documented categorical distributions as the exact `top_values` component within those three frozen kinds; no new kind or profile decision was introduced |
+| Independent review found a hardcoded artifact default, a tracked-file ignore blind spot, and missing documented/candidate disjointness | Added strict RED/GREEN regressions and repaired all three without changing the sealed CSV or science/profile decisions |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
 ---
 
 ## 4. Next Steps
 
-Handoff: Gate 3.4 can seal the structurally, semantically, and empirically
-enriched dictionary. The current interior README marks Gate 3.3 complete and
-states that the formal seal remains Gate 3.4 responsibility.
+Handoff: Gate 3.4 has sealed the structurally, semantically, and empirically
+enriched dictionary. Later gates may consume this contract but may not change
+its science, profiles, source values, or mappings without new authorization.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
 2. Preserve the frozen structural, semantic, profile, null-state, and sentinel
-   mappings during the Gate 3.4 seal.
+   mappings during later DDL/load work.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

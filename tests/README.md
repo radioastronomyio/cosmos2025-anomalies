@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.2"
+version: "3.3"
 status: "Active"
 tags:
   - type: directory-readme
@@ -74,6 +74,29 @@ pytest tests/test_profile_values.py -v
 
 `python src/etl/load_dictionary.py --check` performs the full live profile and
 byte-identical dictionary/report check.
+
+`test_dictionary_seal.py` proves the Gate 3.4 frozen contract from the tracked
+artifact without live profiling:
+
+- all 32 CSV fields and every controlled vocabulary/schema are documented;
+- the default artifact follows `dictionary.columns_v11` from config;
+- exact native, metadata, source-family, target-table, status, and provenance
+  counts remain fixed;
+- ragged records, embedded newlines, empty origins, unauthorized fields, and
+  first-23-field drift fail;
+- canonical profile and sentinel JSON schemas, entry order, per-index
+  cardinality, documented/candidate disjointness, and candidate rule version
+  remain sealed;
+- the dictionary CSV/README are tracked while arbitrary CSV, staging,
+  profiler-temporary, and other data products remain ignored; a temporary Git
+  fixture proves removal of the exact negation fails.
+
+Run the fast seal suite and production validator:
+
+```bash
+pytest tests/test_dictionary_seal.py -v
+python src/etl/validate_dictionary_seal.py
+```
 
 ## Manifest validator
 
