@@ -4,7 +4,7 @@ title: "Reference"
 description: "Catalog column schemas, structural profiles, pinned manifests, and unit conventions"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-15"
-version: "1.0"
+version: "1.1"
 status: "Active"
 tags:
   - type: directory-readme
@@ -28,6 +28,7 @@ reference/
 ├── master-catalog-profile.md                      # v1 structural profile (historical)
 ├── master-catalog-profile-v1.1.md                 # v1.1 structural profile (live)
 ├── data-manifest-v1.1.md / data-manifest-v1.1.csv # SHA-256 pin of the v1.1 holdings
+├── sentinel-candidates-v11.md                     # Gate 3.3 generated observations
 ├── unit-conventions.md                            # log10 vs linear cross-code rules
 ├── quality-flags.txt                              # flag definitions
 ├── large-scale-structure-in-cosmos-web-readme.txt # LSS supplement readme
@@ -47,6 +48,7 @@ reference/
 | [data-manifest-v1.1.md](data-manifest-v1.1.md) | SHA-256 manifest summary for the v1.1 holdings | ✅ Active |
 | [v1-to-v11-delta.md](v1-to-v11-delta.md) | Column, row, and ID-space classification, v1 to v1.1 | ✅ Active |
 | [parameter-migration-evidence-v1.1.md](parameter-migration-evidence-v1.1.md) | CIGALE/LePhare value comparison against the live v1 tables | ✅ Active |
+| [sentinel-candidates-v11.md](sentinel-candidates-v11.md) | Generated FITS-mask, NaN, documented-sentinel, and conservative candidate observations | ✅ Active |
 | [quality-flags.txt](quality-flags.txt) | Upstream quality flag definitions | ✅ Active |
 | [columns-photometry.txt](columns-photometry.txt) | v1 photometry column inventory | 🗄️ Archived |
 | [columns-lephare-photometrric-redshifts.txt](columns-lephare-photometrric-redshifts.txt) | v1 LePhare column inventory | 🗄️ Archived |

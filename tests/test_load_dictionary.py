@@ -226,6 +226,7 @@ def test_cli_writes_configured_csv_without_contextual_id_rename(tmp_path: Path) 
             str(REPO_ROOT / "src" / "etl" / "load_dictionary.py"),
             "--config",
             str(config_path),
+            "--semantic-only",
         ],
         cwd=REPO_ROOT,
         capture_output=True,
@@ -258,8 +259,10 @@ def test_default_check_reproduces_tracked_dictionary_byte_identical() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert (
-        "dictionary check PASSED: 1416 rows reproduce byte-identical" in result.stdout
+        "dictionary check PASSED: 1416 profiled rows reproduce byte-identical"
+        in result.stdout
     )
+    assert "candidate report check PASSED" in result.stdout
 
 
 def tracked_rows() -> list[dict[str, str]]:

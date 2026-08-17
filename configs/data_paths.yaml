@@ -58,6 +58,7 @@ processed:
 # Repository data products built deterministically from the immutable sources.
 dictionary:
   columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
+  sentinel_candidates_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/sentinel-candidates-v11.md
 
 # Pinned semantic evidence consumed read-only by the load-dictionary builder.
 # The Yang PDF cache is outside the repository and immutable source-data root.

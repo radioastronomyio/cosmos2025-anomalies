@@ -417,6 +417,15 @@ def test_csv_schema_is_fixed_and_contains_no_embedded_newlines(
         "semantic_note_source",
         "semantic_note_locator",
         "semantic_note_source_sha256",
+        "profile_json",
+        "has_fits_mask",
+        "has_nan",
+        "documented_sentinel_values_json",
+        "documented_sentinel_evidence_text",
+        "documented_sentinel_source",
+        "documented_sentinel_locator",
+        "documented_sentinel_source_sha256",
+        "candidate_sentinel_values_json",
     ]
     serialized = load_dictionary.dictionary_csv_text(rows)
     parsed = list(csv.reader(io.StringIO(serialized, newline="")))

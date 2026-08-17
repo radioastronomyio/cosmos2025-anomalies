@@ -2,7 +2,7 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-17"
-version: "0.1"
+version: "0.2"
 status: "partial"
 tags:
   - type: worklog
@@ -35,6 +35,9 @@ related_documents:
   - "src/etl/load_dictionary.py"
   - "tests/test_load_dictionary.py"
   - "tests/test_load_dictionary_semantics.py"
+  - "src/etl/profile_values.py"
+  - "tests/test_profile_values.py"
+  - "docs/reference/sentinel-candidates-v11.md"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -43,21 +46,22 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 and 3.2 complete; later gates remain |
+| Status | Partial: Gates 3.1 through 3.3 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
 | Duration | unknown (not exposed to the executor) |
 
-Objective: Build the unified load-dictionary skeleton and reconcile its source
-descriptions, units, provenance status, and project semantic notes for the
-COSMOS-Web v1.1 lossless mirror.
+Objective: Build the unified load-dictionary skeleton, reconcile its semantics,
+and profile every native value/null/sentinel state for the COSMOS-Web v1.1
+lossless mirror.
 
-Outcome: Gates 3.1 and 3.2 generated and validated 1,416 dictionary rows: 1,403
+Outcome: Gates 3.1 through 3.3 generated and validated 1,416 dictionary rows: 1,403
 native fields, seven zero-based `source_row` rows, and six `id` rows injected
-from primary photometry by matching row ordinal. All rows now carry separate
-description, unit, and semantic-note evidence fields. No source data,
-PostgreSQL object, or remote Git state was modified.
+from primary photometry by matching row ordinal. Native rows now carry separate
+semantic, type-appropriate profile, null-state, documented-sentinel, and
+candidate-sentinel fields. No source data, PostgreSQL object, or remote Git
+state was modified.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -231,6 +235,125 @@ and 3.2 suites returned `19 passed in 20.42s`; regeneration returned
 repository verification after implementation returned `39 passed in 129.19s
 (0:02:09)`.
 
+### Gate 3.3 value, null-encoding, and sentinel profiling
+
+Gate 3.3 profiled every one of the 1,403 native dictionary rows from the eleven
+configured live sources. The thirteen project metadata rows use explicit
+not-applicable cells: empty `profile_json`, false mask/NaN booleans, empty
+documented evidence, and `[]` sentinel arrays. All 1,416 Gate 3.1/3.2 row
+prefixes remained byte-value identical through the first 23 CSV fields.
+
+Profile coverage:
+
+| Profile class | Count |
+|---------------|------:|
+| Native rows | 1,403 |
+| Scalar fields | 1,237 |
+| Numeric vector fields | 166 |
+| Numeric vector-index profiles | 830 |
+| Metadata rows, not applicable | 13 |
+| Total dictionary rows | 1,416 |
+
+Live source row populations:
+
+| Target table | Source rows |
+|--------------|------------:|
+| `photometry_primary` | 784,016 |
+| `lephare` | 784,016 |
+| `photometry_aper` | 784,016 |
+| `cigale` | 784,016 |
+| `ml_morpho` | 784,016 |
+| `bulge_disk` | 784,016 |
+| `galight_morph` | 784,016 |
+| `lss_overdensity` | 164,155 |
+| `galaxy_groups` | 1,678 |
+| `galaxy_group_memberships` | 1,745,652 |
+| `specz_compilation` | 261,975 |
+
+Independent state distributions:
+
+| State | False/empty fields | True/non-empty fields | Observations |
+|-------|-------------------:|----------------------:|-------------:|
+| Declared FITS masks | 1,400 | 3 | Per scalar/index counts are in `profile_json` |
+| NaNs | 1,098 | 305 | Per scalar/index counts are in `profile_json` |
+| Documented sentinels | 1,402 | 1 | One field, value `-999` |
+| Conservative candidates | 927 | 476 | 793 scalar/index entries |
+
+The sole documented sentinel is `photometry_primary.id_specz_khostovan25 =
+-999`. Its exact canonicalized evidence states `-999 if no specz match`; the
+dictionary retains the source, line locator, and exact artifact SHA-256.
+
+Candidate rule version `cosmos_v11_candidate_sentinel_v1` requires an
+undocumented finite numeric value whose absolute value is exactly `10^k - 1`
+for integer `k >= 2`, with `count >= 1000` and `count * 1000 >=
+non_null_count` in that scalar/index, excluding documented valid flag/category
+values. Observed candidate-value distribution:
+
+| Value | Candidate entries |
+|------:|------------------:|
+| `-999` | 451 |
+| `999` | 318 |
+| `-99` | 23 |
+| `99` | 1 |
+| **Total** | **793** |
+
+Candidate table distribution:
+
+| Target table | Candidate entries |
+|--------------|------------------:|
+| `photometry_aper` | 370 |
+| `bulge_disk` | 265 |
+| `photometry_primary` | 86 |
+| `galight_morph` | 44 |
+| `specz_compilation` | 19 |
+| `lephare` | 9 |
+
+`docs/reference/sentinel-candidates-v11.md` is generated from dictionary cells.
+It contains separate FITS-mask, NaN, documented-sentinel, and candidate
+sections, plus one row for each of the 793 candidate observations. Every row
+includes exact count, non-null denominator/fraction, scalar or vector index,
+rule trigger/version, and sourced semantics or literal `unknown`.
+
+Strict TDD evidence:
+
+| Cycle | RED evidence | GREEN evidence |
+|-------|--------------|----------------|
+| Numeric scalar/vector profiles | Tests failed because the profiler module did not exist | Masks, NaNs, finite summaries, deterministic top-three ties, and per-index vectors passed |
+| Candidate rule and JSON | Four tests failed on missing APIs | Exact pattern/threshold/denominator, exclusions, stable JSON, and evidence validation passed |
+| Typed rows and null encodings | Four tests failed on missing typed/profile-field APIs | Text/boolean types, finite sentinel retention, declared TNULL-only masking, and metadata N/A passed |
+| Profile validator/artifact | Validator APIs and nine profile CSV fields were absent | Vector/index/population/candidate validation and full tracked coverage passed |
+| Direct CLI regression | `--help` failed with `ModuleNotFoundError: src` | Package-aware local/module imports passed direct execution |
+| Generated report | Report renderer was absent | Every dictionary candidate and all four state classes reconciled in generated Markdown |
+| Exact large integer | A literal `10^k - 1` integer above float precision was rejected after float coercion | Integer candidates retain exact arithmetic and ordering without float conversion |
+| State-summary mutation | The validator accepted `has_nan` drift from per-index counts | Mask and NaN summary booleans reconcile to their independent profile counts |
+| Generated report claims | Source-table scope was a literal and candidate rows omitted the explicit trigger | Scope counts derive from validated rows and all 793 candidates carry trigger and version |
+
+The first successful live profile completed with internal profiling duration
+1,918.074 seconds. `/usr/bin/time -v` measured 32:02.13 elapsed, 1,835.27 user
+seconds, 88.54 system seconds, 100% CPU, and maximum resident set size
+5,734,188 KiB (5,599.793 MiB). FITS inputs were memory-mapped and processed one
+scalar/vector index at a time. The 1,745,652-row memberships table was streamed
+in 50,000-row chunks through temporary disk-backed exact-frequency tables; the
+table was never materialized as a full in-memory copy.
+
+An independent live `python src/etl/load_dictionary.py --check` returned both
+`dictionary check PASSED: 1416 profiled rows reproduce byte-identical` and
+`candidate report check PASSED: content reproduces byte-identical`. Its
+internal profile took 1,892.321 seconds; `/usr/bin/time -v` measured 31:36.33
+elapsed, 1,811.86 user seconds, 86.12 system seconds, and 5,733,600 KiB
+(5,599.219 MiB) maximum RSS.
+
+Final focused Gate 3.3 verification returned `15 passed in 0.55s`. Prior-gate
+dictionary verification excluding the deliberately expensive default live
+check returned `19 passed, 1 deselected in 16.56s`. The fresh full repository
+suite returned `55 passed in 2156.06s (0:35:56)` and included both the
+production manifest verifier and current-code live dictionary/report
+reproduction. `/usr/bin/time -v pytest -v` measured 35:56.29 elapsed and
+5,731,928 KiB maximum RSS. Final Ruff and formatting checks passed, as did
+individual frontmatter checks for all six changed/new HTML-comment Markdown
+files and `git diff --check`. The repository-wide frontmatter checker retains
+four base-commit violations described below.
+
 ---
 
 ## 2. Files Changed
@@ -239,15 +362,19 @@ repository verification after implementation returned `39 passed in 129.19s
 |------|--------|
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
 | [configs/data_paths.yaml](../configs/data_paths.yaml) | Added the dictionary output path and Gate 3.2 semantic evidence paths |
-| [configs/README.md](../configs/README.md) | Documented the dictionary and semantic source roles |
+| [configs/README.md](../configs/README.md) | Documented the dictionary, report, and semantic source roles |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
-| [data/dictionary/README.md](../data/dictionary/README.md) | Documented the Gate 3.1 structure, Gate 3.2 semantics, and regeneration contract without claiming the Gate 3.4 seal |
-| [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added the generated structural dictionary and Gate 3.2 semantic fields |
-| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural inspection, semantic reconciliation, validation, CSV, and check-mode implementation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 dictionary builder |
+| [data/dictionary/README.md](../data/dictionary/README.md) | Documented Gate 3.3 payloads, evidence fields, candidate rule, and regeneration without claiming the Gate 3.4 seal |
+| [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added generated structural, semantic, profile, null-state, and sentinel fields |
+| [docs/reference/sentinel-candidates-v11.md](../docs/reference/sentinel-candidates-v11.md) | Added the generated Gate 3.3 state and candidate report |
+| [docs/reference/README.md](../docs/reference/README.md) | Indexed the candidate report |
+| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
+| [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 dictionary builder and value profiler |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
-| [tests/README.md](../tests/README.md) | Documented the new focused suite |
+| [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
+| [tests/README.md](../tests/README.md) | Documented the dictionary and profiler suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---
@@ -259,18 +386,22 @@ repository verification after implementation returned `39 passed in 129.19s
 | Startup instructions and repository docs name Doppler `ml01/prd`, but the operator corrected the active config to `ml01/dev` | Recorded for eventual defect registration. Gate 3.1 made no PostgreSQL connection, so no credential config was consumed or changed |
 | Ruff reported test import `E402` after the repository root was inserted into `sys.path` | Matched the existing test-suite pattern with a narrow `# noqa: E402`; rerun passed |
 | Toni headers and twenty-nine spec-z native field names lack exact field definitions in their pinned documentation | Preserved them as `undocumented_upstream` with empty descriptions; no prose or units were inferred from names |
+| Direct execution of the new profiler initially could not import the repository namespace | Added and passed a direct-CLI regression test, then used package-aware module/local imports |
+| Expanding the CSV schema initially made the Gate 3.2 validator demand Gate 3.3 fields before profiling | Separated the frozen Gate 3.2 semantic field list from later CSV fields; the existing semantic integration test passed |
+| The first exact profile required 32:02 elapsed and reached 5,599.793 MiB RSS | Recorded measured runtime/memory; retained exact per-index/top-three behavior and bounded the largest text table with chunking plus temporary disk aggregation |
+| The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
 ---
 
 ## 4. Next Steps
 
-Handoff: Gate 3.3 can consume the structurally and semantically reconciled
-dictionary. Gate 3.4 remains responsible for the formally sealed dictionary
-documentation; the current interior README states that boundary explicitly.
+Handoff: Gate 3.4 can seal the structurally, semantically, and empirically
+enriched dictionary. The current interior README marks Gate 3.3 complete and
+states that the formal seal remains Gate 3.4 responsibility.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
-2. Preserve the frozen structural and semantic mappings while adding only the
-   Gate 3.3 profiling fields authorized by the spec.
+2. Preserve the frozen structural, semantic, profile, null-state, and sentinel
+   mappings during the Gate 3.4 seal.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

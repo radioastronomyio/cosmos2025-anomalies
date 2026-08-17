@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.1"
+version: "3.2"
 status: "Active"
 tags:
   - type: directory-readme
@@ -52,6 +52,28 @@ Run both dictionary gates together:
 ```bash
 pytest tests/test_load_dictionary.py tests/test_load_dictionary_semantics.py -v
 ```
+
+`test_profile_values.py` proves the Gate 3.3 value-profile contract:
+
+- FITS masks and NaNs remain independent;
+- finite documented/candidate values remain finite source observations;
+- vectors retain one complete profile per index;
+- exact top-three tie ordering and compact JSON are deterministic;
+- the frozen denominator, integer threshold comparison, pattern, per-index
+  rule, documented/category exclusions, and rule version are discriminating;
+- unsupported documented-sentinel evidence and incomplete candidates fail;
+- all 1,403 native rows and 830 vector indices are present in the tracked
+  artifact, while thirteen metadata rows use explicit not-applicable cells;
+- the generated candidate report reconciles every dictionary candidate.
+
+Run the focused profiler tests without a fresh 32-minute live pass:
+
+```bash
+pytest tests/test_profile_values.py -v
+```
+
+`python src/etl/load_dictionary.py --check` performs the full live profile and
+byte-identical dictionary/report check.
 
 ## Manifest validator
 

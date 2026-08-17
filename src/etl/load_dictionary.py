@@ -194,7 +194,17 @@ CSV_FIELDS = (
     "semantic_note_source",
     "semantic_note_locator",
     "semantic_note_source_sha256",
+    "profile_json",
+    "has_fits_mask",
+    "has_nan",
+    "documented_sentinel_values_json",
+    "documented_sentinel_evidence_text",
+    "documented_sentinel_source",
+    "documented_sentinel_locator",
+    "documented_sentinel_source_sha256",
+    "candidate_sentinel_values_json",
 )
+SEMANTIC_FIELDS = CSV_FIELDS[10:23]
 ALLOWED_DESCRIPTION_STATUSES = {
     "verified",
     "pattern_expanded",
@@ -1109,7 +1119,7 @@ def validate_dictionary(rows: list[dict[str, str | int]]) -> None:
 
 def validate_semantics(rows: list[dict[str, str | int]]) -> None:
     """Validate the full Gate 3.2 semantic and provenance contract."""
-    required_fields = set(CSV_FIELDS[10:])
+    required_fields = set(SEMANTIC_FIELDS)
     statuses: Counter[str] = Counter()
     project_rows = 0
     semantic_notes = 0
@@ -1528,7 +1538,21 @@ def main() -> None:
         action="store_true",
         help="compare a fresh build with the configured CSV",
     )
+    parser.add_argument(
+        "--semantic-only",
+        action="store_true",
+        help="build only the Gate 3.2 semantic prefix for focused diagnostics",
+    )
     args = parser.parse_args()
+
+    if not args.semantic_only:
+        if __package__:
+            from . import profile_values
+        else:
+            import profile_values
+
+        profile_values.main()
+        return
 
     config = yaml.safe_load(args.config.read_text())
     output_path = Path(config["dictionary"]["columns_v11"])
