@@ -4,7 +4,7 @@ title: "ETL Pipeline"
 description: "COSMOS-Web catalog extraction, load-dictionary, and verification scripts"
 author: "VintageDon"
 date: "2026-04-05"
-version: "1.8"
+version: "1.9"
 status: "Active"
 tags:
   - type: directory-readme
@@ -31,6 +31,7 @@ FITS-to-PostgreSQL pipeline for the COSMOS-Web DR1 master catalog. Phase 1 is co
 | `verify_schema_v11_scratch.py` | Creates one random prefix-scoped scratch database, verifies catalogs/comments/constraints and mutations, and drops it in `finally` |
 | `bootstrap_v11.py` | Performs the guarded, one-time Gate 3.7 master bootstrap and separate post-load verification for `cosmos2025_v11` |
 | `load_supplements_v11.py` | Streams and verifies the four Gate 3.8 supplement/spec-z mirrors and supports source-free post-seal administration resume |
+| `load_provenance_v11.py` | Registers and verifies the exact eleven-row Gate 3.9 dual-hash provenance set with phase-aware commit classification |
 | `extract_catalog.py` | Main ETL script. Reads 8.4GB FITS (6 extensions), extracts 4 parquet files, loads into PostgreSQL via COPY FROM |
 | `verify_catalog.py` | Post-ETL verification. Runs 13 check sections (row counts, sentinel residuals, unit validation, O1 readiness), writes Markdown + HTML reports with embedded charts |
 | `create_schema.sql` | DDL for the `catalog` schema. Creates all 7 tables with correct column types, constraints, and indexes |
@@ -168,6 +169,46 @@ Analyst checks use the operator-approved admin connection with session
 authorization. Four supplement SELECTs and twenty-four per-table write/DDL/
 grant denials extend the unchanged Gate 3.7 matrix. Direct analyst HBA access
 from ML01 remains an operator infrastructure action and is not claimed.
+
+---
+
+## Gate 3.9 provenance registration
+
+The non-idempotent load requires all eleven mirrors exact and
+`source.provenance` empty. It freshly hashes every configured source against
+the Gate 3.5 manifest, guards one stable manifest identity across declared-pin
+reads, rechecks physical and live counts plus each table's single load
+transaction `xmin`, and verifies schema, role, handoff, analyst ACLs, and v1
+identity before one transaction:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_provenance_v11.py --load
+```
+
+That transaction applies the generated provenance-contract 1.0.1 COMMENT and
+inserts exactly eleven rows. `load_timestamp` is the shared PostgreSQL
+`transaction_timestamp()` of this provenance-registration transaction after
+mirror verification; it is not a reconstructed historical table-load commit
+time. Each note preserves the exact table-load `xmin` and states that the
+actual commit timestamp is unavailable because `track_commit_timestamp` was
+off. No extension was installed and no timestamp was approximated.
+
+Precommit failure rolls back both COMMENT and rows. An ambiguous commit or
+connection-close result reconnects and accepts only exact zero with an
+authorized old/amended comment or exact eleven with the amended comment and
+field-perfect rows. Postcommit verifier failure retains the eleven rows for
+the separate read-only verification path; it never deletes or reloads mirror
+data.
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_provenance_v11.py --verify-only
+```
+
+Analyst checks continue to use operator-approved clusteradmin session
+authorization. Direct analyst network authentication remains unexercised and
+the SCRAM HBA correction for ML01 remains an operator infrastructure action.
 
 ---
 

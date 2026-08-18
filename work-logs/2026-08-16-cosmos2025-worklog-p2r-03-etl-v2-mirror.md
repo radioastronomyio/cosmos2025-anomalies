@@ -888,6 +888,106 @@ intentional approximately 36-minute live profile/byte-reproduction test. No
 other test was excluded and no second near-full run was started. The one local
 `gate 3.8:` commit seals this checkpoint.
 
+### Gate 3.9 dual-hash provenance
+
+Gate 3.9 registered exactly one row for every loaded mirror and changed only
+the generated `source.provenance.load_timestamp` COMMENT plus those eleven
+rows. The operator approved a timestamp-contract amendment after the required
+preflight proved PostgreSQL `track_commit_timestamp` was off. Historical
+table-load commit times therefore could not be recovered from
+`pg_xact_commit_timestamp`. `pg_walinspect` versions 1.0 and 1.1 were available
+but the extension was not installed in any relevant database, so no extension
+was created and no WAL timestamp was claimed. The investigation recorded a
+16 MiB WAL segment size, current WAL at `4D/F002C498`, checkpoint redo at
+`4D/E6EB8258`, and earliest retained filename
+`000000010000004D000000E6`; these facts did not provide a supported exact
+per-XID commit timestamp without installing the extension.
+
+The amended, versioned provenance contract is 1.0.1. `load_timestamp` now
+means the single PostgreSQL `transaction_timestamp()` of the
+provenance-registration transaction performed after load verification, not a
+historical table-load completion time. The live registration timestamp is
+`2026-08-18T05:21:29.316886-04:00`. Every row's notes record its exact loaded
+table transaction `xmin` and state that the actual commit timestamp is
+unavailable because `track_commit_timestamp` was off. Supplement notes also
+state `v1-release product on v1.1 holdings`.
+
+| Table | Rows | Load `xmin` | Declared and observed SHA-256 |
+|-------|-----:|------------:|----------------------------------|
+| `photometry_primary` | 784,016 | 11273452 | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` |
+| `photometry_aper` | 784,016 | 11273453 | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` |
+| `lephare` | 784,016 | 11273459 | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` |
+| `cigale` | 784,016 | 11273460 | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` |
+| `ml_morpho` | 784,016 | 11273462 | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` |
+| `bulge_disk` | 784,016 | 11273464 | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` |
+| `galight_morph` | 784,016 | 11273466 | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` |
+| `lss_overdensity` | 164,155 | 11273564 | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` |
+| `galaxy_groups` | 1,678 | 11273565 | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` |
+| `galaxy_group_memberships` | 1,745,652 | 11273566 | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` |
+| `specz_compilation` | 261,975 | 11273567 | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` |
+
+All configured source paths were stored in full with their basenames. Declared
+manifest hashes and freshly observed file hashes were obtained separately and
+required equal. The manifest was hashed before and after the same declared-pin
+read window; both identities equal
+`5941abbbcde4e27d706ec1a49456482cb779f9c77e6cf573b7313a0450ee4c7e`.
+Every source count, sealed profile count, live count, and recorded count
+matched. `catalog_version` is `v1.1` for all rows. The operator-directed
+version split is three supplement rows at `v1` and eight rows at the explicit
+`not_applicable` value.
+
+Strict TDD began with an expected failure for the old load-completion comment;
+GREEN amended the generator and regenerated SQL with only the version line and
+COMMENT changed. Evidence-construction RED/GREEN covered set, hash, path,
+count, version, XID, and timestamp drift. Transaction RED/GREEN established
+one database timestamp, atomic COMMENT plus inserts, rollback before commit,
+postcommit retention, and class/SQLSTATE-only diagnostics. The first real
+scratch proof found a psycopg API error because `executemany` belongs to a
+cursor, not a connection. A real-interface regression went RED and the
+cursor-based fix went GREEN before any persistent attempt.
+
+Independent review then found pre-amendment comment rejection, unstable
+manifest-read identity, ambiguous commit/close reporting, a missing contract
+version bump, and lifecycle diagnostic gaps. Focused RED/GREEN added one exact
+old/amended pre-registration comment override while preserving all other
+comments and schema metadata, manifest before/after identity, exact
+zero-versus-eleven reconnect classification, contract 1.0.1, post-registration
+retention state, and unvalidated verify-only reporting before observation.
+The latest operator instruction explicitly required three supplement version
+values of `v1`; the longer release phrase remains in notes rather than replacing
+that field.
+
+The final disposable PostgreSQL proof executed the exact generated twelve-table
+schema, inserted aligned scratch rows in all eleven mirrors, and reproduced the
+live old comment. It passed exact object/comment/nullability/constraint checks,
+one `xmin` per table, rollback of both COMMENT and rows, exact empty-state
+classification, an injected commit-succeeded-then-raised classification as
+retained eleven, postcommit exact schema, one/six provenance analyst checks,
+four/twenty-four Gate 3.8 checks, the one/eleven master matrix, and seven
+mutation classes. The scratch database was exactly absent afterward.
+Independent re-review approved live execution with no blocker.
+
+The live internal preflight proved provenance zero, stable fresh pins, exact
+physical/live counts and XIDs, schema, role, mode-0600 handoff, ACLs, and v1
+identity. The one registration transaction and immediate postcommit verifier
+passed. A separate `--verify-only` invocation independently re-read sources and
+manifest and reproduced the same eleven rows and registration timestamp. The
+final schema is twelve tables, 1,429 columns, 192 exact constraints, and 166
+array checks. Provenance analyst verification passed one SELECT and six
+write/DDL/grant denials; inherited supplement and master matrices passed.
+Direct analyst network authentication was not exercised. Clusteradmin session
+authorization remains operator-approved, and direct ML01 analyst HBA coverage
+remains a pending operator infrastructure correction. The v1 fingerprint is
+unchanged at
+`82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7`.
+Final closeout review approved with no blocker. The single efficient near-full
+suite returned `226 passed, 1 deselected in 120.53s (0:02:00)` with 2:01.04
+wall time, 1,175,720 KiB maximum RSS, zero swap, and exit zero. The sole
+deselection was the intentional approximately 36-minute
+`test_default_check_reproduces_tracked_dictionary_byte_identical`; no other
+test was excluded and no second near-full run was started. The one local
+`gate 3.9:` commit seals this checkpoint.
+
 ---
 
 ## 2. Files Changed
@@ -904,14 +1004,15 @@ other test was excluded and no second near-full run was started. The one local
 | [docs/reference/README.md](../docs/reference/README.md) | Indexed the candidate report |
 | [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
 | [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 builder, profiler, seal validator, and source-fidelity verifier |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented the Gate 3.9 timestamp amendment, lifecycle, verification, and analyst transport |
 | [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [src/etl/verify_source_fidelity.py](../src/etl/verify_source_fidelity.py) | Added the Gate 3.5 immutable-input and standalone/master verifier |
-| [src/etl/generate_schema_v11.py](../src/etl/generate_schema_v11.py) | Added the Gate 3.6 sealed-dictionary DDL generator and versioned provenance contract |
-| [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Added the generated-only eleven-mirror plus provenance SQL artifact |
-| [src/etl/verify_schema_v11_scratch.py](../src/etl/verify_schema_v11_scratch.py) | Added the prefix-guarded disposable database verifier and mutations |
+| [src/etl/generate_schema_v11.py](../src/etl/generate_schema_v11.py) | Added the Gate 3.6 sealed-dictionary DDL generator and amended provenance contract 1.0.1 |
+| [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Added the generated-only eleven-mirror plus provenance SQL artifact and amended registration-time COMMENT |
+| [src/etl/verify_schema_v11_scratch.py](../src/etl/verify_schema_v11_scratch.py) | Added the prefix-guarded disposable database verifier, mutations, and exact bounded comment override for Gate 3.9 transition preflight |
 | [src/etl/bootstrap_v11.py](../src/etl/bootstrap_v11.py) | Added the guarded persistent master bootstrap, phase-aware exact reversal/finalization, analyst role/handoff, admin-session security checks, and verify-only mode |
 | [src/etl/load_supplements_v11.py](../src/etl/load_supplements_v11.py) | Added guarded Gate 3.8 streaming loads, phase-aware row/grant recovery, source-free finalization, full admin/analyst verification, and verify-only mode |
+| [src/etl/load_provenance_v11.py](../src/etl/load_provenance_v11.py) | Added guarded Gate 3.9 dual-hash registration, exact commit classification, postcommit retention, analyst checks, and verify-only mode |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
@@ -921,7 +1022,8 @@ other test was excluded and no second near-full run was started. The one local
 | [tests/test_verify_schema_v11_scratch.py](../tests/test_verify_schema_v11_scratch.py) | Added unauthenticated scratch guards and conformance mutations |
 | [tests/test_bootstrap_v11.py](../tests/test_bootstrap_v11.py) | Added Gate 3.7 conversion, COPY, guards, fingerprint, role, handoff, verifier-query, diagnostics, and entrypoint regressions |
 | [tests/test_load_supplements_v11.py](../tests/test_load_supplements_v11.py) | Added Gate 3.8 source/COPY, count/flag/join, ACL/matrix, sealed lifecycle, resume, redaction, and orchestration regressions |
-| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, and scratch suites |
+| [tests/test_load_provenance_v11.py](../tests/test_load_provenance_v11.py) | Added Gate 3.9 evidence, mutation, transaction, ambiguity, retention, redaction, and orchestration regressions |
+| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, scratch, loading, and provenance suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---
@@ -947,6 +1049,9 @@ other test was excluded and no second near-full run was started. The one local
 | Gate 3.8 table-to-PUBLIC GRANT probes returned PostgreSQL warnings/no-ops instead of deterministic privilege denials | Reproduced all four in disposable PostgreSQL, replaced them with role-membership GRANT probes requiring ADMIN OPTION, and passed the production 4/24 matrix |
 | The first Gate 3.8 post-load analyst-verifier defect triggered another blanket four-table reversal | Recorded the repeated operator-corrected policy mistake; added a four-load seal, post-seal row retention, selective new-grant reversal, and source-free `--finalize-admin`; only one later import was authorized and it passed |
 | Gate 3.8 independent review found source/profile, exact-schema, ACL, commit-window, resume, and handoff-security gaps | Added strict RED/GREEN coverage, complete retained validation, context-exit-safe seal tracking, config-bound handoff checks, and a real failure/retain/resume scratch proof; final review approved |
+| `track_commit_timestamp` was off, so exact historical table-load commit timestamps were unavailable | Operator approved contract 1.0.1: `load_timestamp` records the later provenance-registration transaction; each note preserves exact load `xmin` and the unavailable-timestamp reason; no approximation or extension installation occurred |
+| The first Gate 3.9 real scratch registration used psycopg `Connection.executemany` | Scratch rolled back and was exactly removed; a real-interface RED moved the call to `Cursor.executemany`, and the expanded proof passed before live execution |
+| Gate 3.9 review found old-comment preflight, manifest identity, commit ambiguity, versioning, and retention-diagnostic gaps | Added strict transition-only comment checking, stable manifest pin window, exact zero/eleven reconnect classification, contract 1.0.1, stage-aware retention, expanded unit/scratch proof, and independent approval |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -954,9 +1059,9 @@ other test was excluded and no second near-full run was started. The one local
 
 ## 4. Next Steps
 
-Handoff: Gate 3.8 has retained the persistent seven-master plus four
-supplement/spec-z mirrors, exact read-only analyst role, and ignored handoff.
-Provenance remains empty for Gate 3.9. Later gates may consume the sealed
+Handoff: Gate 3.9 has retained the persistent seven-master plus four
+supplement/spec-z mirrors, eleven exact provenance rows, exact read-only
+analyst role, and ignored handoff. Later gates may consume the sealed
 dictionary, generated DDL, persistent target, and verifier evidence but may
 not change source science, profiles, values, mappings, or provenance without
 their own authorization.

@@ -181,7 +181,7 @@ def test_provenance_contract_is_versioned_importable_and_fidelity_safe() -> None
     """Field drift, weak digests, or loss of table identity must fail."""
     module = _module()
     contract = module.PROVENANCE_CONTRACT
-    assert module.PROVENANCE_CONTRACT_VERSION == "1.0.0"
+    assert module.PROVENANCE_CONTRACT_VERSION == "1.0.1"
     assert tuple(field.name for field in contract) == (
         "table_name",
         "source_file",
@@ -205,6 +205,19 @@ def test_provenance_contract_is_versioned_importable_and_fidelity_safe() -> None
     assert "64" in contract[3].check_expression
     assert "64" in contract[4].check_expression
     assert "64" in contract[9].check_expression
+
+
+def test_load_timestamp_is_provenance_registration_time_not_load_completion() -> None:
+    """The amended field must not invent a historical table-load timestamp."""
+    module = _module()
+    field = next(
+        field for field in module.PROVENANCE_CONTRACT if field.name == "load_timestamp"
+    )
+
+    assert "provenance-registration transaction" in field.comment
+    assert "after mirror load verification" in field.comment
+    assert "not the historical table-load commit timestamp" in field.comment
+    assert "table load completed" not in field.comment
 
 
 def test_every_column_has_one_separated_provenance_aware_comment() -> None:

@@ -291,7 +291,10 @@ def _inspect_comments(
 
 
 def _verify_objects_and_columns(
-    connection: psycopg.Connection, rows: list[dict[str, str]]
+    connection: psycopg.Connection,
+    rows: list[dict[str, str]],
+    *,
+    expected_comment_overrides: Mapping[tuple[str, str], str] | None = None,
 ) -> dict[str, int]:
     """Verify exact objects, columns, comments, and all named constraints."""
     table_rows = connection.execute(
@@ -329,6 +332,11 @@ def _verify_objects_and_columns(
             for field in generate_schema_v11.PROVENANCE_CONTRACT
         }
     )
+    if expected_comment_overrides:
+        unknown = set(expected_comment_overrides).difference(expected_comments)
+        if unknown:
+            raise ValueError("column comment override boundary mismatch")
+        expected_comments.update(expected_comment_overrides)
     observed_comments = _inspect_comments(connection)
     if observed_comments != expected_comments:
         raise ValueError("column comment conformance mismatch")

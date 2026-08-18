@@ -59,7 +59,7 @@ MIRROR_TABLE_ORDER = (
     "specz_compilation",
 )
 MASTER_EXTENSION_TABLES = MIRROR_TABLE_ORDER[1:7]
-PROVENANCE_CONTRACT_VERSION = "1.0.0"
+PROVENANCE_CONTRACT_VERSION = "1.0.1"
 
 
 @dataclass(frozen=True)
@@ -126,7 +126,8 @@ PROVENANCE_CONTRACT = (
         "load_timestamp",
         "timestamp with time zone",
         False,
-        "Timestamp at which the table load completed.",
+        "Timestamp of the provenance-registration transaction performed after "
+        "mirror load verification; not the historical table-load commit timestamp.",
     ),
     ProvenanceField(
         "manifest_ref",
