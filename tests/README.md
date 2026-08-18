@@ -300,6 +300,35 @@ pytest tests/test_generate_conformance_v11.py \
 python src/etl/generate_conformance_v11.py --check
 ```
 
+## Source-fresh value reconciliation
+
+`test_reconciliation_core_v11.py` fixes the Gate 3.11 sampling, target-cast,
+IEEE, NULL, array, and protected-ledger semantics. It rejects invalid sampling
+boundaries, integer overflow, wrong scalar/array shapes, non-FITS NULL
+inference, unsafe ledger destinations, inode replacement, and incomplete
+mismatch records.
+
+`test_reconcile_values_v11.py` covers generated source contracts, historical
+versus live key names, full source uniqueness and tuple fallback, one logical
+source open per table, 500/2,000-row DB batching, exact all-column comparison,
+element-indexed mismatches, runtime-derived success totals, hash-only pinning,
+redacted CLI output, and before/after identity on source-open, fetch, ledger-
+write, transaction-close, count-drift, cleanup, and identity failures.
+
+The authenticated `--scratch-proof` is intentionally separate from pytest. It
+builds all eleven synthetic sources and the exact generated target schema,
+passes the production reconciler, detects eight rollback-isolated mutations,
+round-trips finite float4/float8 rounding plus masks/IEEE/sentinel/integer/
+array edges through PostgreSQL, and proves exact scratch absence. Normal tests
+never access the persistent target or immutable source holdings.
+
+```bash
+pytest tests/test_generate_conformance_v11.py \
+  tests/test_reconciliation_core_v11.py \
+  tests/test_reconcile_values_v11.py -v
+python src/etl/generate_conformance_v11.py --check
+```
+
 ## Manifest validator
 
 `test_build_data_manifest.py` proves the manifest machine contract in two layers.

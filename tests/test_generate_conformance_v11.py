@@ -23,6 +23,7 @@ Usage
 
 import csv
 import importlib.util
+import json
 import sys
 from collections import Counter
 from copy import deepcopy
@@ -139,6 +140,50 @@ def test_each_case_carries_exact_schema_comment_and_array_contract() -> None:
         assert case["array_constraint_expression"] == (
             expected_array["expression"] if expected_array else None
         )
+
+
+def test_each_case_carries_exact_value_source_contract() -> None:
+    """Wrong source mapping, null facts, or expected population must be visible."""
+    module = _module()
+    rows = _rows()
+    cases = module.generate_cases(rows)
+    table_counts: dict[str, set[int]] = {}
+    for row in rows:
+        if row["profile_json"]:
+            table_counts.setdefault(row["target_table"], set()).update(
+                profile["row_count"]
+                for profile in json.loads(row["profile_json"])["profiles"]
+            )
+
+    for case, row in zip(cases, rows, strict=True):
+        expected_counts = table_counts[row["target_table"]]
+        assert len(expected_counts) == 1
+        assert case["source_family"] == row["source_family"]
+        assert case["source_file"] == row["source_file"]
+        assert case["source_locator"] == row["source_locator"]
+        assert case["source_column"] == row["source_column"]
+        assert case["source_type"] == row["source_type"]
+        assert case["has_fits_mask"] is (row["has_fits_mask"] == "True")
+        assert case["has_nan"] is (row["has_nan"] == "True")
+        assert case["expected_source_rows"] == next(iter(expected_counts))
+
+
+def test_generator_rejects_inconsistent_profile_row_counts() -> None:
+    """Vector profiles with different populations must not become value cases."""
+    module = _module()
+    rows = _rows()
+    vector_index = next(
+        index
+        for index, row in enumerate(rows)
+        if len(json.loads(row["profile_json"])["profiles"]) > 1
+    )
+    changed = deepcopy(rows)
+    profile = json.loads(changed[vector_index]["profile_json"])
+    profile["profiles"][1]["row_count"] -= 1
+    changed[vector_index]["profile_json"] = json.dumps(profile)
+
+    with pytest.raises(ValueError, match="profile row-count mismatch"):
+        module.generate_cases(changed)
 
 
 def test_generated_module_is_explicit_importable_and_byte_checked(

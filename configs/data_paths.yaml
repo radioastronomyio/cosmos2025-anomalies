@@ -108,6 +108,15 @@ etl_v2:
   # Halt before target creation unless the PostgreSQL data volume has 50 GiB free.
   minimum_database_free_bytes: 53687091200
 
+# ---------------------------------------------------------------------------
+# ETL v2 Gate 3.11 read-only reconciliation
+# ---------------------------------------------------------------------------
+reconciliation:
+  sample_rows: 20000
+  wide_batch_rows: 500
+  batch_rows: 2000
+  mismatch_ledger: /opt/agents/repos/cosmos2025-anomalies/.superpowers/sdd/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror/gate-3-11-mismatches.jsonl
+
 handoff:
   # Created once with O_EXCL and mode 0600 after load and role checks succeed.
   cosmos2025_v11_env: /opt/agents/repos/cosmos2025-anomalies/internal-files/cosmos2025-v11.env

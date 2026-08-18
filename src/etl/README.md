@@ -35,6 +35,8 @@ FITS-to-PostgreSQL pipeline for the COSMOS-Web DR1 master catalog. Phase 1 is co
 | `generate_conformance_v11.py` | Generates one explicit Gate 3.10 conformance case per sealed dictionary row; `--check` rejects artifact drift |
 | `conformance_cases_v11.py` | Generated-only 1,416-case Python contract spanning every mirror column, comment, origin, type, and array check |
 | `verify_conformance_v11.py` | Captures one batched catalog snapshot, validates every generated case and security boundary, and runs rollback-isolated scratch mutations |
+| `reconciliation_core_v11.py` | Provides pure deterministic sampling, exact target-cast/IEEE canonicalization, and protected complete mismatch-ledger primitives for Gate 3.11 |
+| `reconcile_values_v11.py` | Performs the one-pass, source-fresh Gate 3.11 value reconciliation against one read-only PostgreSQL snapshot and runs its disposable full-pipeline proof |
 | `extract_catalog.py` | Main ETL script. Reads 8.4GB FITS (6 extensions), extracts 4 parquet files, loads into PostgreSQL via COPY FROM |
 | `verify_catalog.py` | Post-ETL verification. Runs 13 check sections (row counts, sentinel residuals, unit validation, O1 readiness), writes Markdown + HTML reports with embedded charts |
 | `create_schema.sql` | DDL for the `catalog` schema. Creates all 7 tables with correct column types, constraints, and indexes |
@@ -257,6 +259,56 @@ comment and one type in separate transactions, requires the intended failures,
 rolls both back, drops only its exact scratch database, and compares protected
 database, role, v1, catalog, and handoff identity before and after. It never
 writes to `cosmos2025_v11` or `cosmos2025`.
+
+---
+
+## Gate 3.11 source-fresh value reconciliation
+
+`generate_conformance_v11.py` also emits the exact source family, configured
+file, locator, source column/type, mask/NaN facts, and sealed source population
+for every case. Regenerate or byte-check this tracked input exactly as in Gate
+3.10.
+
+The live reconciler is a read-only, single-use evidence command:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/reconcile_values_v11.py --live
+```
+
+It first hashes and manifest-pins the eleven configured artifacts without a
+second record extraction. It then opens each source exactly once, checks full
+source-key uniqueness, retains the lowest SHA-256-ranked 20,000 source
+ordinals (or the complete smaller source), fetches every generated target
+column in bounded batches, and compares exact target-cast tokens. Float4 and
+float8 use IEEE bytes; FITS masks and NaNs alone become NULL; arrays retain
+order, element NULLs, and exact cardinality. Success output contains no source
+or database row values.
+
+The current dictionary maps Toni `ID` to live `galaxy_groups.id` and
+`(GALID, ID)` to live `galaxy_group_memberships.(galid, id)`. The historical
+v1 wording `group_id` is preserved only as evidence and is never queried.
+
+Every mismatch is written without truncation to the configured ignored
+mode-0600 JSONL ledger, including zero-based array element indices and exact
+fallback tuple locators. Unexpected failures print only allowlisted stage,
+exception class, and SQLSTATE metadata. The disposable proof is separate:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/reconcile_values_v11.py --scratch-proof
+```
+
+It creates only one random configured-prefix database, exercises all 1,416
+cases plus PostgreSQL float rounding, signed zero, infinities, FITS masks,
+finite sentinels, integer edges, arrays, and eight intended mutations, then
+drops the exact database. Both modes bracket every exit with protected target,
+v1, role, handoff, count, and transaction-ID identity observations.
+
+The persistent verification transport remains the operator-approved
+clusteradmin session authorization. Direct analyst network authentication was
+not exercised, and the ML01 analyst SCRAM HBA correction remains a pending
+operator infrastructure action.
 
 ---
 

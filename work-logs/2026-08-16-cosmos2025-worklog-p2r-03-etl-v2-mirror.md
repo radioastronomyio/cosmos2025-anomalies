@@ -2,7 +2,7 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-17"
-version: "0.7"
+version: "0.8"
 status: "partial"
 tags:
   - type: worklog
@@ -52,8 +52,12 @@ related_documents:
   - "src/etl/generate_conformance_v11.py"
   - "src/etl/conformance_cases_v11.py"
   - "src/etl/verify_conformance_v11.py"
+  - "src/etl/reconciliation_core_v11.py"
+  - "src/etl/reconcile_values_v11.py"
   - "tests/test_generate_conformance_v11.py"
   - "tests/test_verify_conformance_v11.py"
+  - "tests/test_reconciliation_core_v11.py"
+  - "tests/test_reconcile_values_v11.py"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -62,7 +66,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 through 3.10 complete; later gates remain |
+| Status | Partial: Gates 3.1 through 3.11 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
@@ -86,7 +90,9 @@ and remote Git state were not modified.
 
 Gates 3.8 and 3.9 added the four supplement/spec-z mirrors and exact eleven-row
 dual-hash provenance. Gate 3.10 generated and executed the 1,416-case
-dictionary conformance surface without changing either persistent database.
+dictionary conformance surface. Gate 3.11 then independently reconciled exact
+target-cast values for 201,678 deterministic source samples across all 1,416
+mirror columns without changing either persistent database.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -1056,6 +1062,100 @@ deselection was the intentional approximately 36-minute
 test was excluded and no second near-full run was started. The one local
 `gate 3.10:` commit seals this checkpoint.
 
+### Gate 3.11 full-coverage value reconciliation
+
+Gate 3.11 extended the generated conformance artifact rather than introducing
+a hand-maintained value list. Each of the 1,416 cases now also carries its
+exact source family, configured file, source locator, source column/type,
+FITS mask and NaN facts, and sealed source population. Generator byte identity
+continues to bind the tracked module to `columns-v11.csv`.
+
+Strict RED/GREEN added deterministic lowest-SHA-256-rank sampling, independent
+target-cast canonicalization, one-pass FITS/text readers, bounded PostgreSQL
+fetches, complete mismatch evidence, and every-exit protected identity. The
+seven masters share seed `1380376179526893666`, 20,000 ordinals, and digest
+`dda74f4d62dd0965588c9603ef445fbed1f50619f8c1278eb28c34cad42b35f4`.
+The remaining exact sample boundary was:
+
+| Table | Population | Sample | Seed | Sample SHA-256 | DB batches |
+|-------|-----------:|-------:|-----:|---------------|-----------:|
+| `lss_overdensity` | 164,155 | 20,000 | 4976263942886350198 | `10daf8c325b51ab08b9eb4961780611764f8d095311ab2725603973810dd24d9` | 10 |
+| `galaxy_groups` | 1,678 | 1,678 | 4652599078883424958 | `e2793870f64035f8c79f38add75b3d196ebb2176f29984ae16a3824aa31a90d4` | 1 |
+| `galaxy_group_memberships` | 1,745,652 | 20,000 | 15583989488859696288 | `a0d4b4b3e3993abf8e97318fda8316162bb46fe21f40ed17028c4e6ca56d061d` | 10 |
+| `specz_compilation` | 261,975 | 20,000 | 9076022164977561485 | `3102efb8e00dee0d3d548fd2c26aab3ac5b505d026d10efaea32e05d4894afa2` | 10 |
+
+All complete source keys were unique. Matching used `source_row` for masters,
+source/live `id` for Hatamnia, `ID`/`id` for Toni groups, `(GALID, ID)`/
+`(galid, id)` for memberships, and `Id_specz`/`id_specz` for spec-z. The
+central spec's historical v1 `group_id` and `(galid, group_id)` names remain
+explicit evidence only; the reconciler derived and queried the current sealed
+dictionary names.
+
+| Source table boundary | Total source rows | Distinct candidate keys | Method |
+|-----------------------|------------------:|------------------------:|--------|
+| Each of seven master tables | 784,016 | 784,016 | `unique_key` |
+| `lss_overdensity` | 164,155 | 164,155 | `unique_key` |
+| `galaxy_groups` | 1,678 | 1,678 | `unique_key` |
+| `galaxy_group_memberships` | 1,745,652 | 1,745,652 | `unique_key` |
+| `specz_compilation` | 261,975 | 261,975 | `unique_key` |
+
+Exact total equaled exact distinct count for every table, so tuple-multiplicity
+fallback was not used.
+
+The authenticated disposable proof executed the exact generated schema and
+all 1,416 production reconciliation cases across eleven synthetic sources. It
+round-tripped finite 1.1 float4/float8 rounding, signed zero, both infinities,
+FITS integer masks, NaN, retained finite sentinel values, smallint/bigint
+edges, booleans, text, and ordered arrays through PostgreSQL. Eight independent
+scalar, array, NULL/sentinel, `source_row`, missing, extra, tuple-multiplicity,
+and injected-ID mutations caused the intended failures under rollback. The
+final proof returned eleven logical source reads, exact scratch absence, and
+unchanged persistent target, v1, role, and handoff identity in 9.85 seconds
+with 169,732 KiB maximum RSS.
+
+Independent review initially found duplicate record extraction from the full
+Gate 3.5 comparer, success-output redaction outside the exception boundary,
+missing array indices and exact fallback locators, incomplete success evidence,
+missing PostgreSQL edge-cast parity, and incomplete failure-path identity
+coverage. Strict RED/GREEN replaced the preflight with eleven hash-only pins,
+added element/key/count ledger records, recorded the full sampling/column/NULL
+boundary, expanded the scratch data, and bracketed every live/scratch exit.
+Later review found table-count drift could bypass the ledger and finite float
+rounding was not yet exercised; both gained live-path or scratch regressions.
+Final pre-live review cleared every blocker with 64 focused tests passing.
+The cumulative Gate 3.6 through 3.11 selection then returned `229 passed in
+5.96s`; generator byte identity, focused Ruff and format, configuration YAML,
+changed-document frontmatter and links, and `git diff --check` also passed.
+
+Exactly one persistent live reconciliation ran read-only. It freshly pinned
+eleven inputs, made eleven logical record extractions, executed 311 bounded DB
+batches in one repeatable-read/read-only snapshot, and returned zero mismatches
+without publishing a ledger. Runtime-derived totals were 201,678 sampled
+table-records, 28,063,492 row-column comparisons, 260,000 metadata comparisons,
+3,320,000 array cells, and 16,600,000 array-element comparisons across exactly
+1,403 native plus thirteen metadata columns. It completed in 15:59.19 with
+2,427,708 KiB maximum RSS, zero swap, and exit zero. No second source
+reconciliation was run.
+
+The separate DB-only conformance recheck passed 1,416 cases, twelve regular
+tables, 1,429 columns/comments, 192 constraints, eleven provenance rows,
+twelve analyst SELECTs, 72 absent table write capabilities, and the inherited
+master/supplement/provenance matrices. Direct analyst network authentication
+was not exercised. Operator-approved clusteradmin session authorization and
+the pending direct ML01 SCRAM HBA correction remain unchanged. The v1
+fingerprint remains
+`82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7`.
+
+Independent closeout review required explicit per-table key total/distinct/
+method evidence and the cumulative test result; both documentation findings
+were repaired, and narrow re-review cleared the gate. The single efficient
+near-full suite then returned `323 passed, 1 deselected in 125.61s (0:02:05)`
+with 2:06.15 wall time, 1,180,232 KiB maximum RSS, zero swap, and exit zero.
+The sole deselection was the intentional approximately 36-minute
+`test_default_check_reproduces_tracked_dictionary_byte_identical`; no other
+test was excluded and no second near-full run was started. The one local
+`gate 3.11:` commit seals this checkpoint.
+
 ---
 
 ## 2. Files Changed
@@ -1063,7 +1163,7 @@ test was excluded and no second near-full run was started. The one local
 | File | Change |
 |------|--------|
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
-| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic-evidence, Gate 3.5 provenance-pin, generated-DDL/conformance, maintenance-database, and scratch-prefix paths/settings |
+| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic-evidence, Gate 3.5 provenance-pin, generated-DDL/conformance, maintenance-database, scratch-prefix, and bounded Gate 3.11 reconciliation settings |
 | [configs/README.md](../configs/README.md) | Documented dictionary, report, semantic-source, provenance-pin, and `ml01/dev` scratch roles |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
 | [data/dictionary/README.md](../data/dictionary/README.md) | Expanded the 32-field formal seal, all controlled vocabularies, provenance, profile/JSON schemas, sentinels, and ignore contract |
@@ -1072,7 +1172,7 @@ test was excluded and no second near-full run was started. The one local
 | [docs/reference/README.md](../docs/reference/README.md) | Indexed the candidate report |
 | [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
 | [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 provenance plus Gate 3.10 generated conformance, mutation, verification, and analyst transport |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 provenance, Gate 3.10 conformance, and Gate 3.11 source-fresh reconciliation, mismatch, scratch, and transport boundaries |
 | [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [src/etl/verify_source_fidelity.py](../src/etl/verify_source_fidelity.py) | Added the Gate 3.5 immutable-input and standalone/master verifier |
 | [src/etl/generate_schema_v11.py](../src/etl/generate_schema_v11.py) | Added the Gate 3.6 sealed-dictionary DDL generator and amended provenance contract 1.0.1 |
@@ -1081,9 +1181,11 @@ test was excluded and no second near-full run was started. The one local
 | [src/etl/bootstrap_v11.py](../src/etl/bootstrap_v11.py) | Added the guarded persistent master bootstrap, phase-aware exact reversal/finalization, analyst role/handoff, admin-session security checks, and verify-only mode |
 | [src/etl/load_supplements_v11.py](../src/etl/load_supplements_v11.py) | Added guarded Gate 3.8 streaming loads, phase-aware row/grant recovery, source-free finalization, full admin/analyst verification, and verify-only mode |
 | [src/etl/load_provenance_v11.py](../src/etl/load_provenance_v11.py) | Added guarded Gate 3.9 dual-hash registration, exact commit classification, postcommit retention, analyst checks, and verify-only mode |
-| [src/etl/generate_conformance_v11.py](../src/etl/generate_conformance_v11.py) | Added the deterministic Gate 3.10 explicit-case generator and byte-identity check |
-| [src/etl/conformance_cases_v11.py](../src/etl/conformance_cases_v11.py) | Added the generated 1,416-case dictionary conformance contract |
+| [src/etl/generate_conformance_v11.py](../src/etl/generate_conformance_v11.py) | Added the deterministic explicit-case generator, byte-identity check, and Gate 3.11 source/value fields |
+| [src/etl/conformance_cases_v11.py](../src/etl/conformance_cases_v11.py) | Added the generated 1,416-case schema plus source/value reconciliation contract |
 | [src/etl/verify_conformance_v11.py](../src/etl/verify_conformance_v11.py) | Added batched live catalog validation, complete security orchestration, and exact disposable comment/type mutation proof |
+| [src/etl/reconciliation_core_v11.py](../src/etl/reconciliation_core_v11.py) | Added deterministic sampling, exact target-cast/IEEE tokens, and protected complete mismatch-ledger primitives |
+| [src/etl/reconcile_values_v11.py](../src/etl/reconcile_values_v11.py) | Added one-read source extraction, bounded read-only target reconciliation, exact live evidence, redacted lifecycle, and full disposable PostgreSQL proof |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
@@ -1094,9 +1196,11 @@ test was excluded and no second near-full run was started. The one local
 | [tests/test_bootstrap_v11.py](../tests/test_bootstrap_v11.py) | Added Gate 3.7 conversion, COPY, guards, fingerprint, role, handoff, verifier-query, diagnostics, and entrypoint regressions |
 | [tests/test_load_supplements_v11.py](../tests/test_load_supplements_v11.py) | Added Gate 3.8 source/COPY, count/flag/join, ACL/matrix, sealed lifecycle, resume, redaction, and orchestration regressions |
 | [tests/test_load_provenance_v11.py](../tests/test_load_provenance_v11.py) | Added Gate 3.9 evidence, mutation, transaction, ambiguity, retention, redaction, and orchestration regressions |
-| [tests/test_generate_conformance_v11.py](../tests/test_generate_conformance_v11.py) | Added Gate 3.10 generated boundary, split, field, array, and byte-identity regressions |
+| [tests/test_generate_conformance_v11.py](../tests/test_generate_conformance_v11.py) | Added generated boundary, split, schema/value-source field, profile-count, and byte-identity regressions |
 | [tests/test_verify_conformance_v11.py](../tests/test_verify_conformance_v11.py) | Added Gate 3.10 snapshot, drift, query-budget, security, guard, lifecycle, and redaction regressions |
-| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, scratch, loading, provenance, and generated-conformance suites |
+| [tests/test_reconciliation_core_v11.py](../tests/test_reconciliation_core_v11.py) | Added sampling, exact cast, NULL/array, and protected ledger regressions |
+| [tests/test_reconcile_values_v11.py](../tests/test_reconcile_values_v11.py) | Added generated key, one-read source, bounded DB, comparison, evidence, scratch, lifecycle, and redaction regressions |
+| [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, loading, provenance, conformance, and source-fresh reconciliation suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---
@@ -1125,6 +1229,9 @@ test was excluded and no second near-full run was started. The one local
 | `track_commit_timestamp` was off, so exact historical table-load commit timestamps were unavailable | Operator approved contract 1.0.1: `load_timestamp` records the later provenance-registration transaction; each note preserves exact load `xmin` and the unavailable-timestamp reason; no approximation or extension installation occurred |
 | The first Gate 3.9 real scratch registration used psycopg `Connection.executemany` | Scratch rolled back and was exactly removed; a real-interface RED moved the call to `Cursor.executemany`, and the expanded proof passed before live execution |
 | Gate 3.9 review found old-comment preflight, manifest identity, commit ambiguity, versioning, and retention-diagnostic gaps | Added strict transition-only comment checking, stable manifest pin window, exact zero/eleven reconnect classification, contract 1.0.1, stage-aware retention, expanded unit/scratch proof, and independent approval |
+| The first Gate 3.11 scratch command could not import `src` under direct-file execution, then the first protected observation expected a tuple instead of the configured psycopg `dict_row` | Both failures occurred before scratch creation; added direct-entry and real dict-row RED/GREEN regressions, confirmed zero scratch databases, and passed the guarded proof |
+| Gate 3.11 pre-live review found duplicate record extraction, incomplete ledger/evidence/cast boundaries, output redaction, and failure-path identity gaps | Replaced the full Gate 3.5 call with eleven hash-only pins, added complete element/key/count records and value-free evidence, expanded real PostgreSQL cast parity, and bracketed every exit before the sole live run |
+| Missing/extra table counts initially raised before a mismatch record, and finite 1.1 rounding was absent from scratch | Added a live-path sealed mode-0600 table-count ledger regression and float4/float8 finite-rounding scratch cases; final independent review cleared both |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -1132,13 +1239,14 @@ test was excluded and no second near-full run was started. The one local
 
 ## 4. Next Steps
 
-Handoff: Gate 3.10 reverified the persistent seven-master plus four
-supplement/spec-z mirrors, eleven exact provenance rows, exact read-only
-analyst role, and ignored handoff retained by Gate 3.9. Later gates may consume
-the sealed
-dictionary, generated DDL, persistent target, and verifier evidence but may
-not change source science, profiles, values, mappings, or provenance without
-their own authorization.
+Handoff: Gate 3.11 independently reconciled the persistent seven-master plus
+four supplement/spec-z mirrors against fresh immutable-source records at the
+exact target-cast boundary. It also reverified eleven provenance rows, the
+exact read-only analyst role, the ignored handoff retained by Gate 3.9, and
+unchanged v1 identity. Later gates may consume the sealed dictionary,
+generated DDL, persistent target, and reconciliation evidence but may not
+change source science, profiles, values, mappings, or provenance without their
+own authorization.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
@@ -1150,5 +1258,8 @@ their own authorization.
 4. Use the applicable guarded `--finalize-admin`, never a master or supplement
    reimport, after a post-seal administration failure leaves exact loaded data
    retained.
+5. Preserve the Gate 3.11 one-read, bounded-batch, target-cast reconciliation
+   boundary; investigate any future mismatch only through a protected ignored
+   ledger and a separately authorized gate.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

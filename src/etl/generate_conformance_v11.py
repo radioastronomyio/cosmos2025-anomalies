@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 from collections import Counter
 from dataclasses import asdict
@@ -66,6 +67,43 @@ def _case_group(row: dict[str, str]) -> str:
     return "supplement_native"
 
 
+def _profile_row_count(row: dict[str, str]) -> int | None:
+    """Return one native field's physical population when it has profiles."""
+    if not row["profile_json"]:
+        return None
+    profiles = json.loads(row["profile_json"])["profiles"]
+    counts = {profile["row_count"] for profile in profiles}
+    if (
+        len(counts) != 1
+        or not profiles
+        or any(not isinstance(count, int) or count < 0 for count in counts)
+    ):
+        raise ValueError("profile row-count mismatch")
+    return counts.pop()
+
+
+def _table_row_counts(rows: list[dict[str, str]]) -> dict[str, int]:
+    """Derive every table population from its independently profiled fields."""
+    observed: dict[str, set[int]] = {}
+    for row in rows:
+        count = _profile_row_count(row)
+        if count is not None:
+            observed.setdefault(row["target_table"], set()).add(count)
+    if set(observed) != {row["target_table"] for row in rows} or any(
+        len(counts) != 1 for counts in observed.values()
+    ):
+        raise ValueError("table profile row-count mismatch")
+    return {table: counts.pop() for table, counts in observed.items()}
+
+
+def _boolean_field(row: dict[str, str], field: str) -> bool:
+    """Parse one sealed title-case boolean without truthy coercion."""
+    value = row[field]
+    if value not in {"True", "False"}:
+        raise ValueError(f"invalid sealed boolean: {field}")
+    return value == "True"
+
+
 def generate_cases(
     rows: list[dict[str, str]],
 ) -> tuple[dict[str, object], ...]:
@@ -82,6 +120,7 @@ def generate_cases(
             generate_schema_v11.array_check_contract(rows), array_rows, strict=True
         )
     }
+    table_row_counts = _table_row_counts(rows)
     cases = tuple(
         {
             "case_id": f"{index:04d}:{row['target_table']}.{row['target_identifier']}",
@@ -102,6 +141,14 @@ def generate_cases(
                     "expression"
                 )
             ),
+            "source_family": row["source_family"],
+            "source_file": row["source_file"],
+            "source_locator": row["source_locator"],
+            "source_column": row["source_column"],
+            "source_type": row["source_type"],
+            "has_fits_mask": _boolean_field(row, "has_fits_mask"),
+            "has_nan": _boolean_field(row, "has_nan"),
+            "expected_source_rows": table_row_counts[row["target_table"]],
         }
         for index, row in enumerate(rows, start=1)
     )
