@@ -59,6 +59,7 @@ processed:
 dictionary:
   columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
   schema_v11_sql: /opt/agents/repos/cosmos2025-anomalies/src/etl/schema_v11.sql
+  conformance_cases_v11: /opt/agents/repos/cosmos2025-anomalies/src/etl/conformance_cases_v11.py
   sentinel_candidates_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/sentinel-candidates-v11.md
 
 # Pinned semantic evidence consumed read-only by the load-dictionary builder.

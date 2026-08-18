@@ -4,7 +4,7 @@ title: "ETL Pipeline"
 description: "COSMOS-Web catalog extraction, load-dictionary, and verification scripts"
 author: "VintageDon"
 date: "2026-04-05"
-version: "1.9"
+version: "2.0"
 status: "Active"
 tags:
   - type: directory-readme
@@ -32,6 +32,9 @@ FITS-to-PostgreSQL pipeline for the COSMOS-Web DR1 master catalog. Phase 1 is co
 | `bootstrap_v11.py` | Performs the guarded, one-time Gate 3.7 master bootstrap and separate post-load verification for `cosmos2025_v11` |
 | `load_supplements_v11.py` | Streams and verifies the four Gate 3.8 supplement/spec-z mirrors and supports source-free post-seal administration resume |
 | `load_provenance_v11.py` | Registers and verifies the exact eleven-row Gate 3.9 dual-hash provenance set with phase-aware commit classification |
+| `generate_conformance_v11.py` | Generates one explicit Gate 3.10 conformance case per sealed dictionary row; `--check` rejects artifact drift |
+| `conformance_cases_v11.py` | Generated-only 1,416-case Python contract spanning every mirror column, comment, origin, type, and array check |
+| `verify_conformance_v11.py` | Captures one batched catalog snapshot, validates every generated case and security boundary, and runs rollback-isolated scratch mutations |
 | `extract_catalog.py` | Main ETL script. Reads 8.4GB FITS (6 extensions), extracts 4 parquet files, loads into PostgreSQL via COPY FROM |
 | `verify_catalog.py` | Post-ETL verification. Runs 13 check sections (row counts, sentinel residuals, unit validation, O1 readiness), writes Markdown + HTML reports with embedded charts |
 | `create_schema.sql` | DDL for the `catalog` schema. Creates all 7 tables with correct column types, constraints, and indexes |
@@ -209,6 +212,51 @@ doppler run --project ml01 --config dev -- \
 Analyst checks continue to use operator-approved clusteradmin session
 authorization. Direct analyst network authentication remains unexercised and
 the SCRAM HBA correction for ML01 remains an operator infrastructure action.
+
+---
+
+## Gate 3.10 dictionary-driven conformance
+
+Regenerate or byte-check the explicit 1,416-case module from the sealed
+dictionary:
+
+```bash
+python src/etl/generate_conformance_v11.py
+python src/etl/generate_conformance_v11.py --check
+```
+
+Each generated case carries the exact table and column, canonical PostgreSQL
+type, column origin, full evidence-separated generated comment, element count,
+and the named dimension/cardinality CHECK for arrays. The split is 1,349
+master-native, 22 supplement-native, 32 spec-z-native, and 13 metadata cases.
+
+Run the persistent verifier read-only through the approved clusteradmin
+transport:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/verify_conformance_v11.py --live
+```
+
+The verifier collects objects, 1,429 columns/comments, 192 exact constraints,
+eleven provenance rows, and all table ACLs in five batched queries on one target
+connection. It evaluates the 1,416 cases locally, then runs the existing master,
+Gate 3.8, and provenance admin-session analyst matrices. Direct analyst network
+authentication is not claimed; the pending ML01 HBA correction is unchanged.
+
+The destructive detection proof is restricted to one random configured-prefix
+scratch database:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/verify_conformance_v11.py --scratch-mutations
+```
+
+It executes byte-reviewed generated DDL, proves baseline conformance, alters one
+comment and one type in separate transactions, requires the intended failures,
+rolls both back, drops only its exact scratch database, and compares protected
+database, role, v1, catalog, and handoff identity before and after. It never
+writes to `cosmos2025_v11` or `cosmos2025`.
 
 ---
 

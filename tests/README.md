@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.9"
+version: "4.0"
 status: "Active"
 tags:
   - type: directory-readme
@@ -271,6 +271,34 @@ schema, aligned rows in all eleven mirrors, a simulated successful commit with
 an interrupted return, all seven mutation classes under rollback, and exact
 scratch absence. Persistent `--load` and `--verify-only` remain separate
 operator commands and are never invoked by the repository suite.
+
+## Dictionary-driven conformance
+
+`test_generate_conformance_v11.py` proves deterministic generation from the
+sealed dictionary: 1,416 unique explicit cases, the exact
+1,349/22/32/13 source split, the 1,403/7/6 origin split, 166 named array
+dimension/cardinality contracts, importable tracked output, and `--check` byte
+identity. Removed rows, duplicate identifiers, and hand-edited output fail.
+
+`test_verify_conformance_v11.py` exercises the production batched snapshot and
+local validator. It requires exact twelve-table, 1,429-column, 192-constraint,
+eleven-row provenance, all-table SELECT-only ACL, and per-case type/comment/
+origin/array coverage. Focused mutations independently fail type, comment,
+object, constraint, provenance, ACL, origin, and array element-count checks.
+The query-budget regression fixes catalog capture at five batched queries rather
+than one query per dictionary row.
+
+The lifecycle tests cover the read-only live orchestration, class/SQLSTATE-only
+CLI diagnostics, exact random scratch-name guards, ambiguous CREATE cleanup,
+separate comment/type rollback detection, exact-resource drop, and protected
+identity equality. The authenticated mutation proof is an explicit CLI action;
+normal pytest never changes either persistent database.
+
+```bash
+pytest tests/test_generate_conformance_v11.py \
+  tests/test_verify_conformance_v11.py -v
+python src/etl/generate_conformance_v11.py --check
+```
 
 ## Manifest validator
 
