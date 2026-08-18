@@ -329,6 +329,19 @@ pytest tests/test_generate_conformance_v11.py \
 python src/etl/generate_conformance_v11.py --check
 ```
 
+## Generated schema reference
+
+`test_generate_schema_docs_v11.py` proves that Gate 3.12 maps every one of the
+32 dictionary fields, renders all 1,416 mirror columns and the fixed provenance
+contract deterministically, validates the bounded live snapshot, and rejects
+unsafe or drifted output paths. It also freezes every file under `assets/`
+byte-for-byte, including the supplied icon, while checking the repository's
+current operational orientation.
+
+```bash
+pytest tests/test_generate_schema_docs_v11.py -v
+```
+
 ## Manifest validator
 
 `test_build_data_manifest.py` proves the manifest machine contract in two layers.

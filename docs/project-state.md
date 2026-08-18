@@ -3,8 +3,8 @@
 title: "Project State"
 description: "Current phase, database inventory, data holdings, and environment for cosmos2025-anomalies"
 author: "VintageDon (https://github.com/vintagedon/)"
-date: "2026-08-15"
-version: "1.0"
+date: "2026-08-18"
+version: "1.1"
 status: "Active"
 tags:
   - type: reference
@@ -27,9 +27,14 @@ Operating state of `cosmos2025-anomalies`: phase, live database inventory, data 
 
 ## 1. Phase and Posture
 
-The project restarted on 2026-08-15. The v1 catalog is retired as the source of truth; the rebuild on v1.1 (ETL v2) is designed but not approved, and it dispatches only after the operator approves the readiness review produced by spec P2R-01 (`docs/research/v11-readiness-review.md`).
+The v1.1 ETL v2 mirror passed source integrity, schema, load, provenance,
+conformance, and full-coverage value reconciliation through Gate 3.11. It is
+built and verified in `cosmos2025_v11.source`. MetaMCP cutover, direct ML01
+analyst HBA validation, and T_A v2 remain pending operator approval.
 
-Until ETL v2 lands, the live v1 database objects below are the comparison baseline and are read-only by policy. No DDL or DML runs against psql01 outside an approved spec.
+The retired `cosmos2025.catalog` v1 objects remain a read-only comparison
+baseline. No DDL or DML runs against either database outside an approved
+central-queue spec.
 
 Open items the restart addresses, carried from the May/July diagnostic work as frozen inputs to the T_A v2 design unit (not facts to re-verify, not defects to fix in passing):
 
@@ -39,9 +44,40 @@ Open items the restart addresses, carried from the May/July diagnostic work as f
 
 ---
 
-## 2. Live Database Inventory (psql01, v1 baseline)
+## 2. Live Database Inventory (psql01)
 
-Database `cosmos2025`, schema `catalog`, host psql01 (10.25.20.8). Credentials injected from Doppler `ml01/prd`; scripts read environment variables per the config contract in `configs/data_paths.yaml`. Read-only until ETL v2.
+### Verified v1.1 source mirror
+
+Database `cosmos2025_v11`, schema `source`, host psql01 (10.25.20.8). The
+operator handoff names the read-only role `cosmos2025_v11_ro`; direct network
+authentication from ML01 remains pending SCRAM HBA coverage. Verification uses
+the approved administrator transport with PostgreSQL session authorization
+and renders no credential value.
+
+| Table | Rows | Dictionary columns | Boundary |
+|-------|-----:|-------------------:|----------|
+| `source.photometry_primary` | 784,016 | 288 | Primary photometry plus `source_row` |
+| `source.photometry_aper` | 784,016 | 150 | Non-PSF-homogenized aperture photometry plus relational metadata |
+| `source.lephare` | 784,016 | 45 | LePhare plus relational metadata |
+| `source.cigale` | 784,016 | 58 | CIGALE plus relational metadata |
+| `source.ml_morpho` | 784,016 | 152 | ML morphology plus relational metadata |
+| `source.bulge_disk` | 784,016 | 463 | Bulge/disk morphology plus relational metadata |
+| `source.galight_morph` | 784,016 | 206 | Galight morphology plus relational metadata |
+| `source.lss_overdensity` | 164,155 | 4 | Hatamnia supplement |
+| `source.galaxy_groups` | 1,678 | 14 | Toni groups |
+| `source.galaxy_group_memberships` | 1,745,652 | 4 | Toni memberships |
+| `source.specz_compilation` | 261,975 | 32 | Khostovan spec-z compilation |
+| `source.provenance` | 11 | 13 | Project infrastructure; one registration per mirror |
+
+The eleven mirrors contain 1,403 native columns plus seven `source_row` and
+six injected `id` fields. Only FITS masks and NaN become SQL NULL; finite
+sentinels remain source values. Complete schema and provenance evidence is in
+[`reference/schema-v11.md`](reference/schema-v11.md).
+
+### Read-only v1 baseline
+
+Database `cosmos2025`, schema `catalog`, host psql01 (10.25.20.8). It remains
+read-only historical evidence under the named `baseline_v1` configuration.
 
 ### Phase 1 tables (v1 ETL, complete)
 
@@ -55,7 +91,8 @@ Database `cosmos2025`, schema `catalog`, host psql01 (10.25.20.8). Credentials i
 | `catalog.galaxy_groups` | Toni et al. | 1,678 | Groups to z=3.7. |
 | `catalog.galaxy_group_memberships` | Toni et al. | 1,745,652 | 364,674 unique galaxies across 1,678 groups. |
 
-Sentinel conversion (`-999`/`-99`/`999999` → NULL) happened at extraction. Column-name sanitization: hyphens → underscores.
+Historical v1 extraction converted finite sentinels to NULL and sanitized
+identifiers. That behavior is not the v1.1 source-mirror rule.
 
 ### Phase 2 products (T_A v1, superseded by pending T_A v2)
 
@@ -95,7 +132,7 @@ cosmos2025-anomalies/
 ├── internal-files/               # Human source materials (gitignored)
 ├── notebooks/                    # Exploration, EDA
 ├── recycle-bin/                  # Agent trash can (README tracked, contents ignored)
-├── spec/                         # Active work specs; YYYY-MM/ archive
+├── spec/                         # Repo archive/index; dispatch: /opt/agents/repos/spec/
 ├── src/
 │   ├── etl/                      # v1 FITS → parquet → psql pipeline
 │   ├── features/                 # Derived feature computation
@@ -116,7 +153,7 @@ cosmos2025-anomalies/
 | Environment | Role | Compute |
 |-------------|------|---------|
 | ML01 (primary) | Repo at `/opt/agents/repos/cosmos2025-anomalies`, v1.1 holdings, shared venv `/opt/agents/venv/` | 5950X / 128G / A4000 16GB |
-| psql01 (10.25.20.8) | PostgreSQL, `cosmos2025` database, `catalog` schema | Read-only baseline until ETL v2 |
+| psql01 (10.25.20.8) | PostgreSQL: verified `cosmos2025_v11.source` mirror and read-only `cosmos2025.catalog` v1 baseline | Runtime cutover pending |
 | vps3557752 (storage server) | Off-box SED archive root | Not an execution host |
 
 ---
@@ -126,6 +163,7 @@ cosmos2025-anomalies/
 | What | Where |
 |------|-------|
 | Data path configuration | `configs/data_paths.yaml` |
+| Generated v1.1 schema reference | `docs/reference/schema-v11.md` |
 | v1.1 pinned data manifest | `docs/reference/data-manifest-v1.1.md` |
 | v1.1 structural profile | `docs/reference/master-catalog-profile-v1.1.md` |
 | v1 documented profile (historical) | `docs/reference/master-catalog-profile.md` |

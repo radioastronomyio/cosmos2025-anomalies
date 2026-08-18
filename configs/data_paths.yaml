@@ -40,10 +40,9 @@ supplementary:
 
 specz:
   # Khostovan et al. spec-z compilation checkout (git, LFS-backed).
-  # NOTE (P2R-01 gate 1.7): the LFS-tracked FITS/PKL files in this checkout
-  # are pointer files on this box, not materialized data. Recorded as a
-  # readiness-review finding; do not treat these paths as data until
-  # materialized by the operator.
+  # The local FITS/PKL holdings are materialized. Gate 3.5 SHA-256-pinned the
+  # exact unique FITS consumed by the verified Gate 3.8 load; this records
+  # observed local state and does not claim a remote or LFS operation.
   compilation_root: /opt/agents/repos/reference-files/speczcompilation
   unique_fits: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_unique.fits
 
@@ -59,6 +58,7 @@ processed:
 dictionary:
   columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
   schema_v11_sql: /opt/agents/repos/cosmos2025-anomalies/src/etl/schema_v11.sql
+  schema_v11_docs: /opt/agents/repos/cosmos2025-anomalies/docs/reference/schema-v11.md
   conformance_cases_v11: /opt/agents/repos/cosmos2025-anomalies/src/etl/conformance_cases_v11.py
   sentinel_candidates_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/sentinel-candidates-v11.md
 
@@ -83,6 +83,8 @@ provenance:
 # Database (psql01)
 # ---------------------------------------------------------------------------
 database:
+  # Bootstrap and verification transport only. Runtime consumers use the
+  # database-specific read-only contract below after operator cutover.
   host_env: PGSQL01_HOST          # 10.25.20.8
   port_env: PGSQL01_PORT          # 5432
   user_env: PGSQL01_ADMIN_USER
@@ -93,6 +95,24 @@ database:
   schema: catalog
   target_database: cosmos2025_v11
   analyst_role: cosmos2025_v11_ro
+
+  # Retired source-of-truth database retained as a named read-only baseline.
+  baseline_v1:
+    database_name: cosmos2025
+    schema: catalog
+    access: read_only
+
+  # Runtime ETL v2 contract. Direct ML01 analyst HBA coverage remains a
+  # pending operator action; these are names only, never credential values.
+  runtime_v11:
+    host_env: PGSQL01_HOST
+    port_env: PGSQL01_PORT
+    database_env: PGSQL01_COSMOS2025_V11_DB
+    user_env: PGSQL01_COSMOS2025_V11_USER
+    password_env: PGSQL01_COSMOS2025_V11_PASSWORD
+    database_name: cosmos2025_v11
+    schema: source
+    access: read_only
 
   # Inject credentials through the ML01 scoped runtime:
   #   doppler run --project ml01 --config dev -- python your_script.py

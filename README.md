@@ -3,9 +3,9 @@
 title: "COSMOS2025 Anomaly Detection"
 description: "Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog — exploiting tension between independent measurements to find scientifically valuable outliers"
 author: "VintageDon"
-date: "2026-05-01"
-version: "0.4"
-status: "Phase 2 In Progress: Feature Engineering"
+date: "2026-08-18"
+version: "1.0"
+status: "ETL v2 Verified; Operator Cutover Pending"
 tags:
   - type: project-root
   - domain: [astronomy, anomaly-detection, data-science]
@@ -25,11 +25,16 @@ related_documents:
 [![JWST](https://img.shields.io/badge/Data-JWST_COSMOS--Web_DR1-orange)](https://cosmos-web.astro.caltech.edu/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-![alt text](assets/repo-banner.jpg)
+![COSMOS2025 anomaly detection](assets/icon.svg)
 
 > Systematic anomaly detection on the COSMOS-Web DR1 galaxy catalog — hunting for high-value scientific discoveries in the largest contiguous JWST survey to date.
 
-This project applies outlier detection methods to the COSMOS2025 photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning 37 photometric bands from UV through mid-infrared. The approach exploits *tension between independent measurements* — where two SED fitting codes disagree on a galaxy's properties, where a photo-z solution is ambiguous, where morphology contradicts star formation activity, or where a galaxy's behavior defies its environment, something physically interesting is happening.
+This project applies outlier detection methods to the COSMOS-Web v1.1
+photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning
+37 photometric bands from UV through mid-infrared. The verified
+`cosmos2025_v11.source` mirror preserves all eleven release and supplement
+tables. The next science stage exploits *tension between independent
+measurements* after operator approval of MetaMCP cutover and T_A v2.
 
 Each source receives a multi-component **tension vector** quantifying disagreement across four axes:
 
@@ -48,13 +53,13 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 
 | Area | Status | Description |
 |------|--------|-------------|
-| Data acquisition | ✅ Complete | All DR1 catalog products downloaded; CIGALE SEDs extracted (436GB); LePhare SEDs archived (not extracted) |
+| Data acquisition | ✅ Complete | v1.1 holdings pinned by the repository SHA-256 manifest; raw sources remain immutable |
 | Literature landscape | ✅ Complete | Independent deep research surveys (Gemini, GPT) converged on tension-first strategy; four-axis tension vector defined |
-| Catalog profiling | ✅ Complete | Master catalog structure characterized — 6 extensions, sentinel patterns mapped, column types inventoried |
-| ETL design | ✅ Complete | 4-file parquet schema defined; PostgreSQL DDL written; execution specs for agent handoff |
-| ETL execution | ✅ Complete | 784,016 sources loaded across 4 core tables + 3 supplementary tables on psql01 |
-| ETL verification | ✅ Complete | 93 checks (47 pass, 0 fail); sentinels, joins, units, ranges, O1 readiness confirmed |
-| Feature engineering | 🚧 In Progress | T_A complete: `catalog.v_analysis_sample` (553,830 sources) and `catalog.tension_scalars` live on psql01; T_z, T_M, T_E planned |
+| Catalog profiling | ✅ Complete | Seven master extensions plus four supplement/spec-z products sealed in a 1,416-row dictionary |
+| ETL execution | ✅ Complete | Eleven lossless mirrors plus provenance loaded into `cosmos2025_v11.source` |
+| ETL verification | ✅ Complete | Source pins, schema, values, provenance, analyst permissions, and v1 identity passed Gates 3.5–3.11 |
+| Runtime cutover | ⏳ Pending approval | MetaMCP cutover and direct analyst HBA validation remain operator actions |
+| Feature engineering | ⏳ Pending approval | T_A v2 design follows cutover; v1 Phase 2 products remain historical evidence only |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
 | Characterization | 🔲 Planned | Phase 2 — SED-level analysis of top candidates |
 | ARD release | 🔲 Planned | Tension scalars + anomaly scores packaged as community data product |
@@ -63,16 +68,23 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 
 ## 🏗️ Architecture
 
-### Workflow
+### Current data boundary
 
-![alt text](assets/architecture-section-infographic.jpg)
+The release-driven ETL reads immutable v1.1 artifacts into seven master
+mirrors, three environmental supplement tables, and one spec-z compilation.
+`source.provenance` records the eleven source registrations separately. The
+read-only `cosmos2025_v11_ro` role is the runtime boundary; cleaned or derived
+science products belong in a future `analysis` schema.
+
+The retained architecture and dataset infographics under `assets/` describe
+the retired v1 pipeline and are intentionally not presented as current.
 
 ### Compute Environment
 
 | Stage | Environment | Hardware |
 |-------|-------------|----------|
 | ETL, exploration, feature engineering | ML01 bare metal | 5950X / 128G / A4000 16GB |
-| Catalog queries | psql01 (cluster VM) | PostgreSQL with pgvector, PostGIS |
+| Catalog queries | psql01 (cluster VM) | `cosmos2025_v11.source` read-only mirror; `cosmos2025.catalog` v1 baseline |
 | SED characterization (Phase 2) | Desktop workstation | RTX 3080 12GB |
 
 ---
@@ -88,7 +100,7 @@ cosmos2025-anomalies/
 │   └── research/                 # GDR results, ETL one-pager, Codex review
 ├── notebooks/                    # Exploration, EDA, analysis
 ├── shared/                       # Cross-repo utilities (tree generator)
-├── spec/                         # Agent execution prompts (KC, OC, Codex)
+├── spec/                         # Repository-local completed-spec archive/index
 ├── src/
 │   ├── etl/                      # FITS → parquet → psql pipeline
 │   ├── features/                 # Derived feature computation
@@ -105,23 +117,24 @@ Data is stored outside the repository — see [AGENTS.md](AGENTS.md) for path co
 
 ---
 
-## 🔬 Dataset: COSMOS-Web DR1
+## 🔬 Dataset: COSMOS-Web DR1 v1.1
 
-The master catalog provides six extensions per source, each offering a different view:
-
-![alt text](assets/dataset-composition-section-infographic.jpg)
-
-Supplementary catalogs add 1,678 galaxy groups with membership probabilities (Toni et al. 2025) and per-source overdensity values across 314 redshift slices (Hatamnia et al. 2025).
-
-Of 784,016 sources, 694,341 carry `warn_flag = 0` (most secure). See `docs/reference/quality-flags.txt` for flag definitions and `docs/reference/master-catalog-profile.md` for the full structural profile.
+The master catalog provides seven aligned extensions per source: primary
+photometry, non-PSF-homogenized aperture photometry, LePhare, CIGALE, machine-
+learning morphology, bulge/disk morphology, and Galight morphology.
+Supplementary catalogs add Hatamnia overdensity, Toni groups and memberships,
+and the Khostovan spec-z compilation. See
+[`schema-v11.md`](docs/reference/schema-v11.md) for the complete generated
+1,416-column source-mirror reference.
 
 ### Data Products
 
 | Data Product | Source | Size | Phase 1 Use |
 |--------------|--------|------|-------------|
-| Master catalog (6 extensions) | Shuntov et al. 2025 | 8.4 GB | Primary ETL target |
+| Master catalog (7 extensions) | Shuntov et al. 2025 | 8.4 GB | Seven lossless source mirrors |
 | Galaxy group catalog | Toni et al. 2025 | ~1 MB | O5 environmental context |
 | LSS overdensity catalog | Hatamnia et al. 2025 | 289 MB | O5 environmental context |
+| Spec-z compilation | Khostovan et al. | 261,975 rows | Calibration/validation evidence; allocation deferred |
 | CIGALE best-fit SEDs | Shuntov et al. 2025 | 436 GB (extracted) | Phase 2 characterization |
 | LePhare best-fit SEDs | Shuntov et al. 2025 | 141 GB (compressed) | Phase 2 characterization |
 | LePhare PDFz distributions | Shuntov et al. 2025 | 26 GB | Phase 2 — T_z tension metrics |
@@ -137,7 +150,11 @@ The anomaly detection pipeline produces two outputs serving different audiences:
 
 **Analysis Ready Dataset** — The tension scalars, anomaly scores, and ranked lists *without* interpretation, packaged as a reusable community data product following the [ARD methodology](https://github.com/radioastronomyio/analysis-ready-dataset). Every researcher working with COSMOS2025 who wants to assess cross-code consistency must independently compute Δlog M★, ΔSFR, χ² ratios, photo-z PDF metrics, and morphology-SED contradiction scores. This ARD front-loads that compute cost once with documented methodology.
 
-The ARD layers map directly to pipeline phases: raw catalog in PostgreSQL (Layer 0), materialized tension scalars (Layer 1), anomaly scores and SOM embeddings (Layer 2), and environmental context joins (Layer 3). See the [Project Roadmap](ROADMAP.md) for the full layer mapping and scope definition.
+The ARD layers map directly to pipeline phases: the verified v1.1 source mirror
+in PostgreSQL (Layer 0), future T_A v2 tension scalars (Layer 1), anomaly scores
+and SOM embeddings (Layer 2), and environmental context joins (Layer 3). See
+the [Project Roadmap](ROADMAP.md) for the historical layer framing; execution
+of T_A v2 remains pending operator approval.
 
 ---
 
@@ -196,4 +213,4 @@ We practice open science and open methodology — our version of "showing your w
 
 ---
 
-Last Updated: May 1, 2026 | Phase 2 In Progress: Feature Engineering
+Last Updated: August 18, 2026 | ETL v2 Verified; Operator Cutover Pending

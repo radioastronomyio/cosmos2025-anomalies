@@ -20,7 +20,12 @@ related_documents:
 
 ## Repository Identity
 
-Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog (Shuntov et al. 2025): catalog-level feature analysis across 37-band photometry and two independent SED-fitting codes (LePhare, CIGALE), without proprietary data or spectroscopy, targeting high-ROI publishable discoveries. The project is mid-restart: the v1 catalog is retired as source of truth and the v1.1 rebuild (ETL v2) awaits operator approval of the readiness review.
+Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog
+(Shuntov et al. 2025): catalog-level feature analysis across 37-band
+photometry and two independent SED-fitting codes (LePhare, CIGALE), without
+proprietary data or image-level analysis. The verified v1.1 ETL v2 mirror is
+the release-driven data boundary. The v1 catalog remains a read-only baseline;
+MetaMCP cutover and T_A v2 remain pending operator approval.
 
 ## Context Loading
 
@@ -37,10 +42,18 @@ Agents working on this repository should load context in this order:
 ## Architectural Constraints
 
 - Raw data is immutable. Never modify anything under `/mnt/nvme01/`; the SHA-256 manifest is the provenance anchor for everything downstream.
-- The psql01 `catalog` schema is a read-only baseline until an approved spec authorizes otherwise. A needed write is a finding, not an action.
+- The psql01 `cosmos2025.catalog` v1 schema is a read-only baseline. A needed
+  write is a finding, not an action. Runtime mirror reads target
+  `cosmos2025_v11.source` through the database-specific analyst contract after
+  operator cutover.
 - Config-driven paths only: source code reads paths and DB environment variable names from `configs/data_paths.yaml`; no hardcoded data paths or connection strings.
-- Credentials arrive only as Doppler-injected environment variables (`doppler run --project ml01 --config prd -- <cmd>`). Never hardcode, log, or commit secrets.
-- Sentinel values convert to NULL at extraction time, never downstream.
+- Administrator credentials arrive only through `doppler run --project ml01
+  --config dev -- <cmd>` and are bootstrap/verification-only. Runtime v1.1
+  consumers use the fixed `PGSQL01_COSMOS2025_V11_*` handoff names. Never
+  hardcode, log, or commit secrets; direct analyst HBA access from ML01 remains
+  a pending operator infrastructure action.
+- Only FITS masks and NaN become SQL NULL in the source mirror. Every finite sentinel
+  remains a source value; future cleaning belongs in `analysis`.
 - Science logic changes (tension formulas, SFR censoring handling, `chi2_ratio`) require an approved spec; executors record defects, they do not fix them in passing.
 - Agents never delete tracked files; retired content moves to `recycle-bin/` with worklog justification.
 - Executors never perform remote git operations (fetch, push, PR). The operator owns the remote.
@@ -71,10 +84,15 @@ Agents working on this repository should load context in this order:
 
 ## Executing a Work Spec
 
-The repo-mode contract for spec runs. A spec in `spec/` is the authorization; this section is the procedure.
+The central queue at `/opt/agents/repos/spec/` is the dispatch authority for
+repo-mode work. This repository's `spec/` directory is an archive/index, not
+an active queue. A dispatched central spec is the authorization; this section
+is the procedure.
 
 - **Branch:** `task/<n>-<slug>` off `main`, created at startup after `spec-startup` preflight. The executor notes the starting branch and base commit for the worklog.
 - **Commits:** one commit per gate, each referencing its gate number. Closeout commits stop at local commits: **no push, no PR, no remote operations by the executor**; the operator reviews, pushes, and owns merges.
 - **Worklog:** `work-logs/worklog-YYYY-MM-DD-<slug>.md`, appended per gate as checkpoints, sealed at close with per-gate commit SHAs and runtime facts.
-- **Specs:** live in `spec/`, named `spec-<series>-NN-<slug>.md`. Active queue is flat; completed specs archive to `spec/YYYY-MM/` as part of the closeout commit.
+- **Specs:** dispatch from `/opt/agents/repos/spec/`, named
+  `YYYY-MM-DD-<series>-NN-<slug>.md`. Completed specs archive to the repository
+  `spec/YYYY-MM/` index as part of the authorized closeout.
 - **Closeout:** append one row to the central registry at `/opt/agents/repos/work-logs/work-registry.csv` following `spec-closeout` (ML01 estate: attestation trailers on the closeout commit, registry row with the same model string).

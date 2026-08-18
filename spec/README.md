@@ -1,7 +1,7 @@
 <!--
 ---
-title: "Specs"
-description: "Active work-spec queue and lifecycle conventions for spec-driven execution"
+title: "Spec Archive"
+description: "Repository-local archive and index for centrally dispatched work specs"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-15"
 version: "2.0"
@@ -14,16 +14,22 @@ related_documents:
 ---
 -->
 
-# Specs
+# Spec Archive
 
-Work specs for AI-assisted execution. A spec in this directory is the authorization for a repo-mode run; the execution contract (branch, per-gate commits, worklog, closeout) lives in [AGENTS.md](../AGENTS.md) under "Executing a Work Spec".
+The central queue at `/opt/agents/repos/spec/` is the dispatch authority for
+AI-assisted repository work. This directory is the repository-local archive
+and index for completed specs; files here do not constitute an active queue.
+The execution contract lives in [AGENTS.md](../AGENTS.md) under "Executing a
+Work Spec."
 
 ---
 
 ## Layout
 
-- **Active queue (this directory, flat):** specs currently dispatchable or in execution.
-- **Archive (`spec/YYYY-MM/`):** completed specs, moved there by the closeout commit. `YYYY-MM` derives from the spec's date.
+- **Central queue (`/opt/agents/repos/spec/`):** specs authorized for dispatch
+  or currently in execution.
+- **Repository archive (`spec/YYYY-MM/`):** completed specs moved here by their
+  authorized closeout commit. `YYYY-MM` derives from the spec date.
 
 Naming: `spec-<series>-NN-<slug>.md` (series such as `p2r` for the Phase 2 restart).
 
@@ -31,11 +37,11 @@ Naming: `spec-<series>-NN-<slug>.md` (series such as `p2r` for the Phase 2 resta
 
 ## Files
 
-Active queue contents, generated from the directory listing:
+Repository archive/index contents:
 
 | File | Description |
 |------|-------------|
-| — | Queue empty; spec P2R-01 completed 2026-08-16 and archived to [spec/2026-08/](2026-08/) pending operator review |
+| [spec/2026-08/](2026-08/) | Completed repository-local spec archive; active dispatch remains central |
 
 ---
 
