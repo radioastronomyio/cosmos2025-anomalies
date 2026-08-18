@@ -62,6 +62,11 @@ Gate 3.12 adds `dictionary.schema_v11_docs` for the generated
 `docs/reference/schema-v11.md` artifact. Its generator performs one bounded
 read-only live catalog/count observation and no immutable-source read.
 
+Gate 3.13 adds the `verification_surface` block for tracked worklog/science/
+index inputs and the generated `docs/research/etl-v2-verification.md` output.
+That compiler is offline: it reads no source holding, handoff content, Doppler
+value, or PostgreSQL state.
+
 ---
 
 ## Related

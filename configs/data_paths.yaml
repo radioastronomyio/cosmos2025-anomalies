@@ -79,6 +79,13 @@ provenance:
   source_manifest_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1.csv
   cigale_seds_aggregate_pin: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1-cigale-seds.csv
 
+# Tracked-only inputs and output for the offline Gate 3.13 approval surface.
+verification_surface:
+  cumulative_worklog: /opt/agents/repos/cosmos2025-anomalies/work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md
+  science_opportunities: /opt/agents/repos/cosmos2025-anomalies/docs/research/science-opportunities.md
+  research_index: /opt/agents/repos/cosmos2025-anomalies/docs/research/README.md
+  output: /opt/agents/repos/cosmos2025-anomalies/docs/research/etl-v2-verification.md
+
 # ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------

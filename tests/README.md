@@ -342,6 +342,19 @@ current operational orientation.
 pytest tests/test_generate_schema_docs_v11.py -v
 ```
 
+## Generated ETL v2 verification surface
+
+`test_generate_verification_surface_v11.py` proves exact configured input
+seals, full dictionary-to-conformance and manifest-to-provenance joins, all 14
+findings, complete 49/793/11/17 appendices, 261,975 quality-flag rows, deferred
+T_A questions, blank operator dispositions, atomic output classification, CLI
+redaction, and the no-source/no-database call graph.
+
+```bash
+pytest tests/test_generate_verification_surface_v11.py -v
+python src/etl/generate_verification_surface_v11.py --check
+```
+
 ## Manifest validator
 
 `test_build_data_manifest.py` proves the manifest machine contract in two layers.

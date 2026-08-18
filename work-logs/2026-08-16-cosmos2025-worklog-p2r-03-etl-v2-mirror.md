@@ -1225,6 +1225,36 @@ read-only baseline, v1.1 as the verified runtime, the central spec queue as
 dispatch authority, finite sentinels as retained values, and MetaMCP/T_A v2
 plus direct analyst HBA access as pending operator actions.
 
+### Gate 3.13 evidence-generated verification surface
+
+Gate 3.13 added an offline compiler and generated
+`docs/research/etl-v2-verification.md` from exact tracked evidence anchors. The
+single default generation produced 245,928 bytes with SHA-256
+`f1d9f4e77959530146215bf648b7881fd59b297da9bb5bf20cc4a64f625e176e`.
+It contains fourteen findings, 49 complete upstream-description gaps, 793
+complete finite candidate observations, eleven dual-hash provenance rows, and
+all seventeen observed spec-z flag values totaling 261,975. The earlier
+sixteen-value planning count was corrected because the tracked complete
+distribution contains seventeen values; none was omitted or merged.
+
+Every finding has a unique ID, one-line numeric statement, exact numeric
+evidence with a tracked locator, a Yes/No question, and a recommendation. The
+five `D13-*` science questions remain explicitly deferred to T_A v2. The
+MetaMCP redirect and T_A v2 dispatch disposition cells are genuinely blank;
+successful verification does not approve either action.
+
+Strict RED/GREEN and independent review hardened exact input digests, the
+all-field dictionary-to-generated-CASES equality, the manifest/dictionary/
+provenance table-count/hash join, complete canonical appendix digests,
+candidate denominators, role/handoff/transport evidence, compliant
+frontmatter, redacted CLI behavior, and every atomic writer stage. The final
+focused suite returned `60 passed in 1.56s`; the bounded Gate 3.6/3.10/3.12/
+3.13 selection returned `129 passed in 7.80s`. Both offline generator checks,
+Ruff, format, and diff checks passed. Generation reported zero source reads,
+zero database queries, no persistent mutation, and blank dispositions. No
+PostgreSQL, Doppler, source holding, scratch database, handoff content, HBA,
+MetaMCP, v1, or remote operation was used.
+
 ---
 
 ## 2. Files Changed
@@ -1234,8 +1264,8 @@ plus direct analyst HBA access as pending operator actions.
 | [AGENTS.md](../AGENTS.md) | Updated central dispatch, v1/v1.1 runtime, credential, and exact NULL/sentinel boundaries |
 | [README.md](../README.md) | Refreshed verified v1.1 architecture/status, supplied icon presentation, supplement/spec-z boundary, and pending cutover |
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
-| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic-evidence, generated artifacts, distinct read-only v1/v1.1 runtime blocks, and bounded ETL settings |
-| [configs/README.md](../configs/README.md) | Documented bootstrap-only admin variables, read-only runtime variables, and the generated schema-reference path |
+| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic evidence, generated artifacts, read-only runtime blocks, bounded ETL settings, and the Gate 3.13 verification-surface paths |
+| [configs/README.md](../configs/README.md) | Documented bootstrap/runtime variables plus the generated schema-reference and offline verification-surface boundaries |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
 | [data/dictionary/README.md](../data/dictionary/README.md) | Expanded the 32-field formal seal, all controlled vocabularies, provenance, profile/JSON schemas, sentinels, and ignore contract |
 | [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added generated structural, semantic, profile, null-state, and sentinel fields |
@@ -1246,7 +1276,8 @@ plus direct analyst HBA access as pending operator actions.
 | [spec/README.md](../spec/README.md) | Clarified repo-local archive/index scope and central dispatch authority |
 | [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
 | [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 through Gate 3.12 generation, verification, and transport boundaries |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 through Gate 3.13 generation, verification, and transport boundaries |
+| [src/etl/generate_verification_surface_v11.py](../src/etl/generate_verification_surface_v11.py) | Added the sealed offline evidence compiler, exact appendices, blank decisions, and classified atomic output |
 | [src/etl/generate_schema_docs_v11.py](../src/etl/generate_schema_docs_v11.py) | Added deterministic field-complete rendering, bounded live validation, exact path/identity guards, and classified atomic output |
 | [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [src/etl/verify_source_fidelity.py](../src/etl/verify_source_fidelity.py) | Added the Gate 3.5 immutable-input and standalone/master verifier |
@@ -1276,7 +1307,10 @@ plus direct analyst HBA access as pending operator actions.
 | [tests/test_reconciliation_core_v11.py](../tests/test_reconciliation_core_v11.py) | Added sampling, exact cast, NULL/array, and protected ledger regressions |
 | [tests/test_reconcile_values_v11.py](../tests/test_reconcile_values_v11.py) | Added generated key, one-read source, bounded DB, comparison, evidence, scratch, lifecycle, and redaction regressions |
 | [tests/test_generate_schema_docs_v11.py](../tests/test_generate_schema_docs_v11.py) | Added exact field/render/live/path/atomic/orientation/asset regressions for Gate 3.12 |
-| [tests/README.md](../tests/README.md) | Documented the dictionary through generated-schema-reference suites and their nonmutation boundaries |
+| [tests/test_generate_verification_surface_v11.py](../tests/test_generate_verification_surface_v11.py) | Added exact anchor, finding, appendix, decision, output-lifecycle, and offline-boundary regressions |
+| [tests/README.md](../tests/README.md) | Documented the dictionary through verification-surface suites and their nonmutation boundaries |
+| [docs/research/etl-v2-verification.md](../docs/research/etl-v2-verification.md) | Added the evidence-generated Gate 3.13 operator approval surface |
+| [docs/research/README.md](../docs/research/README.md) | Indexed the generated verification surface |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
 ---

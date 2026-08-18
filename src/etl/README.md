@@ -326,6 +326,18 @@ FITS or supplement sources.
 
 ---
 
+## Gate 3.13 verification surface
+
+`generate_verification_surface_v11.py` compiles the sealed dictionary,
+generated contracts, manifest, cumulative Gate 3.5 through Gate 3.12 evidence,
+and configured policy documents into
+`docs/research/etl-v2-verification.md`. Default mode writes atomically;
+`--check` is read-only and requires byte identity. Both modes report zero
+source reads, zero database queries, and no persistent mutation. The generated
+MetaMCP and T_A v2 disposition cells remain blank for the operator.
+
+---
+
 ## Related
 
 | Directory | Relationship |
