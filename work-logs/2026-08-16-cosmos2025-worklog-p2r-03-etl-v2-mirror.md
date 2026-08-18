@@ -2,8 +2,8 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-18"
-version: "0.9"
-status: "partial"
+version: "1.0"
+status: "completed"
 tags:
   - type: worklog
   - domain: work-logs
@@ -15,7 +15,7 @@ runtime: "Codex API"
 runtime_version: "unreported"
 model: "unreported"
 hostname: "ml01"
-spec_ref: ../spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
+spec_ref: spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
 repo: "cosmos2025-anomalies"
 category: "astronomy"
 duration_seconds: null
@@ -61,6 +61,9 @@ related_documents:
   - "src/etl/generate_schema_docs_v11.py"
   - "tests/test_generate_schema_docs_v11.py"
   - "docs/reference/schema-v11.md"
+  - "src/etl/generate_verification_surface_v11.py"
+  - "tests/test_generate_verification_surface_v11.py"
+  - "docs/research/etl-v2-verification.md"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -69,7 +72,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 through 3.12 complete; later gates remain |
+| Status | Completed: Gates 3.1 through 3.14 verified and sealed for operator review |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
@@ -98,6 +101,9 @@ target-cast values for 201,678 deterministic source samples across all 1,416
 mirror columns without changing either persistent database.
 Gate 3.12 generated the complete live-backed schema reference and refreshed
 repository orientation without source reads or persistent mutation.
+Gate 3.13 generated the exact offline verification surface with both operator
+dispositions blank. Gate 3.14 packages the final evidence without authorizing
+MetaMCP cutover, Doppler import, direct HBA changes, or T_A v2 dispatch.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -1255,6 +1261,119 @@ zero database queries, no persistent mutation, and blank dispositions. No
 PostgreSQL, Doppler, source holding, scratch database, handoff content, HBA,
 MetaMCP, v1, or remote operation was used.
 
+### Gate 3.14 evidence closeout
+
+The closeout preflight found a clean `task/3-etl-v2-mirror` branch at
+`dd6f7812ae13019a01064fc2a42ddaf6cac4287c`, exactly thirteen commits after
+base `d2e51479f5ec108688d2da44333988dd0c9c7709`, and one commit for every gate
+from 3.1 through 3.13. The central active spec was version 1.7, its exact
+`2026-08` archive target was absent, the 23-field registry had zero P2R-03
+rows, and both central lifecycle surfaces were non-Git directories.
+
+Runtime identity is limited to facts exposed to this executor: agent `codex`,
+runtime `Codex API`, runtime version `unreported`, model `unreported`, and
+hostname `ml01`. Session duration was not exposed. Token usage source is
+`unavailable`; no token or cost value is estimated or populated.
+
+Four authored spec defects were registered centrally. SD-056 records the
+stale authored Doppler `ml01/prd` selector versus the operator-confirmed
+`ml01/dev` runtime. SD-057 records the phase-unaware blanket reversal that
+caused reimports after sealed table data had passed. SD-058 records the
+undefined `load_timestamp` semantics that required the approved registration-
+transaction amendment. SD-059 records Deliverable 14's impossible requirement
+that the committed worklog contain the SHA of its own containing commit. The
+absent direct analyst HBA path is not attributed to the spec: it remains a
+pending operator infrastructure action, and the earlier five-hour-plus stall
+is recorded as executor handling.
+
+The immutable gate commit map is:
+
+| Gate | Commit |
+|------|--------|
+| 3.1 | `fe7091a8272f30b5b904ae9da268cbeb74286958` |
+| 3.2 | `fa262ff32026a778a54d9af7f8fdc94dfa38ff7a` |
+| 3.3 | `0a419e50daa02ec15b4f509b2264a8695a447ba0` |
+| 3.4 | `4068f30192e0e854a4785abc2ca9b0edc05aaecf` |
+| 3.5 | `14b244bf7df46020f4d47f5bd7ae64c82f57bc56` |
+| 3.6 | `ea96154365fc932363b238b99584b72298272260` |
+| 3.7 | `d5d01316092c828873e6ddc7f5344e765a0f921d` |
+| 3.8 | `03689907dd89bab41052724b0503a0c4a7e1b0d4` |
+| 3.9 | `0235aab61bd9e7015fa1b9b03d472e250f4d4e7f` |
+| 3.10 | `61dcb59ba4bb3a72b7d5454b171acc886cb58d60` |
+| 3.11 | `fdafc7c96780e3b3f27ba1e95b15b609e4f4e5cf` |
+| 3.12 | `23a3cc257705e5c0b31ab54cf341c354d1ecc87c` |
+| 3.13 | `dd6f7812ae13019a01064fc2a42ddaf6cac4287c` |
+| 3.14 | Relational identity: the attested `gate 3.14:` commit containing this sealed worklog |
+
+The Gate 3.14 relational identity follows SD-055. A file cannot contain the
+SHA of the commit whose tree contains that file because adding the value
+changes the commit. The exact resulting SHA is verified after commit and
+recorded only in the ignored task report and operator handoff. No fixup commit
+or amend cycle is authorized.
+
+The docs pass found that Gate 3.13's configured central-spec path and rendered
+policy locators still named the active queue and would become stale at archive.
+Strict RED/GREEN added an exact lifecycle selector: before closeout it accepts
+only the sealed regular active inode while the archive is absent; after
+closeout it accepts only the sealed regular archive inode. Duplicate, absent,
+linked, or redirected states fail. The final configured and rendered locator
+is the durable `spec/2026-08` archive path. One offline Gate 3.14 renderer pass
+updated only those locators and their shifted exact worklog line references,
+producing 245,960 bytes with SHA-256
+`e60b4a7fd916a625de9cd3907429a2fcf071e900c8b7b56774ce87095deffd86`.
+It reported fourteen findings, 49 gaps, 793 candidates, eleven provenance rows,
+seventeen flags, blank dispositions, zero source reads, zero database queries,
+and no persistent mutation.
+
+The one final authenticated database check was read-only and completed in
+3.07 seconds with 134,844 KiB maximum RSS and exit zero. It reverified twelve
+objects, 1,429 columns, 192 constraints, all 1,416 generated cases, 166 array
+contracts, eleven provenance rows, exact 1,349/22/32/13 case splits, twelve
+analyst SELECTs, 72 denied table capabilities, the 1/11 master and 4/24
+supplement matrices, the provenance matrix, exact role and mode-0600 handoff
+metadata, and unchanged v1 fingerprint
+`82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7`.
+It used the operator-approved admin-session transport; direct network
+authentication remained unexercised and no secret value was rendered.
+
+The first comprehensive closeout attempt exposed one real path-role defect and
+stopped with `424 passed, 4 failed, 8 errors in 134.92s`; wall time was 2:15.48,
+maximum RSS 1,181,768 KiB, zero swap, and exit one. The Gate 3.14 docs pass had
+repointed the shared `semantic_sources.etl_v2_spec` key to the future archive,
+but Gate 3.1 consumes that key as historical provenance while reproducing the
+sealed dictionary before the archive move. The intentional long byte-
+reproduction case reached the same missing-path boundary immediately rather
+than completing its source pass. Strict RED/GREEN separated the roles:
+`semantic_sources.etl_v2_spec` retains the historical active path already
+sealed into the dictionary, while
+`verification_surface.central_spec_archive` carries the durable Gate 3.13
+policy locator and exact transition guard. The three formerly failing Gate 3.1
+tests and all nine semantic tests then passed. This real defect fix satisfies
+the operator's sole condition for one comprehensive retry.
+
+The authorized comprehensive retry passed all 437 tests in 2,152.07 seconds
+(35:52.64 wall), with 5,729,392 KiB maximum RSS, zero swap, and exit zero. It
+included the intentional byte-reproduction test; no test was excluded.
+
+A final closeout review identified the remaining post-archive reader boundary:
+the sealed dictionary must continue emitting its historical active-queue
+locator after that path is moved. Strict RED/GREEN added a separate exact
+active/archive byte selector to `load_dictionary.py`. Archive-only input now
+hashes the same sealed spec bytes while `description_source` remains the
+historical active path; duplicate, missing, linked, or non-regular candidates
+fail closed. The composed post-move regression regenerated all 1,416 semantic
+rows with their tracked field surface unchanged and passed the dictionary,
+schema, conformance, and verification-surface check paths. The focused
+transition chain passed 91 tests before the composed regression, and its exact
+two-case archive transition slice passed after the final harness correction.
+After exact-inode hardening, the final focused closeout suite passed 93 tests
+in 11.20 seconds. Schema, conformance, and verification-surface checks remained
+byte-identical; Ruff, formatting, and diff checks passed. Independent final
+review reran the three archive-selection and two verification-lifecycle cases,
+confirmed the 245,960-byte report at SHA-256
+`e60b4a7fd916a625de9cd3907429a2fcf071e900c8b7b56774ce87095deffd86`,
+and cleared the sole local closeout commit with no remaining finding.
+
 ---
 
 ## 2. Files Changed
@@ -1264,8 +1383,8 @@ MetaMCP, v1, or remote operation was used.
 | [AGENTS.md](../AGENTS.md) | Updated central dispatch, v1/v1.1 runtime, credential, and exact NULL/sentinel boundaries |
 | [README.md](../README.md) | Refreshed verified v1.1 architecture/status, supplied icon presentation, supplement/spec-z boundary, and pending cutover |
 | [.gitignore](../.gitignore) | Added the narrow tracked-CSV exception |
-| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic evidence, generated artifacts, read-only runtime blocks, bounded ETL settings, and the Gate 3.13 verification-surface paths |
-| [configs/README.md](../configs/README.md) | Documented bootstrap/runtime variables plus the generated schema-reference and offline verification-surface boundaries |
+| [configs/data_paths.yaml](../configs/data_paths.yaml) | Added dictionary, semantic evidence, generated artifacts, read-only runtime blocks, bounded ETL settings, the historical spec-provenance path, and a separate durable archived Gate 3.13 policy path |
+| [configs/README.md](../configs/README.md) | Documented bootstrap/runtime variables, generated schema/verification boundaries, and the exact active-to-archive policy-evidence transition |
 | [data/README.md](../data/README.md) | Added the required interior data-product index |
 | [data/dictionary/README.md](../data/dictionary/README.md) | Expanded the 32-field formal seal, all controlled vocabularies, provenance, profile/JSON schemas, sentinels, and ignore contract |
 | [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Added generated structural, semantic, profile, null-state, and sentinel fields |
@@ -1274,10 +1393,10 @@ MetaMCP, v1, or remote operation was used.
 | [docs/reference/README.md](../docs/reference/README.md) | Indexed the candidate report and generated v1.1 schema reference |
 | [docs/reference/schema-v11.md](../docs/reference/schema-v11.md) | Added the generated field-complete live-backed v1.1 schema reference |
 | [spec/README.md](../spec/README.md) | Clarified repo-local archive/index scope and central dispatch authority |
-| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support and delegated default generation/check to the full profiler |
+| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Added structural/semantic build support, delegated default generation/check to the full profiler, and preserved archive-backed post-closeout reproduction without rewriting historical provenance locators |
 | [src/etl/profile_values.py](../src/etl/profile_values.py) | Added memory-bounded live profiling, validation, deterministic JSON, candidate rule, and report generation |
-| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 through Gate 3.13 generation, verification, and transport boundaries |
-| [src/etl/generate_verification_surface_v11.py](../src/etl/generate_verification_surface_v11.py) | Added the sealed offline evidence compiler, exact appendices, blank decisions, and classified atomic output |
+| [src/etl/README.md](../src/etl/README.md) | Listed the ETL v2 tools and documented Gate 3.9 through Gate 3.14 generation, verification, transport, and archive-transition boundaries |
+| [src/etl/generate_verification_surface_v11.py](../src/etl/generate_verification_surface_v11.py) | Added the sealed offline evidence compiler, exact appendices, blank decisions, classified atomic output, and exact central-spec archive transition |
 | [src/etl/generate_schema_docs_v11.py](../src/etl/generate_schema_docs_v11.py) | Added deterministic field-complete rendering, bounded live validation, exact path/identity guards, and classified atomic output |
 | [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Added the fast composed Gate 3.4 artifact/documentation/ignore validator |
 | [src/etl/verify_source_fidelity.py](../src/etl/verify_source_fidelity.py) | Added the Gate 3.5 immutable-input and standalone/master verifier |
@@ -1293,7 +1412,7 @@ MetaMCP, v1, or remote operation was used.
 | [src/etl/reconciliation_core_v11.py](../src/etl/reconciliation_core_v11.py) | Added deterministic sampling, exact target-cast/IEEE tokens, and protected complete mismatch-ledger primitives |
 | [src/etl/reconcile_values_v11.py](../src/etl/reconcile_values_v11.py) | Added one-read source extraction, bounded read-only target reconciliation, exact live evidence, redacted lifecycle, and full disposable PostgreSQL proof |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
-| [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
+| [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, serialization, and exact active/archive inode tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
 | [tests/test_dictionary_seal.py](../tests/test_dictionary_seal.py) | Added Gate 3.4 field-coverage, mutation, CSV-shape, and ignore tests |
 | [tests/test_verify_source_fidelity.py](../tests/test_verify_source_fidelity.py) | Added Gate 3.5 manifest, hash, sample, value, and ID mutation tests |
@@ -1307,11 +1426,15 @@ MetaMCP, v1, or remote operation was used.
 | [tests/test_reconciliation_core_v11.py](../tests/test_reconciliation_core_v11.py) | Added sampling, exact cast, NULL/array, and protected ledger regressions |
 | [tests/test_reconcile_values_v11.py](../tests/test_reconcile_values_v11.py) | Added generated key, one-read source, bounded DB, comparison, evidence, scratch, lifecycle, and redaction regressions |
 | [tests/test_generate_schema_docs_v11.py](../tests/test_generate_schema_docs_v11.py) | Added exact field/render/live/path/atomic/orientation/asset regressions for Gate 3.12 |
-| [tests/test_generate_verification_surface_v11.py](../tests/test_generate_verification_surface_v11.py) | Added exact anchor, finding, appendix, decision, output-lifecycle, and offline-boundary regressions |
-| [tests/README.md](../tests/README.md) | Documented the dictionary through verification-surface suites and their nonmutation boundaries |
-| [docs/research/etl-v2-verification.md](../docs/research/etl-v2-verification.md) | Added the evidence-generated Gate 3.13 operator approval surface |
+| [tests/test_generate_verification_surface_v11.py](../tests/test_generate_verification_surface_v11.py) | Added exact anchor, finding, appendix, decision, output-lifecycle, offline-boundary, and active/archive regressions |
+| [tests/README.md](../tests/README.md) | Documented the dictionary through verification-surface suites, nonmutation boundaries, and archive transition |
+| [docs/research/etl-v2-verification.md](../docs/research/etl-v2-verification.md) | Added the evidence-generated Gate 3.13 operator approval surface and refreshed policy locators to the durable archive path at Gate 3.14 |
 | [docs/research/README.md](../docs/research/README.md) | Indexed the generated verification surface |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
+| [work-logs/README.md](README.md) | Indexed the complete P2R-01 through P2R-03 worklog set |
+| `/opt/agents/repos/spec/spec-defect-register.md` | Added SD-056 through SD-059 for the four attributable authored P2R-03 defects |
+| `/opt/agents/repos/work-logs/work-registry.csv` | Appended the one exact 23-field P2R-03 completion row after the closeout commit |
+| `/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md` | Archived the byte-identical central active spec after the closeout commit |
 
 ---
 
@@ -1319,7 +1442,7 @@ MetaMCP, v1, or remote operation was used.
 
 | Issue | Resolution |
 |-------|------------|
-| Startup instructions and repository docs name Doppler `ml01/prd`, but the operator corrected the active config to `ml01/dev` | Recorded for eventual defect registration. Gate 3.1 made no PostgreSQL connection, so no credential config was consumed or changed |
+| Startup instructions and repository docs name Doppler `ml01/prd`, but the operator corrected the active config to `ml01/dev` | Registered as authored spec defect SD-056. Gate 3.1 made no PostgreSQL connection, so no credential config was consumed or changed |
 | Ruff reported test import `E402` after the repository root was inserted into `sys.path` | Matched the existing test-suite pattern with a narrow `# noqa: E402`; rerun passed |
 | Toni headers and twenty-nine spec-z native field names lack exact field definitions in their pinned documentation | Preserved them as `undocumented_upstream` with empty descriptions; no prose or units were inferred from names |
 | Direct execution of the new profiler initially could not import the repository namespace | Added and passed a direct-CLI regression test, then used package-aware module/local imports |
@@ -1331,12 +1454,12 @@ MetaMCP, v1, or remote operation was used.
 | The first Gate 3.6 scratch invocation encoded a two-character PostgreSQL `ESCAPE` literal | No database was created; added a focused regression and changed the inventory query to a single `!` escape character before the successful rerun |
 | Direct `cosmos2025_v11_ro` HBA coverage from ML01 was absent and the run stalled for more than five hours awaiting it | Operator explicitly approved clusteradmin operations plus session-authorization privilege checks as nonblocking; direct analyst HBA remains a required post-run infrastructure action and was not changed by the gate |
 | Four post-load verifier-code defects appeared only after seven long transactional loads had passed | Reproduced each defect in disposable PostgreSQL, added strict RED/GREEN regressions, reversed only resources owned by each run, and retained v1 identity; the final attempt passed |
-| Blanket rollback caused full table reimports after data had already passed | Operator approved and Gate 3.7 implemented a seven-load seal, phase-aware cleanup, and guarded source-free `--finalize-admin` resume; repeated full imports are no longer the recovery path |
+| Blanket rollback caused full table reimports after data had already passed | Registered as authored spec defect SD-057. Operator approved and Gate 3.7 implemented a seven-load seal, phase-aware cleanup, and guarded source-free `--finalize-admin` resume; repeated full imports are no longer the recovery path |
 | Independent closeout review found five schema, handoff, guard, diagnostic, and DDL-buffer gaps | Added seven RED/GREEN cases, real PostgreSQL drift mutations, exact-inode cleanup, and immutable-buffer execution; independent re-review reported no blockers |
 | Gate 3.8 table-to-PUBLIC GRANT probes returned PostgreSQL warnings/no-ops instead of deterministic privilege denials | Reproduced all four in disposable PostgreSQL, replaced them with role-membership GRANT probes requiring ADMIN OPTION, and passed the production 4/24 matrix |
 | The first Gate 3.8 post-load analyst-verifier defect triggered another blanket four-table reversal | Recorded the repeated operator-corrected policy mistake; added a four-load seal, post-seal row retention, selective new-grant reversal, and source-free `--finalize-admin`; only one later import was authorized and it passed |
 | Gate 3.8 independent review found source/profile, exact-schema, ACL, commit-window, resume, and handoff-security gaps | Added strict RED/GREEN coverage, complete retained validation, context-exit-safe seal tracking, config-bound handoff checks, and a real failure/retain/resume scratch proof; final review approved |
-| `track_commit_timestamp` was off, so exact historical table-load commit timestamps were unavailable | Operator approved contract 1.0.1: `load_timestamp` records the later provenance-registration transaction; each note preserves exact load `xmin` and the unavailable-timestamp reason; no approximation or extension installation occurred |
+| `track_commit_timestamp` was off, so exact historical table-load commit timestamps were unavailable | Registered the undefined authored field semantics as SD-058. Operator approved contract 1.0.1: `load_timestamp` records the later provenance-registration transaction; each note preserves exact load `xmin` and the unavailable-timestamp reason; no approximation or extension installation occurred |
 | The first Gate 3.9 real scratch registration used psycopg `Connection.executemany` | Scratch rolled back and was exactly removed; a real-interface RED moved the call to `Cursor.executemany`, and the expanded proof passed before live execution |
 | Gate 3.9 review found old-comment preflight, manifest identity, commit ambiguity, versioning, and retention-diagnostic gaps | Added strict transition-only comment checking, stable manifest pin window, exact zero/eleven reconnect classification, contract 1.0.1, stage-aware retention, expanded unit/scratch proof, and independent approval |
 | The first Gate 3.11 scratch command could not import `src` under direct-file execution, then the first protected observation expected a tuple instead of the configured psycopg `dict_row` | Both failures occurred before scratch creation; added direct-entry and real dict-row RED/GREEN regressions, confirmed zero scratch databases, and passed the guarded proof |
@@ -1344,6 +1467,7 @@ MetaMCP, v1, or remote operation was used.
 | Missing/extra table counts initially raised before a mismatch record, and finite 1.1 rounding was absent from scratch | Added a live-path sealed mode-0600 table-count ledger regression and float4/float8 finite-rounding scratch cases; final independent review cleared both |
 | Gate 3.12 pre-live review found entrypoint ordering, seal/path binding, protected-output ordering, and post-replace classification gaps | Added strict RED/GREEN coverage for each boundary, including success-then-raise replacement ambiguity; two independent review passes cleared the sole live command |
 | Gate 3.12 closeout review found missing identifier rules plus stale spec and spec-z orientation text | Added exact renderer/orientation regressions, regenerated presentation bytes offline only, and retained the one-live/no-source boundary |
+| Deliverable 14 requires every gate SHA inside the one Gate 3.14 commit | Registered as authored spec defect SD-059 and used the SD-055 relational identity; the exact containing SHA is verified only after commit, with no fixup commit or amend cycle |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -1351,29 +1475,28 @@ MetaMCP, v1, or remote operation was used.
 
 ## 4. Next Steps
 
-Handoff: Gate 3.12 generated the field-complete, live-backed
-`docs/reference/schema-v11.md` from the Gate 3.11-verified mirror without a
-source reread or persistent mutation. It also refreshed operational routing
-while preserving every supplied asset byte. Later gates may consume the sealed
-dictionary, generated DDL, persistent target, reconciliation evidence, and
-schema reference but may not change source science, profiles, values,
-mappings, provenance, assets, or protected identity without their own
+Handoff: P2R-03 has produced the sealed dictionary, generated DDL, verified
+eleven-table mirror and provenance, conformance/value evidence, schema
+reference, and evidence-generated operator approval surface. Closeout does not
+answer either blank disposition and does not authorize cutover. Future work
+may consume these artifacts but may not change source science, profiles,
+values, mappings, provenance, assets, or protected identity without separate
 authorization.
 
-1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
-   spec-authorized defect-registration gate.
-2. Preserve the frozen structural, semantic, profile, null-state, sentinel,
-   generated DDL, and provenance contracts during later extraction/load work.
+1. The operator reviews `docs/research/etl-v2-verification.md` and separately
+   decides whether to redirect MetaMCP and dispatch T_A v2.
+2. Import the retained handoff into Doppler only after operator approval; this
+   run did not read its contents or change Doppler.
 3. Add direct SCRAM HBA coverage for `cosmos2025_v11_ro` from ML01 and reload
    PostgreSQL configuration as an operator infrastructure action; then test
    direct analyst authentication without changing the retained handoff.
-4. Use the applicable guarded `--finalize-admin`, never a master or supplement
+4. Preserve the frozen structural, semantic, profile, NULL-state, sentinel,
+   generated DDL, provenance, schema-reference, and verification contracts.
+5. Use the applicable guarded `--finalize-admin`, never a master or supplement
    reimport, after a post-seal administration failure leaves exact loaded data
    retained.
-5. Preserve the Gate 3.11 one-read, bounded-batch, target-cast reconciliation
+6. Preserve the Gate 3.11 one-read, bounded-batch, target-cast reconciliation
    boundary; investigate any future mismatch only through a protected ignored
    ledger and a separately authorized gate.
-6. Preserve the generated Gate 3.12 schema-reference byte contract; regenerate
-   it only after a separately authorized schema/dictionary/live-state change.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

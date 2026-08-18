@@ -67,6 +67,84 @@ def sha256_independently(path: Path) -> str:
     return digest.hexdigest()
 
 
+def test_archived_spec_bytes_preserve_historical_dictionary_locator(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Post-closeout reads use the archive without rewriting sealed locators."""
+    active = tmp_path / "active" / "spec.md"
+    archive = tmp_path / "archive" / "spec.md"
+    archive.parent.mkdir()
+    archive.write_bytes(b"sealed central spec\n")
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    monkeypatch.setitem(load_dictionary.EXPECTED_SEMANTIC_HASHES, "etl_v2_spec", digest)
+    config = {
+        "semantic_sources": {"etl_v2_spec": str(active)},
+        "verification_surface": {"central_spec_archive": str(archive)},
+    }
+
+    paths, hashes = load_dictionary._semantic_source_context(config)
+
+    assert paths["etl_v2_spec"] == active
+    assert hashes["etl_v2_spec"] == digest
+
+
+def test_spec_transition_rejects_ambiguous_and_unsafe_candidates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only one exact regular active/archive central spec may supply bytes."""
+    active = tmp_path / "active.md"
+    archive = tmp_path / "archive.md"
+    active.write_bytes(b"sealed\n")
+    archive.write_bytes(b"sealed\n")
+    digest = hashlib.sha256(b"sealed\n").hexdigest()
+    monkeypatch.setitem(load_dictionary.EXPECTED_SEMANTIC_HASHES, "etl_v2_spec", digest)
+    config = {
+        "semantic_sources": {"etl_v2_spec": str(active)},
+        "verification_surface": {"central_spec_archive": str(archive)},
+    }
+
+    with pytest.raises(ValueError, match="exactly one regular central spec"):
+        load_dictionary._semantic_source_context(config)
+
+    active.unlink()
+    archive.unlink()
+    active.symlink_to(archive)
+    with pytest.raises(ValueError, match="unsafe central spec candidate"):
+        load_dictionary._semantic_source_context(config)
+
+
+def test_spec_hash_rejects_symlink_swap_after_candidate_selection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The selected regular inode cannot be replaced before its hash read."""
+    active = tmp_path / "active.md"
+    archive = tmp_path / "archive.md"
+    replacement = tmp_path / "replacement.md"
+    active.write_bytes(b"sealed\n")
+    replacement.write_bytes(b"sealed\n")
+    digest = hashlib.sha256(b"sealed\n").hexdigest()
+    monkeypatch.setitem(load_dictionary.EXPECTED_SEMANTIC_HASHES, "etl_v2_spec", digest)
+    config = {
+        "semantic_sources": {"etl_v2_spec": str(active)},
+        "verification_surface": {"central_spec_archive": str(archive)},
+    }
+    select = load_dictionary._select_etl_v2_spec_read_path
+
+    def select_then_swap(
+        observed_config: dict[str, object], historical: Path
+    ) -> object:
+        selected = select(observed_config, historical)
+        active.unlink()
+        active.symlink_to(replacement)
+        return selected
+
+    monkeypatch.setattr(
+        load_dictionary, "_select_etl_v2_spec_read_path", select_then_swap
+    )
+    with pytest.raises(ValueError, match="central spec .*unsafe|identity changed"):
+        load_dictionary._semantic_source_context(config)
+
+
 @pytest.fixture(scope="module")
 def semantic_dictionary() -> tuple[list[dict[str, str | int]], dict[str, object]]:
     """Build the live semantic dictionary once for focused assertions."""

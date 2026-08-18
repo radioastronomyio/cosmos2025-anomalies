@@ -73,12 +73,18 @@ SEALED_INPUT_SHA256 = {
 APPENDIX_SHA256 = {
     "gaps": "6a28c4bfde2c7220f81765ea6ab33337fa622d639c7f8285c9d45ae461c82a4f",
     "candidates": "b7059634706d5bbad65aecd3ff30fda2427271cc3d5893335527df0f572af372",
-    "provenance": "3ded19b47dac8b3e3cf3bd78d26bd4fc7fbe0758709fe6f89df5251a3784b6fa",
+    "provenance": "8e5bee2df85db34d61c8544c863ec59626dc8ec4256c75616f89db941cee6569",
     "flags": "450fd99eb7b2f5ecf635f62c3f68a5cce9a4625595085e1b93617ccd2e891d19",
 }
 WORKLOG_RELATIVE = "work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md"
 WORKLOG_EVIDENCE_SHA256 = (
     "9f18c6926a24f9edc36b31d7346e0b377d2b4867c9e70c1068942bf4839defbf"
+)
+ACTIVE_CENTRAL_SPEC_PATH = Path(
+    "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+)
+ARCHIVED_CENTRAL_SPEC_PATH = Path(
+    "/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
 )
 
 
@@ -96,6 +102,7 @@ class EvidencePaths:
     unit_conventions: Path
     science_opportunities: Path
     central_spec: Path
+    central_spec_read: Path
     research_index: Path
     output: Path
 
@@ -264,6 +271,22 @@ def _require_exact_path(observed: Path, expected: Path) -> Path:
     return observed
 
 
+def select_central_spec_read_path(archive: Path, active: Path) -> Path:
+    """Choose one exact regular pre- or post-closeout spec inode."""
+    regular: list[Path] = []
+    for path in (archive, active):
+        try:
+            metadata = path.lstat()
+        except FileNotFoundError:
+            continue
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("central spec lifecycle path is unsafe")
+        regular.append(path)
+    if len(regular) != 1:
+        raise ValueError("central spec lifecycle state mismatch")
+    return regular[0]
+
+
 def resolve_evidence_paths(
     config_path: Path = DEFAULT_CONFIG_PATH, *, repo_root: Path = REPO_ROOT
 ) -> EvidencePaths:
@@ -285,7 +308,7 @@ def resolve_evidence_paths(
             "candidate_report": Path(dictionary["sentinel_candidates_v11"]),
             "manifest": Path(provenance["source_manifest_v11"]),
             "unit_conventions": Path(semantics["unit_conventions"]),
-            "central_spec": Path(semantics["etl_v2_spec"]),
+            "central_spec": Path(verification["central_spec_archive"]),
             "worklog": Path(verification["cumulative_worklog"]),
             "science_opportunities": Path(verification["science_opportunities"]),
             "research_index": Path(verification["research_index"]),
@@ -303,9 +326,7 @@ def resolve_evidence_paths(
         "candidate_report": root / "docs/reference/sentinel-candidates-v11.md",
         "manifest": root / "docs/reference/data-manifest-v1.1.csv",
         "unit_conventions": root / "docs/reference/unit-conventions.md",
-        "central_spec": Path(
-            "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
-        ),
+        "central_spec": ARCHIVED_CENTRAL_SPEC_PATH,
         "worklog": root / WORKLOG_RELATIVE,
         "science_opportunities": root / "docs/research/science-opportunities.md",
         "research_index": root / "docs/research/README.md",
@@ -314,6 +335,9 @@ def resolve_evidence_paths(
     guarded = {
         name: _require_exact_path(observed[name], expected[name]) for name in expected
     }
+    central_spec_read = select_central_spec_read_path(
+        ARCHIVED_CENTRAL_SPEC_PATH, ACTIVE_CENTRAL_SPEC_PATH
+    )
     for name, path in guarded.items():
         if name == "output":
             try:
@@ -334,14 +358,16 @@ def resolve_evidence_paths(
                 if not stat.S_ISREG(output_metadata.st_mode):
                     raise ValueError("verification evidence path output unsafe")
             continue
-        raw = read_stable_regular_bytes(path)
+        raw = read_stable_regular_bytes(
+            central_spec_read if name == "central_spec" else path
+        )
         expected_digest = SEALED_INPUT_SHA256.get(name)
         if (
             expected_digest is not None
             and hashlib.sha256(raw).hexdigest() != expected_digest
         ):
             raise ValueError("verification evidence input seal mismatch")
-    return EvidencePaths(**guarded)
+    return EvidencePaths(**guarded, central_spec_read=central_spec_read)
 
 
 def extract_dictionary_evidence(path: Path) -> DictionaryEvidence:
@@ -774,7 +800,7 @@ def _unique_line(text: str, needle: str) -> int:
 
 def extract_policy_evidence(paths: EvidencePaths) -> PolicyEvidence:
     """Bind deferred questions to configured unit/science/spec sources."""
-    spec = read_stable_regular_bytes(paths.central_spec).decode("utf-8")
+    spec = read_stable_regular_bytes(paths.central_spec_read).decode("utf-8")
     units = read_stable_regular_bytes(paths.unit_conventions).decode("utf-8")
     science = read_stable_regular_bytes(paths.science_opportunities).decode("utf-8")
     index = read_stable_regular_bytes(paths.research_index).decode("utf-8")
@@ -884,7 +910,7 @@ def validate_findings(findings: tuple[Finding, ...]) -> None:
         WORKLOG_RELATIVE,
         "docs/reference/unit-conventions.md",
         "docs/research/science-opportunities.md",
-        "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md",
+        str(ARCHIVED_CENTRAL_SPEC_PATH),
     }
     for finding in findings:
         if not re.fullmatch(r"[VD]13-\d{2}", finding.finding_id):

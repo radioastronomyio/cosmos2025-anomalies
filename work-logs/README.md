@@ -3,8 +3,8 @@
 title: "Work Logs"
 description: "Session-by-session execution logs for spec runs and standalone work"
 author: "VintageDon (https://github.com/vintagedon/)"
-date: "2026-08-15"
-version: "2.0"
+date: "2026-08-18"
+version: "2.1"
 status: "Active"
 tags:
   - type: directory-readme
@@ -25,7 +25,9 @@ Chronological execution logs documenting what was done, what failed, and what wa
 
 | File | Description |
 |------|-------------|
-| `worklog-2026-08-15-reentry-v11-inspection.md` | P2R-01 per-gate checkpoints: template conformance, environment repair, v1.1 manifest/profile/delta, readiness review |
+| [worklog-2026-08-15-reentry-v11-inspection.md](worklog-2026-08-15-reentry-v11-inspection.md) | P2R-01 per-gate checkpoints: template conformance, environment repair, v1.1 manifest/profile/delta, readiness review |
+| [2026-08-16-cosmos2025-worklog-p2r-02-manifest-amendment.md](2026-08-16-cosmos2025-worklog-p2r-02-manifest-amendment.md) | P2R-02 manifest repair, provenance closeout amendments, operator dispositions, and final evidence chain |
+| [2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | P2R-03 Gates 3.1 through 3.14: dictionary, verified mirror, provenance, conformance, documentation, and closeout |
 
 ---
 

@@ -65,7 +65,13 @@ read-only live catalog/count observation and no immutable-source read.
 Gate 3.13 adds the `verification_surface` block for tracked worklog/science/
 index inputs and the generated `docs/research/etl-v2-verification.md` output.
 That compiler is offline: it reads no source holding, handoff content, Doppler
-value, or PostgreSQL state.
+value, or PostgreSQL state. Gate 3.14 adds its durable policy locator under
+`verification_surface.central_spec_archive`; the semantic-source key retains
+the historical active path sealed into the dictionary. During closeout only,
+the compiler and dictionary reader accept the byte-sealed active-queue inode
+when the archive target is absent; after archival they accept only the archive
+inode while continuing to emit the historical dictionary locator. Duplicate,
+absent, linked, or redirected lifecycle states fail.
 
 ---
 

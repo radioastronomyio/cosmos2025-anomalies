@@ -11,6 +11,7 @@ Link         : https://github.com/radioastronomyio/cosmos2025-anomalies
 from __future__ import annotations
 
 import ast
+import csv
 import os
 import subprocess
 import sys
@@ -26,6 +27,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.etl import generate_verification_surface_v11 as module  # noqa: E402
+from src.etl import generate_conformance_v11  # noqa: E402
+from src.etl import generate_schema_v11  # noqa: E402
+from src.etl import load_dictionary  # noqa: E402
 
 CONFIG_PATH = REPO_ROOT / "configs/data_paths.yaml"
 
@@ -33,6 +37,18 @@ CONFIG_PATH = REPO_ROOT / "configs/data_paths.yaml"
 def test_verification_surface_compiler_module_exists() -> None:
     """Gate 3.13 begins with an importable offline compiler."""
     assert (REPO_ROOT / "src/etl/generate_verification_surface_v11.py").is_file()
+
+
+def test_historical_dictionary_spec_path_is_separate_from_archive_locator() -> None:
+    """Closeout cannot rewrite the sealed dictionary's original provenance."""
+    config = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
+    assert config["semantic_sources"]["etl_v2_spec"] == (
+        "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+    )
+    assert config["verification_surface"]["central_spec_archive"] == (
+        "/opt/agents/repos/spec/2026-08/"
+        "2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+    )
 
 
 def test_exact_evidence_paths_resolve_under_repository() -> None:
@@ -46,6 +62,106 @@ def test_exact_evidence_paths_resolve_under_repository() -> None:
     assert paths.science_opportunities == REPO_ROOT / (
         "docs/research/science-opportunities.md"
     )
+    assert paths.central_spec == Path(
+        "/opt/agents/repos/spec/2026-08/"
+        "2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+    )
+    assert paths.central_spec_read == Path(
+        "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+    )
+
+
+def test_central_spec_archive_transition_selects_exactly_one_regular_file(
+    tmp_path: Path,
+) -> None:
+    """Pre-closeout active and post-closeout archive states are both exact."""
+    active = tmp_path / "active.md"
+    archive = tmp_path / "2026-08" / "archived.md"
+    archive.parent.mkdir()
+
+    active.write_bytes(b"sealed spec\n")
+    assert module.select_central_spec_read_path(archive, active) == active
+
+    active.rename(archive)
+    assert module.select_central_spec_read_path(archive, active) == archive
+
+    active.write_bytes(b"duplicate\n")
+    with pytest.raises(ValueError, match="central spec lifecycle"):
+        module.select_central_spec_read_path(archive, active)
+
+    active.unlink()
+    archive.unlink()
+    with pytest.raises(ValueError, match="central spec lifecycle"):
+        module.select_central_spec_read_path(archive, active)
+
+    active.symlink_to(tmp_path / "missing")
+    with pytest.raises(ValueError, match="central spec lifecycle"):
+        module.select_central_spec_read_path(archive, active)
+
+
+def test_post_archive_simulation_keeps_all_four_checks_green(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Archive bytes preserve dictionary cells and every generated check."""
+    config = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
+    historical = Path(config["semantic_sources"]["etl_v2_spec"])
+    simulated_active = tmp_path / "active" / historical.name
+    simulated_archive = tmp_path / "2026-08" / historical.name
+    simulated_archive.parent.mkdir()
+    simulated_archive.write_bytes(historical.read_bytes())
+    config_path = tmp_path / "data_paths.yaml"
+    config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
+
+    assert not simulated_active.exists()
+    selected_archive = load_dictionary._select_etl_v2_spec_read_path(
+        {"verification_surface": {"central_spec_archive": str(simulated_archive)}},
+        simulated_active,
+    )
+    assert selected_archive[0] == simulated_archive
+    monkeypatch.setattr(
+        load_dictionary,
+        "_select_etl_v2_spec_read_path",
+        lambda _config, observed: (
+            selected_archive
+            if observed == historical
+            else (_ for _ in ()).throw(AssertionError("historical locator drift"))
+        ),
+    )
+    regenerated, _ = load_dictionary.build_dictionary(config_path)
+    with Path(config["dictionary"]["columns_v11"]).open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        tracked = list(csv.DictReader(handle))
+    semantic_fields = load_dictionary.CSV_FIELDS[:23]
+    assert [
+        {field: str(row[field]) for field in semantic_fields} for row in regenerated
+    ] == [{field: row[field] for field in semantic_fields} for row in tracked]
+
+    schema_rows = generate_schema_v11.read_dictionary(
+        Path(config["dictionary"]["columns_v11"])
+    )
+    generate_schema_v11.write_or_check(
+        schema_rows,
+        Path(config["dictionary"]["schema_v11_sql"]),
+        check=True,
+    )
+    conformance_rows = generate_conformance_v11._read_dictionary(
+        Path(config["dictionary"]["columns_v11"])
+    )
+    generate_conformance_v11.write_or_check(
+        conformance_rows,
+        Path(config["dictionary"]["conformance_cases_v11"]),
+        check=True,
+    )
+
+    monkeypatch.setattr(
+        module,
+        "select_central_spec_read_path",
+        lambda _archive, _active: simulated_archive,
+    )
+    result = module.run_generation(config_path, check=True)
+    assert result["status"] == "passed"
+    assert result["mode"] == "check"
 
 
 @pytest.mark.parametrize("field", ("columns_v11", "cumulative_worklog", "output"))

@@ -36,7 +36,9 @@ import argparse
 import csv
 import hashlib
 import io
+import os
 import re
+import stat
 from collections import Counter
 from pathlib import Path
 
@@ -596,6 +598,94 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _select_etl_v2_spec_read_path(
+    config: dict[str, object], historical_path: Path
+) -> tuple[Path, tuple[int, int, int, int]]:
+    """Choose active or archived spec bytes without changing their locator."""
+    verification = config.get("verification_surface")
+    if not isinstance(verification, dict):
+        raise ValueError("Missing verification_surface configuration")
+    archive_value = verification.get("central_spec_archive")
+    if not isinstance(archive_value, str) or not archive_value:
+        raise ValueError("Missing central_spec_archive configuration")
+    archive_path = Path(archive_value)
+    if archive_path == historical_path:
+        raise ValueError("Active and archived central spec paths must differ")
+
+    regular: list[tuple[Path, tuple[int, int, int, int]]] = []
+    for candidate in (historical_path, archive_path):
+        try:
+            metadata = candidate.lstat()
+        except FileNotFoundError:
+            continue
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError(f"unsafe central spec candidate: {candidate}")
+        regular.append(
+            (
+                candidate,
+                (
+                    metadata.st_dev,
+                    metadata.st_ino,
+                    metadata.st_size,
+                    metadata.st_mtime_ns,
+                ),
+            )
+        )
+    if len(regular) != 1:
+        raise ValueError(
+            "exactly one regular central spec must exist across active/archive"
+        )
+    return regular[0]
+
+
+def _sha256_selected_central_spec(
+    path: Path, expected_identity: tuple[int, int, int, int]
+) -> str:
+    """Hash the exact selected regular inode without following a path link."""
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+    except (FileNotFoundError, OSError) as exc:
+        raise ValueError("selected central spec is absent or unsafe") from exc
+    digest = hashlib.sha256()
+    try:
+        opened = os.fstat(descriptor)
+        opened_identity = (
+            opened.st_dev,
+            opened.st_ino,
+            opened.st_size,
+            opened.st_mtime_ns,
+        )
+        if not stat.S_ISREG(opened.st_mode) or opened_identity != expected_identity:
+            raise ValueError("selected central spec identity changed")
+        while chunk := os.read(descriptor, 1024 * 1024):
+            digest.update(chunk)
+        final = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    try:
+        after = path.lstat()
+    except FileNotFoundError as exc:
+        raise ValueError("selected central spec identity changed") from exc
+    final_identity = (
+        final.st_dev,
+        final.st_ino,
+        final.st_size,
+        final.st_mtime_ns,
+    )
+    after_identity = (
+        after.st_dev,
+        after.st_ino,
+        after.st_size,
+        after.st_mtime_ns,
+    )
+    if final_identity != expected_identity or after_identity != expected_identity:
+        raise ValueError("selected central spec identity changed")
+    return digest.hexdigest()
+
+
 def _semantic_source_context(
     config: dict[str, object],
 ) -> tuple[dict[str, Path], dict[str, str]]:
@@ -604,9 +694,16 @@ def _semantic_source_context(
     if not isinstance(configured, dict):
         raise ValueError("Missing semantic_sources configuration")
     paths = {key: Path(str(value)) for key, value in configured.items()}
+    spec_read_path, spec_identity = _select_etl_v2_spec_read_path(
+        config, paths["etl_v2_spec"]
+    )
     hashes: dict[str, str] = {}
     for key, path in paths.items():
-        observed = _sha256_file(path)
+        observed = (
+            _sha256_selected_central_spec(spec_read_path, spec_identity)
+            if key == "etl_v2_spec"
+            else _sha256_file(path)
+        )
         expected = EXPECTED_SEMANTIC_HASHES.get(key)
         if expected is not None and observed != expected:
             raise ValueError(

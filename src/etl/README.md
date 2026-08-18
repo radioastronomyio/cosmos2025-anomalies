@@ -336,6 +336,16 @@ and configured policy documents into
 source reads, zero database queries, and no persistent mutation. The generated
 MetaMCP and T_A v2 disposition cells remain blank for the operator.
 
+The central-spec evidence path is the durable `2026-08` archive location.
+Closeout has one exact transition: before the archive move the generator reads
+the sealed active-queue inode only while the archive is absent; afterward it
+reads the sealed archive inode only. Both states render the same archive
+locator, and duplicate, absent, linked, or redirected states fail.
+`load_dictionary.py` uses the same exact transition for the central-spec bytes
+but deliberately retains the original active-queue string in its 13 sealed
+project-derived provenance cells, so post-closeout `--check` remains
+byte-identical rather than rewriting history.
+
 ---
 
 ## Related

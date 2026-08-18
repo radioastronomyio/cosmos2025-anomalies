@@ -84,6 +84,7 @@ verification_surface:
   cumulative_worklog: /opt/agents/repos/cosmos2025-anomalies/work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md
   science_opportunities: /opt/agents/repos/cosmos2025-anomalies/docs/research/science-opportunities.md
   research_index: /opt/agents/repos/cosmos2025-anomalies/docs/research/README.md
+  central_spec_archive: /opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
   output: /opt/agents/repos/cosmos2025-anomalies/docs/research/etl-v2-verification.md
 
 # ---------------------------------------------------------------------------

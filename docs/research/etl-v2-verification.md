@@ -32,7 +32,7 @@ All 11 mirrors map 1,403 native and 13 metadata fields in 1,416 rows, including 
 | dictionary rows | 1,416 | `data/dictionary/columns-v11.csv:rows 2-1417` |
 | native fields | 1,403 | `data/dictionary/columns-v11.csv:rows 2-1417 field=column_origin` |
 | metadata fields | 13 | `data/dictionary/columns-v11.csv:rows 2-1417 field=column_origin` |
-| master fidelity | 1,349 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L518` |
+| master fidelity | 1,349 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L524` |
 
 Question: Accept the 11-source, 1,416-field lossless mirror boundary? Yes/No.
 
@@ -88,13 +88,13 @@ The 155-row manifest bounded 16 inputs; 7 master products each had 784,016 rows,
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| manifest rows | 155 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L477` |
-| consumed inputs | 16 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L491` |
-| master products | 7 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L507-L513` |
-| rows per master | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L516` |
-| master native fields | 1,349 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L518` |
-| sample ordinals | 5,000 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L515` |
-| fidelity mismatches | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L519` |
+| manifest rows | 155 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L483` |
+| consumed inputs | 16 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L497` |
+| master products | 7 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L513-L519` |
+| rows per master | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L522` |
+| master native fields | 1,349 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L524` |
+| sample ordinals | 5,000 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L521` |
+| fidelity mismatches | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L525` |
 
 Question: Accept the 16-pin and 1,349-field fidelity evidence with its ordinal limitation? Yes/No.
 
@@ -107,24 +107,24 @@ The target has 11 exact load counts, 1,429 columns, 192 constraints, 166 arrays,
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| mirror tables | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| columns | 1,429 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| constraints | 192 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| arrays | 166 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| provenance rows | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L937-L947` |
-| declared and observed digests | 22 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L937-L947` |
-| load count photometry_primary | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L937` |
-| load count photometry_aper | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L938` |
-| load count lephare | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L939` |
-| load count cigale | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L940` |
-| load count ml_morpho | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L941` |
-| load count bulge_disk | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L942` |
-| load count galight_morph | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943` |
-| load count lss_overdensity | 164,155 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L944` |
-| load count galaxy_groups | 1,678 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L945` |
-| load count galaxy_group_memberships | 1,745,652 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L946` |
-| load count specz_compilation | 261,975 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L947` |
-| manifest identity 5941abbbcde4e27d706ec1a49456482cb779f9c77e6cf573b7313a0450ee4c7e | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L951-L953` |
+| mirror tables | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| columns | 1,429 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| constraints | 192 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| arrays | 166 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| provenance rows | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943-L953` |
+| declared and observed digests | 22 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943-L953` |
+| load count photometry_primary | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943` |
+| load count photometry_aper | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L944` |
+| load count lephare | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L945` |
+| load count cigale | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L946` |
+| load count ml_morpho | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L947` |
+| load count bulge_disk | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L948` |
+| load count galight_morph | 784,016 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L949` |
+| load count lss_overdensity | 164,155 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L950` |
+| load count galaxy_groups | 1,678 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L951` |
+| load count galaxy_group_memberships | 1,745,652 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L952` |
+| load count specz_compilation | 261,975 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L953` |
+| manifest identity 5941abbbcde4e27d706ec1a49456482cb779f9c77e6cf573b7313a0450ee4c7e | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L957-L959` |
 
 Question: Accept the exact 11-mirror, 1,429-column persisted schema and provenance boundary? Yes/No.
 
@@ -137,11 +137,11 @@ All 1,416 cases passed 201,678 samples, 28,063,492 row-column and 16,600,000 arr
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| value reconciliation | 28,063,492 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1139` |
-| cases | 1,416 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1138-L1141` |
-| sampled records | 201,678 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1138-L1141` |
-| array elements | 16,600,000 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1138-L1141` |
-| mismatches | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1138-L1141` |
+| value reconciliation | 28,063,492 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1145` |
+| cases | 1,416 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1144-L1147` |
+| sampled records | 201,678 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1144-L1147` |
+| array elements | 16,600,000 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1144-L1147` |
+| mismatches | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1144-L1147` |
 
 Question: Accept the 1,416-case value reconciliation as complete for the declared sample? Yes/No.
 
@@ -154,16 +154,16 @@ All 261,975 spec-z rows span 17 flags; flags 3+4 total 183,221, flag 9 totals 2,
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| spec-z rows | 261,975 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| observed flags | 17 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| flag identifier | 3 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| flag identifier | 4 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| flags 3+4 rows | 183,221 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| flag identifier | 9 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| flag 9 rows | 2,326 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
-| join rows | 24,364 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L848` |
-| prior rows | 37,219 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L848` |
-| difference | -12,855 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L848` |
+| spec-z rows | 261,975 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| observed flags | 17 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| flag identifier | 3 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| flag identifier | 4 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| flags 3+4 rows | 183,221 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| flag identifier | 9 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| flag 9 rows | 2,326 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
+| join rows | 24,364 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L853-L854` |
+| prior rows | 37,219 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L853-L854` |
+| difference | -12,855 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L853-L854` |
 
 Question: Accept the complete 17-flag distribution and leave the 24,364 join nonmaterialized? Yes/No.
 
@@ -176,23 +176,23 @@ The 7-attribute analyst passed 12 SELECTs and 72 denials, including 1/11 and 4/2
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| role cosmos2025_v11_ro | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693-L698` |
-| role attributes: LOGIN/NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOINHERIT/NOREPLICATION/NOBYPASSRLS | 7 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L684-L686` |
-| analyst SELECTs | 12 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| analyst denials | 72 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1195-L1198` |
-| master matrix SELECTs | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L687` |
-| master matrix denials | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L687` |
-| supplement matrix SELECTs | 4 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L853-L856` |
-| supplement matrix denials | 24 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L853-L856` |
-| role memberships | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L684-L686` |
-| role ownership | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L684-L686` |
-| handoff mode | 600 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L704-L709` |
-| handoff path internal-files/cosmos2025-v11.env | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L704-L709` |
-| handoff names PGSQL01_HOST, PGSQL01_PORT, PGSQL01_COSMOS2025_V11_DB, PGSQL01_COSMOS2025_V11_USER, PGSQL01_COSMOS2025_V11_PASSWORD | 5 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L704-L709` |
-| secret values exposed | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L704-L709` |
-| operator-approved clusteradmin session authorization | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693-L698` |
-| direct analyst network authentications exercised | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693-L698` |
-| pending direct ML01 SCRAM HBA correction | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693-L698` |
+| role cosmos2025_v11_ro | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L699-L704` |
+| role attributes: LOGIN/NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOINHERIT/NOREPLICATION/NOBYPASSRLS | 7 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L690-L692` |
+| analyst SELECTs | 12 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| analyst denials | 72 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1201-L1204` |
+| master matrix SELECTs | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693` |
+| master matrix denials | 11 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L693` |
+| supplement matrix SELECTs | 4 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L859-L862` |
+| supplement matrix denials | 24 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L859-L862` |
+| role memberships | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L690-L692` |
+| role ownership | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L690-L692` |
+| handoff mode | 600 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L710-L715` |
+| handoff path internal-files/cosmos2025-v11.env | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L710-L715` |
+| handoff names PGSQL01_HOST, PGSQL01_PORT, PGSQL01_COSMOS2025_V11_DB, PGSQL01_COSMOS2025_V11_USER, PGSQL01_COSMOS2025_V11_PASSWORD | 5 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L710-L715` |
+| secret values exposed | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L710-L715` |
+| operator-approved clusteradmin session authorization | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L699-L704` |
+| direct analyst network authentications exercised | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L699-L704` |
+| pending direct ML01 SCRAM HBA correction | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L699-L704` |
 
 Question: Accept the 12/72 admin-session security evidence while direct ML01 HBA access remains pending? Yes/No.
 
@@ -205,9 +205,9 @@ The 8-table v1 fingerprint passed 1 before/after identity check with 0 recorded 
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| v1 user tables | 8 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1151-L1152` |
-| fingerprint 82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7 | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1151-L1152` |
-| v1 writes | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1151-L1152` |
+| v1 user tables | 8 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1157-L1158` |
+| fingerprint 82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7 | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1157-L1158` |
+| v1 writes | 0 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L1157-L1158` |
 
 Question: Accept that the historical 8-table cosmos2025 baseline remained unmodified? Yes/No.
 
@@ -1916,27 +1916,27 @@ Candidates remain finite source values; any future cleaning rule requires scient
 | Table | Rows | Load xmin | Declared SHA-256 | Observed SHA-256 | Source |
 |---|---:|---:|---|---|---|
 <!-- provenance:photometry_primary -->
-| `photometry_primary` | 784,016 | 11273452 | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L937` |
+| `photometry_primary` | 784,016 | 11273452 | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943` |
 <!-- provenance:photometry_aper -->
-| `photometry_aper` | 784,016 | 11273453 | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L938` |
+| `photometry_aper` | 784,016 | 11273453 | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L944` |
 <!-- provenance:lephare -->
-| `lephare` | 784,016 | 11273459 | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L939` |
+| `lephare` | 784,016 | 11273459 | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L945` |
 <!-- provenance:cigale -->
-| `cigale` | 784,016 | 11273460 | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L940` |
+| `cigale` | 784,016 | 11273460 | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L946` |
 <!-- provenance:ml_morpho -->
-| `ml_morpho` | 784,016 | 11273462 | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L941` |
+| `ml_morpho` | 784,016 | 11273462 | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L947` |
 <!-- provenance:bulge_disk -->
-| `bulge_disk` | 784,016 | 11273464 | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L942` |
+| `bulge_disk` | 784,016 | 11273464 | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L948` |
 <!-- provenance:galight_morph -->
-| `galight_morph` | 784,016 | 11273466 | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L943` |
+| `galight_morph` | 784,016 | 11273466 | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L949` |
 <!-- provenance:lss_overdensity -->
-| `lss_overdensity` | 164,155 | 11273564 | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L944` |
+| `lss_overdensity` | 164,155 | 11273564 | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L950` |
 <!-- provenance:galaxy_groups -->
-| `galaxy_groups` | 1,678 | 11273565 | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L945` |
+| `galaxy_groups` | 1,678 | 11273565 | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L951` |
 <!-- provenance:galaxy_group_memberships -->
-| `galaxy_group_memberships` | 1,745,652 | 11273566 | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L946` |
+| `galaxy_group_memberships` | 1,745,652 | 11273566 | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L952` |
 <!-- provenance:specz_compilation -->
-| `specz_compilation` | 261,975 | 11273567 | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L947` |
+| `specz_compilation` | 261,975 | 11273567 | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L953` |
 
 ### Complete spec-z quality distribution
 
@@ -1945,39 +1945,39 @@ The earlier 16-value planning count was corrected: the tracked complete distribu
 | Flag | Rows | Tracked source |
 |---:|---:|---|
 <!-- flag:-99 -->
-| -99 | 67 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| -99 | 67 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:-2 -->
-| -2 | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| -2 | 1 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:-1 -->
-| -1 | 1,794 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| -1 | 1,794 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:0 -->
-| 0 | 24,594 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 0 | 24,594 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:1 -->
-| 1 | 18,526 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 1 | 18,526 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:2 -->
-| 2 | 27,013 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 2 | 27,013 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:3 -->
-| 3 | 7,217 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 3 | 7,217 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:4 -->
-| 4 | 176,004 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 4 | 176,004 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:5 -->
-| 5 | 2 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 5 | 2 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:6 -->
-| 6 | 3 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 6 | 3 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:9 -->
-| 9 | 2,326 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 9 | 2,326 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:10 -->
-| 10 | 12 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 10 | 12 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:11 -->
-| 11 | 17 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 11 | 17 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:12 -->
-| 12 | 43 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 12 | 43 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:13 -->
-| 13 | 59 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 13 | 59 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:14 -->
-| 14 | 4,269 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 14 | 4,269 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 <!-- flag:19 -->
-| 19 | 28 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L841-L844` |
+| 19 | 28 | `work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md:L847-L850` |
 
 ## Questions deferred to T_A v2
 
@@ -1988,7 +1988,7 @@ The 1 chi2_ratio policy repair remains outside ETL v2.
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| deferred policy | 1 | `/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
+| deferred policy | 1 | `/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
 
 Question: Should T_A v2 repair chi2_ratio before anomaly ranking? Yes/No.
 
@@ -2014,7 +2014,7 @@ The 1 analysis-sample definition remains outside ETL v2.
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| deferred policy | 1 | `/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
+| deferred policy | 1 | `/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
 
 Question: Should T_A v2 freeze a reproducible analysis-sample definition before discovery scoring? Yes/No.
 
@@ -2027,7 +2027,7 @@ The 1 spec-z calibration/validation allocation remains outside ETL v2.
 
 | Evidence | Value | Tracked source |
 |---|---:|---|
-| deferred policy | 1 | `/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
+| deferred policy | 1 | `/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L395` |
 
 Question: Should T_A v2 allocate spec-z rows between calibration and validation before modeling? Yes/No.
 
@@ -2060,7 +2060,7 @@ The historical v1 fingerprint remained `82fb7e09f21253f2e9b78e8232c43b737008aa4b
 
 Successful verification does not fill these cells.
 
-The governing 2-decision boundary is `/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L428`.
+The governing 2-decision boundary is `/opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md:L428`.
 
 | Decision | Generator recommendation | Operator disposition |
 |---|---|---|

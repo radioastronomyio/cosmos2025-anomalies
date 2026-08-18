@@ -348,7 +348,15 @@ pytest tests/test_generate_schema_docs_v11.py -v
 seals, full dictionary-to-conformance and manifest-to-provenance joins, all 14
 findings, complete 49/793/11/17 appendices, 261,975 quality-flag rows, deferred
 T_A questions, blank operator dispositions, atomic output classification, CLI
-redaction, and the no-source/no-database call graph.
+redaction, the no-source/no-database call graph, and the exact active-to-archive
+central-spec transition. The transition accepts one regular sealed inode at
+the active or durable archive path and rejects duplicate, absent, linked, or
+redirected states.
+
+The Gate 3.14 post-archive simulation additionally proves that archive-only
+central-spec bytes reproduce all 1,416 dictionary semantic rows without
+changing the 13 historical provenance locators, while the schema, conformance,
+and verification-surface check functions remain byte-identical.
 
 ```bash
 pytest tests/test_generate_verification_surface_v11.py -v
