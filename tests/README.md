@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.6"
+version: "3.7"
 status: "Active"
 tags:
   - type: directory-readme
@@ -154,6 +154,62 @@ doppler run --project ml01 --config dev -- \
 The live command must finish with zero matching scratch databases. It never
 creates or drops `cosmos2025_v11`, creates `cosmos2025_v11_ro`, or connects to
 the read-only `cosmos2025` baseline.
+
+## Persistent bootstrap and post-load verification
+
+`test_bootstrap_v11.py` proves the Gate 3.7 contract without authenticating:
+
+- fixed database, role, handoff, and cleanup targets;
+- deterministic v1 fingerprint serialization and byte/hash comparison;
+- scalar and vector FITS masks, IEEE NaNs, infinities, signed zero,
+  float32/float64 round trips, finite sentinels, and exact metadata injection;
+- PostgreSQL CSV escaping for tabs, newlines, backslashes, quotes, empty text,
+  arrays, per-element NULL, and a collision-guarded explicit NULL marker;
+- exact analyst attributes, grants, negative matrix, and default privileges;
+- exclusive mode-0600 five-line handoff creation, name/public-value checks,
+  Git ignore/tracking evidence, and secret-output exclusion;
+- transactional table evidence, source-row bounds/gaps, injected-ID/FK
+  alignment, array shape/NULL counts, and unloaded-table boundaries;
+- scalar NULL verification excludes array fields, joined extension-ID
+  aggregates qualify the extension alias, and direct-file entry occurs only
+  after every validation definition;
+- redaction-safe lifecycle diagnostics expose only stage, exception class,
+  safe SQLSTATE, and exact reversed-resource names;
+- phase-aware pre-seal database cleanup versus post-seal database retention,
+  including exact retained-role grant reversal without `DROP OWNED`;
+- separate create/load, administration-finalization, and verify-only phase sets;
+- guarded finalization requires an exact retained load and proves source,
+  manifest, FITS-load, and COPY paths are unreachable.
+
+```bash
+pytest tests/test_bootstrap_v11.py -v
+```
+
+Database mutation rehearsals use only random
+`cosmos2025_v11_scratch_<pid>_<token>` databases and must prove cleanup. The
+one persistent run is invoked separately under Doppler `ml01/dev`; the final
+repository suite never reruns `--create-load`.
+
+Authenticated rehearsals use production functions in disposable databases.
+The final ten-row parity executed the production-generated 1,416-column DDL,
+all seven aligned master tables, the complete admin verifier (including the
+wrong-array mutation), exact role/privilege observation, the 1-positive and
+11-negative session-authorization matrix, and default privileges. Direct
+analyst network authentication is not a test claim; ML01 analyst HBA coverage
+remains an operator infrastructure action.
+
+The real disposable failure/resume proof injects a post-role administration
+failure after a seven-table aligned load, proves the database retained with the
+scratch role/handoff absent, then invokes the production `--finalize-admin`
+path. The resumed run completes both matrices, default privileges, handoff,
+and v1 identity with zero source reads and zero COPY operations before exact
+scratch cleanup.
+
+Independent-review regressions additionally require exact retained nullability
+and canonical key/reference/CHECK definitions, reject same-named cardinality
+drift and dangling handoff symlinks, remove exact-inode partial handoffs after
+interrupted `fsync`, redact unexpected CLI exception text in all three modes,
+and execute the immutable DDL bytes returned by identity review.
 
 ## Manifest validator
 

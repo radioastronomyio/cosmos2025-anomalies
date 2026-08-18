@@ -90,11 +90,26 @@ database:
   scratch_prefix: cosmos2025_v11_scratch_
   database_name: cosmos2025
   schema: catalog
+  target_database: cosmos2025_v11
+  analyst_role: cosmos2025_v11_ro
 
   # Inject credentials through the ML01 scoped runtime:
   #   doppler run --project ml01 --config dev -- python your_script.py
   #
   # Python reads the injected values from os.environ by the names above.
+
+# ---------------------------------------------------------------------------
+# ETL v2 Gate 3.7 persistent bootstrap
+# ---------------------------------------------------------------------------
+etl_v2:
+  # COPY frames stay bounded in memory; each master table commits separately.
+  copy_batch_rows: 2000
+  # Halt before target creation unless the PostgreSQL data volume has 50 GiB free.
+  minimum_database_free_bytes: 53687091200
+
+handoff:
+  # Created once with O_EXCL and mode 0600 after load and role checks succeed.
+  cosmos2025_v11_env: /opt/agents/repos/cosmos2025-anomalies/internal-files/cosmos2025-v11.env
 
 # ---------------------------------------------------------------------------
 # Off-box holdings (storage server; NOT local paths, exempt from the

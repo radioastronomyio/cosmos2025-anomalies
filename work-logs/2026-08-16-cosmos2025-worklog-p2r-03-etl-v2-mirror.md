@@ -2,7 +2,7 @@
 title: "Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)"
 description: "Per-gate checkpoint log for the COSMOS-Web v1.1 lossless mirror rebuild"
 date: "2026-08-17"
-version: "0.5"
+version: "0.6"
 status: "partial"
 tags:
   - type: worklog
@@ -47,6 +47,8 @@ related_documents:
   - "src/etl/verify_schema_v11_scratch.py"
   - "tests/test_generate_schema_v11.py"
   - "tests/test_verify_schema_v11_scratch.py"
+  - "src/etl/bootstrap_v11.py"
+  - "tests/test_bootstrap_v11.py"
 ---
 
 # Worklog: COSMOS-Web ETL v2 Lossless Mirror (P2R-03)
@@ -55,7 +57,7 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Partial: Gates 3.1 through 3.6 complete; later gates remain |
+| Status | Partial: Gates 3.1 through 3.7 complete; later gates remain |
 | Agent | codex / Codex API / unreported |
 | Hostname | ml01 |
 | Spec | spec-p2r-03-etl-v2-mirror.md |
@@ -72,8 +74,10 @@ separate semantic, type-appropriate profile, null-state, documented-sentinel,
 and candidate-sentinel fields. Gate 3.5 then verified the complete immutable
 input boundary and exact seven-extension fidelity before extraction. Gate 3.6
 generated the complete source-mirror DDL and validated it in a disposable
-database. No source data, protected PostgreSQL object, sealed artifact, or
-remote Git state was modified.
+database. Gate 3.7 created and verified the persistent seven-master v1.1
+mirror, exact read-only analyst role, and ignored operator handoff. Immutable
+sources, the v1 database, supplements, spec-z/provenance, Doppler, HBA policy,
+and remote Git state were not modified.
 
 Starting branch and base: startup began on `main` at
 `d2e51479f5ec108688d2da44333988dd0c9c7709`; execution uses
@@ -612,6 +616,184 @@ Repository-wide Ruff retained the same fifteen unrelated base-tree errors and
 repository-wide frontmatter retained the same four inherited violations
 already recorded in section 3.
 
+### Gate 3.7 persistent master load, analyst role, and handoff
+
+Gate 3.7 added `bootstrap_v11.py` with a non-idempotent guarded create/load
+mode and a separate verify-only mode. The successful lifecycle created
+`cosmos2025_v11`, executed the unchanged generated DDL, loaded only the seven
+master mirrors, created `cosmos2025_v11_ro`, and wrote the exact ignored
+mode-0600 handoff. The four supplement/spec-z mirrors and provenance remain
+empty. The successful database, role, and handoff are retained for the
+operator and later gates.
+
+The authoritative final internal preflight proved the fixed database, role,
+and handoff absent; PostgreSQL 16.14; 216,553,578,496 bytes available on a
+263,085,035,520-byte volume (14 percent used) against the 53,687,091,200-byte
+minimum; all sixteen source-integrity inputs passed; the dictionary contained
+1,416 rows; and the DDL SHA-256 was
+`181d2973f767d9b054eb210643adb6480121113c4c6b38452c104dcc9ac5152d`.
+The v1 fingerprint contained eight user tables and remained
+`82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7`
+before and after the lifecycle.
+
+Final committed table evidence:
+
+| Table | Rows | Source SHA-256 | Load seconds |
+|-------|-----:|---------------|-------------:|
+| `photometry_primary` | 784,016 | `878c318e22780b73742940c7b8807f2bbbe210ead51472706bbe0f43923e618f` | 326.432 |
+| `photometry_aper` | 784,016 | `2c5326cb878c85cdf85c9e90e8bf69f4a38720187ddd8e6e4b3d210a7cd21951` | 776.757 |
+| `lephare` | 784,016 | `b46b0003ad0cfeef7710758d402f8b4883537b341a36223909e25e82901721ed` | 59.324 |
+| `cigale` | 784,016 | `018f9de6e6d089f11db40f3c0a8af8e25ae14a703b76d0f22f97a469b68d58f3` | 78.726 |
+| `ml_morpho` | 784,016 | `42a93b037ce0f507478749c5dba5376c87dc42ae3601b638c34e64a499d3ce66` | 157.923 |
+| `bulge_disk` | 784,016 | `786da57b506920db5403b559ad4acd8b3ad374f78109281f13cffad6924225cf` | 441.586 |
+| `galight_morph` | 784,016 | `19007dae6114900aa483d53adf8c697ea87a5d2769704cfa07d5fa1a3925e327` | 196.048 |
+
+Each declared and observed byte count/hash matched, each table committed in a
+separate transaction, and all zero-based `source_row` and six injected-ID
+sequences passed complete alignment checks. The target has twelve tables,
+1,416 mirror columns, thirteen provenance columns, 1,429 comments, 166 array
+checks, and 192 constraints. The create/load verifier observed target size
+24,635,636,759 bytes; verify-only later observed 24,635,644,951 bytes after the
+transactionally cleaned default-privilege proof. Scalar NULL totals, vector
+shape and element-NULL totals, and 775 finite sentinel assertions passed. The
+five unloaded tables remained exactly zero rows. A wrong-length array reached
+the intended
+`photometry_primary_flux_aper_hst_f814w_array_shape_8c4ff19f7a7e` check and
+was rolled back.
+
+The analyst role is LOGIN, NOSUPERUSER, NOCREATEDB, NOCREATEROLE, NOINHERIT,
+NOREPLICATION, and NOBYPASSRLS; its SCRAM credential is present without its
+hash or secret being output. It has zero memberships and owns zero objects.
+Both pre- and post-handoff matrices returned one allowed SELECT and eleven
+`42501` denials for insert/update/delete, schema/source/public/TEMP creation,
+alter, truncate, role grant, and admin-role switch; snapshots were unchanged.
+Default privileges allowed SELECT on a bootstrap-created proof table, denied
+write with `42501`, and left zero proof objects.
+
+All database operations authenticated through the configured
+`clusteradmin_pg01` connection. PostgreSQL session authorization changed the
+effective identity to `cosmos2025_v11_ro` for the privilege checks. The
+operator explicitly approved this transport and directed that missing direct
+analyst HBA coverage must not block the run. Direct analyst network
+authentication from ML01 was not exercised and is not claimed. A SCRAM HBA
+rule for ML01 direct access remains a required post-run operator
+infrastructure action; the gate did not add or reload HBA policy. Work stalled
+for more than five hours before this override while awaiting direct HBA
+coverage.
+
+The retained handoff is
+`internal-files/cosmos2025-v11.env`, mode `0600`, ignored and untracked, with
+exact variable names `PGSQL01_HOST`, `PGSQL01_PORT`,
+`PGSQL01_COSMOS2025_V11_DB`, `PGSQL01_COSMOS2025_V11_USER`, and
+`PGSQL01_COSMOS2025_V11_PASSWORD`. No value, password, password hash, or
+secret-derived text was printed, passed as a command argument, staged, or
+found in tracked content.
+
+Strict TDD and systematic-debugging cycles included:
+
+| Cycle | RED | GREEN |
+|-------|-----|-------|
+| Conversion/COPY/guards | Missing bootstrap behavior failed focused tests | Scalar/vector masks and NaNs, infinities, signed zero, float round trips, text/array COPY escaping, metadata injection, absence/capacity, fingerprint, and exact cleanup guards passed |
+| Role password utility SQL | Live scratch rejected `PASSWORD %s` in utility SQL | Parameterized `set_config` plus secret-free dynamic role alteration passed without exposing the password |
+| Admin-session analyst checks | Transaction rollback reverted session authorization | Committed SET/RESET transitions retained effective analyst identity across each denied-operation rollback |
+| Scalar versus vector NULLs | Sealed vector element NULL counts were compared to SQL array-object NULL counts | Scalar NULL queries exclude arrays; `_verify_arrays` alone owns exact element NULL counts |
+| Privilege SQL | Production verifier raised `ProgrammingError` on client `%I` | `has_table_privilege` uses the live-supported relation-OID overload |
+| Direct entry ordering | Direct execution invoked `main()` before late validators existed | The sole entry block moved after every function/class definition |
+| Extension ID alignment | Real PostgreSQL reproduced `AmbiguousColumn`/`42702` for unqualified joined IDs | Extension aggregates use `count(e.id)` and `count(DISTINCT e.id)`; a behavioral regression and full production admin proof pass |
+| Safe lifecycle diagnostics | Failures lacked useful secret-safe stage evidence | Diagnostics expose only an allowlisted stage, exception class, safe SQLSTATE, and exact reversed resources |
+
+The final disposable production-function proof generated the complete DDL from
+an in-memory ten-row dictionary profile, inserted ten aligned rows in all seven
+masters, and called `verify_target_admin(..., exercise_wrong_array=True)` once.
+It covered structure, owners, counts, source-row bounds, scalar NULLs, all 166
+arrays, sentinels, ID/FK alignment, unloaded tables, role, wrong-array, and
+size paths, followed by the exact privilege contract, 1/11 matrix, and default
+privileges. Scratch database and fixed role cleanup passed.
+
+Persistent attempts and reversals were cumulative and secret-free:
+
+| Attempt | Result | Reversal |
+|---------|--------|----------|
+| 1 | Seven loads passed; role creation hit unsupported utility placeholder use | Database only |
+| 2 | Seven loads and role creation passed; post-load verification failed before staged diagnostics existed | Database and role |
+| 3 | Seven loads passed; `verify_role` raised `ProgrammingError` from `%I` in parameterized privilege SQL | Database and role |
+| 4 | Seven loads and `verify_role` passed; `verify_admin` raised `NameError` because direct entry preceded late definitions | Database and role |
+| 5 | Seven loads and `verify_role` passed; `verify_admin` raised `AmbiguousColumn`/`42702` in extension alignment | Database and role |
+| 6 | All loads, admin/security stages, handoff, v1 identity, and Git-secret checks passed | None; database, role, and handoff retained |
+
+Every reversal confirmed the exact target database and role absent, handoff
+absent, and the v1 fingerprint unchanged. No cleanup failure occurred. The
+operator subsequently corrected the execution policy: once all seven table
+loads are proven good, blanket target rollback and full reimport for a
+post-load admin/verifier-code defect are too broad. Attempts 2 through 5 caused
+avoidable wall time and NVMe read/write work by repeating already-good table
+imports. No further full import is authorized for such a defect. This gate
+implements the subsequently approved phase-aware design: failures before the
+seven-load seal clean an incomplete database; later failures retain it and
+remove only role/handoff artifacts created by the run. `--finalize-admin`
+accepts only an exact retained database with role/handoff absent and completes
+administration with no source FITS reads or COPY.
+
+Phase-aware strict TDD began with two expected failures for the absent load
+seal and cleanup decision. GREEN requires all seven ordered, individually
+validated committed `TableLoadEvidence` records before retention; unknown or
+pre-seal stages cannot retain. Administration-finalization strict TDD began
+with four expected failures for the absent phase, boundary guard, success
+orchestration, and failure cleanup. GREEN added exact target-present and
+role/handoff-absent guards, a database-only retained-load validator, direct CLI
+dispatch, forbidden source/COPY hooks, and safe role/handoff cleanup.
+
+The first real post-seal cleanup proof reproduced
+`DependentObjectsStillExist`/`2BP01`: the created analyst role still had exact
+grants and default privileges in the retained database. A focused RED/GREEN
+added four exact reversals (default SELECT, current-table SELECT, schema USAGE,
+database CONNECT) and deliberately avoids `DROP OWNED`. The final disposable
+proof injected a post-role admin failure after seven aligned ten-row tables,
+confirmed the database and all seventy rows retained while role/handoff were
+absent, then ran the real `run_finalize_admin()` path. Both 1/11 matrices,
+default privileges, mode-0600 ignored handoff, v1 identity, zero source reads,
+and zero COPY operations passed. Scratch database/role/handoff were absent
+afterward; the persistent database/role stayed present and real handoff
+inode/size/mtime/mode were unchanged.
+
+The successful create/load returned exit zero in 42:43.14 with 23,672,204 KiB
+maximum RSS and no swap. The separate verify-only command returned status
+passed in 5:56.73 with 151,896 KiB maximum RSS. It repeated the exact catalog,
+role, matrix, handoff, and v1 checks without create/load and did not exercise
+the destructive wrong-array mutation. Focused Gate 3.7 verification returned
+`45 passed in 0.77s`; the cumulative Gate 3.5 through 3.7 suite returned
+`96 passed in 1.28s`. Final full-suite evidence will be recorded after
+independent review of the approved lifecycle implementation. Focused Ruff,
+format, and `git diff --check` passed at this checkpoint.
+
+After the approved phase-aware implementation and disposable resume proof,
+the expanded Gate 3.7 suite returned `54 passed in 0.95s`; the cumulative Gate
+3.5 through 3.7 suite returned `105 passed in 1.32s`. Focused Ruff, format,
+config YAML, four HTML-frontmatter checks, and `git diff --check` passed.
+
+Independent review then identified five closeout gaps: retained schema checks
+did not compare nullability/canonical definitions, interrupted final-path
+handoff writes could leave a partial file, dangling symlinks passed the
+create/load absence guard, unexpected CLI exceptions could expose their text,
+and create/load reopened the DDL path after identity review. Strict RED
+captured seven failures across those surfaces. GREEN added exact comparison of
+1,429 nullability entries and 192 key/reference/CHECK definitions, exact-inode
+interrupted-write reversal, symlink rejection, class/SQLSTATE-only unexpected
+CLI diagnostics, and execution of the immutable reviewed DDL bytes. A real
+scratch mutation rejected both dropped `NOT NULL` and same-named wrong-array
+cardinality before rolling back. The final production-function scratch
+failure/resume proof passed in 1.81 seconds with 140,964 KiB maximum RSS, both
+1/11 matrices, zero source reads/COPY, exact scratch absence, and unchanged
+persistent database/role/handoff identity. The final Gate 3.7 focused suite
+returned `61 passed`; cumulative Gates 3.5 through 3.7 returned `112 passed`.
+Independent re-review cleared all five findings with no blocking issues;
+focused Ruff/format, config YAML, four frontmatter checks, and diff checks pass.
+The single final repository suite then returned `179 passed in 2152.96s
+(0:35:52)` with 35:53.37 wall time, 5,732,632 KiB maximum RSS, zero swap,
+and exit zero. No second full run was started. Gate 3.7 is sealed by the one
+local `gate 3.7:` commit containing this checkpoint; its SHA is recorded in the
+ignored task report and operator handoff.
+
 ---
 
 ## 2. Files Changed
@@ -634,6 +816,7 @@ already recorded in section 3.
 | [src/etl/generate_schema_v11.py](../src/etl/generate_schema_v11.py) | Added the Gate 3.6 sealed-dictionary DDL generator and versioned provenance contract |
 | [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Added the generated-only eleven-mirror plus provenance SQL artifact |
 | [src/etl/verify_schema_v11_scratch.py](../src/etl/verify_schema_v11_scratch.py) | Added the prefix-guarded disposable database verifier and mutations |
+| [src/etl/bootstrap_v11.py](../src/etl/bootstrap_v11.py) | Added the guarded persistent master bootstrap, phase-aware exact reversal/finalization, analyst role/handoff, admin-session security checks, and verify-only mode |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
@@ -641,6 +824,7 @@ already recorded in section 3.
 | [tests/test_verify_source_fidelity.py](../tests/test_verify_source_fidelity.py) | Added Gate 3.5 manifest, hash, sample, value, and ID mutation tests |
 | [tests/test_generate_schema_v11.py](../tests/test_generate_schema_v11.py) | Added Gate 3.6 generated DDL, constraint, comment, and byte-drift tests |
 | [tests/test_verify_schema_v11_scratch.py](../tests/test_verify_schema_v11_scratch.py) | Added unauthenticated scratch guards and conformance mutations |
+| [tests/test_bootstrap_v11.py](../tests/test_bootstrap_v11.py) | Added Gate 3.7 conversion, COPY, guards, fingerprint, role, handoff, verifier-query, diagnostics, and entrypoint regressions |
 | [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, and scratch suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
@@ -660,6 +844,10 @@ already recorded in section 3.
 | Independent review found a hardcoded artifact default, a tracked-file ignore blind spot, and missing documented/candidate disjointness | Added strict RED/GREEN regressions and repaired all three without changing the sealed CSV or science/profile decisions |
 | The first live Gate 3.5 verifier retained the large full-listing and memory-mapped FITS working sets, reaching 23,590,708 KiB maximum RSS | Recorded the measured resource fact; the run stayed read-only, completed in 3:00.32, and remained within ML01 capacity |
 | The first Gate 3.6 scratch invocation encoded a two-character PostgreSQL `ESCAPE` literal | No database was created; added a focused regression and changed the inventory query to a single `!` escape character before the successful rerun |
+| Direct `cosmos2025_v11_ro` HBA coverage from ML01 was absent and the run stalled for more than five hours awaiting it | Operator explicitly approved clusteradmin operations plus session-authorization privilege checks as nonblocking; direct analyst HBA remains a required post-run infrastructure action and was not changed by the gate |
+| Four post-load verifier-code defects appeared only after seven long transactional loads had passed | Reproduced each defect in disposable PostgreSQL, added strict RED/GREEN regressions, reversed only resources owned by each run, and retained v1 identity; the final attempt passed |
+| Blanket rollback caused full table reimports after data had already passed | Operator approved and Gate 3.7 implemented a seven-load seal, phase-aware cleanup, and guarded source-free `--finalize-admin` resume; repeated full imports are no longer the recovery path |
+| Independent closeout review found five schema, handoff, guard, diagnostic, and DDL-buffer gaps | Added seven RED/GREEN cases, real PostgreSQL drift mutations, exact-inode cleanup, and immutable-buffer execution; independent re-review reported no blockers |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -667,14 +855,21 @@ already recorded in section 3.
 
 ## 4. Next Steps
 
-Handoff: Gate 3.6 has generated the complete source mirror and proven it in a
-disposable database. Later gates may consume the sealed dictionary, generated
-DDL, importable provenance contract, and verifier evidence but may not change
-source science, profiles, values, or mappings without new authorization.
+Handoff: Gate 3.7 has retained the persistent seven-master mirror, exact
+read-only analyst role, and ignored handoff. Later gates may consume the sealed
+dictionary, generated DDL, persistent target, and verifier evidence but may
+not change source science, profiles, values, mappings, or load supplements,
+spec-z, or provenance without their own authorization.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
 2. Preserve the frozen structural, semantic, profile, null-state, sentinel,
    generated DDL, and provenance contracts during later extraction/load work.
+3. Add direct SCRAM HBA coverage for `cosmos2025_v11_ro` from ML01 and reload
+   PostgreSQL configuration as an operator infrastructure action; then test
+   direct analyst authentication without changing the retained handoff.
+4. Use guarded `--finalize-admin`, not a seven-table reimport, if a future
+   post-seal administration failure leaves the exact database retained with
+   role/handoff absent.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->
