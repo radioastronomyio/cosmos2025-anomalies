@@ -4,7 +4,7 @@ title: "Repository Test Suites"
 description: "Discriminating tests for v1.1 provenance and ETL structural contracts"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-17"
-version: "3.7"
+version: "3.8"
 status: "Active"
 tags:
   - type: directory-readme
@@ -210,6 +210,35 @@ and canonical key/reference/CHECK definitions, reject same-named cardinality
 drift and dangling handoff symlinks, remove exact-inode partial handoffs after
 interrupted `fsync`, redact unexpected CLI exception text in all three modes,
 and execute the immutable DDL bytes returned by identity review.
+
+## Supplement and spec-z loading
+
+`test_load_supplements_v11.py` proves the Gate 3.8 boundary without mutating
+the persistent catalog:
+
+- exact config/dictionary selection of 54 native fields and no metadata;
+- bounded FITS/text COPY conversion with finite sentinels preserved;
+- per-table source pin/count transactions and preflight-zero guards;
+- complete spec-z flags, sourced definitions, `{3,4}`/`{9}` summaries, and
+  reported nonmaterialized primary join;
+- exact four-table SELECT grants plus four positive and twenty-four negative
+  analyst operations, including deterministic ADMIN OPTION denial;
+- pre-seal row cleanup versus post-seal row retention and selective grant
+  reversal;
+- source-free `--finalize-admin` orchestration with no COPY or TRUNCATE path;
+- exact retained schema/null/sentinel/flag/join/master/provenance/v1 checks;
+- fixed-path/config-bound handoff security and CLI error redaction.
+
+```bash
+pytest tests/test_load_supplements_v11.py -v
+```
+
+Authenticated proof uses only random disposable PostgreSQL databases. The
+production-function failure/resume proof loads all four pinned sources,
+injects a post-seal analyst failure, retains every row, revokes only four
+scratch-applied grants, and completes source-free finalization before exact
+scratch cleanup. Persistent loading and verify-only are separate operator
+commands and are never invoked by the repository suite.
 
 ## Manifest validator
 

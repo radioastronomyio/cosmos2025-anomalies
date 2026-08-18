@@ -794,6 +794,100 @@ and exit zero. No second full run was started. Gate 3.7 is sealed by the one
 local `gate 3.7:` commit containing this checkpoint; its SHA is recorded in the
 ignored task report and operator handoff.
 
+### Gate 3.8 supplements and spec-z
+
+Gate 3.8 added `load_supplements_v11.py` and loaded the four dictionary-native
+supplement/spec-z mirrors without touching the seven master tables or
+provenance. The authoritative successful internal preflight proved exact
+schema/nullability/constraint identity, all master count/ordinal/ID/FK
+invariants, four target tables plus provenance at zero, the exact role and
+mode-0600 config-bound handoff, unchanged v1 fingerprint, and fresh equality
+for all four Gate 3.5 source pins.
+
+| Table | Rows | Columns | Source bytes | Source SHA-256 |
+|-------|-----:|--------:|-------------:|---------------|
+| `lss_overdensity` | 164,155 | 4 | 289,091,520 | `c8944f0250e1fc59f8905d016f10ba1da484a2a2ea30f655cd436c99aeaa4829` |
+| `galaxy_groups` | 1,678 | 14 | 243,453 | `c94a9ac4078b7078961712d263ad1c97e8e031aecab60324b1a10b3ce2b5521a` |
+| `galaxy_group_memberships` | 1,745,652 | 4 | 69,826,118 | `c66b3a4657d0e152314efc8328fa59fe3d9f8fc7d15badac39ecdd15211fad77` |
+| `specz_compilation` | 261,975 | 32 | 70,223,040 | `6ffd1145ed9caeba6c16f8e4267415682562b1a37549ac07a070ba5eb6336e99` |
+
+Every physical source count/column boundary reconciled to its sealed profile.
+Every native field loaded exactly once, with no project metadata. Finite
+sentinels stayed finite and all nineteen spec-z sentinel assertions passed.
+The three supplement versions were captured as
+`v1-release-on-v1.1-holdings` evidence for Gate 3.9, but
+`source.provenance` remains zero rows.
+
+The complete spec-z quality distribution is `-99:67`, `-2:1`, `-1:1794`,
+`0:24594`, `1:18526`, `2:27013`, `3:7217`, `4:176004`, `5:2`, `6:3`,
+`9:2326`, `10:12`, `11:17`, `12:43`, `13:59`, `14:4269`, and `19:28`.
+Flags 3 and 4 total 183,221; flag 9 totals 2,326. No filter or secure label was
+applied. Exact definitions remain cited from the pinned spec-z README.
+
+The nonmaterialized primary/spec-z join returns 24,364 distinct primary rows,
+12,855 below the 37,219 live-side prior. The discrepancy is recorded without
+reconciliation and no view/table was created. The pinned Toni contract does
+not define memberships `ID` as a group foreign key, so the conditional
+anti-join is not applicable.
+
+Analyst verification used the operator-approved clusteradmin transport with
+session authorization. The four new SELECT checks passed. Twenty-four
+per-table write/DDL/grant probes and the unchanged eleven-operation master
+matrix all returned `42501`; role attributes, SCRAM presence, zero
+memberships/ownership, and exact ACLs passed. Direct analyst network
+authentication was not exercised. The post-run SCRAM HBA correction remains
+an operator action and this gate did not change or reload HBA.
+
+Two persistent attempts occurred:
+
+| Attempt | Result | Recovery |
+|---------|--------|----------|
+| 1 | Four tables, grants, and admin verification passed; analyst verification failed because PostgreSQL treated table-to-PUBLIC GRANT as a warning/no-op | The old lifecycle reversed all four tables; exact zero state and v1 identity were confirmed |
+| 2 | Internal preflight, four commits, grants, admin verification, 4/24 supplement matrix, 1/11 master matrix, and v1 identity passed | None; all rows retained |
+
+The first reversal repeated the policy mistake the operator had corrected in
+Gate 3.7: good data was discarded for a post-load verifier defect, causing
+avoidable wall time and NVMe work. The operator prohibited another reload
+after a sealed failure and approved an explicit Gate 3.8 phase-aware design.
+
+Strict RED/GREEN and a real PostgreSQL reproduction showed INSERT, UPDATE,
+DELETE, TRUNCATE, and ALTER returned `42501`, while every old
+`GRANT SELECT ... TO PUBLIC` probe warning/no-op passed. The deterministic
+replacement attempts an unauthorized admin-role membership GRANT requiring
+ADMIN OPTION. The production scratch matrix then passed 4/24.
+
+The lifecycle now seals after all four exact committed/count/pin-validated
+loads. Pre-seal failures truncate only this gate's tables proven zero at
+preflight. Post-seal failures retain all four and revoke only SELECT grants
+proven absent before the run; pre-existing Gate 3.7 grants are never claimed.
+The guarded `--finalize-admin` path requires exact retained schema, counts,
+NULLs, sentinels, flags, join, masters, provenance zero, role/handoff security,
+and v1 identity while calling no source, COPY, or TRUNCATE path.
+
+A disposable production proof loaded all four real sources, applied four
+scratch-only grants, injected a post-seal analyst failure, confirmed all
+2,173,460 rows retained and the four grants revoked, and successfully ran
+finalization with `source_reads=0`, `copy_operations=0`, and
+`truncate_operations=0`. The 4/24 analyst matrix passed and scratch absence
+was exact. Independent review required and then approved exact source/profile
+counts, retained nullability/constraint definitions, per-table ACL/negative
+checks, commit-window-safe seal tracking, selective grant reversal, source-free
+resume, and fixed-path/host/port/secret-separated handoff validation.
+
+The successful load returned exit zero in 19.92 seconds with 280,544 KiB
+maximum RSS. Separate verify-only returned status passed in 3.75 seconds with
+269,356 KiB maximum RSS. Both preserved provenance zero and v1 SHA-256
+`82fb7e09f21253f2e9b78e8232c43b737008aa4bfb44daf28640463bea82abe7`.
+Focused Gate 3.8 verification returned `30 passed`; cumulative schema/security
+verification returned `114 passed`. Ruff, format, and diff checks passed.
+The single efficient near-full suite returned `208 passed, 1 deselected in
+120.48s (0:02:00)` with 2:00.99 wall time, 1,175,308 KiB maximum RSS, zero
+swap, and exit zero. The sole deselection was
+`test_default_check_reproduces_tracked_dictionary_byte_identical`, the
+intentional approximately 36-minute live profile/byte-reproduction test. No
+other test was excluded and no second near-full run was started. The one local
+`gate 3.8:` commit seals this checkpoint.
+
 ---
 
 ## 2. Files Changed
@@ -817,6 +911,7 @@ ignored task report and operator handoff.
 | [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Added the generated-only eleven-mirror plus provenance SQL artifact |
 | [src/etl/verify_schema_v11_scratch.py](../src/etl/verify_schema_v11_scratch.py) | Added the prefix-guarded disposable database verifier and mutations |
 | [src/etl/bootstrap_v11.py](../src/etl/bootstrap_v11.py) | Added the guarded persistent master bootstrap, phase-aware exact reversal/finalization, analyst role/handoff, admin-session security checks, and verify-only mode |
+| [src/etl/load_supplements_v11.py](../src/etl/load_supplements_v11.py) | Added guarded Gate 3.8 streaming loads, phase-aware row/grant recovery, source-free finalization, full admin/analyst verification, and verify-only mode |
 | [tests/test_load_dictionary.py](../tests/test_load_dictionary.py) | Added discriminating unit, mutation, live integration, and artifact tests |
 | [tests/test_load_dictionary_semantics.py](../tests/test_load_dictionary_semantics.py) | Added Gate 3.2 canonicalization, provenance, asymmetry, mutation, unit, semantic-note, and serialization tests |
 | [tests/test_profile_values.py](../tests/test_profile_values.py) | Added Gate 3.3 profile, candidate, evidence, artifact, CLI, and report tests |
@@ -825,6 +920,7 @@ ignored task report and operator handoff.
 | [tests/test_generate_schema_v11.py](../tests/test_generate_schema_v11.py) | Added Gate 3.6 generated DDL, constraint, comment, and byte-drift tests |
 | [tests/test_verify_schema_v11_scratch.py](../tests/test_verify_schema_v11_scratch.py) | Added unauthenticated scratch guards and conformance mutations |
 | [tests/test_bootstrap_v11.py](../tests/test_bootstrap_v11.py) | Added Gate 3.7 conversion, COPY, guards, fingerprint, role, handoff, verifier-query, diagnostics, and entrypoint regressions |
+| [tests/test_load_supplements_v11.py](../tests/test_load_supplements_v11.py) | Added Gate 3.8 source/COPY, count/flag/join, ACL/matrix, sealed lifecycle, resume, redaction, and orchestration regressions |
 | [tests/README.md](../tests/README.md) | Documented the dictionary, profiler, seal, manifest, fidelity, DDL, and scratch suites |
 | [work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md](2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md) | Created this per-gate checkpoint log |
 
@@ -848,6 +944,9 @@ ignored task report and operator handoff.
 | Four post-load verifier-code defects appeared only after seven long transactional loads had passed | Reproduced each defect in disposable PostgreSQL, added strict RED/GREEN regressions, reversed only resources owned by each run, and retained v1 identity; the final attempt passed |
 | Blanket rollback caused full table reimports after data had already passed | Operator approved and Gate 3.7 implemented a seven-load seal, phase-aware cleanup, and guarded source-free `--finalize-admin` resume; repeated full imports are no longer the recovery path |
 | Independent closeout review found five schema, handoff, guard, diagnostic, and DDL-buffer gaps | Added seven RED/GREEN cases, real PostgreSQL drift mutations, exact-inode cleanup, and immutable-buffer execution; independent re-review reported no blockers |
+| Gate 3.8 table-to-PUBLIC GRANT probes returned PostgreSQL warnings/no-ops instead of deterministic privilege denials | Reproduced all four in disposable PostgreSQL, replaced them with role-membership GRANT probes requiring ADMIN OPTION, and passed the production 4/24 matrix |
+| The first Gate 3.8 post-load analyst-verifier defect triggered another blanket four-table reversal | Recorded the repeated operator-corrected policy mistake; added a four-load seal, post-seal row retention, selective new-grant reversal, and source-free `--finalize-admin`; only one later import was authorized and it passed |
+| Gate 3.8 independent review found source/profile, exact-schema, ACL, commit-window, resume, and handoff-security gaps | Added strict RED/GREEN coverage, complete retained validation, context-exit-safe seal tracking, config-bound handoff checks, and a real failure/retain/resume scratch proof; final review approved |
 | Repository-wide Ruff reports fifteen errors in unchanged Phase 1/inspection files | Preserved unrelated base code; focused Ruff and format checks for both Gate 3.5 Python files pass |
 | The repository-wide frontmatter checker reports four violations already present at base `fa262ff`: two invalid tags in an unchanged recycle-bin document and raw-YAML frontmatter in the P2R-02 and cumulative P2R-03 worklogs | Preserved the mandated central lifecycle worklog template; all six changed/new HTML-comment Markdown files pass individually |
 
@@ -855,11 +954,12 @@ ignored task report and operator handoff.
 
 ## 4. Next Steps
 
-Handoff: Gate 3.7 has retained the persistent seven-master mirror, exact
-read-only analyst role, and ignored handoff. Later gates may consume the sealed
+Handoff: Gate 3.8 has retained the persistent seven-master plus four
+supplement/spec-z mirrors, exact read-only analyst role, and ignored handoff.
+Provenance remains empty for Gate 3.9. Later gates may consume the sealed
 dictionary, generated DDL, persistent target, and verifier evidence but may
-not change source science, profiles, values, mappings, or load supplements,
-spec-z, or provenance without their own authorization.
+not change source science, profiles, values, mappings, or provenance without
+their own authorization.
 
 1. Register the `ml01/dev` versus stale `ml01/prd` documentation defect at the
    spec-authorized defect-registration gate.
@@ -868,8 +968,8 @@ spec-z, or provenance without their own authorization.
 3. Add direct SCRAM HBA coverage for `cosmos2025_v11_ro` from ML01 and reload
    PostgreSQL configuration as an operator infrastructure action; then test
    direct analyst authentication without changing the retained handoff.
-4. Use guarded `--finalize-admin`, not a seven-table reimport, if a future
-   post-seal administration failure leaves the exact database retained with
-   role/handoff absent.
+4. Use the applicable guarded `--finalize-admin`, never a master or supplement
+   reimport, after a post-seal administration failure leaves exact loaded data
+   retained.
 
 <!-- Agent: codex, Runtime: Codex API, Model: unreported, Session: interactive -->

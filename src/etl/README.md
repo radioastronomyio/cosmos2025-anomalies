@@ -4,7 +4,7 @@ title: "ETL Pipeline"
 description: "COSMOS-Web catalog extraction, load-dictionary, and verification scripts"
 author: "VintageDon"
 date: "2026-04-05"
-version: "1.7"
+version: "1.8"
 status: "Active"
 tags:
   - type: directory-readme
@@ -30,6 +30,7 @@ FITS-to-PostgreSQL pipeline for the COSMOS-Web DR1 master catalog. Phase 1 is co
 | `schema_v11.sql` | Generated-only Gate 3.6 DDL for eleven source mirrors plus the fixed provenance table; never edit this artifact directly |
 | `verify_schema_v11_scratch.py` | Creates one random prefix-scoped scratch database, verifies catalogs/comments/constraints and mutations, and drops it in `finally` |
 | `bootstrap_v11.py` | Performs the guarded, one-time Gate 3.7 master bootstrap and separate post-load verification for `cosmos2025_v11` |
+| `load_supplements_v11.py` | Streams and verifies the four Gate 3.8 supplement/spec-z mirrors and supports source-free post-seal administration resume |
 | `extract_catalog.py` | Main ETL script. Reads 8.4GB FITS (6 extensions), extracts 4 parquet files, loads into PostgreSQL via COPY FROM |
 | `verify_catalog.py` | Post-ETL verification. Runs 13 check sections (row counts, sentinel residuals, unit validation, O1 readiness), writes Markdown + HTML reports with embedded charts |
 | `create_schema.sql` | DDL for the `catalog` schema. Creates all 7 tables with correct column types, constraints, and indexes |
@@ -129,6 +130,44 @@ artifacts. Direct CLI failures preserve allowlisted lifecycle diagnostics but
 reduce unexpected failures to exception class and SQLSTATE. Create/load also
 executes the immutable DDL bytes returned by preflight identity review rather
 than reopening the path after review.
+
+---
+
+## Gate 3.8 supplements and spec-z
+
+The guarded load requires all four mirror tables and provenance to be empty,
+freshly pins the configured inputs, and streams only the 54 native dictionary
+fields. Each table commits independently. Provenance stays empty until Gate
+3.9.
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_supplements_v11.py --load
+```
+
+The lifecycle seals after all four committed counts and pins validate.
+Pre-seal failure truncates only this gate's preflight-zero cleanup candidates.
+Post-seal administration or verifier failure retains all four tables and
+revokes only SELECT grants proven absent before the run. Resume that exact
+retained state without source reads, COPY, or TRUNCATE:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_supplements_v11.py --finalize-admin
+```
+
+Run the separate source-pinned, read-only verification after successful load
+or finalization:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_supplements_v11.py --verify-only
+```
+
+Analyst checks use the operator-approved admin connection with session
+authorization. Four supplement SELECTs and twenty-four per-table write/DDL/
+grant denials extend the unchanged Gate 3.7 matrix. Direct analyst HBA access
+from ML01 remains an operator infrastructure action and is not claimed.
 
 ---
 
