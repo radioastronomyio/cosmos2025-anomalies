@@ -255,3 +255,25 @@ It now asserts presence-plus-identity (both sealed databases and the role
 present and unchanged across the run), and the summary keys report
 `sealed_databases_unchanged`/`analyst_role_unchanged`. Gate 4.3 commit: see
 SHA table at close.
+
+### Gate 4.4 — Rename and re-verify the galaxy-level table
+
+`doppler run --project ml01 --config dev -- python
+src/etl/rename_specz_unique_v11.py --rename` executed one transaction
+(ALTER TABLE RENAME plus exactly one provenance `table_name` UPDATE) and
+re-verified in the same run; `--verify-only` re-verifies the post state
+repeatably (comments compared against the dictionary-generated contract).
+
+| Check | Result |
+|---|---|
+| `source.specz_compilation` exists | No |
+| `source.specz_compilation_unique` row count | 261,975, equal to provenance before and after |
+| Seeded row-level digest (seed modulus 977, offset 3; 269 sampled rows) | identical before/after (`a40bb411c768ae047e6005ecd534287e`) |
+| Column comments | 32 survive; full comparison against pre-rename values and, on re-verify, against the dictionary contract — zero differences |
+| Constraints | preserved (the table carries none by contract) |
+| Provenance row | `table_name` updated; every other field unchanged (field-exact diff) |
+| Analyst SELECT | effective through session authorization: 261,975 rows |
+| Other relations | no name, owner, or row-count change; all ten others agree with provenance |
+| Live inventory | 12 relations, zero views, owner `clusteradmin_pg01` throughout |
+
+Gate 4.4 commit: see SHA table at close.

@@ -169,7 +169,7 @@ def _seeded_digest(connection: psycopg.Connection, table: str) -> dict[str, obje
             "SELECT count(*), md5(coalesce(string_agg(md5(s.txt), '' "
             "ORDER BY s.rn), '')) FROM (SELECT t::text AS txt, "
             "row_number() OVER (ORDER BY t.ctid) AS rn FROM {}.{} t) s "
-            "WHERE s.rn % %(modulus)s = %(offset)s"
+            "WHERE s.rn %% %(modulus)s = %(offset)s"
         ).format(sql.Identifier("source"), sql.Identifier(table)),
         {"modulus": DIGEST_MODULUS, "offset": DIGEST_OFFSET},
     ).fetchone()

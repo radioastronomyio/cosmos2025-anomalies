@@ -107,7 +107,7 @@ def _seeded_digest(connection: psycopg.Connection, table: str) -> dict[str, obje
             "SELECT count(*), md5(coalesce(string_agg(md5(s.txt), '' "
             "ORDER BY s.rn), '')) FROM (SELECT t::text AS txt, "
             "row_number() OVER (ORDER BY t.ctid) AS rn FROM {}.{} t) s "
-            "WHERE s.rn % %(modulus)s = %(offset)s"
+            "WHERE s.rn %% %(modulus)s = %(offset)s"
         ).format(sql.Identifier("source"), sql.Identifier(table)),
         {"modulus": DIGEST_MODULUS, "offset": DIGEST_OFFSET},
     ).fetchone()
@@ -308,6 +308,61 @@ def _verify_after(
 # =============================================================================
 
 
+def _verify_post_state(
+    connection: psycopg.Connection, settings: bootstrap_v11.Settings
+) -> dict[str, object]:
+    """Repeatably verify the post-rename state without any before-capture."""
+    names = {name for name, _, _ in _relations(connection)}
+    if OLD_TABLE in names:
+        raise SystemExit(f"verify FAILED: {OLD_TABLE} still exists")
+    if NEW_TABLE not in names:
+        raise SystemExit(f"verify FAILED: {NEW_TABLE} absent")
+    if _provenance_row(connection, OLD_TABLE) is not None:
+        raise SystemExit(f"verify FAILED: stale provenance row for {OLD_TABLE}")
+    provenance = _provenance_row(connection, NEW_TABLE)
+    if provenance is None:
+        raise SystemExit(f"verify FAILED: no provenance row for {NEW_TABLE}")
+    row_count = _row_count(connection, NEW_TABLE)
+    if row_count != int(provenance["loaded_rows"]):
+        raise SystemExit(
+            f"verify FAILED: row count {row_count} != provenance "
+            f"{provenance['loaded_rows']}"
+        )
+    rows = bootstrap_v11._read_dictionary(settings)
+    expected_comments = {
+        item.column: item.text
+        for item in generate_schema_v11.column_comment_contract(rows)
+        if item.table == NEW_TABLE
+    }
+    live_comments = dict(_column_comments(connection, NEW_TABLE))
+    if live_comments != expected_comments:
+        raise SystemExit("verify FAILED: comments differ from dictionary contract")
+    constraints = _constraints(connection, NEW_TABLE)
+    analyst_count = _analyst_select(connection, settings, NEW_TABLE)
+    if analyst_count != row_count:
+        raise SystemExit(
+            f"verify FAILED: analyst SELECT returned {analyst_count} != {row_count}"
+        )
+    for table in PROTECTED_TABLES:
+        if table in {OLD_TABLE, NEW_TABLE, "provenance"}:
+            continue
+        row = _provenance_row(connection, table)
+        if row is None or _row_count(connection, table) != int(row["loaded_rows"]):
+            raise SystemExit(f"verify FAILED: {table} disagrees with provenance")
+    connection.rollback()
+    return {
+        "renamed_to": NEW_TABLE,
+        "row_count": row_count,
+        "digest": _seeded_digest(connection, NEW_TABLE),
+        "comment_count": len(live_comments),
+        "comments_match_dictionary": True,
+        "constraints": [name for name, _ in constraints],
+        "provenance_table_name": provenance["table_name"],
+        "analyst_select_rows": analyst_count,
+        "other_relations_match_provenance": True,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=bootstrap_v11.DEFAULT_CONFIG_PATH)
@@ -319,8 +374,10 @@ def main() -> None:
 
     settings = bootstrap_v11.resolve_settings(args.config)
     with bootstrap_v11._connect(settings, settings.target_database) as connection:
-        before = _capture_before(connection)
-        if args.rename:
+        if args.verify_only:
+            evidence = _verify_post_state(connection, settings)
+        else:
+            before = _capture_before(connection)
             connection.execute(
                 sql.SQL("ALTER TABLE {}.{} RENAME TO {}").format(
                     sql.Identifier("source"),
@@ -339,7 +396,7 @@ def main() -> None:
                 connection.rollback()
                 raise SystemExit(f"rename FAILED: {updated} provenance rows updated")
             connection.commit()
-        evidence = _verify_after(connection, before, settings)
+            evidence = _verify_after(connection, before, settings)
     print(json.dumps(evidence, indent=2, default=str))
 
 
