@@ -343,3 +343,62 @@ SQLSTATE 42501 across masters, supplements, and provenance); v1 fingerprint
 unchanged (`82fb7e09...`); handoff security intact; direct analyst network
 authentication remains a pending operator action and is not claimed.
 Gate 4.6 commit: see SHA table at close.
+
+### Gate 4.7 — Characterize the linkage, decide nothing
+
+Committed read-only script `src/etl/characterize_specz_linkage_v11.py`; full
+per-source enumeration in
+`staging/specz-linkage-g47-characterization.json`. The script re-reads the
+sealed mirror fresh (two read-only connections) and consumes no staging
+state. Post-state verified after the run: zero `source` views or materialized
+views, no `analysis` schema, twelve provenance rows, zero rows written.
+
+Corrected path (both surfaces via `Id_COSMOS25`): 45,007 galaxy-level and
+46,039 measurement-level distinct catalog sources; galaxy-level is a subset of
+measurement-level. Galaxy multiplicity: 44,822×1, 184×2, 1×3. Measurement
+multiplicity: 25,430 singletons; 21 distinct multiplicities up to 25 entries
+on one source (DESI repeats). Usable-redshift rule stated explicitly as
+finite `specz > -90` with no confidence threshold: 39,165 galaxy-level
+sources; by the compilation's own confidence value: -99→1, 0→732, 50→9,021,
+80→7,430, 85→1,358, 95→4,201, 97→16,498.
+
+Recovery population A (measurement-only catalog sources): 1,032 sources over
+1,559 entries, every entry `Priority = 0` (verified, not assumed). Entries per
+source: 716×1, 213×2, 58×3, ..., 2×12. Entry-to-catalog separation: median
+0.130", p90 0.380", max 0.982" — these are real sub-arcsecond crossmatches.
+Confidence distribution across entries: 0→415, 50→387, 80→303, 85→80, 95→157,
+97→217. Representative destination (nearest `Priority = 1` entry by
+corrected-coordinate separation within 5", a compilation self-crossmatch):
+found for 694; **every one of the 694 names a different catalog source** (0
+name the same source), at entry-to-representative separation median 0.873"
+(max 4.98") and catalog-source-to-destination separation median 1.167", p90
+4.143", max 5.756". 338 sources have no `Priority = 1` entry within 5" of any
+of their entries. **The neighbour-promotion hypothesis is supported by the
+measurement for the 694**: the deduplication's chosen representative for the
+same spectroscopic source was attached to a neighbouring catalog source
+1-6 arcsec away, so the demoted entry's source lost its galaxy-level row. It
+is not supported as a complete account: the 338 without a nearby
+representative need a separate explanation the evidence does not determine.
+
+Recovery population B (multiply-named galaxy sources): 185 sources over 371
+entries (184 pairs, 1 triple). Per-source tables carry each entry's redshift,
+flag, confidence, survey, and separation (median 0.202", max 0.977"). Redshift
+rule: sentinels excluded by finite `specz > -90`, 58 entries excluded, no
+arbitrary duplicate selection — per-group reporting. 132 groups carry two or
+more usable redshifts; 75 agree within |Δz| ≤ 0.005; median max-|Δz| 0.0028,
+p90 0.832, max 4.105 — a real disagreement tail the policy unit must own.
+
+Selection function of `id_specz_khostovan25` (resolving = distinct
+non-sentinel value present in galaxy-level `Id_specz`): 24,364 of 37,219
+flagged sources resolve; 12,855 do not. Treated as a boolean flag against the
+corrected path — against the galaxy-level surface: TP 34,157, FP 3,062, FN
+10,850, precision 0.9177, recall 0.7589 (positive denominator 45,007 =
+galaxy-level-reachable sources); against the measurement-level surface: TP
+34,841, FP 2,378, FN 11,198, precision 0.9361, recall 0.7568 (positive
+denominator 46,039). Full corrected-path-attached galaxy-entry flag and
+confidence distributions reported for both buckets (not means): resolving
+sources' entries carry confidence 97→8,693, 95→2,711, 80→3,167, 50→2,719,
+0→3,778; non-resolving sources' entries carry 97→5,915, 95→1,033, 80→1,845,
+50→1,484, 0→1,743. Flagged sources with no corrected-path galaxy entry at
+all: 2,760 resolving, 302 non-resolving. Every figure above names the surface
+it was computed against. Gate 4.7 commit: see SHA table at close.
