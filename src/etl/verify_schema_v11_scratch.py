@@ -502,7 +502,7 @@ def _removed_row_mutation(
     except ValueError as exc:
         diagnostic = str(exc)
         connection.rollback()
-        if "expected 1416, observed 1415" not in diagnostic:
+        if "expected 1448, observed 1447" not in diagnostic:
             raise ValueError("removed-row mutation had unexpected diagnostic") from exc
         return diagnostic
     connection.rollback()

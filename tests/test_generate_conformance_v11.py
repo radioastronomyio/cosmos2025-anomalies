@@ -90,16 +90,16 @@ def test_generator_emits_one_case_per_sealed_dictionary_row() -> None:
     module = _module()
     cases = module.generate_cases(_rows())
 
-    assert len(cases) == 1_416
-    assert len({case["case_id"] for case in cases}) == 1_416
+    assert len(cases) == 1_448
+    assert len({case["case_id"] for case in cases}) == 1_448
     assert Counter(case["case_group"] for case in cases) == {
         "master_native": 1_349,
         "supplement_native": 22,
-        "specz_native": 32,
+        "specz_native": 64,
         "metadata": 13,
     }
     assert Counter(case["column_origin"] for case in cases) == {
-        "source_native": 1_403,
+        "source_native": 1_435,
         "source_row_metadata": 7,
         "id_injected": 6,
     }
@@ -196,13 +196,13 @@ def test_generated_module_is_explicit_importable_and_byte_checked(
     namespace: dict[str, object] = {}
     exec(compile(generated, "conformance_cases_v11.py", "exec"), namespace)
 
-    assert len(namespace["CASES"]) == 1_416
+    assert len(namespace["CASES"]) == 1_448
     assert namespace["CASE_COUNTS"] == {
         "master_native": 1_349,
         "supplement_native": 22,
-        "specz_native": 32,
+        "specz_native": 64,
         "metadata": 13,
-        "native_total": 1_403,
+        "native_total": 1_435,
         "array": 166,
     }
     output = tmp_path / "conformance_cases_v11.py"

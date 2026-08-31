@@ -165,12 +165,12 @@ def test_sealed_column_comparison_is_bidirectional_and_ordered() -> None:
     """A missing, extra, reordered, or remapped column must fail conformance."""
     module = _module()
     expected = module.expected_mirror_columns(_rows())
-    assert len(expected) == 1_416
+    assert len(expected) == 1_448
     module.compare_mirror_columns(expected, expected)
 
     mutations = {
         "removed": expected[:-1],
-        "extra": expected + (("specz_compilation", "invented", "text", 33),),
+        "extra": expected + (("specz_compilation_unique", "invented", "text", 33),),
         "reordered": expected[:-2] + (expected[-1], expected[-2]),
         "remapped": expected[:-1]
         + ((expected[-1][0], expected[-1][1], "text", expected[-1][3]),),
@@ -186,7 +186,7 @@ def test_one_row_removed_dictionary_mutation_cannot_pass_conformance() -> None:
     module = _module()
     sealed = module.expected_mirror_columns(_rows())
     one_row_removed = sealed[:-1]
-    with pytest.raises(ValueError, match="expected 1416, observed 1415"):
+    with pytest.raises(ValueError, match="expected 1448, observed 1447"):
         module.compare_mirror_columns(sealed, one_row_removed)
 
 

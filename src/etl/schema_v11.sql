@@ -1603,7 +1603,7 @@ CREATE TABLE "source"."galaxy_group_memberships" (
     "assoc_prob" double precision
 );
 
-CREATE TABLE "source"."specz_compilation" (
+CREATE TABLE "source"."specz_compilation_unique" (
     "id_specz" bigint,
     "id_original" text,
     "ra_original" double precision,
@@ -1636,6 +1636,42 @@ CREATE TABLE "source"."specz_compilation" (
     "photoz_type" bigint,
     "groupid" bigint,
     "groupsize" bigint
+);
+
+CREATE TABLE "source"."specz_compilation_all" (
+    "id_specz" bigint,
+    "id_original" text,
+    "ra_original" double precision,
+    "dec_original" double precision,
+    "ra_corrected" double precision,
+    "dec_corrected" double precision,
+    "priority" bigint,
+    "specz" double precision,
+    "flag" bigint,
+    "confidence_level" bigint,
+    "survey" bigint,
+    "compilation_year" bigint,
+    "public_or_private" bigint,
+    "id_cos20_classic" bigint,
+    "ra_cos20_classic" double precision,
+    "dec_cos20_classic" double precision,
+    "id_cos20_farmer" bigint,
+    "ra_cos20_farmer" double precision,
+    "dec_cos20_farmer" double precision,
+    "id_cosmos25" bigint,
+    "ra_cosmos25" double precision,
+    "dec_cosmos25" double precision,
+    "id_cosmos15" bigint,
+    "ra_cosmos15" double precision,
+    "dec_cosmos15" double precision,
+    "id_cosmos09" bigint,
+    "ra_cosmos09" double precision,
+    "dec_cosmos09" double precision,
+    "photoz" double precision,
+    "photoz_type" bigint,
+    "groupid" bigint,
+    "groupsize" bigint,
+    CONSTRAINT "specz_compilation_all_id_specz_primary_key_bdebedbae09f" PRIMARY KEY ("id_specz")
 );
 
 CREATE TABLE "source"."provenance" (
@@ -1695,8 +1731,8 @@ Description status: verified
 Description provenance: source=/mnt/nvme01/cosmos-web-dr1-catalog/cosmosweb-dr1-detailed-column-descriptions.txt; locator=section 1, line 36, Description; sha256=3e7dde1db9d541ce8593b12cbf0690130422e746ce7db78cc238f27ed724366b
 Unit: unknown
 Unit provenance: [not applicable]
-Semantic note: [not documented]
-Semantic-note provenance: [not applicable]
+Semantic note: Does not resolve against the held DR1.1 spec-z compilation: 24,364 of 37,219 distinct non-sentinel values resolve by Id_specz, with a field-scale median separation of 4,467.3 arcsec and stored values spanning 223-165,312 against Id_specz 1-487,666. Join through specz Id_COSMOS25 instead. Mirrored as shipped; no repair. Evidence: gate 4.1 command src/etl/verify_specz_linkage_v11.py; review surface docs/research/specz-linkage-evidence.md.
+Semantic-note provenance: source=/opt/agents/repos/cosmos2025-anomalies/src/etl/verify_specz_linkage_v11.py; locator=PRIORS contract and main() establishments 3-4 (defective-path geometry; value-range incompatibility); sha256=46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":165312,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":784016,"non_null_fraction":1.0,"row_count":784016,"top_values":[{"count":746797,"value":-999},{"count":1,"value":223},{"count":1,"value":224}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[-999]; evidence=Unique ID of the source corresponding to the Id_specz of the Khostovan et al. (2025) spec-z compilation. -999 if no specz match; provenance=source=/mnt/nvme01/cosmos-web-dr1-catalog/cosmosweb-dr1-detailed-column-descriptions.txt; locator=section 1, line 36, Description; sha256=3e7dde1db9d541ce8593b12cbf0690130422e746ce7db78cc238f27ed724366b
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
@@ -15500,7 +15536,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":0.99904734,"finite_min":0.0050000055,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":1745652,"non_null_fraction":1.0,"row_count":1745652,"top_values":[{"count":4,"value":0.0050018635},{"count":4,"value":0.0050740885},{"count":4,"value":0.0054967846}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_specz" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_specz" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15510,7 +15546,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":487664,"finite_min":3,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":1,"value":3},{"count":1,"value":4},{"count":1,"value":8}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_original" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_original" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15520,7 +15556,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"text","profiles":[{"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":2637,"value":"hyperion_peak2n3n7_0"},{"count":1610,"value":"hyperion_peak4n5n6_0"},{"count":538,"value":"IMACS"}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_original" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_original" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15530,7 +15566,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":11,"value":150.00926},{"count":10,"value":149.87955},{"count":10,"value":149.99788}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_original" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_original" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15540,7 +15576,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":9,"value":2.28669},{"count":8,"value":1.52562},{"count":8,"value":1.95111}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_corrected" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_corrected" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15550,7 +15586,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":9,"value":149.92368},{"count":9,"value":149.95291},{"count":9,"value":150.00926}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_corrected" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_corrected" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15560,7 +15596,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":8,"value":1.52562},{"count":8,"value":2.07083},{"count":8,"value":2.33069}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."priority" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."priority" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15570,7 +15606,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":261975,"value":1}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."specz" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."specz" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15580,7 +15616,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":14.44,"finite_min":-999.98999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":24781,"value":-99.0},{"count":13344,"value":0.0},{"count":208,"value":1e-05}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":24781,"index":null,"non_null_fraction":0.0945929955148392,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."flag" IS 'Description: The quality assessment flag system that we adopt is based on a 0 - 4, 9 scale with an additional +10 for the case of broad line features identified within the 1D and 2D spectra. | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
+COMMENT ON COLUMN "source"."specz_compilation_unique"."flag" IS 'Description: The quality assessment flag system that we adopt is based on a 0 - 4, 9 scale with an additional +10 for the case of broad line features identified within the 1D and 2D spectra. | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
 Description status: verified
 Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality Assessment Flagging System, lines 60-70; sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23
 Unit: unknown
@@ -15590,7 +15626,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":19,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":176004,"value":4},{"count":27013,"value":2},{"count":24594,"value":0}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."confidence_level" IS 'Description: | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
+COMMENT ON COLUMN "source"."specz_compilation_unique"."confidence_level" IS 'Description: | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
 Description status: verified
 Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality Assessment Flagging System, lines 62-70; sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23
 Unit: unknown
@@ -15600,7 +15636,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":97,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":180273,"value":97},{"count":27056,"value":80},{"count":26456,"value":0}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."survey" IS 'Description: - `_surveys.list`: an ASCII file that contains the survey ID number assigned in the FITS files under the column `survey'', the survey name, a simple reference placeholder, status of the survey, contact information for PI, number of galaxies in the survey, and key statistics on the redshift distribution.
+COMMENT ON COLUMN "source"."specz_compilation_unique"."survey" IS 'Description: - `_surveys.list`: an ASCII file that contains the survey ID number assigned in the FITS files under the column `survey'', the survey name, a simple reference placeholder, status of the survey, contact information for PI, number of galaxies in the survey, and key statistics on the redshift distribution.
 Description status: verified
 Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md; locator=List of Surveys, line 6; sha256=43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1
 Unit: unknown
@@ -15610,7 +15646,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":138,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":161562,"value":38},{"count":39239,"value":37},{"count":12056,"value":115}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."compilation_year" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."compilation_year" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15620,7 +15656,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2025,"finite_min":2001,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":210699,"value":2025},{"count":12227,"value":2011},{"count":7735,"value":2018}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."public_or_private" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."public_or_private" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15630,7 +15666,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":261975,"value":1}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_cos20_classic" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_cos20_classic" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15640,7 +15676,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1720486,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":131910,"value":-999},{"count":1,"value":1},{"count":1,"value":9}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":131910,"index":null,"non_null_fraction":0.5035213283710278,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_cos20_classic" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_cos20_classic" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15650,7 +15686,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.0635824268984,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":131910,"value":-999.0},{"count":1,"value":149.05783409108687},{"count":1,"value":149.05785280515246}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":131910,"index":null,"non_null_fraction":0.5035213283710278,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_cos20_classic" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_cos20_classic" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15660,7 +15696,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.071570844554334,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":131910,"value":-999.0},{"count":1,"value":1.3915088563974352},{"count":1,"value":1.3915663757249135}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":131910,"index":null,"non_null_fraction":0.5035213283710278,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_cos20_farmer" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_cos20_farmer" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15670,7 +15706,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":964465,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":189993,"value":-999},{"count":2,"value":102208},{"count":2,"value":104178}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":189993,"index":null,"non_null_fraction":0.725233323790438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_cos20_farmer" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_cos20_farmer" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15680,7 +15716,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.81258839852458,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":189993,"value":-999.0},{"count":2,"value":149.23535372339538},{"count":2,"value":149.2593731556924}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":189993,"index":null,"non_null_fraction":0.725233323790438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_cos20_farmer" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_cos20_farmer" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15690,7 +15726,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.877324424410641,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":189993,"value":-999.0},{"count":2,"value":1.561332844563677},{"count":2,"value":1.6007928946428163}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":189993,"index":null,"non_null_fraction":0.725233323790438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_cosmos25" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_cosmos25" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15700,7 +15736,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":779168,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":216782,"value":-999},{"count":3,"value":437641},{"count":2,"value":4961}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":216782,"index":null,"non_null_fraction":0.8274911728218342,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_cosmos25" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_cosmos25" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15710,7 +15746,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.57824995549876,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":216782,"value":-999.0},{"count":3,"value":150.05884539595175},{"count":2,"value":149.70708011078503}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":216782,"index":null,"non_null_fraction":0.8274911728218342,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_cosmos25" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_cosmos25" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15720,7 +15756,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.6898572364212643,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":216782,"value":-999.0},{"count":3,"value":2.5503877643425414},{"count":2,"value":1.7713302094703263}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":216782,"index":null,"non_null_fraction":0.8274911728218342,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_cosmos15" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_cosmos15" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15730,7 +15766,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1180397,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":155128,"value":-999},{"count":3,"value":824807},{"count":2,"value":124830}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":155128,"index":null,"non_null_fraction":0.5921481057352801,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_cosmos15" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_cosmos15" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15740,7 +15776,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.88434729290955,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":155128,"value":-999.0},{"count":3,"value":150.05887829395266},{"count":2,"value":149.28639214247323}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":155128,"index":null,"non_null_fraction":0.5921481057352801,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_cosmos15" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_cosmos15" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15750,7 +15786,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.973945041414017,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":155128,"value":-999.0},{"count":3,"value":2.5503713011000326},{"count":2,"value":1.4767115595830347}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":155128,"index":null,"non_null_fraction":0.5921481057352801,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."id_cosmos09" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."id_cosmos09" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15760,7 +15796,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1993549,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":163540,"value":-999},{"count":2,"value":89567},{"count":2,"value":119107}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":163540,"index":null,"non_null_fraction":0.6242580398893024,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."ra_cosmos09" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."ra_cosmos09" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15770,7 +15806,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.82673,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":163540,"value":-999.0},{"count":9,"value":150.12679},{"count":8,"value":150.44459}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":163540,"index":null,"non_null_fraction":0.6242580398893024,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."dec_cosmos09" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."dec_cosmos09" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15780,7 +15816,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.912715,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":163540,"value":-999.0},{"count":4,"value":2.111876},{"count":4,"value":2.16661}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":163540,"index":null,"non_null_fraction":0.6242580398893024,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."photoz" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."photoz" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15790,7 +15826,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":99.9,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":130904,"value":-999.0},{"count":61438,"value":-99.0},{"count":2804,"value":99.9}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":130904,"index":null,"non_null_fraction":0.49968126729649776,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0},{"count":61438,"index":null,"non_null_fraction":0.2345185609313866,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]';
-COMMENT ON COLUMN "source"."specz_compilation"."photoz_type" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."photoz_type" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15800,7 +15836,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":130874,"value":-999},{"count":116163,"value":0},{"count":12003,"value":1}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":130874,"index":null,"non_null_fraction":0.4995667525527245,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
-COMMENT ON COLUMN "source"."specz_compilation"."groupid" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."groupid" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15810,7 +15846,7 @@ Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":487664,"finite_min":-1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":138664,"value":-1},{"count":3,"value":6006},{"count":3,"value":193576}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
-COMMENT ON COLUMN "source"."specz_compilation"."groupsize" IS 'Description: [undocumented upstream]
+COMMENT ON COLUMN "source"."specz_compilation_unique"."groupsize" IS 'Description: [undocumented upstream]
 Description status: undocumented_upstream
 Description provenance: [not applicable]
 Unit: unknown
@@ -15818,6 +15854,326 @@ Unit provenance: [not applicable]
 Semantic note: [not documented]
 Semantic-note provenance: [not applicable]
 Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":25,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":261975,"non_null_fraction":1.0,"row_count":261975,"top_values":[{"count":138664,"value":1},{"count":57506,"value":2},{"count":49592,"value":3}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_specz" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":487666,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":1,"value":1},{"count":1,"value":2},{"count":1,"value":3}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_original" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"text","profiles":[{"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":3240,"value":"hyperion_peak2n3n7_0"},{"count":2858,"value":"IMACS"},{"count":1949,"value":"hyperion_peak4n5n6_0"}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_original" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":26,"value":150.10352},{"count":26,"value":150.11028},{"count":25,"value":150.08521}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_original" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":26,"value":2.21493},{"count":22,"value":2.2097},{"count":21,"value":2.22759}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_corrected" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":25,"value":150.08922},{"count":23,"value":150.12215},{"count":23,"value":150.13698}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_corrected" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":28,"value":2.21492},{"count":22,"value":2.20969},{"count":21,"value":2.24381}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."priority" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":261975,"value":1},{"count":220604,"value":0}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."specz" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":14.44,"finite_min":-999.98999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":34665,"value":-99.0},{"count":27184,"value":0.0},{"count":520,"value":8e-05}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":34665,"index":null,"non_null_fraction":0.0718327983604757,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."flag" IS 'Description: The quality assessment flag system that we adopt is based on a 0 - 4, 9 scale with an additional +10 for the case of broad line features identified within the 1D and 2D spectra. | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
+Description status: verified
+Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality Assessment Flagging System, lines 60-70; sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":19,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":271323,"value":4},{"count":112143,"value":2},{"count":34290,"value":0}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."confidence_level" IS 'Description: | Quality Flag | Confidence Level (%) | Description | | ------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |
+Description status: verified
+Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality Assessment Flagging System, lines 62-70; sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":97,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281602,"value":97},{"count":112461,"value":80},{"count":37013,"value":0}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."survey" IS 'Description: - `_surveys.list`: an ASCII file that contains the survey ID number assigned in the FITS files under the column `survey'', the survey name, a simple reference placeholder, status of the survey, contact information for PI, number of galaxies in the survey, and key statistics on the redshift distribution.
+Description status: verified
+Description provenance: source=/opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md; locator=List of Surveys, line 6; sha256=43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":138,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":201445,"value":38},{"count":96255,"value":37},{"count":55327,"value":39}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."compilation_year" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2025,"finite_min":2001,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":311120,"value":2025},{"count":56615,"value":2023},{"count":30663,"value":2011}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."public_or_private" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":482579,"value":1}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_cos20_classic" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1720486,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999},{"count":25,"value":879094},{"count":22,"value":831115}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_cos20_classic" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":151.0635824268984,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999.0},{"count":25,"value":150.0893344059057},{"count":22,"value":150.08600501243833}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_cos20_classic" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":3.071570844554334,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999.0},{"count":25,"value":2.2475917823480653},{"count":22,"value":2.2096952629120867}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_cos20_farmer" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":964465,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999},{"count":22,"value":479297},{"count":20,"value":307999}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_cos20_farmer" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.81258839852458,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999.0},{"count":22,"value":150.17138750691578},{"count":20,"value":150.23004136728338}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_cos20_farmer" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.877324424410641,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999.0},{"count":22,"value":2.237925374184951},{"count":20,"value":2.39550659778136}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_cosmos25" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":779168,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999},{"count":25,"value":667180},{"count":22,"value":105410}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_cosmos25" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.57824995549876,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999.0},{"count":25,"value":150.089334990901},{"count":22,"value":150.08600529775592}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_cosmos25" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.6898572364212643,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999.0},{"count":25,"value":2.247593409319224},{"count":22,"value":2.209693190791956}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_cosmos15" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1180397,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999},{"count":25,"value":626034},{"count":22,"value":599254}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_cosmos15" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.88434729290955,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999.0},{"count":25,"value":150.08937609172278},{"count":22,"value":150.0860475211964}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_cosmos15" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.973945041414017,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999.0},{"count":25,"value":2.2476039867978406},{"count":22,"value":2.2097113721717387}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."id_cosmos09" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":1993549,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999},{"count":25,"value":1000527},{"count":22,"value":1001752}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."ra_cosmos09" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":150.82673,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999.0},{"count":36,"value":150.09586},{"count":30,"value":150.15022}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."dec_cosmos09" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2.912715,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999.0},{"count":25,"value":2.247612},{"count":23,"value":2.209735}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."photoz" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":99.9,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":225276,"value":-999.0},{"count":114946,"value":-99.0},{"count":10357,"value":99.9}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":225276,"index":null,"non_null_fraction":0.4668168320627296,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0},{"count":114946,"index":null,"non_null_fraction":0.23819105265666346,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."photoz_type" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":2,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":225190,"value":-999},{"count":220612,"value":0},{"count":26152,"value":1}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[{"count":225190,"index":null,"non_null_fraction":0.46663862289904867,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."groupid" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":487664,"finite_min":-1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":139858,"value":-1},{"count":25,"value":214888},{"count":25,"value":267766}]}]}
+Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
+Candidate observations: finite retained source values, not null-conversion directives; values=[]';
+COMMENT ON COLUMN "source"."specz_compilation_all"."groupsize" IS 'Description: [undocumented upstream]
+Description status: undocumented_upstream
+Description provenance: [not applicable]
+Unit: unknown
+Unit provenance: [not applicable]
+Semantic note: [not documented]
+Semantic-note provenance: [not applicable]
+Null/profile facts: has_fits_mask=False; has_nan=False; profile={"kind":"numeric","profiles":[{"finite_max":25,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":148480,"value":3},{"count":139858,"value":1},{"count":114804,"value":2}]}]}
 Documented sentinel evidence: finite values are retained source values; values=[]; evidence=[none]; provenance=[not applicable]
 Candidate observations: finite retained source values, not null-conversion directives; values=[]';
 COMMENT ON COLUMN "source"."provenance"."table_name" IS 'Mirror table identity; one provenance row is permitted per loaded table.';

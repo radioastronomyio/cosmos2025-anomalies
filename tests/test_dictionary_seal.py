@@ -165,7 +165,7 @@ def test_fast_seal_cli_accepts_the_tracked_dictionary() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "dictionary seal PASSED" in result.stdout
-    assert "rows: 1416 (1403 native, 13 metadata)" in result.stdout
+    assert "rows: 1448 (1435 native, 13 metadata)" in result.stdout
     assert "README fields: 32/32" in result.stdout
 
 
@@ -181,6 +181,29 @@ def test_cli_rejects_empty_column_origin(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert "column_origin" in result.stdout + result.stderr
+
+
+def test_validator_rejects_duplicate_identifier_within_specz_all(
+    tmp_path: Path,
+) -> None:
+    """P2R-04 gate 4.2: duplicate specz_compilation_all identifiers must fail."""
+    header, rows = tracked_rows()
+    specz_all = [
+        index
+        for index, row in enumerate(rows)
+        if row["target_table"] == "specz_compilation_all"
+    ]
+    assert len(specz_all) >= 2
+    rows[specz_all[1]]["target_identifier"] = rows[specz_all[0]][
+        "target_identifier"
+    ]
+    path = tmp_path / "duplicate-specz-identifier.csv"
+    write_rows(path, header, rows)
+
+    result = run_mutated_cli(path)
+
+    assert result.returncode != 0
+    assert "Identifier collision" in result.stdout + result.stderr
 
 
 def test_validator_rejects_candidate_json_schema(tmp_path: Path) -> None:

@@ -4,9 +4,9 @@
 # fmt: off
 CASE_COUNTS = {'master_native': 1349,
  'supplement_native': 22,
- 'specz_native': 32,
+ 'specz_native': 64,
  'metadata': 13,
- 'native_total': 1403,
+ 'native_total': 1435,
  'array': 166}
 
 CASES = ({'case_id': '0001:photometry_primary.id',
@@ -124,8 +124,17 @@ CASES = ({'case_id': '0001:photometry_primary.id',
              'sha256=3e7dde1db9d541ce8593b12cbf0690130422e746ce7db78cc238f27ed724366b\n'
              'Unit: unknown\n'
              'Unit provenance: [not applicable]\n'
-             'Semantic note: [not documented]\n'
-             'Semantic-note provenance: [not applicable]\n'
+             'Semantic note: Does not resolve against the held DR1.1 spec-z compilation: 24,364 of '
+             '37,219 distinct non-sentinel values resolve by Id_specz, with a field-scale median '
+             'separation of 4,467.3 arcsec and stored values spanning 223-165,312 against Id_specz '
+             '1-487,666. Join through specz Id_COSMOS25 instead. Mirrored as shipped; no repair. '
+             'Evidence: gate 4.1 command src/etl/verify_specz_linkage_v11.py; review surface '
+             'docs/research/specz-linkage-evidence.md.\n'
+             'Semantic-note provenance: '
+             'source=/opt/agents/repos/cosmos2025-anomalies/src/etl/verify_specz_linkage_v11.py; '
+             'locator=PRIORS contract and main() establishments 3-4 (defective-path geometry; '
+             'value-range incompatibility); '
+             'sha256=46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650\n'
              'Null/profile facts: has_fits_mask=False; has_nan=False; '
              'profile={"kind":"numeric","profiles":[{"finite_max":165312,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":784016,"non_null_fraction":1.0,"row_count":784016,"top_values":[{"count":746797,"value":-999},{"count":1,"value":223},{"count":1,"value":224}]}]}\n'
              'Documented sentinel evidence: finite values are retained source values; '
@@ -48192,9 +48201,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 1745652},
- {'case_id': '1385:specz_compilation.id_specz',
+ {'case_id': '1385:specz_compilation_unique.id_specz',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_specz',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48222,9 +48231,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1386:specz_compilation.id_original',
+ {'case_id': '1386:specz_compilation_unique.id_original',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_original',
   'target_type': 'text',
   'column_origin': 'source_native',
@@ -48252,9 +48261,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1387:specz_compilation.ra_original',
+ {'case_id': '1387:specz_compilation_unique.ra_original',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_original',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48282,9 +48291,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1388:specz_compilation.dec_original',
+ {'case_id': '1388:specz_compilation_unique.dec_original',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_original',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48312,9 +48321,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1389:specz_compilation.ra_corrected',
+ {'case_id': '1389:specz_compilation_unique.ra_corrected',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_corrected',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48342,9 +48351,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1390:specz_compilation.dec_corrected',
+ {'case_id': '1390:specz_compilation_unique.dec_corrected',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_corrected',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48372,9 +48381,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1391:specz_compilation.priority',
+ {'case_id': '1391:specz_compilation_unique.priority',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'priority',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48402,9 +48411,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1392:specz_compilation.specz',
+ {'case_id': '1392:specz_compilation_unique.specz',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'specz',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48433,9 +48442,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1393:specz_compilation.flag',
+ {'case_id': '1393:specz_compilation_unique.flag',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'flag',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48472,9 +48481,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1394:specz_compilation.confidence_level',
+ {'case_id': '1394:specz_compilation_unique.confidence_level',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'confidence_level',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48509,9 +48518,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1395:specz_compilation.survey',
+ {'case_id': '1395:specz_compilation_unique.survey',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'survey',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48545,9 +48554,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1396:specz_compilation.compilation_year',
+ {'case_id': '1396:specz_compilation_unique.compilation_year',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'compilation_year',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48575,9 +48584,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1397:specz_compilation.public_or_private',
+ {'case_id': '1397:specz_compilation_unique.public_or_private',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'public_or_private',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48605,9 +48614,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1398:specz_compilation.id_cos20_classic',
+ {'case_id': '1398:specz_compilation_unique.id_cos20_classic',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_cos20_classic',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48636,9 +48645,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1399:specz_compilation.ra_cos20_classic',
+ {'case_id': '1399:specz_compilation_unique.ra_cos20_classic',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_cos20_classic',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48667,9 +48676,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1400:specz_compilation.dec_cos20_classic',
+ {'case_id': '1400:specz_compilation_unique.dec_cos20_classic',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_cos20_classic',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48698,9 +48707,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1401:specz_compilation.id_cos20_farmer',
+ {'case_id': '1401:specz_compilation_unique.id_cos20_farmer',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_cos20_farmer',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48729,9 +48738,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1402:specz_compilation.ra_cos20_farmer',
+ {'case_id': '1402:specz_compilation_unique.ra_cos20_farmer',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_cos20_farmer',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48760,9 +48769,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1403:specz_compilation.dec_cos20_farmer',
+ {'case_id': '1403:specz_compilation_unique.dec_cos20_farmer',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_cos20_farmer',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48791,9 +48800,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1404:specz_compilation.id_cosmos25',
+ {'case_id': '1404:specz_compilation_unique.id_cosmos25',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_cosmos25',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48822,9 +48831,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1405:specz_compilation.ra_cosmos25',
+ {'case_id': '1405:specz_compilation_unique.ra_cosmos25',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_cosmos25',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48853,9 +48862,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1406:specz_compilation.dec_cosmos25',
+ {'case_id': '1406:specz_compilation_unique.dec_cosmos25',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_cosmos25',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48884,9 +48893,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1407:specz_compilation.id_cosmos15',
+ {'case_id': '1407:specz_compilation_unique.id_cosmos15',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_cosmos15',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -48915,9 +48924,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1408:specz_compilation.ra_cosmos15',
+ {'case_id': '1408:specz_compilation_unique.ra_cosmos15',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_cosmos15',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48946,9 +48955,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1409:specz_compilation.dec_cosmos15',
+ {'case_id': '1409:specz_compilation_unique.dec_cosmos15',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_cosmos15',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -48977,9 +48986,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1410:specz_compilation.id_cosmos09',
+ {'case_id': '1410:specz_compilation_unique.id_cosmos09',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'id_cosmos09',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -49008,9 +49017,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1411:specz_compilation.ra_cosmos09',
+ {'case_id': '1411:specz_compilation_unique.ra_cosmos09',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'ra_cosmos09',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -49039,9 +49048,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1412:specz_compilation.dec_cosmos09',
+ {'case_id': '1412:specz_compilation_unique.dec_cosmos09',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'dec_cosmos09',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -49070,9 +49079,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1413:specz_compilation.photoz',
+ {'case_id': '1413:specz_compilation_unique.photoz',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'photoz',
   'target_type': 'double precision',
   'column_origin': 'source_native',
@@ -49101,9 +49110,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1414:specz_compilation.photoz_type',
+ {'case_id': '1414:specz_compilation_unique.photoz_type',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'photoz_type',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -49132,9 +49141,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1415:specz_compilation.groupid',
+ {'case_id': '1415:specz_compilation_unique.groupid',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'groupid',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -49162,9 +49171,9 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'has_fits_mask': False,
   'has_nan': False,
   'expected_source_rows': 261975},
- {'case_id': '1416:specz_compilation.groupsize',
+ {'case_id': '1416:specz_compilation_unique.groupsize',
   'case_group': 'specz_native',
-  'table': 'specz_compilation',
+  'table': 'specz_compilation_unique',
   'column': 'groupsize',
   'target_type': 'bigint',
   'column_origin': 'source_native',
@@ -49191,5 +49200,1005 @@ CASES = ({'case_id': '0001:photometry_primary.id',
   'source_type': 'K',
   'has_fits_mask': False,
   'has_nan': False,
-  'expected_source_rows': 261975})
+  'expected_source_rows': 261975},
+ {'case_id': '1417:specz_compilation_all.id_specz',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_specz',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":487666,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":1,"value":1},{"count":1,"value":2},{"count":1,"value":3}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_specz',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1418:specz_compilation_all.id_original',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_original',
+  'target_type': 'text',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"text","profiles":[{"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":3240,"value":"hyperion_peak2n3n7_0"},{"count":2858,"value":"IMACS"},{"count":1949,"value":"hyperion_peak4n5n6_0"}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 20,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_original',
+  'source_type': '20A',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1419:specz_compilation_all.ra_original',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_original',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":26,"value":150.10352},{"count":26,"value":150.11028},{"count":25,"value":150.08521}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_original',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1420:specz_compilation_all.dec_original',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_original',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":26,"value":2.21493},{"count":22,"value":2.2097},{"count":21,"value":2.22759}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_original',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1421:specz_compilation_all.ra_corrected',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_corrected',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":151.79997,"finite_min":148.50003,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":25,"value":150.08922},{"count":23,"value":150.12215},{"count":23,"value":150.13698}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_corrected',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1422:specz_compilation_all.dec_corrected',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_corrected',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":3.80526,"finite_min":0.60014,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":28,"value":2.21492},{"count":22,"value":2.20969},{"count":21,"value":2.24381}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_corrected',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1423:specz_compilation_all.priority',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'priority',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":261975,"value":1},{"count":220604,"value":0}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Priority',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1424:specz_compilation_all.specz',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'specz',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":14.44,"finite_min":-999.98999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":34665,"value":-99.0},{"count":27184,"value":0.0},{"count":520,"value":8e-05}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":34665,"index":null,"non_null_fraction":0.0718327983604757,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'specz',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1425:specz_compilation_all.flag',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'flag',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: The quality assessment flag system that we adopt is based on a 0 - 4, 9 '
+             'scale with an additional +10 for the case of broad line features identified within '
+             'the 1D and 2D spectra. | Quality Flag | Confidence Level (%) | Description | | '
+             '------------ | ---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | '
+             '3 | 95 | Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | '
+             '50 | Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line '
+             'Detection with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |\n'
+             'Description status: verified\n'
+             'Description provenance: '
+             'source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality '
+             'Assessment Flagging System, lines 60-70; '
+             'sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":19,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":271323,"value":4},{"count":112143,"value":2},{"count":34290,"value":0}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'flag',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1426:specz_compilation_all.confidence_level',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'confidence_level',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: | Quality Flag | Confidence Level (%) | Description | | ------------ | '
+             '---------------- | ---------- | | 4 | 97 | Very Reliable Redshift | | 3 | 95 | '
+             'Reliable Redshift | | 2 | 80 | Moderate Detection of Emission Lines | | 1 | 50 | '
+             'Tentative Measurement | | 0 | - | No Measurement | | 9 | 85 | Single Line Detection '
+             'with Good S/N | | +10 | - | Broad Line Feature (e.g., BL-AGN) |\n'
+             'Description status: verified\n'
+             'Description provenance: '
+             'source=/opt/agents/repos/reference-files/speczcompilation/README.md; locator=Quality '
+             'Assessment Flagging System, lines 62-70; '
+             'sha256=1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":97,"finite_min":-99,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281602,"value":97},{"count":112461,"value":80},{"count":37013,"value":0}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Confidence_level',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1427:specz_compilation_all.survey',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'survey',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: - `_surveys.list`: an ASCII file that contains the survey ID number '
+             "assigned in the FITS files under the column `survey', the survey name, a simple "
+             'reference placeholder, status of the survey, contact information for PI, number of '
+             'galaxies in the survey, and key statistics on the redshift distribution.\n'
+             'Description status: verified\n'
+             'Description provenance: '
+             'source=/opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md; '
+             'locator=List of Surveys, line 6; '
+             'sha256=43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":138,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":201445,"value":38},{"count":96255,"value":37},{"count":55327,"value":39}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'survey',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1428:specz_compilation_all.compilation_year',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'compilation_year',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2025,"finite_min":2001,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":311120,"value":2025},{"count":56615,"value":2023},{"count":30663,"value":2011}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'compilation_year',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1429:specz_compilation_all.public_or_private',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'public_or_private',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":1,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":482579,"value":1}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'public_or_private',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1430:specz_compilation_all.id_cos20_classic',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_cos20_classic',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":1720486,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999},{"count":25,"value":879094},{"count":22,"value":831115}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_COS20_Classic',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1431:specz_compilation_all.ra_cos20_classic',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_cos20_classic',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":151.0635824268984,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999.0},{"count":25,"value":150.0893344059057},{"count":22,"value":150.08600501243833}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_COS20_Classic',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1432:specz_compilation_all.dec_cos20_classic',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_cos20_classic',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":3.071570844554334,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":226677,"value":-999.0},{"count":25,"value":2.2475917823480653},{"count":22,"value":2.2096952629120867}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":226677,"index":null,"non_null_fraction":0.4697199836710673,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_COS20_Classic',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1433:specz_compilation_all.id_cos20_farmer',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_cos20_farmer',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":964465,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999},{"count":22,"value":479297},{"count":20,"value":307999}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_COS20_Farmer',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1434:specz_compilation_all.ra_cos20_farmer',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_cos20_farmer',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":150.81258839852458,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999.0},{"count":22,"value":150.17138750691578},{"count":20,"value":150.23004136728338}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_COS20_Farmer',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1435:specz_compilation_all.dec_cos20_farmer',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_cos20_farmer',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2.877324424410641,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":339189,"value":-999.0},{"count":22,"value":2.237925374184951},{"count":20,"value":2.39550659778136}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":339189,"index":null,"non_null_fraction":0.7028673025556438,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_COS20_Farmer',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1436:specz_compilation_all.id_cosmos25',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_cosmos25',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":779168,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999},{"count":25,"value":667180},{"count":22,"value":105410}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_COSMOS25',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1437:specz_compilation_all.ra_cosmos25',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_cosmos25',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":150.57824995549876,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999.0},{"count":25,"value":150.089334990901},{"count":22,"value":150.08600529775592}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_COSMOS25',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1438:specz_compilation_all.dec_cosmos25',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_cosmos25',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2.6898572364212643,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":390220,"value":-999.0},{"count":25,"value":2.247593409319224},{"count":22,"value":2.209693190791956}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":390220,"index":null,"non_null_fraction":0.8086137192045241,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_COSMOS25',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1439:specz_compilation_all.id_cosmos15',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_cosmos15',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":1180397,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999},{"count":25,"value":626034},{"count":22,"value":599254}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_COSMOS15',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1440:specz_compilation_all.ra_cosmos15',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_cosmos15',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":150.88434729290955,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999.0},{"count":25,"value":150.08937609172278},{"count":22,"value":150.0860475211964}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_COSMOS15',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1441:specz_compilation_all.dec_cosmos15',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_cosmos15',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2.973945041414017,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":266936,"value":-999.0},{"count":25,"value":2.2476039867978406},{"count":22,"value":2.2097113721717387}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":266936,"index":null,"non_null_fraction":0.553144666469117,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_COSMOS15',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1442:specz_compilation_all.id_cosmos09',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'id_cosmos09',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":1993549,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999},{"count":25,"value":1000527},{"count":22,"value":1001752}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'Id_COSMOS09',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1443:specz_compilation_all.ra_cosmos09',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'ra_cosmos09',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":150.82673,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999.0},{"count":36,"value":150.09586},{"count":30,"value":150.15022}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'ra_COSMOS09',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1444:specz_compilation_all.dec_cosmos09',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'dec_cosmos09',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2.912715,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":281794,"value":-999.0},{"count":25,"value":2.247612},{"count":23,"value":2.209735}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":281794,"index":null,"non_null_fraction":0.5839334077943715,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'dec_COSMOS09',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1445:specz_compilation_all.photoz',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'photoz',
+  'target_type': 'double precision',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":99.9,"finite_min":-999.0,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":225276,"value":-999.0},{"count":114946,"value":-99.0},{"count":10357,"value":99.9}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":225276,"index":null,"non_null_fraction":0.4668168320627296,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999.0},{"count":114946,"index":null,"non_null_fraction":0.23819105265666346,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-99.0}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'photoz',
+  'source_type': 'D',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1446:specz_compilation_all.photoz_type',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'photoz_type',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":2,"finite_min":-999,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":225190,"value":-999},{"count":220612,"value":0},{"count":26152,"value":1}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; '
+             'values=[{"count":225190,"index":null,"non_null_fraction":0.46663862289904867,"rule_version":"cosmos_v11_candidate_sentinel_v1","value":-999}]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'photoz_type',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1447:specz_compilation_all.groupid',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'groupid',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":487664,"finite_min":-1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":139858,"value":-1},{"count":25,"value":214888},{"count":25,"value":267766}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'GroupID',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579},
+ {'case_id': '1448:specz_compilation_all.groupsize',
+  'case_group': 'specz_native',
+  'table': 'specz_compilation_all',
+  'column': 'groupsize',
+  'target_type': 'bigint',
+  'column_origin': 'source_native',
+  'comment': 'Description: [undocumented upstream]\n'
+             'Description status: undocumented_upstream\n'
+             'Description provenance: [not applicable]\n'
+             'Unit: unknown\n'
+             'Unit provenance: [not applicable]\n'
+             'Semantic note: [not documented]\n'
+             'Semantic-note provenance: [not applicable]\n'
+             'Null/profile facts: has_fits_mask=False; has_nan=False; '
+             'profile={"kind":"numeric","profiles":[{"finite_max":25,"finite_min":1,"fits_mask_count":0,"fits_mask_fraction":0.0,"index":null,"nan_count":0,"nan_fraction":0.0,"non_null_count":482579,"non_null_fraction":1.0,"row_count":482579,"top_values":[{"count":148480,"value":3},{"count":139858,"value":1},{"count":114804,"value":2}]}]}\n'
+             'Documented sentinel evidence: finite values are retained source values; values=[]; '
+             'evidence=[none]; provenance=[not applicable]\n'
+             'Candidate observations: finite retained source values, not null-conversion '
+             'directives; values=[]',
+  'element_count': 1,
+  'array_constraint_name': None,
+  'array_constraint_expression': None,
+  'source_family': 'specz_compilation',
+  'source_file': '/opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_all.fits',
+  'source_locator': 'HDU 1',
+  'source_column': 'GroupSize',
+  'source_type': 'K',
+  'has_fits_mask': False,
+  'has_nan': False,
+  'expected_source_rows': 482579})
 # fmt: on

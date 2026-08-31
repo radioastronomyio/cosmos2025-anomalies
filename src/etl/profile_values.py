@@ -577,7 +577,7 @@ def validate_profiled_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Validate complete Gate 3.3 coverage and return audited distributions."""
     native = [row for row in rows if row["column_origin"] == "source_native"]
     metadata = [row for row in rows if row["column_origin"] != "source_native"]
-    if len(native) != 1_403 or len(metadata) != 13 or len(rows) != 1_416:
+    if len(native) != 1_435 or len(metadata) != 13 or len(rows) != 1_448:
         raise ValueError(
             "Profile row scope mismatch: "
             f"native={len(native)}, metadata={len(metadata)}, total={len(rows)}"

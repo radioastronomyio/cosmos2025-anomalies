@@ -20,11 +20,14 @@ related_documents:
 # ETL v2 Unified Dictionary Seal
 
 This directory contains the sealed load dictionary for the COSMOS-Web v1.1
-lossless source mirror. The contract covers 1,416 rows and 32 fields: 1,403
+lossless source mirror. The contract covers 1,448 rows and 32 fields: 1,435
 native source fields, seven generated source-row fields, and six injected
 identifiers. It freezes the reviewed Gate 3.1 structural mapping, Gate 3.2
 semantics, and Gate 3.3 profiles without authorizing DDL, loading, source-value
-changes, or new science-derived fields.
+changes, or new science-derived fields. Spec P2R-04 gate 4.2 extended the
+sealed contract with the 32 measurement-level spec-z fields
+(`specz_compilation_all`) and renamed the galaxy-level target to
+`specz_compilation_unique`; the extension follows the same field contract.
 
 Profiling records observations. It is not proof that a frequent value is a
 sentinel, and it does not change a source value. Units and descriptions are
@@ -78,7 +81,7 @@ below are exhaustive.
 | `unit_source` | Identifies the exact unit evidence artifact. | Exact path/reference for a known unit; empty for `unknown`. | All three unit-provenance cells are populated together or empty together. |
 | `unit_locator` | Locates the unit evidence. | Exact source locator for a known unit; empty for `unknown`. | May differ from `description_locator`, such as a separate Units column. |
 | `unit_source_sha256` | Pins the exact unit evidence bytes. | Exactly 64 lowercase hexadecimal characters for a known unit; empty for `unknown`. | Completes the independent unit provenance group. |
-| `semantic_note` | Records a project interpretation that must remain separate from source prose. | Exact note text when authorized; otherwise empty. | Current notes state only the reviewed LePhare log10 and CIGALE linear conventions. |
+| `semantic_note` | Records a project interpretation that must remain separate from source prose. | Exact note text when authorized; otherwise empty. | Current notes state the reviewed LePhare log10 and CIGALE linear conventions and the P2R-04 `id_specz_khostovan25` linkage finding. |
 | `semantic_note_source` | Identifies semantic-note evidence. | Exact path/reference when `semantic_note` is populated; otherwise empty. | All three note-provenance cells are populated together or empty together. |
 | `semantic_note_locator` | Locates the semantic-note evidence. | Exact locator when populated; otherwise empty. | Never substitutes for description or unit provenance. |
 | `semantic_note_source_sha256` | Pins semantic-note evidence bytes. | Exactly 64 lowercase hexadecimal characters when populated; otherwise empty. | Completes the independent semantic-note provenance group. |
@@ -102,27 +105,27 @@ below are exhaustive.
 | `hatamnia_lss` | Hatamnia `OVERDENSITY` FITS table |
 | `toni_groups` | Toni group text table |
 | `toni_memberships` | Toni membership text table |
-| `specz_compilation` | Unique spec-z FITS table |
+| `specz_compilation` | Both spec-z FITS tables: galaxy-level unique and measurement-level all |
 
 ### Target tables
 
 The exact controlled values are `photometry_primary`, `photometry_aper`,
 `lephare`, `cigale`, `ml_morpho`, `bulge_disk`, `galight_morph`,
-`lss_overdensity`, `galaxy_groups`, `galaxy_group_memberships`, and
-`specz_compilation`. No alias is accepted.
+`lss_overdensity`, `galaxy_groups`, `galaxy_group_memberships`,
+`specz_compilation_unique`, and `specz_compilation_all`. No alias is accepted.
 
 ### Column origins and fixed counts
 
 | Controlled value | Rows | Contract |
 |------------------|-----:|----------|
-| `source_native` | 1,403 | One row for every upstream field: 1,349 master, 4 Hatamnia, 18 Toni, and 32 spec-z fields |
+| `source_native` | 1,435 | One row for every upstream field: 1,349 master, 4 Hatamnia, 18 Toni, and 64 spec-z fields |
 | `source_row_metadata` | 7 | One zero-based `source_row` for each master target table |
 | `id_injected` | 6 | Primary-photometry `id` injected by equal zero-based row ordinal into the six other master tables |
 
 Only the 13 non-native rows are project-derived. The master native total of
-1,349 is the Gate 3.1 live `TFIELDS` total. The 54 non-master native fields are
-4 Hatamnia supplement fields, 18 Toni supplement fields, and 32 spec-z fields.
-There are 1,416 rows in total.
+1,349 is the Gate 3.1 live `TFIELDS` total. The 86 non-master native fields are
+4 Hatamnia supplement fields, 18 Toni supplement fields, and 64 spec-z fields
+(32 galaxy-level plus 32 measurement-level). There are 1,448 rows in total.
 
 ## 5. Target Identifier Contract
 
@@ -169,9 +172,9 @@ vectors, retain PostgreSQL array types, and have five per-index profiles.
 
 | Controlled value | Rows | Required representation |
 |------------------|-----:|-------------------------|
-| `verified` | 1,150 | Exact source definition, canonicalized, with complete description provenance |
+| `verified` | 1,153 | Exact source definition, canonicalized, with complete description provenance |
 | `pattern_expanded` | 204 | Exact reviewed Yang Table 1 pattern applied only to the observed GALIGHT columns, with complete provenance |
-| `undocumented_upstream` | 49 | Empty description text/provenance and unit `unknown` unless a separate exact unit source exists |
+| `undocumented_upstream` | 78 | Empty description text/provenance and unit `unknown` unless a separate exact unit source exists |
 | `project_derived` | 13 | Authorized metadata definition and complete central-spec provenance; never allowed on a native row |
 
 For native rows, an exact field definition takes precedence over an applicable
@@ -355,8 +358,9 @@ The fixed native counts are:
 | `lss_overdensity` | 4 |
 | `galaxy_groups` | 14 |
 | `galaxy_group_memberships` | 4 |
-| `specz_compilation` | 32 |
-| **Total** | **1,403** |
+| `specz_compilation_unique` | 32 |
+| `specz_compilation_all` | 32 |
+| **Total** | **1,435** |
 
 The CSV contains no embedded CR/LF cell and exactly one physical line per
 header/data record. General `data/` and `*.csv` ignore rules remain active.

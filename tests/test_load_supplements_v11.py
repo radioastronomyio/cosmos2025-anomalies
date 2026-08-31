@@ -79,13 +79,13 @@ def test_gate38_contract_is_config_driven_native_only_and_exactly_54_fields() ->
         "lss_overdensity",
         "galaxy_groups",
         "galaxy_group_memberships",
-        "specz_compilation",
+        "specz_compilation_unique",
     )
     assert {table: len(rows) for table, rows in contract.tables.items()} == {
         "lss_overdensity": 4,
         "galaxy_groups": 14,
         "galaxy_group_memberships": 4,
-        "specz_compilation": 32,
+        "specz_compilation_unique": 32,
     }
     assert sum(len(rows) for rows in contract.tables.values()) == 54
     assert {
@@ -98,7 +98,7 @@ def test_gate38_contract_is_config_driven_native_only_and_exactly_54_fields() ->
         "galaxy_group_memberships": Path(
             configured["supplementary"]["group_catalog_memberships"]
         ),
-        "specz_compilation": Path(configured["specz"]["unique_fits"]),
+        "specz_compilation_unique": Path(configured["specz"]["unique_fits"]),
     }
 
     duplicate = [dict(row) for row in _dictionary_rows()]
@@ -116,7 +116,7 @@ def test_gate38_empty_guard_includes_provenance_and_refuses_partial_state() -> N
         "lss_overdensity": 0,
         "galaxy_groups": 0,
         "galaxy_group_memberships": 0,
-        "specz_compilation": 0,
+        "specz_compilation_unique": 0,
         "provenance": 0,
     }
     module.assert_gate38_targets_empty(exact)
@@ -504,7 +504,7 @@ def test_analyst_verifier_selects_all_four_and_retains_negative_matrix(
         "lss_overdensity": 2,
         "galaxy_groups": 3,
         "galaxy_group_memberships": 4,
-        "specz_compilation": 5,
+        "specz_compilation_unique": 5,
     }
 
     class Result:
@@ -556,7 +556,7 @@ def test_admin_observation_requires_exact_counts_flags_and_empty_provenance() ->
         "lss_overdensity": 2,
         "galaxy_groups": 3,
         "galaxy_group_memberships": 4,
-        "specz_compilation": 5,
+        "specz_compilation_unique": 5,
     }
     flags = {-99: 1, 3: 1, 4: 2, 9: 1}
     exact = module.validate_gate38_admin_observation(
@@ -798,7 +798,7 @@ def test_load_orchestration_tracks_all_commits_before_post_load_reversal(
             table: module.SourceObservation(count, ("x",))
             for table, count in counts.items()
         },
-        "source_flags": {"rows": counts["specz_compilation"]},
+        "source_flags": {"rows": counts["specz_compilation_unique"]},
         "select_acl": {table: False for table in module.GATE38_TABLES},
         "v1_fingerprint": SimpleNamespace(sha256="v1"),
     }
@@ -914,7 +914,7 @@ def test_verify_only_orchestration_preserves_provenance_zero(
     monkeypatch.setattr(
         module,
         "_source_quality_flags",
-        lambda _contract: {"rows": counts["specz_compilation"]},
+        lambda _contract: {"rows": counts["specz_compilation_unique"]},
     )
     monkeypatch.setattr(module, "verify_gate38_admin", lambda *_args: {"ok": True})
     monkeypatch.setattr(module, "verify_gate38_analyst", lambda *_args: {"ok": True})
@@ -1034,7 +1034,7 @@ def test_final_preflight_invokes_exact_schema_master_empty_and_handoff_guards(
         module,
         "_source_quality_flags",
         lambda _contract: {
-            "rows": sources["specz_compilation"].row_count,
+            "rows": sources["specz_compilation_unique"].row_count,
             "distribution": {},
         },
     )
@@ -1087,7 +1087,7 @@ def test_admin_verifier_invokes_full_value_role_privilege_and_acl_pipeline(
         def execute(self, statement):
             if "GROUP BY flag" in statement:
                 return Result([(-99, 1), (3, 1), (4, 1), (9, 1)])
-            if 'JOIN "source"."specz_compilation"' in statement:
+            if 'JOIN "source"."specz_compilation_unique"' in statement:
                 return Result((2, 2))
             raise AssertionError(statement)
 
@@ -1320,20 +1320,20 @@ def test_grant_application_and_reversal_touch_only_newly_missing_selects(
         "lss_overdensity": True,
         "galaxy_groups": False,
         "galaxy_group_memberships": True,
-        "specz_compilation": False,
+        "specz_compilation_unique": False,
     }
     applied = module.apply_gate38_select_grants(object(), prior)
-    assert applied == ("galaxy_groups", "specz_compilation")
+    assert applied == ("galaxy_groups", "specz_compilation_unique")
     assert statements == [
         'GRANT SELECT ON TABLE "source"."galaxy_groups" TO "cosmos2025_v11_ro"',
-        'GRANT SELECT ON TABLE "source"."specz_compilation" TO "cosmos2025_v11_ro"',
+        'GRANT SELECT ON TABLE "source"."specz_compilation_unique" TO "cosmos2025_v11_ro"',
     ]
     statements.clear()
     revoked = module.revoke_gate38_select_grants(object(), applied)
     assert revoked == applied
     assert statements == [
         'REVOKE SELECT ON TABLE "source"."galaxy_groups" FROM "cosmos2025_v11_ro"',
-        'REVOKE SELECT ON TABLE "source"."specz_compilation" FROM "cosmos2025_v11_ro"',
+        'REVOKE SELECT ON TABLE "source"."specz_compilation_unique" FROM "cosmos2025_v11_ro"',
     ]
 
 

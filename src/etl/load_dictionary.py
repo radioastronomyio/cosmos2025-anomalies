@@ -220,6 +220,9 @@ EXPECTED_SEMANTIC_HASHES = {
     "specz_root_readme": "1aee693918c3e8deb8ac9ce273468a37935987f53f2903eb47420dcfbfe90a23",
     "specz_schema_readme": "43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1",
     "unit_conventions": "8a4d3a724ba435fe5668260e50be45c41f067214567a8723d27d004d3df9ca4a",
+    "specz_linkage_gate41": (
+        "46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650"
+    ),
 }
 DETAILED_DESCRIPTION_SECTIONS = {
     "1": "photometry_primary",
@@ -991,7 +994,10 @@ def _enrich_semantics(
                 unit=lss_unit if lss_unit != "---" else "unknown",
                 unit_locator=definition["unit_locator"],
             )
-        elif target_table == "specz_compilation" and source_column in specz:
+        elif (
+            target_table in {"specz_compilation_unique", "specz_compilation_all"}
+            and source_column in specz
+        ):
             definition = specz[source_column]
             source_key = definition["source_key"]
             _set_description(
@@ -1053,6 +1059,33 @@ def _enrich_semantics(
                         "section 1, Parameter Spaces table, line 30"
                     ),
                     "semantic_note_source_sha256": unit_hash,
+                }
+            )
+        elif (
+            target_table == "photometry_primary"
+            and source_column == "id_specz_khostovan25"
+        ):
+            row.update(
+                {
+                    "semantic_note": (
+                        "Does not resolve against the held DR1.1 spec-z "
+                        "compilation: 24,364 of 37,219 distinct non-sentinel "
+                        "values resolve by Id_specz, with a field-scale median "
+                        "separation of 4,467.3 arcsec and stored values "
+                        "spanning 223-165,312 against Id_specz 1-487,666. "
+                        "Join through specz Id_COSMOS25 instead. Mirrored as "
+                        "shipped; no repair. Evidence: gate 4.1 command "
+                        "src/etl/verify_specz_linkage_v11.py; review surface "
+                        "docs/research/specz-linkage-evidence.md."
+                    ),
+                    "semantic_note_source": str(paths["specz_linkage_gate41"]),
+                    "semantic_note_locator": (
+                        "PRIORS contract and main() establishments 3-4 "
+                        "(defective-path geometry; value-range incompatibility)"
+                    ),
+                    "semantic_note_source_sha256": hashes[
+                        "specz_linkage_gate41"
+                    ],
                 }
             )
 
@@ -1309,9 +1342,9 @@ def validate_semantics(rows: list[dict[str, str | int]]) -> None:
         raise ValueError("GALIGHT native row lacks pattern-expanded status")
 
     expected_statuses = {
-        "verified": 1_150,
+        "verified": 1_153,
         "pattern_expanded": 204,
-        "undocumented_upstream": 49,
+        "undocumented_upstream": 78,
         "project_derived": 13,
     }
     if dict(statuses) != expected_statuses:
@@ -1321,7 +1354,7 @@ def validate_semantics(rows: list[dict[str, str | int]]) -> None:
         )
     if project_rows != 13:
         raise ValueError(f"Project-derived row count mismatch: {project_rows}")
-    if semantic_notes != 15:
+    if semantic_notes != 16:
         raise ValueError(f"Semantic-note count mismatch: {semantic_notes}")
 
     for name in ("ebv_stars", "ebv_stars_err"):
@@ -1556,14 +1589,25 @@ def build_dictionary(
         rows.extend(native)
         native_counts[target_table] = len(native)
 
-    specz_path = Path(config["specz"]["unique_fits"])
+    specz_unique_path = Path(config["specz"]["unique_fits"])
     native, _, _ = _fits_rows(
-        specz_path,
+        specz_unique_path,
         source_family="specz_compilation",
-        target_table="specz_compilation",
+        target_table="specz_compilation_unique",
     )
     rows.extend(native)
-    native_counts["specz_compilation"] = len(native)
+    native_counts["specz_compilation_unique"] = len(native)
+
+    # P2R-04 gate 4.2: the measurement-level artifact is a distinct upstream
+    # product mirrored under the same contract, with no metadata columns.
+    specz_all_path = Path(config["specz"]["all_fits"])
+    native, _, _ = _fits_rows(
+        specz_all_path,
+        source_family="specz_compilation",
+        target_table="specz_compilation_all",
+    )
+    rows.extend(native)
+    native_counts["specz_compilation_all"] = len(native)
 
     validate_dictionary(rows)
     semantic_evidence = _enrich_semantics(rows, config)

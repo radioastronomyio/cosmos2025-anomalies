@@ -75,6 +75,9 @@ semantic_sources:
   specz_schema_readme: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md
   unit_conventions: /opt/agents/repos/cosmos2025-anomalies/docs/reference/unit-conventions.md
   etl_v2_spec: /opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
+  # P2R-04 gate 4.2: committed gate 4.1 evidence command backing the
+  # id_specz_khostovan25 semantic note; frozen at commit 6d30e24.
+  specz_linkage_gate41: /opt/agents/repos/cosmos2025-anomalies/src/etl/verify_specz_linkage_v11.py
 
 # Existing immutable-source pins consumed read-only by ETL v2 preflight.
 # Gate 3.5 validates these files but never regenerates or replaces them.

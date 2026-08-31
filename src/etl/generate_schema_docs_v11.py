@@ -60,8 +60,8 @@ ALLOWED_TRANSFORMS = {
     "section",
 }
 DEFAULT_CONFIG_PATH = REPO_ROOT / "configs" / "data_paths.yaml"
-SEALED_ROWS_SHA256 = "674f971d1d4b5194ec5e9186a6eb41e6fa33fdd85c49e6c31fdc36e2e1638dd1"
-SEALED_CSV_SHA256 = "623e98f82f435c2ee5112af2d07d4553864f665a82a895c175a47d3edfa883cf"
+SEALED_ROWS_SHA256 = "7ac2b647835ef6dbc03f8ebc845b291790ad70472a5293c88b8f514b68f947ed"
+SEALED_CSV_SHA256 = "a20457c8c5c1785ebce0442a17c1fa06bdef9c1300c199d21776f7c0d22cfcd5"
 
 
 @dataclass(frozen=True)
@@ -242,10 +242,10 @@ def _validate_sealed_dictionary_rows(rows: Sequence[Mapping[str, str]]) -> None:
 def build_documentation_contract(
     rows: Sequence[Mapping[str, str]],
 ) -> DocumentationContract:
-    """Build the exact 1,416-case documentation contract from sealed rows."""
+    """Build the exact 1,448-case documentation contract from sealed rows."""
     validate_field_surface(rows)
     _validate_sealed_dictionary_rows(rows)
-    if len(rows) != 1_416:
+    if len(rows) != 1_448:
         raise ValueError("documentation dictionary row boundary mismatch")
     table_order = tuple(generate_schema_v11.MIRROR_TABLE_ORDER)
     expected_tables = set(table_order)
@@ -270,7 +270,7 @@ def build_documentation_contract(
         )
 
     if origins != {
-        "source_native": 1_403,
+        "source_native": 1_435,
         "source_row_metadata": 7,
         "id_injected": 6,
     }:
@@ -294,7 +294,7 @@ def build_documentation_contract(
         for column in columns
         if column.row["description_status"] == "undocumented_upstream"
     )
-    if len(undocumented) != 49:
+    if len(undocumented) != 78:
         raise ValueError("undocumented-upstream boundary mismatch")
     return DocumentationContract(
         columns=columns,
@@ -380,7 +380,7 @@ def _information_schema_query(contract: DocumentationContract) -> str:
 
 
 def _physical_count_query(contract: DocumentationContract) -> str:
-    """Return one fixed-table UNION query for all eleven exact physical counts."""
+    """Return one fixed-table UNION query for all twelve exact physical counts."""
     statements = [
         "SELECT '{}'::text AS table_name, count(*)::bigint AS row_count "
         'FROM "source".{}'.format(table, generate_schema_v11.quote_identifier(table))
@@ -780,9 +780,9 @@ def _render_provenance_contract() -> list[str]:
     lines = [
         "## Provenance infrastructure",
         "",
-        "`source.provenance` is project infrastructure, not a twelfth source mirror. "
+        "`source.provenance` is project infrastructure, not a thirteenth source mirror. "
         f"Provenance contract version {generate_schema_v11.PROVENANCE_CONTRACT_VERSION} "
-        "contains thirteen fields and one registered row for each of the eleven mirrors.",
+        "contains thirteen fields and one registered row for each of the twelve mirrors.",
         "",
         "| Field | PostgreSQL type | Nullable | Primary key | Check | Comment |",
         "|-------|-----------------|----------|-------------|-------|---------|",
@@ -940,8 +940,8 @@ def render_schema_document(
         "",
         "# COSMOS-Web v1.1 Source Mirror Schema",
         "",
-        "Generated from the sealed 1,416-row dictionary and a verified live "
-        "`cosmos2025_v11.source` catalog observation. The eleven mirror tables "
+        "Generated from the sealed 1,448-row dictionary and a verified live "
+        "`cosmos2025_v11.source` catalog observation. The twelve mirror tables "
         "are lossless source representations after declared target casting. "
         "Cleaned, expanded, or science-derived products belong in a future "
         "`analysis` schema.",

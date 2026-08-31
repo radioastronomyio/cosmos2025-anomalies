@@ -169,3 +169,62 @@ every variant.
 
 No linkage was inferred, repaired, or written. Gate 4.1 commit: see SHA table
 at close.
+
+### Gate 4.2 — Dictionary extension
+
+Extended the sealed dictionary from 1,416 to 1,448 rows by adding source
+coverage to the existing pipeline (`load_dictionary.py`), not a second one.
+Full rebuild re-profiled all 12 source tables (2,031 s, peak RSS 5,594 MiB).
+
+| Check | Result |
+|---|---|
+| Native rows for `specz_compilation_all` | 32, equal to live TFIELDS 32 |
+| Metadata `column_origin` rows in the new table | 0 (no `source_row`, no injected `id`) |
+| Semantic fields | 3 verified with locator + SHA-256 (flag, Confidence_level, survey); 29 `undocumented_upstream` with empty description |
+| Renamed rows (`specz_compilation` → `specz_compilation_unique`) | 32; field-level diff against the pre-change CSV shows exactly `target_table` changed |
+| `id_specz_khostovan25` row | upstream `description_text`, `description_source`, `description_source_sha256` byte-identical; new content in `semantic_note` sourced to the committed gate 4.1 command (SHA-256 `46a7b827...`, frozen at 6d30e24) with the review surface named by path |
+| New seal hashes | CSV `a20457c8c5c1785ebce0442a17c1fa06bdef9c1300c199d21776f7c0d22cfcd5`; first-23-field prefix `42a8a9cac318884385914e759aea1d29817a2bd22994fa02b99ecd9b8126487a` |
+| Dictionary seal validator | PASSED: 1,448 rows (1,435 native, 13 metadata); README fields 32/32 |
+| Mutation test | `test_validator_rejects_duplicate_identifier_within_specz_all` duplicates one `specz_compilation_all` target identifier and requires the validator to fail with `Identifier collision` |
+
+Generated-artifact chain updated in the same pass (regeneration + byte-check
+both green): `schema_v11.sql` (12 mirrors, 1,448 mirror columns, 166 array
+checks, PRIMARY KEY `id_specz` on the new table from the gate 4.1 uniqueness
+proof), `conformance_cases_v11.py` (1,448 cases),
+`docs/reference/sentinel-candidates-v11.md` (812 candidate observations across
+494 fields).
+
+Boundary updates to existing modules so the extended dictionary flows through
+the sealed pipeline: `profile_values.py` (1,435/13/1,448),
+`validate_dictionary_seal.py` (tables, origins 1,435, statuses 1,153/78,
+seal hashes), `generate_schema_v11.py` (12-table order, 1,448, specz PK),
+`generate_conformance_v11.py`/`verify_conformance_v11.py` (1,448 cases,
+specz_native 64, 193 constraints, 12 provenance rows),
+`generate_schema_docs_v11.py` (1,448 contract, 78 undocumented, sealed rows
+hash), `load_provenance_v11.py` (twelve-table boundary incl. `all_fits` path),
+`reconcile_values_v11.py` + `reconciliation_core_v11.py` (galaxy-level rename;
+historical eleven-table case filter; unchanged Gate 3.11 totals),
+`load_supplements_v11.py` (galaxy-level table rename only).
+
+Finding F-07 (pre-existing defect, repaired): the P2R-03 verification-surface
+generator sealed five inputs that P2R-04 legitimately regenerated, so
+`--check` could no longer reproduce the frozen operator document, and two of
+its tests asserted the retired active-queue spec path (broken since the
+closeout archive move). Repaired without touching the sealed document or the
+module's offline property: the four regenerated inputs now fall back to
+P2R-03-committed bytes (`e65242a`) through an injectable, seal-checked
+historical-bytes provider (module source contains no subprocess; the provider
+is installed by the test fixture from the local git object store), and the two
+stale tests now assert the durable post-closeout archive state. The
+`etl-v2-verification.md` document is byte-unchanged.
+
+New modules this gate (for gates 4.4-4.6): `rename_specz_unique_v11.py`,
+`load_specz_all_v11.py`, `reconcile_specz_all_v11.py` (recorded sampling seed
+12,006,315,477,097,142,501, derivation
+`sha256_uint64_seed_plus_zero_based_ordinal_lowest_rank_v1`).
+
+Test suite: all groups green (dictionary seal, semantics, load, supplements,
+provenance, schema, scratch, conformance, docs, verification surface,
+reconciliation, bootstrap); the slow live dictionary byte-identity check
+re-runs the full rebuild and is recorded at close. Gate 4.2 commit: see SHA
+table at close.

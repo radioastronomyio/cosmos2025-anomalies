@@ -77,6 +77,23 @@ APPENDIX_SHA256 = {
     "flags": "450fd99eb7b2f5ecf635f62c3f68a5cce9a4625595085e1b93617ccd2e891d19",
 }
 WORKLOG_RELATIVE = "work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md"
+# P2R-04 extended the sealed dictionary, DDL, conformance cases, and candidate
+# report (authorized successor change). This module reproduces the frozen
+# P2R-03 operator approval surface, so those four sealed inputs fall back to
+# the exact P2R-03-committed bytes when the live files no longer match their
+# Gate 3.13 seals. The compiler itself stays mechanically offline and
+# tracked-only: the historical-bytes provider is injectable and defaults to
+# None, which keeps strict seal behavior for the bare CLI. A mutated file at
+# any other path always fails strictly; only the exact configured live path
+# may fall back.
+P2R03_EVIDENCE_REF = "e65242a7802422cc86ed47d96945e2a86e0b27a3"
+P2R03_FALLBACK_NAMES = {
+    "dictionary": "data/dictionary/columns-v11.csv",
+    "schema_sql": "src/etl/schema_v11.sql",
+    "conformance_cases": "src/etl/conformance_cases_v11.py",
+    "candidate_report": "docs/reference/sentinel-candidates-v11.md",
+}
+historical_evidence_provider: "callable | None" = None
 WORKLOG_EVIDENCE_SHA256 = (
     "9f18c6926a24f9edc36b31d7346e0b377d2b4867c9e70c1068942bf4839defbf"
 )
@@ -265,6 +282,41 @@ def read_stable_regular_bytes(path: Path) -> bytes:
     return b"".join(chunks)
 
 
+def read_sealed_evidence_bytes(name: str, path: Path) -> bytes:
+    """Read one sealed input, falling back to pinned P2R-03 bytes if provided.
+
+    The fallback applies only at the exact configured live path for the four
+    inputs P2R-04 legitimately regenerated (dictionary, DDL, conformance
+    cases, candidate report), only when an injected historical provider
+    supplies the pinned bytes, and only when those bytes match the seal. Any
+    other path, including a mutated temporary file, must match its seal
+    exactly or fail.
+    """
+    raw = read_stable_regular_bytes(path)
+    expected_digest = (
+        SEALED_DICTIONARY_SHA256
+        if name == "dictionary"
+        else SEALED_INPUT_SHA256.get(name)
+    )
+    if expected_digest is None or hashlib.sha256(raw).hexdigest() == expected_digest:
+        return raw
+    blob_path = P2R03_FALLBACK_NAMES.get(name)
+    live_path = REPO_ROOT / blob_path if blob_path is not None else None
+    mismatch_error = ValueError(
+        "dictionary seal mismatch"
+        if name == "dictionary"
+        else "verification evidence input seal mismatch"
+    )
+    if blob_path is None or live_path is None or path.resolve() != live_path.resolve():
+        raise mismatch_error
+    if historical_evidence_provider is None:
+        raise mismatch_error
+    historical = historical_evidence_provider(blob_path)
+    if historical is None or hashlib.sha256(historical).hexdigest() != expected_digest:
+        raise mismatch_error
+    return historical
+
+
 def _require_exact_path(observed: Path, expected: Path) -> Path:
     if observed != expected:
         raise ValueError("verification evidence path mismatch")
@@ -358,13 +410,12 @@ def resolve_evidence_paths(
                 if not stat.S_ISREG(output_metadata.st_mode):
                     raise ValueError("verification evidence path output unsafe")
             continue
-        raw = read_stable_regular_bytes(
-            central_spec_read if name == "central_spec" else path
+        raw = read_sealed_evidence_bytes(
+            name, central_spec_read if name == "central_spec" else path
         )
         expected_digest = SEALED_INPUT_SHA256.get(name)
-        if (
-            expected_digest is not None
-            and hashlib.sha256(raw).hexdigest() != expected_digest
+        if expected_digest is not None and hashlib.sha256(raw).hexdigest() != (
+            expected_digest
         ):
             raise ValueError("verification evidence input seal mismatch")
     return EvidencePaths(**guarded, central_spec_read=central_spec_read)
@@ -372,7 +423,7 @@ def resolve_evidence_paths(
 
 def extract_dictionary_evidence(path: Path) -> DictionaryEvidence:
     """Compute all dictionary findings and appendices from the exact seal."""
-    raw = read_stable_regular_bytes(path)
+    raw = read_sealed_evidence_bytes("dictionary", path)
     if hashlib.sha256(raw).hexdigest() != SEALED_DICTIONARY_SHA256:
         raise ValueError("dictionary seal mismatch")
     text = raw.decode("utf-8")
@@ -842,20 +893,95 @@ def extract_policy_evidence(paths: EvidencePaths) -> PolicyEvidence:
     )
 
 
+def _pinned_conformance_generator():
+    """Load the P2R-03 conformance generator and its schema dependency.
+
+    Both modules come from the injected historical provider as pinned bytes,
+    so case generation uses the frozen 1,416-row boundary rather than the
+    live generator P2R-04 extended. The pinned schema module is temporarily
+    registered under its import name so the pinned conformance module's own
+    ``from src.etl import generate_schema_v11`` resolves to the pinned pair.
+    Returns None when no provider is active.
+    """
+    if historical_evidence_provider is None:
+        return None
+    import sys
+    import types
+
+    schema_bytes = historical_evidence_provider("src/etl/generate_schema_v11.py")
+    conformance_bytes = historical_evidence_provider(
+        "src/etl/generate_conformance_v11.py"
+    )
+    if schema_bytes is None or conformance_bytes is None:
+        return None
+    schema_module = types.ModuleType("src.etl.generate_schema_v11")
+    schema_module.__dict__["__package__"] = "src.etl"
+    schema_module.__dict__["__file__"] = str(REPO_ROOT / "src/etl/generate_schema_v11.py")
+    exec(compile(schema_bytes, "generate_schema_v11.py", "exec"), schema_module.__dict__)
+    conformance_module = types.ModuleType("src.etl.generate_conformance_v11")
+    conformance_module.__dict__["__package__"] = "src.etl"
+    conformance_module.__dict__["__file__"] = str(
+        REPO_ROOT / "src/etl/generate_conformance_v11.py"
+    )
+    import_key = "src.etl.generate_schema_v11"
+    package = sys.modules.get("src.etl")
+    saved_module = sys.modules.get(import_key)
+    saved_attr = getattr(package, "generate_schema_v11", None) if package else None
+    sys.modules[import_key] = schema_module
+    if package is not None:
+        package.generate_schema_v11 = schema_module
+    try:
+        exec(
+            compile(conformance_bytes, "generate_conformance_v11.py", "exec"),
+            conformance_module.__dict__,
+        )
+    finally:
+        if saved_module is None:
+            sys.modules.pop(import_key, None)
+        else:
+            sys.modules[import_key] = saved_module
+        if package is not None:
+            if saved_attr is None:
+                try:
+                    del package.generate_schema_v11
+                except AttributeError:
+                    pass
+            else:
+                package.generate_schema_v11 = saved_attr
+    return conformance_module
+
+
 def validate_conformance_projection(
     paths: EvidencePaths, dictionary: DictionaryEvidence
 ) -> None:
     """Require generated case IDs to match all ordered dictionary rows."""
+    live_dictionary = REPO_ROOT / "data/dictionary/columns-v11.csv"
+    if paths.dictionary.resolve() == live_dictionary.resolve():
+        dictionary_bytes = read_sealed_evidence_bytes("dictionary", paths.dictionary)
+    else:
+        dictionary_bytes = read_stable_regular_bytes(paths.dictionary)
     rows = list(
-        csv.DictReader(
-            read_stable_regular_bytes(paths.dictionary).decode("utf-8").splitlines()
-        )
+        csv.DictReader(dictionary_bytes.decode("utf-8").splitlines())
     )
-    from src.etl import generate_conformance_v11
-    from src.etl.conformance_cases_v11 import CASES
+    # The frozen P2R-03 surface compares against the sealed case module bytes,
+    # not the live module P2R-04 regenerated for the extended boundary.
+    case_module_bytes = read_sealed_evidence_bytes(
+        "conformance_cases", paths.conformance_cases
+    )
+    namespace: dict[str, object] = {}
+    exec(
+        compile(case_module_bytes, "conformance_cases_v11.py", "exec"), namespace
+    )
+    cases = namespace["CASES"]
 
-    expected = generate_conformance_v11.generate_cases(rows)
-    if len(expected) != dictionary.row_count or expected != CASES:
+    pinned = _pinned_conformance_generator()
+    if pinned is not None:
+        expected = pinned.generate_cases(rows)
+    else:
+        from src.etl import generate_conformance_v11
+
+        expected = generate_conformance_v11.generate_cases(rows)
+    if len(expected) != dictionary.row_count or expected != cases:
         raise ValueError("dictionary conformance projection mismatch")
 
 
@@ -863,7 +989,9 @@ def validate_manifest_boundary(paths: EvidencePaths, worklog: WorklogEvidence) -
     """Join every provenance table/count/hash to dictionary and manifest facts."""
     dictionary_rows = list(
         csv.DictReader(
-            read_stable_regular_bytes(paths.dictionary).decode("utf-8").splitlines()
+            read_sealed_evidence_bytes("dictionary", paths.dictionary)
+            .decode("utf-8")
+            .splitlines()
         )
     )
     manifest_rows = list(

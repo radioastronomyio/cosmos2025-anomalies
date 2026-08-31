@@ -135,8 +135,10 @@ def test_generated_table_contracts_derive_live_keys_and_historical_evidence() ->
         "galid",
         "group_id",
     )
-    assert contracts["specz_compilation"].match_source_columns == ("Id_specz",)
-    assert contracts["specz_compilation"].match_target_columns == ("id_specz",)
+    assert contracts["specz_compilation_unique"].match_source_columns == (
+        "Id_specz",
+    )
+    assert contracts["specz_compilation_unique"].match_target_columns == ("id_specz",)
 
 
 # =============================================================================
@@ -944,7 +946,7 @@ def test_success_totals_are_derived_from_generated_cases_and_samples() -> None:
 def test_table_success_evidence_records_sampling_columns_and_null_states() -> None:
     """Success evidence must expose every approved reproducibility boundary."""
     module = _module()
-    contract = module.build_table_contracts(CASES)["specz_compilation"]
+    contract = module.build_table_contracts(CASES)["specz_compilation_unique"]
     plan = module.build_sample_plan(contract, sample_limit=3)
     stream = SimpleNamespace(
         source_reads=1,

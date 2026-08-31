@@ -1753,7 +1753,7 @@ def test_retained_schema_contract_rejects_nullability_and_check_definition_drift
 
     connection = Connection()
     evidence = module.verify_exact_retained_schema(connection, rows)
-    assert evidence == {"column_nullability": 1429, "constraint_definitions": 192}
+    assert evidence == {"column_nullability": 1461, "constraint_definitions": 193}
 
     changed_column = list(connection.columns[0])
     changed_column[-1] = not changed_column[-1]
