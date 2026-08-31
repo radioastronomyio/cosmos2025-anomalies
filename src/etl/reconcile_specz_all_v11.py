@@ -40,7 +40,9 @@ import json
 from pathlib import Path
 import sys
 
+import psycopg
 import yaml
+from psycopg.rows import dict_row
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -132,11 +134,18 @@ def main() -> None:
     batch_count = 0
     compared_rows = 0
 
-    with bootstrap_v11._connect(settings, settings.target_database) as connection:
+    with psycopg.connect(
+        host=settings.host,
+        port=settings.port,
+        user=settings.user,
+        password=settings.password,
+        dbname=settings.target_database,
+        row_factory=dict_row,
+    ) as connection:
         reconcile_values_v11.begin_read_only_snapshot(connection)
         live = connection.execute(
-            'SELECT count(*) FROM "source"."{}"'.format(TABLE)
-        ).fetchone()[0]
+            'SELECT count(*) AS row_count FROM "source"."{}"'.format(TABLE)
+        ).fetchone()["row_count"]
         if live != contract.expected_rows:
             raise SystemExit(
                 f"count FAILED: live {live} != source {contract.expected_rows}"

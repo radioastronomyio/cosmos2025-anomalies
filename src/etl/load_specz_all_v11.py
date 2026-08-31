@@ -111,20 +111,34 @@ def _table_rows(rows: list[dict[str, str]]) -> tuple[dict[str, str], ...]:
 
 
 def _ddl_statements(ddl_path: Path, rows: tuple[dict[str, str], ...]) -> list[str]:
-    """Extract this table's CREATE and COMMENT statements from tracked DDL."""
+    """Extract this table's CREATE and COMMENT statements from tracked DDL.
+
+    COMMENT statements embed multi-line evidence text, so a statement is
+    complete only when a line ends with the closing quote-semicolon.
+    """
     text = ddl_path.read_text(encoding="utf-8")
     statements: list[str] = []
     current: list[str] = []
+    terminator: str = ""
     for line in text.splitlines():
         if current:
             current.append(line)
-            if line.rstrip().endswith(";"):
+            if line.rstrip().endswith(terminator):
                 statements.append("\n".join(current))
                 current = []
-        elif line.startswith(f'CREATE TABLE "source"."{TABLE}"'):
-            current.append(line)
+            continue
+        if line.startswith(f'CREATE TABLE "source"."{TABLE}"'):
+            current = [line]
+            terminator = ");"
+            if line.rstrip().endswith(terminator):
+                statements.append("\n".join(current))
+                current = []
         elif line.startswith(f'COMMENT ON COLUMN "source"."{TABLE}".'):
-            statements.append(line)
+            current = [line]
+            terminator = "';"
+            if line.rstrip().endswith(terminator):
+                statements.append("\n".join(current))
+                current = []
     if current:
         raise SystemExit("DDL FAILED: unterminated statement slice")
     create = [s for s in statements if s.startswith("CREATE TABLE")]

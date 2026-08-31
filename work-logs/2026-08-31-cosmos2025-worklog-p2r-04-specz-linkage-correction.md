@@ -277,3 +277,39 @@ repeatably (comments compared against the dictionary-generated contract).
 | Live inventory | 12 relations, zero views, owner `clusteradmin_pg01` throughout |
 
 Gate 4.4 commit: see SHA table at close.
+
+### Gate 4.5 — Load the measurement-level mirror and declare the seal
+
+`doppler run --project ml01 --config dev -- python src/etl/load_specz_all_v11.py
+--load` under principal `clusteradmin_pg01` (verified equal to the
+default-privilege owner before any DDL).
+
+| Check | Result |
+|---|---|
+| Source pin | manifest SHA-256 `30675493d98014b23900d41fbcdd6157f5fc64962be22755a6077658d3068fd3` == freshly observed; bytes 129,343,680 == observed |
+| DDL | tracked `schema_v11.sql` byte-checked against fresh generation first; 33 extracted statements (1 CREATE + 32 COMMENT) executed inside the load transaction |
+| Loaded rows | 482,579 == source rows (prior 482,579 recorded as expectation, not forced) |
+| `Id_specz` | 482,579 non-null and distinct (gate 4.1 property) |
+| Columns / comments | 32 / 32, equal to dictionary count; comments compared against the dictionary-generated contract |
+| Analyst grant | `has_table_privilege` true AND effective session-authorized SELECT of 482,579 rows — verified, not assumed from default privileges |
+| Protected tables | seven masters + three supplements + renamed galaxy-level table unchanged by row count and seeded digest (seed modulus 977, offset 3) |
+
+Independent value reconciliation (`reconcile_specz_all_v11.py`, load path not
+reused): source re-read fresh once; 20,000-row seeded row sample (seed
+12,006,315,477,097,142,501, derivation
+`sha256_uint64_seed_plus_zero_based_ordinal_lowest_rank_v1`, sample digest
+`737021a2d756d60e5146acbb35d8e0e4b54c104c4016f20f0da3c9fc67457326`); every one
+of the 32 columns fetched and compared in both directions from one
+repeatable-read read-only snapshot; 640,000 row-column comparisons; **zero
+mismatches**; no ledger created. NULLs reconcile only against FITS masks and
+NaN by the canonical-cell machinery, so a database NULL against a finite
+sentinel would have been a mismatch.
+
+**LOAD SEAL (declared per spec Reversal section):** `source.specz_compilation_all`
+has passed row-count, key-uniqueness, null-encoding, and full-coverage value
+reconciliation checks, and `specz_compilation_unique` passed post-rename
+re-verification at gate 4.4. From this point the loaded data is validated
+work: reversal of administrative, documentation, conformance-generation, or
+verifier-code failure is repair in place; dropping or reloading the sealed
+table requires explicit operator authorization. Destructive-retry budget
+remains 2 of 2 (none used). Gate 4.5 commit: see SHA table at close.
