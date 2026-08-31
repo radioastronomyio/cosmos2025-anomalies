@@ -228,3 +228,30 @@ provenance, schema, scratch, conformance, docs, verification surface,
 reconciliation, bootstrap); the slow live dictionary byte-identity check
 re-runs the full rebuild and is recorded at close. Gate 4.2 commit: see SHA
 table at close.
+
+### Gate 4.3 — DDL generation and scratch verification
+
+`schema_v11.sql` was regenerated from the extended dictionary in the gate 4.2
+pass (12 mirrors + provenance = 13 relations, no view). The live disposable
+scratch verification ran under Doppler `ml01/dev` on PostgreSQL 16.15:
+
+| Observation | Value |
+|---|---|
+| Relations created in scratch `source` | 13 tables, 0 views |
+| Mirror columns / provenance columns | 1,448 / 13 |
+| Comments | 1,461 (1,448 dictionary + 13 provenance contract) |
+| Array-shape checks / constraints | 166 / 193 (includes `specz_compilation_all_id_specz` PRIMARY KEY) |
+| Column-set assertion | dictionary-to-DDL equality asserted in both directions by tuple comparison |
+| New-table primary key | `Id_specz`, present because gate 4.1 measured 482,579 distinct of 482,579; no other key invented |
+| Mutation: wrong array cardinality | rejected (`photometry_primary_flux_aper_hst_f814w_array_shape_...`) |
+| Mutation: NULL arrays | 7 dependency rows accepted |
+| Mutation: one dictionary row removed | fails with `expected 1448, observed 1447` |
+| Cleanup | scratch database dropped; 0 remaining; sealed databases and analyst role unchanged |
+
+Boundary repair recorded: `_assert_protected_precondition` in
+`verify_schema_v11_scratch.py` still asserted Gate 3.6 pre-creation absence of
+`cosmos2025_v11` and the analyst role, which is false for every post-seal run.
+It now asserts presence-plus-identity (both sealed databases and the role
+present and unchanged across the run), and the summary keys report
+`sealed_databases_unchanged`/`analyst_role_unchanged`. Gate 4.3 commit: see
+SHA table at close.
