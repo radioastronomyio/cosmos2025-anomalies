@@ -53,6 +53,41 @@ log = logging.getLogger(__name__)
 
 REPO_ROOT = "/opt/agents/repos/cosmos2025-anomalies"
 
+# Destructive-run fence. This script TRUNCATEs and reloads the ``cosmos2025``
+# (v1) database, which upstream replaced in place and which therefore cannot be
+# rebuilt from source. It is retained for provenance: it records how v1 was
+# constructed, including the sentinel-to-NULL conversion in ``convert_sentinels``
+# that the v1.1 mirror deliberately does not perform. Reading it is safe;
+# running it is not. The v1.1 pipeline is src/etl/bootstrap_v11.py, which never
+# imports or invokes this module.
+DESTRUCTIVE_RUN_ENV = "COSMOS2025_ALLOW_V1_DESTRUCTIVE_RELOAD"
+DESTRUCTIVE_RUN_TOKEN = "i-understand-v1-cannot-be-rebuilt"
+
+
+def require_destructive_run_authorization(environment=os.environ):
+    """Refuse to run unless the operator has explicitly authorized v1 destruction.
+
+    The pipeline's first database action truncates every loaded table in the
+    ``catalog`` schema of ``cosmos2025``. That database is an irreplaceable
+    read-only baseline, so an accidental invocation is unrecoverable.
+    Authorization is an exact environment token rather than a command-line flag
+    so that it cannot arrive from shell history or a copied command line.
+
+    Args:
+        environment: Mapping consulted for the authorization token.
+
+    Raises:
+        SystemExit: If the exact token is absent.
+    """
+    if environment.get(DESTRUCTIVE_RUN_ENV) != DESTRUCTIVE_RUN_TOKEN:
+        raise SystemExit(
+            "refusing to run: this script TRUNCATEs and reloads the cosmos2025 "
+            "(v1) database, which cannot be rebuilt because upstream replaced "
+            "the source downloads in place. For the v1.1 mirror use "
+            "src/etl/bootstrap_v11.py instead. To authorize destruction of v1 "
+            f"anyway, set {DESTRUCTIVE_RUN_ENV}={DESTRUCTIVE_RUN_TOKEN}."
+        )
+
 
 def load_config():
     """Load data_paths.yaml from the repository configs directory.
@@ -717,6 +752,8 @@ def main():
         6. Bulk-load parquet files + supplementary catalogs
         7. Run inline verification checks
     """
+    require_destructive_run_authorization()
+
     t0 = time.time()
     config = load_config()
 
