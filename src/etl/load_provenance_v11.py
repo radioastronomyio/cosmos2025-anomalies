@@ -568,7 +568,7 @@ def _verify_provenance_acl(connection: Any) -> dict[str, bool]:
 
 
 def verify_provenance_analyst(
-    settings: bootstrap_v11.Settings, *, expected_rows: int = 11
+    settings: bootstrap_v11.Settings, *, expected_rows: int = 12
 ) -> dict[str, Any]:
     """Prove analyst SELECT and deterministic write/DDL/GRANT denial."""
     operations = (

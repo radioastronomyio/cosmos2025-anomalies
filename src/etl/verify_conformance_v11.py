@@ -436,7 +436,7 @@ def run_live(settings: bootstrap_v11.Settings) -> dict[str, object]:
     }
     gate38_matrix = load_supplements_v11.verify_gate38_analyst(settings, gate38_counts)
     provenance_matrix = load_provenance_v11.verify_provenance_analyst(
-        settings, expected_rows=11
+        settings, expected_rows=12
     )
     after = bootstrap_v11.capture_v1_fingerprint(settings)
     if before.sha256 != after.sha256:

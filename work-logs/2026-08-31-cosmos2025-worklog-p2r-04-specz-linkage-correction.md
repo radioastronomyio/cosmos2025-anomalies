@@ -313,3 +313,33 @@ work: reversal of administrative, documentation, conformance-generation, or
 verifier-code failure is repair in place; dropping or reloading the sealed
 table requires explicit operator authorization. Destructive-retry budget
 remains 2 of 2 (none used). Gate 4.5 commit: see SHA table at close.
+
+### Gate 4.6 — Provenance
+
+`--register-provenance` under Doppler `ml01/dev`:
+
+| Check | Result |
+|---|---|
+| Provenance rows | 12; `table_name` set equals the live `source` relations minus `provenance` |
+| New row dual hashes | manifest `30675493d98014b2...` and observed `30675493d98014b2...` both present and equal, computed independently (declared from the manifest CSV row; observed from a fresh file read inside `pin_manifest_input`) |
+| `loaded_rows` | 482,579 == live count |
+| `manifest_ref_sha256` | `5941abbbcde4e27d706ec1a49456482cb779f9c77e6cf573b7313a0450ee4c7e`, equal to the session's fresh hash of the on-disk manifest CSV |
+| `load_timestamp` | database `transaction_timestamp()` of the registration transaction |
+| Load transaction xmin | 11273678, single distinct xmin across all 482,579 rows |
+| Pre-existing rows | field-exact unchanged (the only prior change is the gate 4.4 `table_name`) |
+
+Authorized administrative action recorded: the live
+`photometry_primary.id_specz_khostovan25` column comment still carried the
+P2R-03 text after the gate 4.2 semantic note extended the dictionary contract.
+`--sync-link-comment` proved the live mirrors differed from the dictionary
+contract in exactly that one comment, applied the tracked-DDL statement, and
+re-verified zero differences across all 1,448 mirror comments. This is the
+single `photometry_primary` change the spec authorizes.
+
+Live conformance surface over the completed mirror (gate 4.6 post-state):
+1,448 case assertions, 13 objects, 1,461 columns, 193 constraints, 12
+provenance rows; all analyst matrices green (SELECT allowed; 78 denials at
+SQLSTATE 42501 across masters, supplements, and provenance); v1 fingerprint
+unchanged (`82fb7e09...`); handoff security intact; direct analyst network
+authentication remains a pending operator action and is not claimed.
+Gate 4.6 commit: see SHA table at close.

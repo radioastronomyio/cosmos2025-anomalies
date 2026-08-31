@@ -68,6 +68,8 @@ from src.etl import (  # noqa: E402
 
 TABLE = "specz_compilation_all"
 OLD_UNIQUE_TABLE = "specz_compilation_unique"
+LINK_COMMENT_TABLE = "photometry_primary"
+LINK_COMMENT_COLUMN = "id_specz_khostovan25"
 EXPECTED_NATIVE_COLUMNS = 32
 DIGEST_MODULUS = 977
 DIGEST_OFFSET = 3
@@ -477,16 +479,107 @@ def _register_provenance(
 # =============================================================================
 # Entry Point
 # =============================================================================
+def _sync_link_comment(
+    connection: psycopg.Connection,
+    settings: bootstrap_v11.Settings,
+) -> dict[str, object]:
+    """Apply the one dictionary-authorized comment change to photometry_primary.
+
+    P2R-04 gate 4.2 added a sourced semantic note to
+    `photometry_primary.id_specz_khostovan25`; the live column still carries
+    the P2R-03 comment. The spec authorizes exactly this column comment and
+    no other photometry_primary change: the sync first proves the live table
+    differs from the dictionary contract in this one comment only, applies
+    the tracked-DDL statement, and re-verifies zero differences across every
+    mirror comment.
+    """
+    rows = bootstrap_v11._read_dictionary(settings)
+    expected = {
+        (item.table, item.column): item.text
+        for item in generate_schema_v11.column_comment_contract(rows)
+    }
+    live: dict[tuple[str, str], str] = {}
+    for table, column, comment in connection.execute(
+        "SELECT c.relname, a.attname, d.description "
+        "FROM pg_attribute a "
+        "JOIN pg_class c ON c.oid = a.attrelid "
+        "JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "LEFT JOIN pg_description d "
+        "ON d.objoid = c.oid AND d.objsubid = a.attnum "
+        "WHERE n.nspname = 'source' AND c.relkind = 'r' "
+        "AND c.relname <> 'provenance' "
+        "AND a.attnum > 0 AND NOT a.attisdropped"
+    ).fetchall():
+        live[(table, column)] = comment or ""
+    differences = sorted(
+        key for key in expected if live.get(key) != expected[key]
+    )
+    if differences != [(LINK_COMMENT_TABLE, LINK_COMMENT_COLUMN)]:
+        raise SystemExit(
+            f"comment sync FAILED: live mirrors differ from the dictionary "
+            f"contract at {differences}; only {LINK_COMMENT_TABLE}."
+            f"{LINK_COMMENT_COLUMN} is authorized"
+        )
+    ddl_lines = settings.ddl_path.read_text(encoding="utf-8").splitlines()
+    prefix = (
+        f'COMMENT ON COLUMN "source"."{LINK_COMMENT_TABLE}".'
+        f'"{LINK_COMMENT_COLUMN}"'
+    )
+    start = next(
+        index for index, line in enumerate(ddl_lines) if line.startswith(prefix)
+    )
+    statement_lines = [ddl_lines[start]]
+    for line in ddl_lines[start + 1 :]:
+        statement_lines.append(line)
+        if line.rstrip().endswith("';"):
+            break
+    else:
+        raise SystemExit("comment sync FAILED: unterminated comment statement")
+    statement = "\n".join(statement_lines)
+    connection.execute(statement)
+    connection.commit()
+    after = {
+        (table, column): (comment or "")
+        for table, column, comment in connection.execute(
+            "SELECT c.relname, a.attname, d.description "
+            "FROM pg_attribute a "
+            "JOIN pg_class c ON c.oid = a.attrelid "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "LEFT JOIN pg_description d "
+            "ON d.objoid = c.oid AND d.objsubid = a.attnum "
+            "WHERE n.nspname = 'source' AND c.relkind = 'r' "
+            "AND c.relname <> 'provenance' "
+            "AND a.attnum > 0 AND NOT a.attisdropped"
+        ).fetchall()
+    }
+    remaining = sorted(key for key in expected if after.get(key) != expected[key])
+    if remaining:
+        raise SystemExit(f"comment sync FAILED: remaining differences {remaining}")
+    return {
+        "applied": f"{LINK_COMMENT_TABLE}.{LINK_COMMENT_COLUMN}",
+        "mirror_comment_differences_after": 0,
+        "statement_source": "tracked schema_v11.sql",
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=bootstrap_v11.DEFAULT_CONFIG_PATH)
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--verify-only", action="store_true")
     parser.add_argument("--register-provenance", action="store_true")
+    parser.add_argument("--sync-link-comment", action="store_true")
     args = parser.parse_args()
-    selected = [name for name in ("load", "verify_only", "register_provenance") if getattr(args, name)]
+    selected = [
+        name
+        for name in ("load", "verify_only", "register_provenance", "sync_link_comment")
+        if getattr(args, name)
+    ]
     if len(selected) != 1:
-        raise SystemExit("exactly one of --load, --verify-only, --register-provenance")
+        raise SystemExit(
+            "exactly one of --load, --verify-only, --register-provenance, "
+            "--sync-link-comment"
+        )
 
     settings = bootstrap_v11.resolve_settings(args.config)
     rows = bootstrap_v11._read_dictionary(settings)
@@ -498,6 +591,9 @@ def main() -> None:
     pin = _pin(settings, table_rows)
 
     with bootstrap_v11._connect(settings, settings.target_database) as connection:
+        if args.sync_link_comment:
+            print(json.dumps(_sync_link_comment(connection, settings), indent=2))
+            return
         principal = _assert_principal(connection)
         if args.load:
             existing = connection.execute(
