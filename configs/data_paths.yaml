@@ -3,7 +3,7 @@
 # All paths are ML01-relative unless noted. Inspection, ETL, and analysis
 # code load this file rather than hardcoding paths.
 #
-# Database credentials: injected from Doppler project `ml01`, config `prd`,
+# Database credentials: injected from Doppler project `ml01`, config `dev`,
 # and not stored here. See the "database" section for env var names.
 #
 # Path-existence contract: every local filesystem path below exists on disk
@@ -40,10 +40,9 @@ supplementary:
 
 specz:
   # Khostovan et al. spec-z compilation checkout (git, LFS-backed).
-  # NOTE (P2R-01 gate 1.7): the LFS-tracked FITS/PKL files in this checkout
-  # are pointer files on this box, not materialized data. Recorded as a
-  # readiness-review finding; do not treat these paths as data until
-  # materialized by the operator.
+  # The local FITS/PKL holdings are materialized. Gate 3.5 SHA-256-pinned the
+  # exact unique FITS consumed by the verified Gate 3.8 load; this records
+  # observed local state and does not claim a remote or LFS operation.
   compilation_root: /opt/agents/repos/reference-files/speczcompilation
   unique_fits: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/specz_compilation_COSMOS_DR1.1_unique.fits
 
@@ -55,21 +54,100 @@ processed:
   derived_dir: /opt/agents/repos/cosmos2025-anomalies/staging/derived
   staging_dir: /opt/agents/repos/cosmos2025-anomalies/staging
 
+# Repository data products built deterministically from the immutable sources.
+dictionary:
+  columns_v11: /opt/agents/repos/cosmos2025-anomalies/data/dictionary/columns-v11.csv
+  schema_v11_sql: /opt/agents/repos/cosmos2025-anomalies/src/etl/schema_v11.sql
+  schema_v11_docs: /opt/agents/repos/cosmos2025-anomalies/docs/reference/schema-v11.md
+  conformance_cases_v11: /opt/agents/repos/cosmos2025-anomalies/src/etl/conformance_cases_v11.py
+  sentinel_candidates_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/sentinel-candidates-v11.md
+
+# Pinned semantic evidence consumed read-only by the load-dictionary builder.
+# The Yang PDF cache is outside the repository and immutable source-data root.
+semantic_sources:
+  master_descriptions: /mnt/nvme01/cosmos-web-dr1-catalog/cosmosweb-dr1-detailed-column-descriptions.txt
+  yang_v1_pdf: /opt/agents/cache/cosmos2025/references/yang-2026-arxiv-2606.14869v1.pdf
+  lss_readme: /mnt/nvme01/cosmos-web-dr1-catalog/hatamnia-lss/readme.txt
+  specz_root_readme: /opt/agents/repos/reference-files/speczcompilation/README.md
+  specz_schema_readme: /opt/agents/repos/reference-files/speczcompilation/specz_compilation/README.md
+  unit_conventions: /opt/agents/repos/cosmos2025-anomalies/docs/reference/unit-conventions.md
+  etl_v2_spec: /opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
+
+# Existing immutable-source pins consumed read-only by ETL v2 preflight.
+# Gate 3.5 validates these files but never regenerates or replaces them.
+provenance:
+  source_manifest_v11: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1.csv
+  cigale_seds_aggregate_pin: /opt/agents/repos/cosmos2025-anomalies/docs/reference/data-manifest-v1.1-cigale-seds.csv
+
+# Tracked-only inputs and output for the offline Gate 3.13 approval surface.
+verification_surface:
+  cumulative_worklog: /opt/agents/repos/cosmos2025-anomalies/work-logs/2026-08-16-cosmos2025-worklog-p2r-03-etl-v2-mirror.md
+  science_opportunities: /opt/agents/repos/cosmos2025-anomalies/docs/research/science-opportunities.md
+  research_index: /opt/agents/repos/cosmos2025-anomalies/docs/research/README.md
+  central_spec_archive: /opt/agents/repos/spec/2026-08/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md
+  output: /opt/agents/repos/cosmos2025-anomalies/docs/research/etl-v2-verification.md
+
 # ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------
 database:
+  # Bootstrap and verification transport only. Runtime consumers use the
+  # database-specific read-only contract below after operator cutover.
   host_env: PGSQL01_HOST          # 10.25.20.8
   port_env: PGSQL01_PORT          # 5432
   user_env: PGSQL01_ADMIN_USER
   password_env: PGSQL01_ADMIN_PASSWORD
+  maintenance_database: postgres
+  scratch_prefix: cosmos2025_v11_scratch_
   database_name: cosmos2025
   schema: catalog
+  target_database: cosmos2025_v11
+  analyst_role: cosmos2025_v11_ro
+
+  # Retired source-of-truth database retained as a named read-only baseline.
+  baseline_v1:
+    database_name: cosmos2025
+    schema: catalog
+    access: read_only
+
+  # Runtime ETL v2 contract. Direct ML01 analyst HBA coverage remains a
+  # pending operator action; these are names only, never credential values.
+  runtime_v11:
+    host_env: PGSQL01_HOST
+    port_env: PGSQL01_PORT
+    database_env: PGSQL01_COSMOS2025_V11_DB
+    user_env: PGSQL01_COSMOS2025_V11_USER
+    password_env: PGSQL01_COSMOS2025_V11_PASSWORD
+    database_name: cosmos2025_v11
+    schema: source
+    access: read_only
 
   # Inject credentials through the ML01 scoped runtime:
-  #   doppler run --project ml01 --config prd -- python your_script.py
+  #   doppler run --project ml01 --config dev -- python your_script.py
   #
   # Python reads the injected values from os.environ by the names above.
+
+# ---------------------------------------------------------------------------
+# ETL v2 Gate 3.7 persistent bootstrap
+# ---------------------------------------------------------------------------
+etl_v2:
+  # COPY frames stay bounded in memory; each master table commits separately.
+  copy_batch_rows: 2000
+  # Halt before target creation unless the PostgreSQL data volume has 50 GiB free.
+  minimum_database_free_bytes: 53687091200
+
+# ---------------------------------------------------------------------------
+# ETL v2 Gate 3.11 read-only reconciliation
+# ---------------------------------------------------------------------------
+reconciliation:
+  sample_rows: 20000
+  wide_batch_rows: 500
+  batch_rows: 2000
+  mismatch_ledger: /opt/agents/repos/cosmos2025-anomalies/.superpowers/sdd/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror/gate-3-11-mismatches.jsonl
+
+handoff:
+  # Created once with O_EXCL and mode 0600 after load and role checks succeed.
+  cosmos2025_v11_env: /opt/agents/repos/cosmos2025-anomalies/internal-files/cosmos2025-v11.env
 
 # ---------------------------------------------------------------------------
 # Off-box holdings (storage server; NOT local paths, exempt from the

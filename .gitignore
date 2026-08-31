@@ -148,6 +148,8 @@ data/external/
 !data/.gitkeep
 # Pinned data manifest is a committed deliverable (spec P2R-01 gate 1.7)
 !docs/reference/data-manifest-v1.1.csv
+# ETL v2 unified load dictionary (spec P2R-03 gate 3.1)
+!data/dictionary/columns-v11.csv
 
 # FITS and astronomical data
 *.fits

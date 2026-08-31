@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""
+Script Name  : generate_conformance_v11.py
+Description  : Generate dictionary-driven ETL v2 conformance cases
+Repository   : cosmos2025-anomalies
+Author       : VintageDon (https://github.com/vintagedon/)
+Created      : 2026-08-18
+Link         : https://github.com/radioastronomyio/cosmos2025-anomalies
+
+Description
+-----------
+Generates one explicit conformance case for every sealed v1.1 dictionary row.
+The tracked output is a reviewable test input; it never replaces the sealed
+dictionary as the source of truth.
+
+Usage
+-----
+    python src/etl/generate_conformance_v11.py [--check]
+"""
+
+from __future__ import annotations
+
+# =============================================================================
+# Imports
+# =============================================================================
+
+import argparse
+import csv
+import json
+import sys
+from collections import Counter
+from dataclasses import asdict
+from pathlib import Path
+from pprint import pformat
+
+import yaml
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.etl import generate_schema_v11  # noqa: E402
+
+
+# =============================================================================
+# Configuration
+# =============================================================================
+
+MASTER_FAMILY = "master_catalog"
+SPECZ_FAMILY = "specz_compilation"
+DEFAULT_CONFIG_PATH = REPO_ROOT / "configs" / "data_paths.yaml"
+
+
+# =============================================================================
+# Contract helpers
+# =============================================================================
+
+
+def _case_group(row: dict[str, str]) -> str:
+    """Classify a row into the exact Gate 3.10 evidence split."""
+    if row["column_origin"] != "source_native":
+        return "metadata"
+    if row["source_family"] == MASTER_FAMILY:
+        return "master_native"
+    if row["source_family"] == SPECZ_FAMILY:
+        return "specz_native"
+    return "supplement_native"
+
+
+def _profile_row_count(row: dict[str, str]) -> int | None:
+    """Return one native field's physical population when it has profiles."""
+    if not row["profile_json"]:
+        return None
+    profiles = json.loads(row["profile_json"])["profiles"]
+    counts = {profile["row_count"] for profile in profiles}
+    if (
+        len(counts) != 1
+        or not profiles
+        or any(not isinstance(count, int) or count < 0 for count in counts)
+    ):
+        raise ValueError("profile row-count mismatch")
+    return counts.pop()
+
+
+def _table_row_counts(rows: list[dict[str, str]]) -> dict[str, int]:
+    """Derive every table population from its independently profiled fields."""
+    observed: dict[str, set[int]] = {}
+    for row in rows:
+        count = _profile_row_count(row)
+        if count is not None:
+            observed.setdefault(row["target_table"], set()).add(count)
+    if set(observed) != {row["target_table"] for row in rows} or any(
+        len(counts) != 1 for counts in observed.values()
+    ):
+        raise ValueError("table profile row-count mismatch")
+    return {table: counts.pop() for table, counts in observed.items()}
+
+
+def _boolean_field(row: dict[str, str], field: str) -> bool:
+    """Parse one sealed title-case boolean without truthy coercion."""
+    value = row[field]
+    if value not in {"True", "False"}:
+        raise ValueError(f"invalid sealed boolean: {field}")
+    return value == "True"
+
+
+def generate_cases(
+    rows: list[dict[str, str]],
+) -> tuple[dict[str, object], ...]:
+    """Generate one stable explicit case identity per dictionary row."""
+    generate_schema_v11.build_schema_contract(rows)
+    comments = {
+        (item.table, item.column): item.text
+        for item in generate_schema_v11.column_comment_contract(rows)
+    }
+    array_rows = (row for row in rows if row["target_type"].endswith("[]"))
+    arrays = {
+        (item.table, row["target_identifier"]): asdict(item)
+        for item, row in zip(
+            generate_schema_v11.array_check_contract(rows), array_rows, strict=True
+        )
+    }
+    table_row_counts = _table_row_counts(rows)
+    cases = tuple(
+        {
+            "case_id": f"{index:04d}:{row['target_table']}.{row['target_identifier']}",
+            "case_group": _case_group(row),
+            "table": row["target_table"],
+            "column": row["target_identifier"],
+            "target_type": row["target_type"],
+            "column_origin": row["column_origin"],
+            "comment": comments[(row["target_table"], row["target_identifier"])],
+            "element_count": int(row["element_count"]),
+            "array_constraint_name": (
+                arrays.get((row["target_table"], row["target_identifier"]), {}).get(
+                    "name"
+                )
+            ),
+            "array_constraint_expression": (
+                arrays.get((row["target_table"], row["target_identifier"]), {}).get(
+                    "expression"
+                )
+            ),
+            "source_family": row["source_family"],
+            "source_file": row["source_file"],
+            "source_locator": row["source_locator"],
+            "source_column": row["source_column"],
+            "source_type": row["source_type"],
+            "has_fits_mask": _boolean_field(row, "has_fits_mask"),
+            "has_nan": _boolean_field(row, "has_nan"),
+            "expected_source_rows": table_row_counts[row["target_table"]],
+        }
+        for index, row in enumerate(rows, start=1)
+    )
+    if len(cases) != 1_416 or len({case["case_id"] for case in cases}) != len(cases):
+        raise ValueError("sealed conformance case boundary mismatch")
+    return cases
+
+
+def generate_module(rows: list[dict[str, str]]) -> str:
+    """Render a deterministic importable module with every explicit case."""
+    cases = generate_cases(rows)
+    groups = Counter(str(case["case_group"]) for case in cases)
+    counts = {
+        "master_native": groups["master_native"],
+        "supplement_native": groups["supplement_native"],
+        "specz_native": groups["specz_native"],
+        "metadata": groups["metadata"],
+        "native_total": sum(case["column_origin"] == "source_native" for case in cases),
+        "array": sum(case["array_constraint_name"] is not None for case in cases),
+    }
+    return (
+        "#!/usr/bin/env python3\n"
+        '"""Generated Gate 3.10 dictionary conformance cases; do not edit."""\n\n'
+        "# fmt: off\n"
+        f"CASE_COUNTS = {pformat(counts, sort_dicts=False, width=100)}\n\n"
+        f"CASES = {pformat(cases, sort_dicts=False, width=100)}\n"
+        "# fmt: on\n"
+    )
+
+
+def write_or_check(
+    rows: list[dict[str, str]], output_path: Path, *, check: bool
+) -> None:
+    """Write generated bytes or prove the tracked artifact is identical."""
+    generated = generate_module(rows).encode("utf-8")
+    if check:
+        if not output_path.exists() or output_path.read_bytes() != generated:
+            raise ValueError(f"generated conformance cases differ at {output_path}")
+        return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_bytes(generated)
+
+
+def configured_paths(config_path: Path) -> tuple[Path, Path]:
+    """Resolve the sealed dictionary and generated output from configuration."""
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    try:
+        values = config["dictionary"]
+        return Path(values["columns_v11"]), Path(values["conformance_cases_v11"])
+    except (KeyError, TypeError) as exc:
+        raise ValueError("missing dictionary conformance path configuration") from exc
+
+
+def _read_dictionary(path: Path) -> list[dict[str, str]]:
+    """Read sealed dictionary rows without changing order or serialization."""
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def main() -> None:
+    """Generate or byte-check the configured explicit conformance cases."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    dictionary_path, output_path = configured_paths(args.config)
+    try:
+        write_or_check(_read_dictionary(dictionary_path), output_path, check=args.check)
+    except ValueError as exc:
+        raise SystemExit(f"conformance generation FAILED: {exc}") from exc
+    action = "checked" if args.check else "wrote"
+    print(f"conformance cases {action}: 1416 cases at {output_path}")
+
+
+# =============================================================================
+# Entry Point
+# =============================================================================
+
+if __name__ == "__main__":
+    main()
