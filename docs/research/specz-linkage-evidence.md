@@ -27,15 +27,24 @@ closed question with a recommendation, and decides none of them. Every number
 below is reproducible from committed evidence commands against the pinned
 sources and the sealed mirror; sources are cited per finding.
 
-Evidence commands: gate 4.1 `src/etl/verify_specz_linkage_v11.py`
-(SHA-256 `46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650`),
-gate 4.7 `src/etl/characterize_specz_linkage_v11.py`; per-gate runtime
-evidence in the worklog. Surfaces: `source.photometry_primary` (784,016
+Evidence commands: corrected gate 4.1
+`src/etl/verify_specz_linkage_v11.py` (SHA-256
+`2db4890d5f1923db3debeb11b83f13fc99a393f2013daf0f2ed9523865596d81`),
+corrected gate 4.7 `src/etl/characterize_specz_linkage_v11.py` (SHA-256
+`83eb96b9c547d157fcb4a6313087477dc671ad7d324fd00ff6ff8d59d25aeb30`);
+per-gate runtime evidence in the worklogs. Surfaces:
+`source.photometry_primary` (784,016
 rows), `source.specz_compilation_unique` (261,975 rows, galaxy level),
 `source.specz_compilation_all` (482,579 rows, measurement level), and the two
 pinned FITS artifacts
 (`specz_compilation_COSMOS_DR1.1_unique.fits` SHA-256 `6ffd1145...`,
 `specz_compilation_COSMOS_DR1.1_all.fits` SHA-256 `30675493...`).
+
+Coordinate-basis convention: throughout this surface, an
+"entry-to-catalog separation" uses the named compilation surface's
+`ra_corrected/dec_corrected` against `photometry_primary.ra/dec` at that
+entry's `Id_COSMOS25`. Every different source-entry pairing names both
+coordinate surfaces inline.
 
 ---
 
@@ -49,15 +58,24 @@ numbers and their source, and a closed question.
 `photometry_primary.id_specz_khostovan25` values do not resolve against the
 DR1.1 compilation's `Id_specz` namespace except coincidentally.
 
-Evidence (gate 4.1 command, worklog gate 4.1): 37,219 distinct non-sentinel
-(`!= -999`) values; 24,364 present in galaxy-level `Id_specz`, 12,855 absent;
-stored range 223–165,312 against compilation `Id_specz` range 1–487,666
-(stored span 33.85% of the compilation range; 0 values exceed the compilation
-maximum); resolving values sit a median 4,467.3 arcsec (p90 6,047.6", max
-8,727.4", n=24,364) from the catalog source, versus the compilation's own
-crossmatch median 0.0840" / max 0.9983" (n=92,359) on the same coordinates.
-The upstream description ("Unique ID of the source corresponding to the
-Id_specz... -999 if no specz match",
+Evidence (corrected gate 4.1 command, amendment worklog gate A1.2): 37,219
+distinct non-sentinel (`!= -999`) values; 24,364 present in galaxy-level
+`Id_specz`, 12,855 absent; stored range 223–165,312 against compilation
+`Id_specz` range 1–487,666 (stored span 33.85% of the compilation range; 0
+values exceed the compilation maximum). For the all-links population of
+37,219 catalog sources, separations between `photometry_primary.ra/dec` and
+the carried link's measurement-level
+`specz_compilation_all.ra_corrected/dec_corrected` have median 4,054.34
+arcsec, p90 5,956.72 arcsec, and max 9,085.02 arcsec. Separately, for the
+24,364-link resolving subset, separations between
+`photometry_primary.ra/dec` and the selected galaxy-level
+`specz_compilation_unique.ra_corrected/dec_corrected` have median 4,245.57
+arcsec, p90 6,061.36 arcsec, and max 9,085.02 arcsec. The compilation's own
+crossmatch population of 92,359 measurement-level rows, using
+`specz_compilation_all.ra_corrected/dec_corrected` against the catalog
+`photometry_primary.ra/dec` named by `Id_COSMOS25`, has median 0.0840 arcsec
+and max 0.9983 arcsec. The upstream description ("Unique ID of the source
+corresponding to the Id_specz... -999 if no specz match",
 `cosmosweb-dr1-detailed-column-descriptions.txt` section 1, line 36) is what
 upstream said; the project records the non-resolution as a semantic note on
 the dictionary row and as the live column comment, and the values are
@@ -84,11 +102,15 @@ the compilation into `photometry_primary`? Yes.**
 
 ### F-03 — The defective path's geometry is field-scale, not a crossmatch
 
-Evidence (gate 4.1 command): catalog-source-to-named-entry separations over
-the 24,364 resolving values: min 45.59", median 4,467.3" (≈1.24°), p90
-6,047.6", p99 7,121.9", max 8,727.4"; the compilation's own crossmatch over
-the same surfaces: min 0.00013", median 0.0840", p90 0.2322", p99 0.6381",
-max 0.9983". Prior discrepancy recorded as finding F-06.
+Evidence (corrected gate 4.1 command, amendment worklog gate A1.2):
+
+| Population and coordinate basis | n | min | median | p90 | p99 | max |
+|---|---:|---:|---:|---:|---:|---:|
+| All links: catalog `photometry_primary.ra/dec` to carried measurement-level `specz_compilation_all.ra_corrected/dec_corrected` | 37,219 | 0.00490" | 4,054.34" | 5,956.72" | 7,219.43" | 9,085.02" |
+| Resolving subset: catalog `photometry_primary.ra/dec` to selected galaxy-level `specz_compilation_unique.ra_corrected/dec_corrected` | 24,364 | 0.00604" | 4,245.57" | 6,061.36" | 7,379.07" | 9,085.02" |
+| Compilation crossmatch: measurement-level `specz_compilation_all.ra_corrected/dec_corrected` to catalog `photometry_primary.ra/dec` named by `Id_COSMOS25` | 92,359 | 0.00013" | 0.0840" | 0.2322" | 0.6381" | 0.9983" |
+
+The corrected all-links prior reproduction is recorded in F-06.
 
 **Closed question F-03-Q: Do the two geometries describe one crossmatch and
 one broken pointer rather than two crossmatches disagreeing about hard
@@ -121,18 +143,20 @@ Both artifacts are shipped upstream; neither is derived in this repository.
 **Closed question F-05-Q: Is the galaxy-level table a shipped product rather
 than something this repository may rederive? Yes.**
 
-### F-06 — Prior-discrepancy finding (recorded, non-halting)
+### F-06: The defective-path median prior reproduces on its stated basis
 
-The investigation prior for the defective-path median was 4,054 arcsec; the
-gate 4.1 reproduction measured 4,467.3 arcsec on the stated basis (resolving
-values, galaxy-level corrected coordinates). Diagnostic variants: identical
-on original coordinates (4,467.3"), 4,300.4" over all 37,219 values at
-measurement level, 1,351.6" median on a stored-`ra_COSMOS25` basis covering
-only 3,141 rows (worklog gate 4.1). The prior's exact basis is not
-reconstructible; the conclusion of F-03 is invariant under every variant.
+The investigation prior is the all-links defective-path median. For all
+37,219 catalog sources carrying non-sentinel links, the corrected gate 4.1
+command pairs each source's `photometry_primary.ra/dec` with its carried
+measurement-level `specz_compilation_all.ra_corrected/dec_corrected` entry.
+That population reproduces the prior at 4,054.34 arcsec to two decimals. An
+independent dictionary association and spherical-law-of-cosines calculation
+returns 4,054.341555895 arcsec, only 1.44e-09 arcsec from the primary result
+of 4,054.341555894 arcsec. The earlier claim that the prior's basis was
+unreconstructible was wrong.
 
-**Closed question F-06-Q: Does the discrepancy change any conclusion of this
-unit? No.**
+**Closed question F-06-Q: Does the all-links reproduction agree with the
+investigation prior and preserve the conclusion of F-03? Yes.**
 
 ### F-07 — Process finding: the P2R-03 verification surface could not regenerate post-extension (repaired)
 
@@ -152,28 +176,46 @@ byte-unchanged and still reproducible from pinned bytes? Yes.**
 Population A: catalog sources with measurement-level `Id_COSMOS25` entries
 but no galaxy-level entry.
 
-Evidence (gate 4.7 command, full per-source enumeration in the run's JSON
+Evidence (corrected gate 4.7 command, full per-source enumeration in the run's JSON
 output): 1,032 sources over 1,559 entries; every entry carries `Priority = 0`
 (verified, not assumed). Entries per source: 716×1, 213×2, 58×3, 22×4, 13×5,
 1×6, 4×7, 1×10, 2×11, 2×12. Entry-to-catalog separation: median 0.130", p90
-0.380", max 0.982" — real sub-arcsecond matches. Confidence values across
-entries: 0→415, 50→387, 80→303, 85→80, 95→157, 97→217; flags: 4→211, 0→399,
+0.380", max 0.982" for the 1,559 measurement-level entries, using
+`specz_compilation_all.ra_corrected/dec_corrected` against the catalog
+`photometry_primary.ra/dec` named by `Id_COSMOS25`. These are real
+sub-arcsecond matches. Confidence values across entries: 0→415, 50→387,
+80→303, 85→80, 95→157, 97→217; flags: 4→211, 0→399,
 1→383, 2→303, 3→156, 9→80, others ≤14.
 
-Representative destination (nearest `Priority = 1` entry by
-corrected-coordinate separation within 5", a compilation self-crossmatch;
-GroupID is not the dedup key — 139,858 rows carry -1, and 768 groups lack a
-Priority=1 row, worklog gate 4.7): found for 694 sources; **all 694
-representatives name a different catalog source** (0 name the same source);
-entry-to-representative separation median 0.873" (max 4.977");
-catalog-source-to-destination separation median 1.167", p90 4.143", max
-5.756". 338 sources have no `Priority = 1` entry within 5" of any of their
-entries.
+The representative search takes one nearest `Priority = 1` entry per
+population-A source by measurement-level
+`specz_compilation_all.ra_corrected/dec_corrected` separation, then applies
+each radius to that same pairwise candidate:
 
-**Closed question F-08-Q: Is the neighbour-promotion hypothesis supported by
-the representative-destination measurement? Yes for the 694 with a nearby
-representative; undetermined for the 338 without one** — the evidence does
-not establish where their representatives went.
+| Radius | Names same catalog source | Names other catalog source | No candidate within radius | Population-A sources |
+|---:|---:|---:|---:|---:|
+| 3" | 0 | 535 | 497 | 1,032 |
+| 5" | 0 | 694 | 338 | 1,032 |
+| 10" | 0 | 956 | 76 | 1,032 |
+
+The 5-arcsec 694 / 338 split is not stable across the tested radii. At 5
+arcsec, **all 694 representatives name a different catalog source** and none
+names the same source. For those 694 pairs, the entry-to-representative
+separation using the two measurement-level
+`specz_compilation_all.ra_corrected/dec_corrected` positions has median
+0.873" and max 4.977". For the same 694 pairs, the population-A catalog
+source `photometry_primary.ra/dec` to the representative-named destination
+catalog source `photometry_primary.ra/dec` separation has median 1.167", p90
+4.143", and max 5.756". This is pairwise nearest-candidate classification
+only. It constructs no connected components, is not transitive across A-B
+and B-C proximity chains, and has no multi-member component count.
+
+**Closed question F-08-Q: Does the representative-destination measurement
+establish a radius-stable recovery classification? No.** At 5 arcsec, all
+694 representatives name another catalog source, but the other-source and
+no-candidate counts move materially at 3 and 10 arcsec. The evidence does not
+establish a selection rule or the destination of sources without a candidate
+inside a tested radius.
 
 ### F-09 — Recovery population B and redshift disagreement
 
@@ -194,21 +236,50 @@ redshift disagreement? Yes** — 57 of 132 comparable groups exceed
 
 ### F-10 — The defective column is quality-conditioned (selection function)
 
-Evidence (gate 4.7 command): of 37,219 flagged sources, 24,364 resolve and
-12,855 do not. Galaxy-level entries attached via the corrected path carry
-these full confidence distributions — resolving sources' entries: 97→8,693,
-95→2,711, 80→3,167, 50→2,719, 0→3,778 (21,700 entries); non-resolving
-sources' entries: 97→5,915, 95→1,033, 80→1,845, 50→1,484, 0→1,743 (12,412
-entries). Flag distributions are reported in full in the gate 4.7 output
-(e.g. flag 4: 8,549 resolving vs 5,782 non-resolving; flag 9: 623 vs 587).
-Flagged sources with no corrected-path galaxy entry at all: 2,760 resolving,
-302 non-resolving. Any sample built on the defective column is therefore
-conditioned on spectroscopic quality in a way nothing in the catalog signals.
+Evidence (corrected gate 4.7 command): of 37,219 flagged catalog sources,
+24,364 have a non-sentinel defective link that resolves to galaxy-level
+`Id_specz`, and 12,855 do not. The tables count galaxy-level entries attached
+through `Id_COSMOS25` to each flagged-source population, not catalog sources.
+
+| Galaxy-level attached-entry confidence bucket | Resolving-source population, n=21,700 entries | Non-resolving-source population, n=12,610 entries |
+|---:|---:|---:|
+| 0 | 3,778 | 1,743 |
+| 50 | 2,719 | 1,484 |
+| 80 | 3,167 | 1,845 |
+| 85 | 632 | 590 |
+| 95 | 2,711 | 1,033 |
+| 97 | 8,693 | 5,915 |
+| Bucket sum / stated total / independent count | 21,700 / 21,700 / 21,700 | 12,610 / 12,610 / 12,610 |
+
+| Galaxy-level attached-entry flag bucket | Resolving-source population, n=21,700 entries | Non-resolving-source population, n=12,610 entries |
+|---:|---:|---:|
+| -99 | 3 | 19 |
+| -2 | 1 | 0 |
+| -1 | 383 | 358 |
+| 0 | 3,391 | 1,366 |
+| 1 | 2,715 | 1,482 |
+| 2 | 3,160 | 1,845 |
+| 3 | 2,688 | 1,027 |
+| 4 | 8,549 | 5,782 |
+| 9 | 623 | 587 |
+| 11 | 4 | 2 |
+| 12 | 7 | 0 |
+| 13 | 23 | 6 |
+| 14 | 144 | 133 |
+| 19 | 9 | 3 |
+| Bucket sum / stated total / independent count | 21,700 / 21,700 / 21,700 | 12,610 / 12,610 / 12,610 |
+
+All four distributions reconcile. Flagged sources with no corrected-path
+galaxy-level entry at all number 2,760 in the resolving population and 302 in
+the non-resolving population. Any sample built on the defective column is
+therefore conditioned on spectroscopic quality in a way nothing in the
+catalog signals.
 
 **Closed question F-10-Q: Does resolution under the defective column correlate
 with the compilation's own quality fields? Yes, measurably** (distributions
-above; e.g. the non-resolving bucket carries proportionally more flag-9 and
-confidence-50/80 entries and fewer 95s relative to its size).
+above; for example, the non-resolving population carries proportionally more
+flag-9 and confidence-85 entries and fewer confidence-95 entries relative to
+its size).
 
 ### F-11 — Precision and recall of the defective column as a boolean flag
 
@@ -251,6 +322,19 @@ column comment; no `analysis` schema exists (worklog gates 4.3–4.7).
 **Closed question F-13-Q: Is the mirror a lossless, annotated, policy-free
 representation of both compilation artifacts? Yes.**
 
+### F-14: Process finding: the P2R-04 executor explained a firing prior instead of debugging it
+
+The P2R-04 gate 4.1 prior check fired on the defective-path median. The
+P2R-04 executor then authored the explanatory F-06 finding instead of
+debugging the generator that produced the disagreement. The spec's
+discriminator worked; the executor failed to follow it. The corrected
+practice is that a firing scientific check remains a defect report until the
+quantity is independently recomputed and its stated population and
+coordinate basis are reproduced.
+
+**Closed question F-14-Q: Must a firing scientific check remain open until
+an independent recomputation resolves it? Yes.**
+
 ---
 
 ## 2. Deferred dispositions (closed questions for the operator)
@@ -260,12 +344,19 @@ and no selection rule exists anywhere in the repository or database.
 
 **D-01 — Recovery population A selection rule.** Should a catalog source
 with only `Priority = 0` entries receive a spectroscopic redshift, and under
-what entry-quality conditions? *Recommendation: exclude population A from
-the primary spectroscopic sample and retain it as a documented recovery
-list; promotion of any demoted measurement is a scientific selection and
-should require per-entry review (confidence/flag/separation), noting the 338
-sources with no nearby representative are not explained by neighbour
-promotion.*
+what entry-quality conditions? The pairwise nearest-`Priority = 1`
+classification is radius-sensitive: at 3, 5, and 10 arcsec, respectively,
+the 1,032 sources split as 0 / 535 / 497, 0 / 694 / 338, and 0 / 956 / 76 for
+same-source / other-source / no-candidate classifications. These radii
+compare the population-A and candidate `Priority = 1` measurement-level
+`specz_compilation_all.ra_corrected/dec_corrected` positions. The 5-arcsec
+split is not stable. This pairwise calculation constructs no connected
+components, is not transitive, and has no multi-member component count.
+*Recommendation: exclude population A from the primary spectroscopic sample
+and retain it as a documented recovery list; promotion of any demoted
+measurement is a scientific selection and should require per-entry review
+(confidence/flag/separation), noting the radius sensitivity and the 338
+sources with no representative within 5 arcsec.*
 
 **D-02 — Recovery population B resolution rule.** When a catalog source
 carries multiple galaxy-level entries, which redshift (if any) applies?
@@ -316,10 +407,11 @@ repaired; and the `analysis` schema remains uncreated.
 
 ---
 
-## Appendix A — Gate 4.1 prior observations versus measured values
+## Appendix A: Gate 4.1 prior observations versus corrected values
 
-Source: gate 4.1 command output, worklog gate 4.1. Agreements state both
-numbers; the single disagreement is finding F-06.
+Source: corrected gate 4.1 command output, amendment worklog gate A1.2.
+Agreements state both numbers. F-06 records the corrected reproduction of
+the defective-path prior.
 
 | Observation | Prior | Observed | Agreement |
 |---|---:|---:|---|
@@ -331,8 +423,8 @@ numbers; the single disagreement is finding F-06.
 | Measurement rows; galaxy rows | 482,579; 261,975 | 482,579; 261,975 | Yes |
 | Galaxy set == measurement `Priority = 1` | full equality | full row-and-column equality (F-05) | Yes |
 | `ra/dec_COSMOS25` vs mirror at that id | zero, all rows | zero at min/median/p90/p99/max, both surfaces (F-02) | Yes |
-| Compilation crossmatch separation | median 0.084", ceiling 0.998" | median 0.0840", max 0.9983" (n=92,359) | Yes |
-| Defective-path separation median | 4,054" | 4,467.3" (n=24,364) | **No — F-06** |
+| Compilation crossmatch separation | median 0.084", ceiling 0.998" | median 0.0840", max 0.9983" (measurement-level n=92,359; `specz_compilation_all.ra_corrected/dec_corrected` to catalog `photometry_primary.ra/dec` named by `Id_COSMOS25`) | Yes |
+| Defective-path separation median | 4,054.34" | 4,054.34" (all-links n=37,219; catalog `photometry_primary.ra/dec` to measurement-level `specz_compilation_all.ra_corrected/dec_corrected`) | Yes (F-06) |
 | Distinct sources, galaxy level | 45,007 | 45,007 | Yes |
 | Distinct sources, measurement level | 46,039 | 46,039 | Yes |
 | Usable-redshift sources, galaxy level | 39,165 | 39,165 (rule: finite `specz > -90`) | Yes |

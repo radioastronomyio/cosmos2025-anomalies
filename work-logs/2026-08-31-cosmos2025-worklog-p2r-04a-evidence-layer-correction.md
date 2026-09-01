@@ -21,8 +21,8 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Complete through A1.3 |
-| Gate | A1.3 distributions and radius sensitivity |
+| Status | Complete through A1.4 |
+| Gate | A1.4 corrected evidence review surface |
 | Branch | `task/4-specz-linkage-correction` |
 | Base | `04b42e16faacbd2388979d9c608d54db26118a50` |
 
@@ -194,3 +194,50 @@ failures and errors halt at the unchanged frozen semantic-source mismatch for
 their subject assertions. The seal, dictionary, generated artifacts, and
 verifier were not modified. Full evidence and self-review are in
 `.superpowers/sdd/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction/task-3-report.md`.
+
+### Gate A1.4: Correct the evidence review surface
+
+Corrected `docs/research/specz-linkage-evidence.md` from the committed A1.2
+and A1.3 evidence without opening a database session. F-01 and F-03 now keep
+the all-links population of 37,219 sources on
+`specz_compilation_all.ra_corrected/dec_corrected` separate from the 24,364
+resolving links on `specz_compilation_unique.ra_corrected/dec_corrected`.
+F-06 closes positively at the reproduced all-links median of 4,054.34 arcsec
+and states that the earlier non-reconstructibility claim was wrong. The
+surface's evidence-command hashes and corresponding F-06 appendix row now
+identify the corrected committed sources and result.
+
+F-08 reports the population-A split at 3, 5, and 10 arcsec as 0 / 535 / 497,
+0 / 694 / 338, and 0 / 956 / 76 for same-source / other-source / no-candidate
+classifications. It states that the 5-arcsec split is not stable and that the
+method is pairwise, non-transitive, and constructs no connected components.
+D-01 carries the same sensitivity evidence without deciding a selection
+rule. F-10 lists every observed confidence and flag bucket for the resolving
+and non-resolving galaxy-level attached-entry populations. Confidence and
+flag tables each reconcile bucket sums, stated totals, and independent counts
+at 21,700 and 12,610 entries.
+
+Added F-14 as the stable process finding. It attributes the failure to the
+P2R-04 executor, who explained the firing prior in F-06 instead of debugging
+the generator. The corrected practice treats a firing scientific check as a
+defect report until an independent recomputation reproduces the population
+and coordinate basis. The finding says that the spec's discriminator worked;
+it does not blame the spec.
+
+Deterministic finding-block extraction against `04b42e1` reported only F-01,
+F-03, F-06, F-08, F-10, and new F-14 as changed. F-02, F-04, F-05, F-07,
+F-09, F-11, F-12, and F-13 were byte-identical. The superseded-number scan of
+the changed findings, added-line em-dash scan, and new policy-decision scan
+passed. A local evidence-to-surface check parsed the YAML frontmatter and
+Markdown, matched the geometry, distribution, reconciliation, radius, and
+topology values to the two gitignored evidence JSON files, and passed.
+
+Focused regression command:
+
+```bash
+/opt/agents/venv/bin/pytest -q \
+  tests/test_specz_linkage_evidence_regressions.py
+```
+
+Result: `7 passed in 0.41s`. `git diff --check` passed. This documentation
+gate opened no database session and changed no database object.
