@@ -1025,9 +1025,9 @@ def test_runtime_config_separates_v1_baseline_v11_runtime_and_admin_bootstrap() 
             "configs/README.md",
             ("PGSQL01_COSMOS2025_V11_DB", "bootstrap", "read-only"),
         ),
-        ("docs/reference/README.md", ("schema-v11.md", "generated", "1,416")),
+        ("docs/reference/README.md", ("schema-v11.md", "generated", "1,448")),
         ("src/etl/README.md", ("generate_schema_docs_v11.py", "one", "read-only")),
-        ("tests/README.md", ("test_generate_schema_docs_v11.py", "1,416", "assets")),
+        ("tests/README.md", ("test_generate_schema_docs_v11.py", "1,448", "assets")),
     ),
 )
 def test_operational_orientation_surfaces_agree(

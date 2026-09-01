@@ -448,3 +448,119 @@ and the gate 4.7 post-state verification proves — that no selection rule,
 view, join, promotion, or threshold exists anywhere in the repository or
 database. No new frontmatter violations. Gate 4.9 commit: see SHA table at
 close.
+
+### Gate 4.10 — Closeout
+
+Docs pass: `tests/README.md` refreshed to the twelve-table/1,448-column
+boundaries with a P2R-04 section; `docs/reference/README.md` schema-v11 line
+updated; research index carries the review surface; ETL README carries the
+P2R-04 module table and commands. Consistency pass found and repaired two
+late regressions introduced by gates 4.8/4.9 editing inputs the frozen
+verification surface seals: `schema_doc` and `research_index` joined the
+P2R-03 pinned-bytes fallback list, and orientation-test literals moved to
+the new counts. Final suite: **441 passed, 1 deselected**; the deselected
+slow byte-identity test's assertion was corrected and its subprocess check
+verified directly twice under Doppler
+(`dictionary check PASSED: 1448 profiled rows reproduce byte-identical`,
+`candidate report check PASSED`, ~2,035 s each run). Frontmatter checker:
+five pre-existing violations only.
+
+---
+
+## Gate commit SHAs
+
+| Gate | Commit | Subject |
+|---|---|---|
+| 4.1 | `6d30e24` | reproduce spec-z linkage evidence against priors |
+| 4.2 | `fa799a3` | extend sealed dictionary with measurement-level spec-z rows |
+| 4.3 | `cf17309` | scratch-verify regenerated thirteen-relation DDL |
+| 4.4 | `c9ccaee` | rename galaxy-level spec-z mirror to _unique |
+| 4.5 | `58359ff` | load measurement-level mirror and declare the seal |
+| 4.6 | `91e7d26` | register dual-hash provenance for the new mirror |
+| 4.7 | `5959426` | characterize linkage, recovery populations, selection function |
+| 4.8 | `dc2c73e` | regenerate schema reference and refresh project docs |
+| 4.9 | `e5b7763` | author spec-z linkage review surface |
+| 4.10 | this commit | closeout |
+
+Branch `task/4-specz-linkage-correction` off `main` at base
+`e65242a7802422cc86ed47d96945e2a86e0b27a3`; no push, no remote operation.
+
+## Summary
+
+| Attribute | Value |
+|-----------|-------|
+| Status | Completed: gates 4.1-4.10 verified; load seal declared at 4.5; review surface awaiting operator disposition |
+| Agent | glm / Kilo CLI / kilo/zai-coding/glm-5.3 |
+| Hostname | ml01 |
+| Spec | 2026-08-31-cosmos2025-spec-p2r-04-specz-linkage-correction.md (archived to `spec/2026-08/`) |
+| Duration | ~5h50m wall (07:28-13:20 EDT, including two ~34-minute full dictionary rebuilds and two ~34-minute byte-identity confirmations) |
+
+Objective: Mirror the measurement-level spec-z compilation, correct the
+catalog-to-compilation join path, annotate the defective upstream identifier,
+and characterize the recovery populations and selection bias without deciding
+their policy.
+
+Outcome: `cosmos2025_v11.source` holds twelve mirrors plus provenance:
+`specz_compilation_all` (482,579 rows, load-sealed, 640,000 seeded
+comparisons at zero mismatches, dual-hash provenance) beside the renamed
+`specz_compilation_unique`; `id_specz_khostovan25` is annotated in the
+dictionary and the live column comment; the correct `Id_COSMOS25` path, both
+recovery populations, the selection function, and seven deferred dispositions
+are on the review surface `docs/research/specz-linkage-evidence.md`. 19 of 20
+spec priors reproduced exactly; one prior discrepancy (defective-path median)
+is finding F-06. Destructive-retry budget: 0 of 2 used. No rows were written
+outside the authorized loads/renames/comments; no view, materialized join,
+sample, promotion, or threshold exists.
+
+## 1. Work completed
+
+| Task | Description | Result |
+|------|-------------|--------|
+| Preflight | spec-startup + spec prerequisites: P2R-03 merge, three archived specs, twelve relations matching provenance, clean pinned checkout, both FITS hashes reproduced, principal = default-privilege owner | Complete |
+| Gate 4.1 | Read-only evidence command reproducing all priors and the four establishments with a passing mutation test | Complete |
+| Gate 4.2 | Dictionary 1,416→1,448 rows; rename; semantic note; full pipeline boundary updates; frozen P2R-03 surface pinned-bytes fallback (F-07 repair) | Complete |
+| Gate 4.3 | DDL regeneration and disposable scratch verification over thirteen relations with three mutations | Complete |
+| Gate 4.4 | One-transaction rename + provenance update with full re-verification | Complete |
+| Gate 4.5 | Guarded load, key/grant/invariance verification, independent seeded reconciliation, load seal | Complete |
+| Gate 4.6 | Dual-hash provenance row; authorized link-comment sync; live conformance surface green | Complete |
+| Gate 4.7 | Read-only characterization: corrected path, populations A and B, selection function, precision/recall per surface | Complete |
+| Gate 4.8 | Schema reference regenerated with empty information_schema diff; project docs refreshed | Complete |
+| Gate 4.9 | Review surface with 13 findings, closed questions, 7 deferred dispositions | Complete |
+| Gate 4.10 | Docs/consistency pass, worklog, registry row, spec archive, attestation | Complete |
+
+## 2. Files changed
+
+Database objects: `source.specz_compilation_all` (new, sealed),
+`source.specz_compilation` renamed to `source.specz_compilation_unique`,
+one provenance row added, one provenance `table_name` updated, one authorized
+column comment applied. Repository: `configs/data_paths.yaml`,
+`data/dictionary/columns-v11.csv` + `README.md`,
+`docs/reference/sentinel-candidates-v11.md`, `schema-v11.md`,
+`docs/reference/README.md`, `docs/research/specz-linkage-evidence.md` (new),
+`docs/research/README.md`, `docs/project-state.md`, `AGENTS.md`, `README.md`,
+`src/etl/` (schema_v11.sql, conformance_cases_v11.py generated; loaders,
+generators, verifiers extended; verify_specz_linkage_v11.py,
+rename_specz_unique_v11.py, load_specz_all_v11.py,
+reconcile_specz_all_v11.py, characterize_specz_linkage_v11.py new),
+`tests/` + `tests/README.md`, this worklog, the registry row, and the spec
+archive move. `docs/research/etl-v2-verification.md` is byte-unchanged.
+
+## 3. Issues encountered
+
+- F-06 prior discrepancy (spec prior 4,054" vs measured 4,467.3"); recorded on
+  the review surface; registered as spec defect SD-068 in the central
+  register.
+- F-07 frozen verification surface could not regenerate post-extension;
+  repaired with the pinned-bytes provider; two of its tests had stale
+  active-queue path expectations predating this unit.
+- Scratch-verifier Gate 3.6 absence precondition inverted to the sealed
+  presence-identity contract (recorded in gate 4.3).
+- Two late consistency-pass regressions from gates 4.8/4.9 (sealed inputs
+  `schema_doc`/`research_index`; orientation literals) — repaired in this
+  gate; final suite green.
+
+## 4. Next steps
+
+Operator: dispose `docs/research/specz-linkage-evidence.md` (D-01 through
+D-07), review and push this branch, and unblock the spec-z science surface
+unit. T_A v2 may proceed on non-spectroscopic axes only.

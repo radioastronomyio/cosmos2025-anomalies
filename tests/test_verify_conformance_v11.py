@@ -493,7 +493,7 @@ def test_live_orchestration_reuses_snapshot_and_runs_all_security_matrices(
     assert report["provenance_matrix"] == {
         "positive": 1,
         "negative": 6,
-        "rows": 11,
+        "rows": 12,
     }
     assert report["v1_fingerprint"] == "v1-fixed"
     assert report["v1_unchanged"] is True

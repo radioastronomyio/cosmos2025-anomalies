@@ -90,8 +90,10 @@ P2R03_EVIDENCE_REF = "e65242a7802422cc86ed47d96945e2a86e0b27a3"
 P2R03_FALLBACK_NAMES = {
     "dictionary": "data/dictionary/columns-v11.csv",
     "schema_sql": "src/etl/schema_v11.sql",
+    "schema_doc": "docs/reference/schema-v11.md",
     "conformance_cases": "src/etl/conformance_cases_v11.py",
     "candidate_report": "docs/reference/sentinel-candidates-v11.md",
+    "research_index": "docs/research/README.md",
 }
 historical_evidence_provider: "callable | None" = None
 WORKLOG_EVIDENCE_SHA256 = (

@@ -261,7 +261,7 @@ def test_default_check_reproduces_tracked_dictionary_byte_identical() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert (
-        "dictionary check PASSED: 1416 profiled rows reproduce byte-identical"
+        "dictionary check PASSED: 1448 profiled rows reproduce byte-identical"
         in result.stdout
     )
     assert "candidate report check PASSED" in result.stdout
