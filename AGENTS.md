@@ -25,7 +25,12 @@ Systematic anomaly detection on the COSMOS-Web DR1 photometric catalog
 photometry and two independent SED-fitting codes (LePhare, CIGALE), without
 proprietary data or image-level analysis. The verified v1.1 ETL v2 mirror is
 the release-driven data boundary. The v1 catalog remains a read-only baseline;
-MetaMCP cutover and T_A v2 remain pending operator approval.
+MetaMCP cutover, T_A v2, and disposition of the P2R-04 spec-z linkage review
+surface (docs/research/specz-linkage-evidence.md) remain pending operator
+approval. The catalog's `id_specz_khostovan25` column does not resolve
+against the held DR1.1 compilation; the correct spec-z join path is the
+compilation's `Id_COSMOS25` crossmatch, and no spectroscopic sample, view, or
+materialized join exists until the operator disposes that surface.
 
 ## Context Loading
 

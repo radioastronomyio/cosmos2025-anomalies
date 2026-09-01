@@ -962,6 +962,31 @@ def render_schema_document(
     lines.extend(
         (
             "",
+            "## Spec-z compilation boundary",
+            "",
+            "The Khostovan et al. compilation ships two distinct upstream "
+            "products, mirrored as two distinct tables with their own "
+            "provenance rows. `source.specz_compilation_all` is the "
+            "measurement-level artifact (`specz_compilation_COSMOS_DR1.1_all.fits`, "
+            "482,579 rows, one row per redshift measurement). "
+            "`source.specz_compilation_unique` is the galaxy-level artifact "
+            "(`specz_compilation_COSMOS_DR1.1_unique.fits`, 261,975 rows, one "
+            "row per spectroscopic source after deduplication by the highest "
+            "quality flag, ties to the most recent redshift; definition at the "
+            "pinned checkout `specz_compilation/README.md`, List of Surveys "
+            "section, SHA-256 "
+            "`43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1`). "
+            "Both artifacts are shipped upstream; neither is derived in this "
+            "repository. The observed relationship, measured at spec P2R-04 "
+            "gate 4.1 from the pinned artifacts, is full row-and-column "
+            "equality between the galaxy-level table and the measurement-level "
+            "rows at `Priority = 1` (column sets identical; positional "
+            "per-column value equality including masks and NaN). The catalog "
+            "column `id_specz_khostovan25` does not resolve against either "
+            "artifact's `Id_specz` namespace; see the semantic note on "
+            "`photometry_primary.id_specz_khostovan25` and the review surface "
+            "`docs/research/specz-linkage-evidence.md`.",
+            "",
             "## Identifier and relational metadata contract",
             "",
             "Every listing places the exact source column beside its PostgreSQL "

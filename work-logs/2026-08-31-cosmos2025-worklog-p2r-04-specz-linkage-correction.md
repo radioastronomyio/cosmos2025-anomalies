@@ -402,3 +402,31 @@ sources' entries carry confidence 97→8,693, 95→2,711, 80→3,167, 50→2,719
 50→1,484, 0→1,743. Flagged sources with no corrected-path galaxy entry at
 all: 2,760 resolving, 302 non-resolving. Every figure above names the surface
 it was computed against. Gate 4.7 commit: see SHA table at close.
+
+### Gate 4.8 — Schema and project documentation
+
+`docs/reference/schema-v11.md` regenerated from the extended dictionary plus a
+verified live read-only snapshot (mode `generate_check`, then `--check`
+byte-identity): document SHA-256
+`e4b467b045a385f09bb03827ff200597608d7a213351f148d6ee843388f09b05`;
+**information_schema diff empty**; 1,448 documented mirror columns, 13
+provenance fields, 12 physical counts, 12 provenance rows; protected identity
+unchanged. The generator now emits a "Spec-z compilation boundary" section
+documenting the two artifacts as distinct upstream products with their own
+provenance, the pinned-checkout deduplication definition with locator and
+SHA-256, and the gate 4.1 measured `Priority = 1` row-and-column equality —
+stating both artifacts are shipped, not derivable-in-repo. The
+`id_specz_khostovan25` entry carries the semantic note with the review-surface
+path.
+
+Project docs refreshed where stale: `docs/project-state.md` (twelve-table
+inventory with both spec-z tables and the twelve-row provenance; phase
+posture records P2R-04 and the pending review-surface disposition; spec-z
+linkage state paragraph), `README.md` (twelve tables, 1,448-row dictionary,
+dual spec-z artifacts in the data-products table), `AGENTS.md` (repository
+identity carries the corrected join path and the pending operator
+disposition), `src/etl/README.md` (twelve-mirror/twelve-row counts, P2R-04
+module table and evidence commands, seal and review-surface pointers).
+Frontmatter checker: five violations, all pre-existing files untouched by this
+unit (REVIEW.md, one recycle-bin file, the P2R-02/P2R-03 worklogs); no new
+violations. Gate 4.8 commit: see SHA table at close.
