@@ -430,3 +430,21 @@ module table and evidence commands, seal and review-surface pointers).
 Frontmatter checker: five violations, all pre-existing files untouched by this
 unit (REVIEW.md, one recycle-bin file, the P2R-02/P2R-03 worklogs); no new
 violations. Gate 4.8 commit: see SHA table at close.
+
+### Gate 4.9 — Review surface
+
+Created `docs/research/specz-linkage-evidence.md` (status: Active — Awaiting
+Operator Disposition) and indexed it in `docs/research/README.md`. Thirteen
+findings (F-01 through F-13), each with a stable ID, exact numbers with
+source citations (gate 4.1/4.7 commands, worklog gates, pinned-checkout
+locators with SHA-256), and a closed yes/no question; Appendix A restates
+every gate 4.1 prior against its observed value with the single F-06
+disagreement marked. Seven deferred dispositions (D-01 through D-07) are
+stated as closed questions with recommendations explicitly marked as
+recommendations: population-A selection rule, population-B rule, sample
+surface, confidence threshold, calibration/validation split, upstream defect
+report, and the T_A v2 spectroscopic unblock. The closing section asserts —
+and the gate 4.7 post-state verification proves — that no selection rule,
+view, join, promotion, or threshold exists anywhere in the repository or
+database. No new frontmatter violations. Gate 4.9 commit: see SHA table at
+close.
