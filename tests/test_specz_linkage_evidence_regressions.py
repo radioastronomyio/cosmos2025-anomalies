@@ -187,18 +187,26 @@ def test_defective_median_guard_rejects_drift_past_two_decimals(
 def _run_characterization(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> tuple[dict, tuple]:
-    """Run the real Gate 4.7 rendering path against a three-category fixture."""
+    """Run the real Gate 4.7 rendering path against both selection buckets."""
     evidence_dir = tmp_path / "evidence"
     catalog = (
-        [10, 20, 30], [0.0, 1.0, 2.0], [0.0, 0.0, 0.0], [100, -999, 101]
+        [10, 20, 30, 40, 50], [0.0, 1.0, 2.0, 3.0, 4.0],
+        [0.0, 0.0, 0.0, 0.0, 0.0], [100, -999, 101, 999, 103],
     )
     columns = (
         "id_specz", "ra_corrected", "dec_corrected", "priority", "specz",
         "flag", "confidence_level", "survey", "id_cosmos25",
     )
     unique = (
-        [100, 101, 102], [0.0, 2.0, 1.0], [0.0, 0.0, 0.0], [1, 1, 1],
-        [1.0, 1.1, 1.2], [4, 4, 4], [97, 50, 85], [1, 1, 1], [10, 30, 20],
+        [100, 101, 102, 103], [0.0, 2.0, 3.0, 4.0],
+        [0.0, 0.0, 0.0, 0.0], [1, 1, 1, 1], [1.0, 1.1, 1.2, 1.3],
+        [4, 4, 7, 4], [97, 50, 85, 85], [1, 1, 1, 1], [10, 30, 40, 50],
+    )
+    all_rows = (
+        [100, 101, 102, 103, 104], [0.0, 2.0, 3.0, 4.0, 4.0 / 3600.0],
+        [0.0, 0.0, 0.0, 0.0, 0.0], [1, 1, 1, 1, 0],
+        [1.0, 1.1, 1.2, 1.3, 1.4], [4, 4, 7, 4, 9],
+        [97, 50, 85, 85, 85], [1, 1, 1, 1, 1], [10, 30, 40, 50, 20],
     )
     monkeypatch.setattr(
         characterize,
@@ -209,7 +217,9 @@ def _run_characterization(
 
     def fetch(_cursor, table, requested_columns):
         assert requested_columns == columns or table == "photometry_primary"
-        return catalog if table == "photometry_primary" else unique
+        if table == "photometry_primary":
+            return catalog
+        return unique if table == "specz_compilation_unique" else all_rows
 
     monkeypatch.setattr(characterize, "fetch_table", fetch)
     characterize.main()
@@ -223,43 +233,84 @@ def _run_characterization(
     )
 
 
-def _rendered_confidence_distribution(evidence: dict) -> dict:
-    """Read the rendered buckets and their stated galaxy-level total."""
+def _rendered_distribution(evidence: dict, quantity: str, bucket: str) -> dict:
+    """Read one fully scoped, reconciled distribution from the evidence."""
     selection = evidence["selection_function"]
-    return {
-        "buckets": selection[
-            "corrected_path_attached_galaxy_entries_confidence_distribution"
-        ]["resolve"],
-        "stated_total": selection["precision_recall"]["against_galaxy_level"][
-            "denominator_positive"
-        ],
-    }
+    return selection[f"corrected_path_attached_galaxy_entries_{quantity}_distribution"][
+        bucket
+    ]
 
 
 def test_confidence_distribution_renders_every_observed_category(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """D2: an observed Confidence_level category cannot disappear from the rendering."""
-    evidence, unique = _run_characterization(monkeypatch, tmp_path)
-    observed_categories = {str(value) for value in unique[6]}
-    rendered = _rendered_confidence_distribution(evidence)["buckets"]
+    """D2: each selection bucket retains every confidence category it contains."""
+    evidence, _unique = _run_characterization(monkeypatch, tmp_path)
+    resolving = _rendered_distribution(evidence, "confidence", "resolve")
+    non_resolving = _rendered_distribution(evidence, "confidence", "no_resolve")
 
-    assert observed_categories <= set(rendered), (
-        "rendered confidence distribution omitted observed category 85"
-    )
+    assert resolving["buckets"] == {"50": 1, "85": 1, "97": 1}
+    assert non_resolving["buckets"] == {"85": 1}
 
 
 def test_confidence_distribution_total_reconciles_to_its_population(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """D2: rendered bucket counts must reconcile to the independent population count."""
-    evidence, unique = _run_characterization(monkeypatch, tmp_path)
-    rendered = _rendered_confidence_distribution(evidence)
-    independently_counted_population = len(unique[0])
+    evidence, _unique = _run_characterization(monkeypatch, tmp_path)
 
-    assert sum(rendered["buckets"].values()) == rendered["stated_total"], (
-        "rendered confidence buckets do not reconcile to their stated total"
-    )
-    assert rendered["stated_total"] == independently_counted_population, (
-        "rendered stated total does not reconcile to the independently counted population"
+    for bucket in ("resolve", "no_resolve"):
+        rendered = _rendered_distribution(evidence, "confidence", bucket)
+        assert rendered["population_scope"]
+        assert sum(rendered["buckets"].values()) == rendered["bucket_sum"]
+        assert rendered["bucket_sum"] == rendered["attached_entry_total"]
+        assert rendered["attached_entry_total"] == rendered["independent_entry_count"]
+        assert rendered["reconciled"] is True
+
+
+def test_flag_distributions_reconcile_every_selection_bucket(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D2: flags receive the same complete, independent reconciliation."""
+    evidence, _unique = _run_characterization(monkeypatch, tmp_path)
+
+    assert _rendered_distribution(evidence, "flag", "resolve")["buckets"] == {
+        "4": 3
+    }
+    assert _rendered_distribution(evidence, "flag", "no_resolve")["buckets"] == {
+        "7": 1
+    }
+    for bucket in ("resolve", "no_resolve"):
+        rendered = _rendered_distribution(evidence, "flag", bucket)
+        assert rendered["bucket_sum"] == rendered["attached_entry_total"]
+        assert rendered["attached_entry_total"] == rendered["independent_entry_count"]
+        assert rendered["reconciled"] is True
+
+
+def test_population_a_reports_radius_sensitivity_and_pairwise_matching(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A1.3: population A classifies one nearest candidate at all three radii."""
+    evidence, _unique = _run_characterization(monkeypatch, tmp_path)
+    population_a = evidence["population_a"]
+
+    classifications = population_a["representative_classification_by_radius_arcsec"]
+    for result in classifications.values():
+        assert result["names_same_catalog_source"] == 0
+        assert result["classification_total"] == population_a["sources"]
+
+    assert classifications["3"]["names_other_catalog_source"] == 0
+    assert classifications["3"]["none_within_radius"] == 1
+    assert classifications["5"]["names_other_catalog_source"] == 1
+    assert classifications["5"]["none_within_radius"] == 0
+    assert classifications["10"] == classifications["5"] | {"radius_arcsec": 10.0}
+    assert classifications["3"] != classifications["5"]
+    assert population_a["five_arcsec_split_stable_across_tested_radii"] is False
+
+    topology = population_a["matching_topology"]
+    assert topology["constructs_connected_components"] is False
+    assert topology["multi_member_component_count"] is None
+    assert topology["interpretation"] == (
+        "pairwise nearest-candidate classification only; no A-B/B-C "
+        "transitive connected components are constructed"
     )

@@ -21,8 +21,8 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | In progress |
-| Gate | A1.2 geometry correction |
+| Status | Complete through A1.3 |
+| Gate | A1.3 distributions and radius sensitivity |
 | Branch | `task/4-specz-linkage-correction` |
 | Base | `04b42e16faacbd2388979d9c608d54db26118a50` |
 
@@ -140,3 +140,57 @@ separators. Both produced SHA-256
 is true. The historical comparison session separately recorded the same
 database identity and both read-only settings as `on`. No control calculation
 or tracked seal artifact changed.
+
+### Gate A1.3: Correct distributions and add radius sensitivity
+
+The characterizer now renders data-derived confidence and flag distributions
+for the resolving and non-resolving attached-entry populations. Each reports
+its scope, bucket sum, stated attached-entry total, independent entry count,
+and reconciliation status. The live confidence totals were 21,700 resolving
+and 12,610 non-resolving; confidence 85 appears in both at 632 and 590,
+respectively. All four distributions reconciled.
+
+Population A now computes one nearest `Priority=1` candidate per source and
+classifies it at three radii. The source totals reconcile at each radius:
+3 arcsec has 0 same, 535 other, and 497 none; 5 arcsec has 0 same, 694 other,
+and 338 none; 10 arcsec has 0 same, 956 other, and 76 none. The 5-arcsec
+694 / 338 split is therefore not stable. This is pairwise nearest-candidate
+matching, not connected-component construction, so A-B and B-C proximity
+does not form a transitive group.
+
+The approved live command was:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/characterize_specz_linkage_v11.py
+```
+
+It opened two read-only sessions, one for source evidence and one for
+post-state observation. Both reported `cosmos2025_v11` with current/session
+user `clusteradmin_pg01`, `default_transaction_read_only=on`, and
+`transaction_read_only=on`. Post-state evidence was zero source views, zero
+source materialized views, no `analysis` schema, 12 provenance rows, and zero
+rows written by the script. No database object changed.
+
+Focused regression result:
+
+```bash
+pytest tests/test_specz_linkage_evidence_regressions.py -v
+```
+
+Result: `7 passed in 0.41s`. The D2 baseline began `3 passed, 2 failed` for
+the missing 85 category and unreconciled total. The extended RED suite was
+`3 passed, 4 failed`, then GREEN after implementation.
+
+The established suite ran with only the required frozen check deselected:
+
+```bash
+pytest -k 'not test_default_check_reproduces_tracked_dictionary_byte_identical'
+```
+
+Result: `436 passed, 4 failed, 8 errors, 1 deselected in 124.57s`. All listed
+failures and errors halt at the unchanged frozen semantic-source mismatch for
+`specz_linkage_gate41` (expected `46a7b827...`, observed `2db4890d...`) before
+their subject assertions. The seal, dictionary, generated artifacts, and
+verifier were not modified. Full evidence and self-review are in
+`.superpowers/sdd/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction/task-3-report.md`.

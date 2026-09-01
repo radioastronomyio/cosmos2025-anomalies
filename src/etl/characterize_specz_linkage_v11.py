@@ -65,7 +65,7 @@ LINK_SENTINEL = -999
 C25_SENTINEL = -999
 COORD_FLOOR = -900.0
 USABLE_Z_FLOOR = -90.0
-REPRESENTATIVE_RADIUS_ARCSEC = 5.0
+REPRESENTATIVE_RADII_ARCSEC = (3.0, 5.0, 10.0)
 ZAGREEMENT_ABS_TOL = 0.005
 
 # =============================================================================
@@ -109,11 +109,62 @@ def distribution(counter: Counter) -> dict[str, int]:
     return {str(key): int(value) for key, value in sorted(counter.items())}
 
 
+def session_identity_and_readonly(cur) -> dict:
+    """Record and require the connection-time read-only settings for one session."""
+    cur.execute(
+        "SELECT current_database(), current_user, session_user, "
+        "current_setting('default_transaction_read_only'), "
+        "current_setting('transaction_read_only')"
+    )
+    database, current_user, session_user, default_read_only, transaction_read_only = (
+        cur.fetchone()
+    )
+    facts = {
+        "database": database,
+        "current_user": current_user,
+        "session_user": session_user,
+        "default_transaction_read_only": default_read_only,
+        "transaction_read_only": transaction_read_only,
+    }
+    if default_read_only != "on" or transaction_read_only != "on":
+        raise SystemExit(f"read-only session requirement failed: {facts}")
+    return facts
+
+
+def reconciled_distribution(
+    counter: Counter,
+    population_scope: str,
+    independent_entry_count: int,
+) -> dict:
+    """Render a data-derived bucket distribution with an independent count check."""
+    buckets = distribution(counter)
+    bucket_sum = sum(buckets.values())
+    reconciled = bucket_sum == independent_entry_count
+    if not reconciled:
+        raise ValueError(
+            "attached-entry distribution did not reconcile: "
+            f"bucket_sum={bucket_sum}, independent_entry_count={independent_entry_count}"
+        )
+    return {
+        "population_scope": population_scope,
+        "buckets": buckets,
+        "bucket_sum": bucket_sum,
+        "attached_entry_total": independent_entry_count,
+        "independent_entry_count": independent_entry_count,
+        "reconciled": reconciled,
+    }
+
+
 def main() -> None:
     config = load_config()
+    session_facts = []
     conn = connect_readonly(config)
     try:
         cur = conn.cursor()
+        session_facts.append({
+            "purpose": "source evidence reads",
+            **session_identity_and_readonly(cur),
+        })
         cat_id, cat_ra, cat_dec, cat_link = fetch_table(
             cur,
             "photometry_primary",
@@ -206,18 +257,13 @@ def main() -> None:
     priority_a = all_tab["priority"][a_rows]
     all_priority_zero = bool((priority_a == 0).all())
 
-    galaxy_valid_idx = np.flatnonzero(valid_u)
-    galaxy_coords = SkyCoord(
-        uni["ra_corrected"][galaxy_valid_idx] * u.deg,
-        uni["dec_corrected"][galaxy_valid_idx] * u.deg,
+    representative_idx = np.flatnonzero(valid_u & (uni["priority"] == 1))
+    representative_coords = SkyCoord(
+        uni["ra_corrected"][representative_idx] * u.deg,
+        uni["dec_corrected"][representative_idx] * u.deg,
     )
 
     population_a: list[dict] = []
-    representative_named_same = 0
-    representative_named_other = 0
-    representative_none = 0
-    representative_seps: list[float] = []
-    catalog_sep_representative_destination: list[float] = []
     entries_per_a_source: Counter = Counter()
 
     by_source = defaultdict(list)
@@ -249,20 +295,20 @@ def main() -> None:
                 for row, sep in zip(rows, entry_sep)
             ],
         }
-        # Where did the deduplication's chosen representative go? Nearest
-        # Priority=1 entry by corrected-coordinate separation.
+        # Find one nearest Priority=1 candidate per source before applying any
+        # radius threshold, so each sensitivity classification shares a match.
         entry_coords = SkyCoord(
             all_tab["ra_corrected"][rows] * u.deg,
             all_tab["dec_corrected"][rows] * u.deg,
         )
         best = None
-        for e_index, e_coord in enumerate(entry_coords):
-            seps = galaxy_coords.separation(e_coord).arcsec
-            order = np.argsort(seps)[:1]
-            candidate_index = int(galaxy_valid_idx[order[0]])
-            candidate_sep = float(seps[order[0]])
-            if candidate_sep > REPRESENTATIVE_RADIUS_ARCSEC:
+        for row, e_coord in zip(rows, entry_coords):
+            seps = representative_coords.separation(e_coord).arcsec
+            if not seps.size:
                 continue
+            order = np.argsort(seps)[:1]
+            candidate_index = int(representative_idx[order[0]])
+            candidate_sep = float(seps[order[0]])
             if best is None or candidate_sep < best["separation_arcsec"]:
                 best = {
                     "separation_arcsec": candidate_sep,
@@ -274,34 +320,9 @@ def main() -> None:
                     "representative_confidence": int(
                         uni["confidence_level"][candidate_index]
                     ),
-                    "via_entry_id_specz": int(all_tab["id_specz"][rows[e_index]]),
+                    "via_entry_id_specz": int(all_tab["id_specz"][row]),
                 }
-        if best is None:
-            representative_none += 1
-            detail["representative"] = {
-                "found_within_arcsec": REPRESENTATIVE_RADIUS_ARCSEC,
-                "result": "none_within_radius",
-            }
-        else:
-            named = best["representative_names_catalog_id"]
-            if named == source:
-                representative_named_same += 1
-            else:
-                representative_named_other += 1
-                dest_pos = cat_index.get(named)
-                if dest_pos is not None:
-                    catalog_sep_representative_destination.append(
-                        float(
-                            separation_matrix(
-                                [cat_ra[cat_pos]],
-                                [cat_dec[cat_pos]],
-                                [cat_ra[dest_pos]],
-                                [cat_dec[dest_pos]],
-                            )[0]
-                        )
-                    )
-            representative_seps.append(best["separation_arcsec"])
-            detail["representative"] = best
+        detail["nearest_priority_one_representative"] = best
         population_a.append(detail)
 
     def stats(values):
@@ -316,6 +337,59 @@ def main() -> None:
             "max": float(q[3]),
         }
 
+    classification_by_radius = {}
+    representative_seps: list[float] = []
+    catalog_sep_representative_destination: list[float] = []
+    for radius in REPRESENTATIVE_RADII_ARCSEC:
+        names_same = 0
+        names_other = 0
+        none_within_radius = 0
+        for detail in population_a:
+            best = detail["nearest_priority_one_representative"]
+            if best is None or best["separation_arcsec"] > radius:
+                none_within_radius += 1
+                continue
+            if best["representative_names_catalog_id"] == detail["catalog_id"]:
+                names_same += 1
+            else:
+                names_other += 1
+        classification_total = names_same + names_other + none_within_radius
+        if classification_total != only_measurement.size:
+            raise ValueError("population-A radius classifications did not reconcile")
+        classification_by_radius[str(int(radius))] = {
+            "radius_arcsec": radius,
+            "names_same_catalog_source": names_same,
+            "names_other_catalog_source": names_other,
+            "none_within_radius": none_within_radius,
+            "classification_total": classification_total,
+        }
+
+    for detail in population_a:
+        best = detail["nearest_priority_one_representative"]
+        if best is None or best["separation_arcsec"] > 5.0:
+            detail["representative"] = {
+                "found_within_arcsec": 5.0,
+                "result": "none_within_radius",
+            }
+            continue
+        detail["representative"] = best
+        representative_seps.append(best["separation_arcsec"])
+        if best["representative_names_catalog_id"] != detail["catalog_id"]:
+            dest_pos = cat_index.get(best["representative_names_catalog_id"])
+            source_pos = cat_index[detail["catalog_id"]]
+            if dest_pos is not None:
+                catalog_sep_representative_destination.append(
+                    float(
+                        separation_matrix(
+                            [cat_ra[source_pos]],
+                            [cat_dec[source_pos]],
+                            [cat_ra[dest_pos]],
+                            [cat_dec[dest_pos]],
+                        )[0]
+                    )
+                )
+
+    at_five = classification_by_radius["5"]
     evidence["population_a"] = {
         "definition": "catalog sources with measurement-level Id_COSMOS25 entries but no galaxy-level entry",
         "sources": int(only_measurement.size),
@@ -336,14 +410,33 @@ def main() -> None:
             ]
         ),
         "representative_search": (
-            "nearest Priority=1 entry by corrected-coordinate separation "
-            f"within {REPRESENTATIVE_RADIUS_ARCSEC} arcsec (compilation self-crossmatch)"
+            "one nearest Priority=1 candidate per population-A source by "
+            "corrected-coordinate separation, then classified at 3, 5, and 10 arcsec"
         ),
-        "representative_found": representative_named_same
-        + representative_named_other,
-        "representative_names_same_catalog_source": representative_named_same,
-        "representative_names_other_catalog_source": representative_named_other,
-        "representative_none_within_radius": representative_none,
+        "representative_classification_by_radius_arcsec": classification_by_radius,
+        "five_arcsec_split_stable_across_tested_radii": (
+            all(
+                result["names_same_catalog_source"] == at_five["names_same_catalog_source"]
+                and result["names_other_catalog_source"] == at_five["names_other_catalog_source"]
+                and result["none_within_radius"] == at_five["none_within_radius"]
+                for result in classification_by_radius.values()
+            )
+        ),
+        "representative_found": (
+            at_five["names_same_catalog_source"]
+            + at_five["names_other_catalog_source"]
+        ),
+        "representative_names_same_catalog_source": at_five["names_same_catalog_source"],
+        "representative_names_other_catalog_source": at_five["names_other_catalog_source"],
+        "representative_none_within_radius": at_five["none_within_radius"],
+        "matching_topology": {
+            "constructs_connected_components": False,
+            "multi_member_component_count": None,
+            "interpretation": (
+                "pairwise nearest-candidate classification only; no A-B/B-C "
+                "transitive connected components are constructed"
+            ),
+        },
         "entry_to_representative_separation_arcsec": stats(representative_seps),
         "catalog_source_to_representative_destination_separation_arcsec": stats(
             catalog_sep_representative_destination
@@ -483,6 +576,26 @@ def main() -> None:
         if cid not in galaxy_set:
             attached_none[bucket] += 1
 
+    attached_entry_count = {}
+    for bucket in ("resolve", "no_resolve"):
+        bucket_sources = [
+            source for source, resolves in resolves_by_catalog.items()
+            if (bucket == "resolve") == resolves
+        ]
+        attached_entry_count[bucket] = int(np.count_nonzero(
+            valid_u & np.isin(uni["id_cosmos25"], bucket_sources)
+        ))
+
+    distribution_scope = {
+        "resolve": (
+            "galaxy-level entries attached through Id_COSMOS25 to flagged catalog "
+            "sources whose non-sentinel defective link resolves to galaxy-level Id_specz"
+        ),
+        "no_resolve": (
+            "galaxy-level entries attached through Id_COSMOS25 to flagged catalog "
+            "sources whose non-sentinel defective link does not resolve to galaxy-level Id_specz"
+        ),
+    }
     evidence["selection_function"] = {
         "defective_column": "photometry_primary.id_specz_khostovan25",
         "resolving_rule": "distinct non-sentinel link value present in galaxy-level Id_specz",
@@ -506,11 +619,15 @@ def main() -> None:
             },
         },
         "corrected_path_attached_galaxy_entries_flag_distribution": {
-            bucket: distribution(counter)
+            bucket: reconciled_distribution(
+                counter, distribution_scope[bucket], attached_entry_count[bucket]
+            )
             for bucket, counter in attached_flag.items()
         },
         "corrected_path_attached_galaxy_entries_confidence_distribution": {
-            bucket: distribution(counter)
+            bucket: reconciled_distribution(
+                counter, distribution_scope[bucket], attached_entry_count[bucket]
+            )
             for bucket, counter in attached_conf.items()
         },
         "flagged_sources_with_no_corrected_path_galaxy_entry": attached_none,
@@ -522,6 +639,10 @@ def main() -> None:
     conn = connect_readonly(config)
     try:
         cur = conn.cursor()
+        session_facts.append({
+            "purpose": "post-state observation",
+            **session_identity_and_readonly(cur),
+        })
         cur.execute(
             "SELECT count(*) FROM pg_views WHERE schemaname = 'source'"
         )
@@ -545,6 +666,7 @@ def main() -> None:
         "provenance_rows": int(provenance),
         "rows_written_by_this_script": 0,
     }
+    evidence["database_sessions"] = session_facts
 
     out_path = Path(config["specz_linkage"]["evidence_dir"]) / (
         "specz-linkage-g47-characterization.json"
