@@ -65,6 +65,12 @@ C25_SENTINEL = -999
 COORD_FLOOR = -900.0
 USABLE_Z_FLOOR = -90.0
 MUTATION_ARCSEC = 0.5
+# The independent spherical-law-of-cosines route has a double-precision
+# rounding bound well below 0.01 arcsec at the roughly one-degree median.
+# Retaining 0.01 arcsec leaves several orders of magnitude for library-level
+# trigonometric variation without accepting an observationally meaningful
+# disagreement between the two calculations.
+ALL_LINKS_CROSSCHECK_TOLERANCE_ARCSEC = 0.01
 
 # Prior expectations from spec P2R-04, stated as priors and never forced.
 PRIORS = {
@@ -80,7 +86,9 @@ PRIORS = {
     "namespace_sep_max": 0.0,
     "crossmatch_median": 0.084,
     "crossmatch_max": 0.998,
-    "defective_median": 4054.0,
+    # All-links population: every stored non-sentinel catalog link paired to
+    # its measurement-level Id_specz row in specz_compilation_all.
+    "defective_median": 4054.34,
     "sources_unique": 45007,
     "sources_all": 46039,
     "usable_z_sources": 39165,
@@ -161,9 +169,30 @@ def load_catalog(conn) -> dict:
         "dec": np.fromiter((r[2] for r in rows), dtype=float, count=n),
         "link": np.fromiter((r[3] for r in rows), dtype=np.int64, count=n),
     }
-    if not np.array_equal(out["id"], np.arange(n, dtype=np.int64)):
-        raise SystemExit("catalog id not contiguous zero-based; index shortcut invalid")
     return out
+
+
+def session_identity_and_readonly(conn) -> dict:
+    """Record and require the single connection's identity and read-only state."""
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT current_database(), current_user, session_user, "
+        "current_setting('default_transaction_read_only'), "
+        "current_setting('transaction_read_only')"
+    )
+    database, current_user, session_user, default_read_only, transaction_read_only = (
+        cur.fetchone()
+    )
+    facts = {
+        "database": database,
+        "current_user": current_user,
+        "session_user": session_user,
+        "default_transaction_read_only": default_read_only,
+        "transaction_read_only": transaction_read_only,
+    }
+    if default_read_only != "on" or transaction_read_only != "on":
+        raise SystemExit(f"read-only session requirement failed: {facts}")
+    return facts
 
 
 def column_float(table: Table, name: str) -> np.ndarray:
@@ -199,6 +228,68 @@ def separation_arcsec(ra1, dec1, ra2, dec2) -> np.ndarray:
     ).separation(
         SkyCoord(np.asarray(ra2, float) * u.deg, np.asarray(dec2, float) * u.deg)
     ).arcsec
+
+
+def pair_catalog_link_carriers(
+    catalog_link: np.ndarray, target_ids: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Associate stored catalog links with target rows by Id_specz value.
+
+    The returned catalog rows are the sources that carry a stored link. They
+    are deliberately selected from link positions, never from catalog IDs.
+    """
+    carrier_rows = np.flatnonzero(catalog_link != LINK_SENTINEL)
+    carried_links = catalog_link[carrier_rows]
+    target_order = np.argsort(target_ids, kind="stable")
+    sorted_target_ids = target_ids[target_order]
+    positions = np.searchsorted(sorted_target_ids, carried_links)
+    in_bounds = positions < sorted_target_ids.size
+    matched = np.zeros(carried_links.size, dtype=bool)
+    matched[in_bounds] = (
+        sorted_target_ids[positions[in_bounds]] == carried_links[in_bounds]
+    )
+    return carrier_rows[matched], target_order[positions[matched]], carried_links[matched]
+
+
+def independent_all_links_median_arcsec(
+    catalog_ra: np.ndarray,
+    catalog_dec: np.ndarray,
+    catalog_link: np.ndarray,
+    all_ids: np.ndarray,
+    all_ra: np.ndarray,
+    all_dec: np.ndarray,
+) -> float:
+    """Recompute the all-links median through independent mapping and geometry."""
+    coordinates_by_id = {
+        int(identifier): (float(ra), float(dec))
+        for identifier, ra, dec in zip(all_ids, all_ra, all_dec, strict=True)
+    }
+    primary_ra = []
+    primary_dec = []
+    linked_ra = []
+    linked_dec = []
+    for ra, dec, link in zip(catalog_ra, catalog_dec, catalog_link, strict=True):
+        if link == LINK_SENTINEL:
+            continue
+        try:
+            target_ra, target_dec = coordinates_by_id[int(link)]
+        except KeyError as exc:
+            raise SystemExit(f"stored link absent from measurement table: {link}") from exc
+        primary_ra.append(float(ra))
+        primary_dec.append(float(dec))
+        linked_ra.append(target_ra)
+        linked_dec.append(target_dec)
+
+    ra1 = np.deg2rad(np.asarray(primary_ra))
+    dec1 = np.deg2rad(np.asarray(primary_dec))
+    ra2 = np.deg2rad(np.asarray(linked_ra))
+    dec2 = np.deg2rad(np.asarray(linked_dec))
+    cosine = (
+        np.sin(dec1) * np.sin(dec2)
+        + np.cos(dec1) * np.cos(dec2) * np.cos(ra1 - ra2)
+    )
+    separations = np.rad2deg(np.arccos(np.clip(cosine, -1.0, 1.0))) * 3600.0
+    return float(np.median(separations))
 
 
 def check(name: str, observed, prior) -> dict:
@@ -312,6 +403,7 @@ def main() -> None:
     uni_tab = Table.read(uni_path, memmap=True)
     conn = connect_readonly(config)
     try:
+        evidence["database_session"] = session_identity_and_readonly(conn)
         cat = load_catalog(conn)
     finally:
         conn.close()
@@ -475,21 +567,47 @@ def main() -> None:
     )
     cross_stats = dist_stats(cross_seps)
 
-    # Defective path: catalog source versus the galaxy-level entry named by
-    # its stored link value, over the resolving values only.
-    uni_order = np.argsort(ids_uni, kind="stable")
-    sorted_uni_ids = ids_uni[uni_order]
-    pos = np.searchsorted(sorted_uni_ids, link_distinct)
-    pos_clipped = np.clip(pos, 0, sorted_uni_ids.size - 1)
-    hit = sorted_uni_ids[pos_clipped] == link_distinct
-    link_row = uni_order[pos_clipped[hit]]
-    defective_seps = separation_arcsec(
-        ra_corr_uni[link_row],
-        dec_corr_uni[link_row],
-        cat_ra[np.searchsorted(cat_id, link_distinct[hit])],
-        cat_dec[np.searchsorted(cat_id, link_distinct[hit])],
+    # All-links population: each catalog source carrying a non-sentinel link
+    # pairs with its measurement-level Id_specz row and corrected coordinates.
+    all_carrier_rows, all_link_rows, all_carried_links = pair_catalog_link_carriers(
+        cat_link, ids_all
     )
-    defective_stats = dist_stats(defective_seps)
+    if all_carrier_rows.size != link_distinct.size:
+        raise SystemExit(
+            "all stored links must resolve in specz_compilation_all: "
+            f"matched={all_carrier_rows.size} expected={link_distinct.size}"
+        )
+    all_link_seps = separation_arcsec(
+        cat_ra[all_carrier_rows],
+        cat_dec[all_carrier_rows],
+        ra_corr_all[all_link_rows],
+        dec_corr_all[all_link_rows],
+    )
+    all_link_stats = dist_stats(all_link_seps)
+
+    # Resolving-subset population: the same carrying catalog sources, limited
+    # to links present in the deduplicated Priority-1 table. Its coordinates
+    # remain those of the selected spectroscopic measurement.
+    resolving_carrier_rows, resolving_link_rows, resolving_carried_links = (
+        pair_catalog_link_carriers(cat_link, ids_uni)
+    )
+    resolving_link_seps = separation_arcsec(
+        cat_ra[resolving_carrier_rows],
+        cat_dec[resolving_carrier_rows],
+        ra_corr_uni[resolving_link_rows],
+        dec_corr_uni[resolving_link_rows],
+    )
+    resolving_link_stats = dist_stats(resolving_link_seps)
+
+    crosscheck_median = independent_all_links_median_arcsec(
+        cat_ra, cat_dec, cat_link, ids_all, ra_corr_all, dec_corr_all
+    )
+    crosscheck_difference = abs(all_link_stats["median"] - crosscheck_median)
+    if crosscheck_difference > ALL_LINKS_CROSSCHECK_TOLERANCE_ARCSEC:
+        raise SystemExit(
+            "all-links geometry cross-check disagrees: "
+            f"difference={crosscheck_difference} arcsec"
+        )
 
     evidence["geometry"] = {
         "compilation_crossmatch": {
@@ -498,9 +616,36 @@ def main() -> None:
             "excluded_rows": int((~valid_cross).sum()),
         },
         "defective_path": {
-            **defective_stats,
-            "surface": "resolving stored link values joined to galaxy-level Id_specz",
-            "excluded_rows": int((~hit).sum()),
+            **all_link_stats,
+            "population": "all_links",
+            "surface": (
+                "all stored non-sentinel catalog links paired to "
+                "specz_compilation_all.Id_specz"
+            ),
+            "coordinate_basis": "specz_compilation_all.ra_corrected/dec_corrected",
+            "excluded_rows": int(link_distinct.size - all_carried_links.size),
+        },
+        "defective_path_resolving_subset": {
+            **resolving_link_stats,
+            "population": "resolving_subset",
+            "surface": (
+                "stored catalog links present in specz_compilation_unique, paired "
+                "to its selected measurement Id_specz row"
+            ),
+            "coordinate_basis": "specz_compilation_unique.ra_corrected/dec_corrected",
+            "excluded_rows": int(link_distinct.size - resolving_carried_links.size),
+        },
+        "defective_path_all_links_crosscheck": {
+            "population": "all_links",
+            "method": "independent dictionary association plus clamped spherical law of cosines",
+            "median": crosscheck_median,
+            "primary_median": all_link_stats["median"],
+            "absolute_difference_arcsec": crosscheck_difference,
+            "tolerance_arcsec": ALL_LINKS_CROSSCHECK_TOLERANCE_ARCSEC,
+            "tolerance_basis": (
+                "0.01 arcsec exceeds double-precision spherical-law-of-cosines "
+                "rounding at the approximately one-degree median by several orders"
+            ),
         },
     }
     checks.append(
@@ -517,7 +662,7 @@ def main() -> None:
     )
     checks.append(
         check(
-            "defective_median", round(defective_stats["median"], 0),
+            "defective_median", round(all_link_stats["median"], 2),
             PRIORS["defective_median"],
         )
     )
@@ -569,6 +714,7 @@ def main() -> None:
 
     print(f"source pins: {json.dumps(pins, indent=2)}")
     print(f"manifest csv sha256: {manifest_sha}")
+    print(f"database session: {json.dumps(evidence['database_session'])}")
     print(f"TFIELDS all={tfields_all} unique={tfields_uni}")
     print(f"Id_specz uniqueness: {json.dumps(evidence['id_specz_unique_all'])}")
     print(

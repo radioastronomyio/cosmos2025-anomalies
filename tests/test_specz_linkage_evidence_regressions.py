@@ -49,10 +49,12 @@ class _Connection:
 class _Cursor:
     """Return post-state counts without introducing a database dependency."""
 
-    def execute(self, _statement):
-        pass
+    def execute(self, statement):
+        self.statement = statement
 
     def fetchone(self):
+        if "current_database" in self.statement:
+            return ("fixture", "fixture_ro", "fixture_ro", "on", "on")
         return (0,)
 
 
@@ -152,6 +154,34 @@ def test_defective_path_pairing_is_invariant_under_catalog_row_permutation(
         "link 20 pairing changed after row permutation; it must remain attached "
         "to stored-link carrier catalog source 10, not catalog source 20"
     )
+
+
+def test_defective_median_guard_rejects_drift_past_two_decimals(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D1: the all-links median guard must retain two decimal places."""
+    monkeypatch.setitem(verify.PRIORS, "defective_median", 4054.34)
+    evidence = _run_verifier(
+        monkeypatch,
+        tmp_path,
+        [
+            {"id": 30, "ra": 30.0, "dec": 0.0, "link": -999},
+            {"id": 10, "ra": 4054.346 / 3600.0, "dec": 0.0, "link": 20},
+            {"id": 20, "ra": 10.0, "dec": 0.0, "link": -999},
+        ],
+    )
+    defective_check = next(
+        check
+        for check in evidence["prior_checks"]
+        if check["observation"] == "defective_median"
+    )
+
+    assert defective_check == {
+        "observation": "defective_median",
+        "prior": 4054.34,
+        "observed": 4054.35,
+        "agreement": False,
+    }
 
 
 def _run_characterization(
