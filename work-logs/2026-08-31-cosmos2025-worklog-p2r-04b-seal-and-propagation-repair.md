@@ -114,6 +114,62 @@ P2R-04b archive under the full central filename, matching P2R-04.
 
 ---
 
+## 0.1 Execution-order deviation, declared
+
+**The spec's execution order strands its own seal. Gates A2.4 and A2.5 are
+executed before A2.2 and A2.3. No deliverable moves between gates.**
+
+The spec's Execution Order runs A2.2 (re-seal and regenerate) and A2.3 (apply
+the corrected database comments) before A2.5 (restore the catalog contiguity
+and order guard). Gate A2.5 changes `src/etl/verify_specz_linkage_v11.py`.
+That file's SHA-256 *is* the value
+`EXPECTED_SEMANTIC_HASHES["specz_linkage_gate41"]` pins, and it is also the
+`semantic_note_source_sha256` carried by the dictionary row, the generated
+DDL, the conformance case, the schema reference, and the live column comment.
+
+Executing in the stated order therefore produces exactly the failure this
+unit exists to repair:
+
+1. A2.2 seals bytes that A2.5 is about to change, so the seal asserts a
+   provenance that stops being true three gates later, and the suite goes red
+   again at A2.5 with no gate left to fix it.
+2. A2.3 writes a database comment carrying a digest that A2.5 invalidates,
+   and A2.3's own constraint ("a separately opened writable session at gate
+   A2.3 only") makes a second comment application illegal. The live column
+   comment would be left stale by this unit's own hand, which is defect 3 of
+   "Why This Exists" reproduced rather than repaired.
+
+The spec's constraints resolve this rather than permitting it: "The seal and
+the regeneration move together. Updating the digest without regenerating
+asserts a provenance that never existed. Either both or neither." The only
+order in which that constraint and every gate validation can all hold is one
+where the verifier reaches its final bytes before the seal is pinned.
+
+What was chosen, and what was not:
+
+- **Chosen:** run the gates as `A2.1, A2.4, A2.5, A2.2, A2.3, A2.6, A2.7,
+  A2.8`. Every gate keeps its own deliverable, its own validations, and its
+  own commit naming its own `A2.n` number. Git history is therefore
+  non-monotonic in gate number, deliberately and visibly.
+- **Rejected:** folding the guard restoration into A2.2. That would move a
+  deliverable between gates and would put the A1.2 repair in a commit whose
+  message does not name gate A1.2, breaking an A2.5 validation.
+- **Rejected:** running the stated order and re-sealing again at A2.5. That
+  costs a second full profiling pass and still leaves the database comment
+  stale, because the single-write-session constraint forbids re-applying it.
+
+Execution order is not in the spec's "Frozen" list, which covers the seal
+being updated rather than bypassed, regeneration and re-seal sharing a gate,
+the inventory-bounded diff, the enumerated column set and comment-contract
+path, SD-068 being corrected rather than deleted, re-derived classifications,
+earlier-gate repairs being new commits, P2R-04a closing `partial`, the
+archive precedence, and the inherited prohibitions. Every one of those holds
+under this order.
+
+This is recorded as an authoring defect against P2R-04b at gate A2.6.
+
+---
+
 ## 1. Gate checkpoints
 
 ### Gate A2.1: Map the propagation
@@ -191,6 +247,85 @@ this worklog, both additions, and no other path. An exact insertion count is
 not recorded here for the same reason a commit cannot contain its own SHA:
 this file's own line count is part of the number.
 
+### Gate A2.4: Repair the A1.1 test discriminators
+
+Repairs gate A1.1 of P2R-04a in a new commit. `35e95de` is not rewritten.
+
+A1.1 required the D1 test to assert direct association rather than a number,
+and the D2 tests to derive the observed categories and independently count
+the fixture. Neither held at `4f98e49`: D1 ultimately asserted
+`geometry.defective_path.median == 0.0`, and D2 hardcoded bucket literals and
+compared `bucket_sum`, `attached_entry_total`, and `independent_entry_count`
+against each other, three fields the generator computes from one
+intermediate and sets equal by construction.
+
+**D1 now asserts association.** The tests call the real production pairing
+`verify.pair_catalog_link_carriers` and render its output as a link-value to
+catalog-identifier map, then compare it against a mapping derived from the
+fixture by a plain Python loop that shares no code with the pairing. The
+fixture's catalog identifiers are unordered and non-contiguous, link value 20
+collides with catalog identifier 20, and link value 21 matches no catalog
+identifier at all: the collision catches a pairing that selects by
+identifier, the absence catches one that silently drops what it cannot
+address that way. No D1 assertion is written against a distance.
+
+**D2 now derives its expectations.** `expected_attached()` recomputes the
+resolution rule, the bucket split, and the entry counts from the fixture
+tuples. Every equality in `check_rendered_distribution()` has one side from
+the fixture reduction and one from the generator. The only assertions without
+a fixture side are `reconciled is True` and a non-empty `population_scope`,
+neither of which is a comparison between two generator values.
+
+**Both families carry negative controls in the suite itself**, so the
+assertions are shown to be capable of failing rather than merely passing.
+
+Discriminator proof. Each case reverts one property in the production code
+and runs the real repaired test, requiring RED:
+
+| Mutation | Result | Failure text |
+|---|---|---|
+| Production pairing reverted to index arithmetic | RED | `link 20 paired with catalog source 20 (row 2, ra=10.0) but is carried by catalog source 10 (row 1, ra=0.0); link 21 paired with no catalog source but is carried by catalog source 30 (row 0, ra=30.0)` |
+| Production pairing made position-dependent | RED | `link 20 paired with catalog source 30 (row 0, ra=30.0) but is carried by catalog source 10 (row 1, ra=0.0); link 21 paired with catalog source 10 (row 1, ra=0.0) but is carried by catalog source 30 (row 0, ra=30.0)` |
+| Same, against the permuted-catalog fixture | RED | `link 20 paired with catalog source 30 (row 3, ra=30.0) but is carried by catalog source 10 (row 2, ra=0.0); link 21 paired with catalog source 10 (row 2, ra=0.0) but is carried by catalog source 30 (row 3, ra=30.0)` |
+| Unmutated production pairing (control) | GREEN | passes as required |
+| Generator drops confidence category 85 | RED | `rendered distribution dropped categories ['85']` |
+| Generator perturbs a stated total | RED | `stated attached_entry_total 4 is not the fixture population 3` |
+
+Five of five mutations discriminate, and every D1 failure names the link
+value and both candidate catalog sources without reporting a separation. The
+proof harness is `scratchpad/a24_mutation_demo.py`, run outside the
+repository and not committed.
+
+Focused suite:
+
+```bash
+/opt/agents/venv/bin/python -m pytest \
+  tests/test_specz_linkage_evidence_regressions.py -q
+```
+
+Result: `11 passed in 0.44s`, up from 7.
+
+Established suite at this gate:
+
+```bash
+/opt/agents/venv/bin/python -m pytest -q \
+  -k 'not test_default_check_reproduces_tracked_dictionary_byte_identical'
+```
+
+Result: `4 failed, 440 passed, 1 deselected, 8 errors in 124.67s`. The
+failure and error set is byte-identical to the startup baseline recorded
+before any edit (`4 failed, 436 passed, 1 deselected, 8 errors in 124.88s`);
+all twelve still halt at `src/etl/load_dictionary.py:712` on the stale
+`specz_linkage_gate41` seal, which gate A2.2 repairs. The four additional
+passes are this gate's net new tests. No new failure was introduced.
+
+`35e95de`, `f9feada`, `d45f068`, and `4f98e49` are unchanged, verified by
+subject and tree digest: `15d87463`, `b26d87a7`, `6a3f497c`, `8748829c`.
+
+Files changed: `tests/test_specz_linkage_evidence_regressions.py` and this
+worklog. No generator, no database object, and no other tracked file changed
+at this gate.
+
 ---
 
 ## 2. Files Changed
@@ -199,6 +334,7 @@ this file's own line count is part of the number.
 |------|--------|
 | [docs/research/specz-linkage-propagation-inventory.md](../docs/research/specz-linkage-propagation-inventory.md) | Created (gate A2.1) |
 | [work-logs/2026-08-31-cosmos2025-worklog-p2r-04b-seal-and-propagation-repair.md](2026-08-31-cosmos2025-worklog-p2r-04b-seal-and-propagation-repair.md) | Created (gate A2.1) |
+| [tests/test_specz_linkage_evidence_regressions.py](../tests/test_specz_linkage_evidence_regressions.py) | Updated (gate A2.4, repairs gate A1.1) |
 
 ---
 
@@ -208,6 +344,7 @@ this file's own line count is part of the number.
 |-------|------------|
 | `cosmos2025_v11_ro` refused by `pg_hba.conf` from ML01 | Recorded, not worked around. Fell back to the spec's named alternative: admin identity with `default_transaction_read_only=on` at connection time. The HBA gap is a pending operator action already recorded in `AGENTS.md`. |
 | Repository spec archive carries two filename conventions | Recorded for later triage per the spec's Archive Precedence section. Not normalized: renaming an archived record edits a closed artifact. |
+| P2R-04b's execution order seals and propagates bytes that its own gate A2.5 changes | Gates A2.4 and A2.5 executed before A2.2 and A2.3. No deliverable moved between gates. Reasoning in §0.1; recorded as an authoring defect at A2.6. |
 
 ---
 
