@@ -42,10 +42,17 @@ therefore described the wrong population on the wrong coordinate basis. Gate
 A1.2 of P2R-04a corrected the pairing; gate A1.3 reconciled the resulting
 distributions; gate A1.4 corrected the review surface.
 
-The corrected verifier is `src/etl/verify_specz_linkage_v11.py` at SHA-256
-`2db4890d5f1923db3debeb11b83f13fc99a393f2013daf0f2ed9523865596d81`. Its
-observed distributions, reproduced fresh at this gate against the pinned FITS
-artifacts and the read-only mirror, are:
+The corrected verifier is `src/etl/verify_specz_linkage_v11.py`. At gate A2.1
+its SHA-256 was
+`2db4890d5f1923db3debeb11b83f13fc99a393f2013daf0f2ed9523865596d81`; gate
+A2.5 restored the catalog identifier lookup and it is now
+`e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466`.
+The seal pinned at gate A2.2 is the second value, and the guard restoration
+changed no observed statistic: every evidence subdocument, including the
+compilation-crossmatch control at canonical digest
+`9a22f4b61bc3214875b0e0377aa3c2d2b068830b69956c58a5aeaff6de085cdc`, is
+byte-identical across the change. Its observed distributions, reproduced
+fresh against the pinned FITS artifacts and the read-only mirror, are:
 
 | Population | Coordinate basis | n | min | median | p90 | p99 | max |
 |---|---|---:|---:|---:|---:|---:|---:|

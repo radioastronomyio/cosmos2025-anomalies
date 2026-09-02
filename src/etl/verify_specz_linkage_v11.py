@@ -230,6 +230,47 @@ def separation_arcsec(ra1, dec1, ra2, dec2) -> np.ndarray:
     ).arcsec
 
 
+def catalog_rows_for_ids(
+    catalog_id: np.ndarray, wanted: np.ndarray
+) -> np.ndarray:
+    """Resolve catalog identifiers to catalog row positions by explicit lookup.
+
+    Subscripting a catalog array with an identifier is only correct while
+    ``photometry_primary.id`` is contiguous, zero-based, and in ascending row
+    order. Nothing in the schema enforces that, and a catalog that stops
+    satisfying it returns a different source rather than an error, which is
+    the same latent-error class the amendment chain exists to correct. This
+    lookup removes the precondition instead of assuming it, and halts on an
+    identifier the catalog does not carry rather than pairing silently.
+
+    Parameters
+    ----------
+    catalog_id : np.ndarray
+        The catalog's ``id`` column, in catalog row order.
+    wanted : np.ndarray
+        Identifiers to resolve, in the order the caller needs them back.
+
+    Returns
+    -------
+    np.ndarray
+        Row positions into the catalog arrays, aligned with ``wanted``.
+    """
+    order = np.argsort(catalog_id, kind="stable")
+    sorted_ids = catalog_id[order]
+    positions = np.searchsorted(sorted_ids, wanted)
+    in_bounds = positions < sorted_ids.size
+    found = np.zeros(wanted.size, dtype=bool)
+    found[in_bounds] = sorted_ids[positions[in_bounds]] == wanted[in_bounds]
+    if not bool(found.all()):
+        missing = np.unique(wanted[~found])
+        raise SystemExit(
+            "catalog identifier absent from photometry_primary.id: "
+            f"first {missing[:10].tolist()}, "
+            f"{int((~found).sum())} of {int(wanted.size)} unresolved"
+        )
+    return order[positions]
+
+
 def pair_catalog_link_carriers(
     catalog_link: np.ndarray, target_ids: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -529,8 +570,9 @@ def main() -> None:
             ),
             "compared": int(both.sum()),
         }
+        matched_rows = catalog_rows_for_ids(cat_id, c25[both])
         seps = separation_arcsec(
-            ra25[both], dec25[both], cat_ra[c25[both]], cat_dec[c25[both]]
+            ra25[both], dec25[both], cat_ra[matched_rows], cat_dec[matched_rows]
         )
         stats = dist_stats(seps)
         return {"surface": label, "exclusions": excluded, "separation": stats}
@@ -559,11 +601,12 @@ def main() -> None:
         & (ra_corr_all > COORD_FLOOR)
         & (dec_corr_all > COORD_FLOOR)
     )
+    cross_rows = catalog_rows_for_ids(cat_id, c25_all[valid_cross])
     cross_seps = separation_arcsec(
         ra_corr_all[valid_cross],
         dec_corr_all[valid_cross],
-        cat_ra[c25_all[valid_cross]],
-        cat_dec[c25_all[valid_cross]],
+        cat_ra[cross_rows],
+        cat_dec[cross_rows],
     )
     cross_stats = dist_stats(cross_seps)
 
@@ -690,10 +733,11 @@ def main() -> None:
     idx = int(np.flatnonzero(both_all)[0])
     ra_mut = ra25_all.copy()
     ra_mut[idx] += MUTATION_ARCSEC / 3600.0
+    mut_row = int(catalog_rows_for_ids(cat_id, c25_all[idx : idx + 1])[0])
     mut_sep = float(
         separation_arcsec(
-            [ra_mut[idx]], [dec25_all[idx]], [cat_ra[c25_all[idx]]],
-            [cat_dec[c25_all[idx]]],
+            [ra_mut[idx]], [dec25_all[idx]], [cat_ra[mut_row]],
+            [cat_dec[mut_row]],
         )[0]
     )
     evidence["mutation_test"] = {

@@ -12,9 +12,10 @@ tags:
   - domain: cosmos-web
   - domain: data-engineering
 related_documents:
-  - "[Spec P2R-04](../spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04-specz-linkage-correction.md)"
+  - "[Spec P2R-04](../../spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04-specz-linkage-correction.md)"
   - "[ETL v2 Verification](etl-v2-verification.md)"
   - "[Schema v1.1](../reference/schema-v11.md)"
+  - "[Spec-z Linkage Propagation Inventory](specz-linkage-propagation-inventory.md)"
   - "[P2R-04 Worklog](../../work-logs/2026-08-31-cosmos2025-worklog-p2r-04-specz-linkage-correction.md)"
 ---
 -->
@@ -29,7 +30,7 @@ sources and the sealed mirror; sources are cited per finding.
 
 Evidence commands: corrected gate 4.1
 `src/etl/verify_specz_linkage_v11.py` (SHA-256
-`2db4890d5f1923db3debeb11b83f13fc99a393f2013daf0f2ed9523865596d81`),
+`e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466`),
 corrected gate 4.7 `src/etl/characterize_specz_linkage_v11.py` (SHA-256
 `83eb96b9c547d157fcb4a6313087477dc671ad7d324fd00ff6ff8d59d25aeb30`);
 per-gate runtime evidence in the worklogs. Surfaces:

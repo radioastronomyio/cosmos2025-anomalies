@@ -326,6 +326,127 @@ Files changed: `tests/test_specz_linkage_evidence_regressions.py` and this
 worklog. No generator, no database object, and no other tracked file changed
 at this gate.
 
+### Gate A2.5: Restore the contiguity guard and repair documentation
+
+Repairs gate A1.2 of P2R-04a in a new commit. `f9feada` is not rewritten.
+
+Gate A1.2 removed `load_catalog`'s assertion that
+`photometry_primary.id` is contiguous and zero-based, while leaving three
+sites that subscript a catalog array with an `Id_COSMOS25` identifier as
+though it were a row position. The removed assertion was the only thing
+standing between those sites and silently naming a different source.
+
+**Every catalog-array indexing site in both generators, enumerated:**
+
+| Generator | Line (pre-repair) | Expression | Indexed by | Disposition |
+|---|---:|---|---|---|
+| `verify_specz_linkage_v11.py` | 242 | `catalog_link[carrier_rows]` | row positions from `flatnonzero` | Safe, positional |
+| same | 435 | `cat_link[linked]` | boolean mask | Safe |
+| same | 453 | `cat_id[linked]` | boolean mask | Safe |
+| same | 533 | `cat_ra[c25[both]]`, `cat_dec[c25[both]]` | `Id_COSMOS25` identifier | **Converted to explicit lookup** |
+| same | 565 to 566 | `cat_ra[c25_all[valid_cross]]`, `cat_dec[...]` | `Id_COSMOS25` identifier | **Converted** (this is the compilation-crossmatch control) |
+| same | 581 to 582 | `cat_ra[all_carrier_rows]`, `cat_dec[...]` | carrier row positions | Safe, positional |
+| same | 595 to 596 | `cat_ra[resolving_carrier_rows]`, `cat_dec[...]` | carrier row positions | Safe, positional |
+| same | 695 to 696 | `cat_ra[c25_all[idx]]`, `cat_dec[...]` | `Id_COSMOS25` identifier | **Converted** (namespace mutation test) |
+| `characterize_specz_linkage_v11.py` | 253, 276, 378 to 379, 463, 560 | `cat_index[...]`, `cat_index.get(...)` | explicit identifier-to-position dict | Already an explicit lookup; unchanged |
+| same | 280 to 281, 384 to 387, 467 to 468, 538 to 539 | `cat_ra[cat_pos]`, `cat_id[flagged]`, and siblings | positions from `cat_index`, or boolean masks | Safe |
+
+Three sites in the verifier, none in the characterizer. The characterizer
+already resolved identifiers through `cat_index`, so it needed no change and
+was not changed.
+
+**Conversion rather than a bare contiguity assertion, and why.** The A1.2
+validation admits either "guarded or converted to explicit lookup." The
+removed `np.array_equal(id, arange(n))` assertion would halt the verifier on
+a catalog that is merely non-contiguous while remaining perfectly joinable,
+and it cannot be reached at all by the A1.1 fixtures, which monkeypatch
+`load_catalog` and deliberately present unordered non-contiguous
+identifiers. `catalog_rows_for_ids()` removes the precondition instead of
+asserting it, and halts with a naming diagnostic on an identifier the
+catalog does not carry, which the old assertion did not do.
+
+**The guard restored correctness without altering a correct result.** The
+guard-restored verifier was run live, read-only, against the pinned FITS
+artifacts and the mirror. Every evidence subdocument is byte-identical to the
+pre-repair run at gate A2.1, compared by canonical JSON SHA-256 (sorted keys,
+ASCII, compact separators):
+
+| Subdocument | Canonical SHA-256 | Equal |
+|---|---|---|
+| `geometry.compilation_crossmatch` (the control) | `9a22f4b61bc3214875b0e0377aa3c2d2b068830b69956c58a5aeaff6de085cdc` | Yes |
+| `geometry.defective_path` | `d3e03ea636218ba3...` | Yes |
+| `geometry.defective_path_resolving_subset` | `a829856fe6210849...` | Yes |
+| `namespace_validity` | `5236fa8333f663a1...` | Yes |
+| `value_range` | `a60c7f8adb951470...` | Yes |
+| `id_specz_unique_all` | `8330952c8c40c454...` | Yes |
+| `galaxy_priority1_equality` | `162639e6592dc0dd...` | Yes |
+| `mutation_test` | identical dict, 0.49977108320530533 arcsec at row 31312 | Yes |
+
+All 20 prior checks agree, 0 disagreements. The control digest equals the
+value gate A1.2 independently recorded. The live catalog's `id` is in fact
+contiguous and zero-based today, so the shortcut happened to be right: the
+error it could produce was latent, which is exactly why an unguarded path is
+the class this amendment chain exists to correct.
+
+Verifier SHA-256 moves from
+`2db4890d5f1923db3debeb11b83f13fc99a393f2013daf0f2ed9523865596d81` to
+`e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466`. Gate
+A2.2 pins the second value; see §0.1 for why this gate runs first.
+
+**Test that fails when the lookup is removed.** Three tests added:
+
+- `test_a12_identifier_lookup_holds_on_a_non_contiguous_catalog` runs the
+  whole gate 4.1 command against a catalog whose identifiers 0 to 3 appear in
+  row order 3, 0, 2, 1, so an identifier and its row position are never the
+  same thing, and requires the namespace separation to be zero.
+- `test_a12_test_fails_when_identifier_lookup_is_reverted_to_positions`
+  substitutes an identifier-as-position lookup and requires the separation to
+  become non-zero, so the check above is shown to be a discriminator.
+- `test_a12_an_unknown_catalog_identifier_halts_rather_than_pairing`
+  requires `SystemExit` naming the absent identifier rather than a silent
+  pairing.
+
+**Documentation repairs in the same gate:**
+
+- `tests/README.md` gains a "P2R-04a and P2R-04b amendment regressions"
+  section covering all three defect families, their fixtures, and their
+  negative controls.
+- The review surface's parent-spec link is repaired. It read
+  `../spec/2026-08/...` from `docs/research/`, which resolves to a
+  nonexistent `docs/spec/...`; the correct depth is `../../spec/2026-08/...`.
+  The error predates the amendment chain.
+- The review surface's evidence-command digest for the gate 4.1 verifier is
+  updated to the guard-restored bytes, and the propagation inventory is
+  linked from it.
+- The propagation inventory records both digests and the byte-identity
+  evidence for the change between them.
+- `docs/research/README.md` indexes the new inventory document.
+
+Every finding block in the review surface is byte-identical to `4f98e49`,
+verified by deterministic finding-block extraction across all fourteen
+findings, including the eight the spec freezes (F-02, F-04, F-05, F-07,
+F-09, F-11, F-12, F-13). The only changes are frontmatter and the
+evidence-command digest.
+
+Focused suite: `14 passed in 0.46s`, up from 11.
+
+Established suite at this gate: `4 failed, 443 passed, 1 deselected, 8 errors
+in 123.91s`. The failure and error set is identical to gate A2.4's, compared
+line by line; the three additional passes are this gate's new tests. All
+twelve still halt on the stale seal that gate A2.2 repairs.
+
+Ruff on the two changed Python files reports the same findings as `4f98e49`
+(one pre-existing unused local in the verifier, two import-order findings in
+the test file); the import-order findings are now suppressed at the two
+`sys.path`-dependent imports that cause them, which closes one of the
+supplemental style items P2R-04a's own review self-reported. No new
+diagnostic was introduced.
+
+No database object changed. The one live session was read-only, database
+`cosmos2025_v11`, current and session user `clusteradmin_pg01`, with
+`default_transaction_read_only=on` and `transaction_read_only=on` asserted by
+the verifier itself before it reads.
+
 ---
 
 ## 2. Files Changed
@@ -334,7 +455,11 @@ at this gate.
 |------|--------|
 | [docs/research/specz-linkage-propagation-inventory.md](../docs/research/specz-linkage-propagation-inventory.md) | Created (gate A2.1) |
 | [work-logs/2026-08-31-cosmos2025-worklog-p2r-04b-seal-and-propagation-repair.md](2026-08-31-cosmos2025-worklog-p2r-04b-seal-and-propagation-repair.md) | Created (gate A2.1) |
-| [tests/test_specz_linkage_evidence_regressions.py](../tests/test_specz_linkage_evidence_regressions.py) | Updated (gate A2.4, repairs gate A1.1) |
+| [tests/test_specz_linkage_evidence_regressions.py](../tests/test_specz_linkage_evidence_regressions.py) | Updated (gate A2.4, repairs gate A1.1; gate A2.5, repairs gate A1.2) |
+| [src/etl/verify_specz_linkage_v11.py](../src/etl/verify_specz_linkage_v11.py) | Updated (gate A2.5, identifier lookup restored) |
+| [tests/README.md](../tests/README.md) | Updated (gate A2.5) |
+| [docs/research/specz-linkage-evidence.md](../docs/research/specz-linkage-evidence.md) | Updated (gate A2.5, link depth and evidence digest) |
+| [docs/research/README.md](../docs/research/README.md) | Updated (gate A2.5, index row) |
 
 ---
 

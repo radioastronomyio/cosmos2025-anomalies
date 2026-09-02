@@ -52,8 +52,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.etl import characterize_specz_linkage_v11 as characterize
-from src.etl import verify_specz_linkage_v11 as verify
+from src.etl import characterize_specz_linkage_v11 as characterize  # noqa: E402
+from src.etl import verify_specz_linkage_v11 as verify  # noqa: E402
 
 # =============================================================================
 # Fixtures
@@ -421,6 +421,72 @@ def test_defective_median_guard_rejects_drift_past_two_decimals(
         "observed": 4054.35,
         "agreement": False,
     }
+
+
+# =============================================================================
+# A1.2 repair: catalog identifiers are resolved, never used as row positions
+# =============================================================================
+
+
+def identifier_as_position_lookup(catalog_id, wanted):
+    """The unguarded shortcut: treat an identifier as though it were a row."""
+    return np.asarray(wanted, dtype=np.int64)
+
+
+def test_a12_identifier_lookup_holds_on_a_non_contiguous_catalog(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The crossmatch must name the source `Id_COSMOS25` says, not row N.
+
+    `E2E_CATALOG` carries identifiers 0..3 in the row order 3, 0, 2, 1, so a
+    catalog identifier and its row position are never the same thing. The
+    compilation's stored `ra_COSMOS25`/`dec_COSMOS25` are the coordinates of
+    the sources its `Id_COSMOS25` names, so the namespace separation is zero
+    exactly when identifiers are resolved and non-zero when they are used as
+    positions.
+    """
+    evidence = _run_verifier(
+        monkeypatch, tmp_path, E2E_CATALOG, _e2e_table()
+    )
+    measurement = evidence["namespace_validity"][0]
+
+    assert measurement["exclusions"]["compared"] == 2
+    assert measurement["separation"]["max"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_a12_test_fails_when_identifier_lookup_is_reverted_to_positions(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Negative control: removing the lookup must turn the check above red."""
+    monkeypatch.setattr(verify, "catalog_rows_for_ids", identifier_as_position_lookup)
+    evidence = _run_verifier(
+        monkeypatch, tmp_path, E2E_CATALOG, _e2e_table()
+    )
+    measurement = evidence["namespace_validity"][0]
+
+    assert measurement["separation"]["max"] > 1.0, (
+        "a non-contiguous catalog indexed by identifier must report a "
+        "non-zero namespace separation; if it does not, this control has "
+        "stopped discriminating"
+    )
+
+
+def test_a12_an_unknown_catalog_identifier_halts_rather_than_pairing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """An identifier the catalog does not carry is an error, not a silent row."""
+    table = _specz_table(
+        specz_ids=(20, 21),
+        cosmos_ids=(0, 7),
+        ra_corrected=(0.0, 41.0),
+        ra_cosmos=(0.0, 30.0),
+    )
+
+    with pytest.raises(SystemExit) as raised:
+        _run_verifier(monkeypatch, tmp_path, E2E_CATALOG, table)
+
+    assert "catalog identifier absent from photometry_primary.id" in str(raised.value)
+    assert "[7]" in str(raised.value)
 
 
 # =============================================================================

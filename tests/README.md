@@ -404,6 +404,37 @@ python src/inspection/build_data_manifest.py --verify \
   --csv <csv> --root <dir> [--root <dir>:git]            # isolated target
 ```
 
+## P2R-04a and P2R-04b amendment regressions
+
+`test_specz_linkage_evidence_regressions.py` runs the two evidence generators
+against small in-memory source-mirror fixtures. It covers three defect
+families, and every family carries a negative control that requires the
+assertion to be capable of failing.
+
+| Family | What it protects | Negative control |
+|---|---|---|
+| D1, identifier-space conflation (gate A1.1, repaired at A2.4) | Each stored `id_specz_khostovan25` value is paired with the catalog source that *carries* it, asserted as an association against a fixture reduction that shares no code with `pair_catalog_link_carriers`. No D1 assertion is written against a separation. | Index-arithmetic and position-dependent pairings are run through the same assertion and required to be rejected, naming the link value and both candidate sources. |
+| D2, silent category loss (gate A1.1, repaired at A2.4) | Every observed `Confidence_level` and `Flag` category appears in the rendered distribution, and every stated total equals a population counted independently from the fixture. No assertion compares two generator fields. | A dropped category and a perturbed total are run through the same check and required to be rejected. |
+| A1.2 identifier lookup (repaired at A2.5) | `Id_COSMOS25` is resolved to a catalog row rather than used as a row position, proved on a fixture whose identifiers are a permutation of their positions. An identifier the catalog does not carry halts. | Substituting an identifier-as-position lookup is required to make the namespace separation non-zero. |
+
+The fixtures are deliberately hostile: catalog identifiers are unordered and
+non-contiguous, one link value collides with a catalog identifier, and
+another matches none.
+
+```bash
+pytest tests/test_specz_linkage_evidence_regressions.py -v
+```
+
+The two live evidence commands the suite exercises in fixture form are
+read-only and run through the one approved transport:
+
+```bash
+doppler run --project ml01 --config dev -- \
+  python src/etl/verify_specz_linkage_v11.py
+doppler run --project ml01 --config dev -- \
+  python src/etl/characterize_specz_linkage_v11.py
+```
+
 ## P2R-04 spec-z linkage tests
 
 `test_dictionary_seal.py` gains the gate 4.2 mutation proof: duplicating one

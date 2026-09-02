@@ -30,6 +30,7 @@ research/
 ├── science-opportunities.md          # O1/O5 selection (frozen input to T_A v2)
 ├── etl-v2-verification.md            # Evidence-generated operator decision surface
 ├── specz-linkage-evidence.md         # P2R-04 linkage review surface (operator dispositions pending)
+├── specz-linkage-propagation-inventory.md  # P2R-04b gate A2.1 propagation trace
 ├── v11-readiness-review.md           # ETL v2 approval surface (P2R-01)
 ├── etl-pipeline-one-pager.md         # v1 ETL design record (historical)
 ├── phase1-precommit-codex-review.md  # Phase 1 code review (historical)
@@ -44,6 +45,7 @@ research/
 |------|-------------|--------|
 | [science-opportunities.md](science-opportunities.md) | O1 algorithmic disagreement (lead) and O5 contextual anomalies; deprioritization record | ✅ Active |
 | [specz-linkage-evidence.md](specz-linkage-evidence.md) | P2R-04 spec-z linkage findings, recovery populations, selection function, and deferred dispositions | 📝 Draft |
+| [specz-linkage-propagation-inventory.md](specz-linkage-propagation-inventory.md) | P2R-04b trace of every artifact carrying a separation statistic from the defective pairing code, with in-scope disposition | ✅ Active |
 | [etl-v2-verification.md](etl-v2-verification.md) | Generated Gate 3.13 findings, complete evidence appendices, deferred questions, and blank operator dispositions | 📝 Draft |
 | [v11-readiness-review.md](v11-readiness-review.md) | Findings and closed questions the operator answers to approve ETL v2 | ✅ Active |
 | [etl-pipeline-one-pager.md](etl-pipeline-one-pager.md) | v1 ETL schema design and execution record | 🗄️ Archived |
