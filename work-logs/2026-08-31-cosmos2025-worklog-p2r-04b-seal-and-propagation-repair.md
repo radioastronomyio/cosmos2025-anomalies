@@ -5,7 +5,7 @@ description: "Re-seal the corrected gate 4.1 verifier, propagate corrected separ
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-31"
 version: "1.0"
-status: "in-progress"
+status: "completed"
 tags:
   - type: worklog
   - domain: astronomy
@@ -20,7 +20,7 @@ hostname: "ml01"
 spec_ref: "spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04b-seal-and-propagation-repair.md"
 repo: "cosmos2025-anomalies"
 category: "astronomy"
-duration_seconds: null
+duration_seconds: 9900
 # --- Token Usage and Cost ---
 token_usage_source: "unavailable"
 tokens_total:
@@ -44,14 +44,14 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | 🔄 in progress |
+| Status | ✅ completed |
 | Agent | cc / Claude Code / claude-opus-5[1m] |
 | Hostname | ml01 |
 | Spec | `2026-08-31-cosmos2025-spec-p2r-04b-seal-and-propagation-repair.md` |
 | Branch | `task/4-specz-linkage-correction` |
 | Starting branch | `task/4-specz-linkage-correction` |
 | Base commit | `4f98e490a07ccd1ea16a147e6930b108a6ca24d1` |
-| Duration | in progress |
+| Duration | approximately 2 h 45 m wall clock (preflight from about 03:30, closeout commit at about 06:16 on 2026-09-02 EDT). Roughly 1 h 10 m of that is three unattended runs of the 34-minute dictionary profiling pass: the A2.2 regeneration at 2,026 s, the A2.2 byte-identity check at 2,006 s, and the A2.8 full suite at 2,140 s. |
 
 Objective: re-seal the corrected gate 4.1 verifier together with the
 artifacts it generates, propagate the corrected separation statistics into
@@ -60,7 +60,20 @@ comment, repair the unmet A1.1 and A1.2 validations by new commits,
 reconcile the central defect register, and close out the dangling P2R-04a
 unit as `partial`.
 
-Outcome: in progress.
+Outcome: complete. The seal names the corrected verifier and the tracked
+dictionary reproduces byte-identically from it. Every artifact that carried
+the superseded 4,467.3 arcsec statistic now carries 4,054.34 arcsec with its
+population and coordinate basis named, including the live column comment on
+`source.photometry_primary.id_specz_khostovan25`. The A1.1 test
+discriminators assert association and fixture-derived totals, and every
+catalog-array indexing path resolves identifiers rather than assuming
+contiguity. The defect register no longer asserts the disproved SD-068 claim
+and carries six new authoring-defect rows with re-derived classifications and
+a reconciled class table. P2R-04a is closed `partial` with its own worklog
+seal, registry row, and archive.
+
+The branch is a clean local history the operator can review, push, and merge
+as one PR carrying P2R-04, P2R-04a, and P2R-04b.
 
 ---
 
@@ -891,6 +904,113 @@ names that row as closed and final, so it is recorded here for operator
 triage and left exactly as it stands. This unit's own rows are written with
 the correct 23 fields.
 
+### Gate A2.8: Closeout
+
+Ran the current `spec-closeout` skill: docs pass, consistency pass, commit,
+worklog, registry row, archive, defect rows (the last at A2.6).
+
+**Docs pass.** `work-logs/README.md` gained rows for P2R-04, P2R-04a, and
+P2R-04b; it listed only P2R-01 through P2R-03. `docs/research/README.md`,
+`tests/README.md`, and the review surface were refreshed at gate A2.5.
+`spec/README.md` points at `spec/2026-08/` generically and remains true.
+`AGENTS.md`, `README.md`, and `docs/project-state.md` need no change: the
+mirror inventory, row counts, and the spec-z posture statement are all still
+accurate, and the review surface remains pending operator disposition.
+
+**Consistency pass.** Every claimed deliverable exists on disk. Every
+relative link in the six documents this unit changed resolves; zero broken.
+Every path `AGENTS.md` names exists. The four generator `--check` modes and
+the dictionary seal validator were re-run at gate A2.3 and pass.
+
+**Drift found and recorded, not silently repaired.** Three live orientation
+documents state a dictionary row count of 1,416, which has been 1,448 since
+P2R-04 gate 4.2: `README.md` line 130, `data/dictionary/README.md` line 44,
+and `src/etl/README.md` lines 225, 248, 305, and 321. The last also states
+the conformance split as "1,349 master-native, 22 supplement-native, 32
+spec-z-native, and 13 metadata cases"; this unit's own regeneration observes
+1,349 / 22 / **64** / 13 = 1,448. The drift predates this unit and was
+introduced by P2R-04's closeout docs pass. It is **left as it stands and
+flagged for operator triage**, because correcting another unit's closeout
+omission is that unit's remediation to own, and because this spec has already
+had to widen scope twice against its own Modify list. The equivalent numbers
+in `docs/research/etl-v2-verification.md` and
+`src/etl/generate_verification_surface_v11.py` are **not** drift: they are
+correct historical statements about the frozen P2R-03 boundary, regenerated
+from pinned `e65242a` bytes under F-07, and must not change.
+
+**Per-session database identity and enforcement, whole unit.** Every session
+used the admin identity, because `pg_hba.conf` refuses `cosmos2025_v11_ro`
+from host 10.25.20.10, a pending operator action recorded in `AGENTS.md`.
+
+| Gate | Purpose | Enforcement | Statement classes |
+|---|---|---|---|
+| Preflight | inventory snapshot | `-c default_transaction_read_only=on`, plus `set_session(readonly=True)` | `SELECT` |
+| A2.1 | gate 4.1 verifier run | connection-time read-only, asserted by the verifier before it reads | `SELECT` |
+| A2.1 | `pg_description` capture | connection-time read-only | `SELECT` |
+| A2.2 | dictionary build, schema-docs attempt | connection-time read-only | `SELECT`; the schema-docs attempt halted before any write path |
+| A2.3 | **write** | none; deliberately writable, opened for this gate and closed at its end | 1 `COMMENT ON COLUMN`, committed |
+| A2.3 | verification | connection-time read-only | `SELECT` |
+| A2.3 | schema-docs regeneration | the generator's own bounded read-only snapshot, `persistent_mutation=false`, `source_reads=0` | `SELECT` |
+| A2.5 | guard-restored verifier run | connection-time read-only, asserted by the verifier | `SELECT` |
+
+Exactly one session in the unit was writable, and it issued exactly one
+statement.
+
+**Gate commits.** Execution order was A2.1, A2.4, A2.5, A2.2, A2.3, A2.6,
+A2.7, A2.8, for the reason declared in §0.1. Git history is therefore
+non-monotonic in gate number, deliberately.
+
+| Gate | SHA | Subject |
+|---|---|---|
+| A2.1 | `ae928c396bf56e10919834b4a107fa2d3f7ae65c` | gate A2.1: map the corrected-statistic propagation |
+| A2.4 | `840dbf778325fca5b1e949b2ca54d4149e103b16` | gate A2.4: repair the A1.1 test discriminators |
+| A2.5 | `9b86c2d89448952cff0f452a468d4e43879f67d1` | gate A2.5: restore the catalog identifier guard, repair docs |
+| A2.2 | `c8a708aa333ba34aad374108008aea4d5d5fe697` | gate A2.2: re-seal the corrected verifier and regenerate |
+| A2.3 | `d199978f9985d4983b50b543948bfae9ba20a501` | gate A2.3: propagate the corrected comment to the database |
+| A2.6 | `cef674363ee71d3de9fa62d7e5501e2aba516cef` | gate A2.6: reconcile the central defect register |
+| A2.7 | `8c71e7878661860bfd2b2e17330ae6b0fe3d3faa` | gate A2.7: close out P2R-04a as partial |
+| A2.8 | identified relationally | the closeout commit on `task/4-specz-linkage-correction`: the single child of `8c71e787` and the branch tip at handoff. Its SHA is recorded in the final handoff and the run report, and nowhere inside the commit it names, because a commit cannot contain its own SHA. |
+
+**History.** Additive commits only. No rewrite, rebase, squash, amend, or
+force from `e65242a` forward. `main` is unchanged at
+`e65242a7802422cc86ed47d96945e2a86e0b27a3` and remains the merge base. The
+ten parent gate commits and the four A1 commits are intact and linear.
+
+**Remote.** No fetch, push, pull request, or any operation requiring the
+network was performed at any gate. No claim is made about remote or pull
+request state. `git branch -r` lists `origin/main` and
+`origin/task/2a-provenance-closeout-amendment` only; there is no
+`origin/task/4-specz-linkage-correction`.
+
+**Established suite, in full, nothing deselected:**
+
+```bash
+doppler run --project ml01 --config dev -- /opt/agents/venv/bin/python -m pytest -q
+```
+
+`456 passed in 2140.40s (0:35:40)`. Zero failures, zero errors, zero
+deselected. The 34-minute
+`test_default_check_reproduces_tracked_dictionary_byte_identical` ran inside
+this figure and passed; it was budgeted for, not deselected, and it had
+already passed standalone at gate A2.2 in `2006.34s`.
+
+**Archive.** This spec is at
+`/opt/agents/repos/spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04b-seal-and-propagation-repair.md`
+and `spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04b-seal-and-propagation-repair.md`,
+byte-identical by `cmp`, both SHA-256
+`70ed8a83e4cdc22bcc6094196e0fa27e4dc65f511a17ffba353e6e4c47fc40e5`, and
+absent from the active central queue, which now holds no cosmos2025 spec. No
+collision existed at either position. The attestation `Spec:` trailer names
+the central archived path.
+
+**Blocked-signal file.** `staging/BLOCKED-p2r-04.md` is absent; no block was
+signalled. `staging/` is gitignored throughout and holds evidence only.
+
+**Destructive-retry budget: zero, unspent.** No table was dropped, reloaded,
+renamed, truncated, inserted into, updated, or deleted from. `source.provenance`,
+the manifest, and the pinned checkouts were read and hashed only. The gate 4.5
+load seal stands.
+
 ---
 
 ## 2. Files Changed
@@ -937,4 +1057,38 @@ the correct 23 fields.
 
 ## 4. Next Steps
 
-In progress. Gates A2.2 through A2.8 remain.
+Handoff: the branch `task/4-specz-linkage-correction` is a clean local
+history, unpushed, ready for operator review, push, and pull request
+creation. It carries P2R-04 (ten gates), P2R-04a (four gates, sealed
+`partial`), and P2R-04b (eight gates) as one reviewable sequence off `main`
+at `e65242a`.
+
+The human approval surface is `docs/research/specz-linkage-evidence.md`, now
+with `docs/research/specz-linkage-propagation-inventory.md` and this worklog.
+Operator disposition of that surface authorizes push, pull request creation,
+and merge, and unblocks the spec-z science surface unit.
+
+Owed to a later unit, recorded rather than absorbed:
+
+1. **The `1,416` documentation drift.** `README.md`,
+   `data/dictionary/README.md`, and `src/etl/README.md` state a dictionary
+   row count and a conformance split that P2R-04 gate 4.2 superseded. Left as
+   found and flagged above.
+2. **The P2R-04 registry row's 24-field anomaly**, with its summary shifted
+   into `tokens_total`. Named in this unit's do-not-touch list.
+3. **The repository spec archive's two filename conventions.** Not
+   normalized; renaming an archived record edits a closed artifact.
+4. **The `cosmos2025_v11_ro` HBA gap.** Analyst access from ML01 is still
+   refused at connection time; the grant itself is intact and verified
+   server-side.
+5. **The versioned-input-snapshot architecture.** This is now the fourth unit
+   shaped by the F-07 seal mechanism, and this one found the property is
+   broader than recorded: the dictionary is pinned in five places across
+   three modules, so any correction to a sealed generator is a cross-cutting
+   change touching the loader, two seal holders, the dictionary, four
+   generated artifacts, and the database. Explicitly out of scope here and
+   overdue.
+6. **Register vocabulary and hygiene items** raised at A2.6:
+   `closeout-paths-missing-from-modify` at zero instances, SD-026 with no
+   class field, SD-008 under a predecessor class name, and the proposed
+   `execution-order-contradicts-dependencies` class.
