@@ -221,7 +221,7 @@ EXPECTED_SEMANTIC_HASHES = {
     "specz_schema_readme": "43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1",
     "unit_conventions": "8a4d3a724ba435fe5668260e50be45c41f067214567a8723d27d004d3df9ca4a",
     "specz_linkage_gate41": (
-        "46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650"
+        "e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466"
     ),
 }
 DETAILED_DESCRIPTION_SECTIONS = {
@@ -1071,10 +1071,14 @@ def _enrich_semantics(
                         "Does not resolve against the held DR1.1 spec-z "
                         "compilation: 24,364 of 37,219 distinct non-sentinel "
                         "values resolve by Id_specz, with a field-scale median "
-                        "separation of 4,467.3 arcsec and stored values "
-                        "spanning 223-165,312 against Id_specz 1-487,666. "
-                        "Join through specz Id_COSMOS25 instead. Mirrored as "
-                        "shipped; no repair. Evidence: gate 4.1 command "
+                        "separation of 4,054.34 arcsec over the all-links "
+                        "population of 37,219 carriers, measured from "
+                        "photometry_primary.ra/dec to the carried link's "
+                        "specz_compilation_all.ra_corrected/dec_corrected, "
+                        "and stored values spanning 223-165,312 against "
+                        "Id_specz 1-487,666. Join through specz Id_COSMOS25 "
+                        "instead. Mirrored as shipped; no repair. Evidence: "
+                        "corrected gate 4.1 command "
                         "src/etl/verify_specz_linkage_v11.py; review surface "
                         "docs/research/specz-linkage-evidence.md."
                     ),

@@ -184,6 +184,72 @@ restriction is read as bounding the edit to the seal entry and the note that
 seal binds, and to nothing else in a 56 KB module. No other line of
 `load_dictionary.py` changes.
 
+### 3.2 Inventory extension recorded at gate A2.2
+
+**This inventory was incomplete when first committed, and gate A2.2 halted on
+the gap rather than pushing through it.** The gate A2.1 sweep searched for the
+superseded *values* and for the digest of the file whose seal the correction
+moves. It did not search for digests of the artifacts the correction
+regenerates. Three of the five files that pin the dictionary were therefore
+missed. The gap is the executor's, not the spec author's; the search method in
+§2 is corrected below and re-run.
+
+The dictionary CSV is pinned in **five** places, not one:
+
+| # | Artifact | Locator | Constant | Prior value | New value |
+|---|---|---|---|---|---|
+| 13 | `src/etl/validate_dictionary_seal.py` | line 74 | `SEALED_CSV_SHA256` | `a20457c8...cfcd5` | `324d3ea1...e8b8` |
+| 14 | `src/etl/validate_dictionary_seal.py` | lines 75 to 77 | `SEALED_PREFIX_SHA256`, over the canonical first-23-field projection, which contains `semantic_note` and `semantic_note_source_sha256` | `42a8a9ca...487a` | `62018697...4bde` |
+| 15 | `src/etl/generate_schema_docs_v11.py` | line 63 | `SEALED_ROWS_SHA256`, over the canonical JSON of all rows | `7ac2b647...947ed` | `d9970011...3aa7` |
+| 16 | `src/etl/generate_schema_docs_v11.py` | line 64 | `SEALED_CSV_SHA256` | `a20457c8...cfcd5` | `324d3ea1...e8b8` |
+
+Prior whole-file digests at `4f98e49`:
+`src/etl/validate_dictionary_seal.py`
+`636f86032a232342be2745575779bc78851986b2d2ff62a59c58a2b257446fbb`;
+`src/etl/generate_schema_docs_v11.py`
+`c8bce46f7cc02f885f0f3da6498a5c06919a13912e456a974740a0643c0229bb`.
+
+These are dictionary seals of exactly the class the loader's is, and they move
+for exactly the reason the spec gives for moving the loader's: the seal binds
+an artifact to the bytes it was produced from, so the designed operation when
+the artifact legitimately changes is regenerate-and-re-seal. Without them
+`docs/reference/schema-v11.md`, which the Modify list names explicitly, cannot
+be regenerated at all: `generate_schema_docs_v11.py` refuses at
+`_configured_paths()` with "documentation dictionary seal mismatch" before
+reading anything. Only these four constants change; no other line of either
+module does.
+
+The corrected search method adds, to the §2.1 sweep, one pass per artifact
+that the correction regenerates, searching the tracked tree for that
+artifact's prior whole-file digest:
+
+```bash
+for artifact in data/dictionary/columns-v11.csv src/etl/schema_v11.sql \
+                src/etl/conformance_cases_v11.py docs/reference/schema-v11.md \
+                docs/reference/sentinel-candidates-v11.md; do
+  git grep -n -F "$(git show 4f98e49:"$artifact" | sha256sum | cut -d' ' -f1)" -- .
+done
+```
+
+Re-run at gate A2.2, that sweep returns the four constants above and nothing
+else. The digests of `schema_v11.sql`, `conformance_cases_v11.py`,
+`schema-v11.md`, and `sentinel-candidates-v11.md` are pinned nowhere in the
+tracked tree outside this inventory and the closed P2R-04 worklog.
+
+### 3.3 Regeneration order forced by the generators, recorded at gate A2.2
+
+`docs/reference/schema-v11.md` cannot be regenerated at gate A2.2. Its
+generator validates the regenerated conformance case against the **live**
+`pg_description` snapshot, through
+`verify_conformance_v11.validate_snapshot(CASES, observation.catalog)`, and
+halts with `conformance comment mismatch:
+0004:photometry_primary.id_specz_khostovan25` while the database still
+carries the superseded comment. The true dependency order is dictionary, then
+DDL and conformance, then the database comment, then the schema reference.
+The schema reference is therefore regenerated at gate A2.3, immediately after
+the comment application, which is the first moment it is possible. Nothing
+else moves gate.
+
 ---
 
 ## 4. Database columns enumerated for gate A2.3
@@ -264,7 +330,7 @@ incomplete.
 | `docs/reference/sentinel-candidates-v11.md` | same command, same run | none; predicted byte-identical |
 | `src/etl/schema_v11.sql` | `python src/etl/generate_schema_v11.py` | the `id_specz_khostovan25` `COMMENT ON COLUMN` statement only |
 | `src/etl/conformance_cases_v11.py` | `python src/etl/generate_conformance_v11.py` | case `0004:photometry_primary.id_specz_khostovan25` only |
-| `docs/reference/schema-v11.md` | `python src/etl/generate_schema_docs_v11.py` | the `0004:photometry_primary.id_specz_khostovan25` row only |
+| `docs/reference/schema-v11.md` | `python src/etl/generate_schema_docs_v11.py`, at gate A2.3 (see §3.3) | the `0004:photometry_primary.id_specz_khostovan25` row only |
 
 `docs/reference/sentinel-candidates-v11.md` is listed because the dictionary
 build writes it in the same run and its byte-identity is asserted by the same

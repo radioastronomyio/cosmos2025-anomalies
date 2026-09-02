@@ -447,6 +447,147 @@ No database object changed. The one live session was read-only, database
 `default_transaction_read_only=on` and `transaction_read_only=on` asserted by
 the verifier itself before it reads.
 
+### Gate A2.2: Re-seal and regenerate together
+
+The seal and the regeneration move in one gate. Separating them would produce
+a seal asserting a provenance that never existed.
+
+**RED baseline, recorded before the first edit** (and again after gates A2.4
+and A2.5, unchanged):
+
+```bash
+/opt/agents/venv/bin/python -m pytest -q \
+  -k 'not test_default_check_reproduces_tracked_dictionary_byte_identical'
+```
+
+`4 failed, 436 passed, 1 deselected, 8 errors in 124.88s`. All twelve halt at
+`src/etl/load_dictionary.py:712`: `Semantic source hash mismatch for
+specz_linkage_gate41: expected 46a7b827..., observed 2db4890d...`.
+
+**Two authored edits, both in `src/etl/load_dictionary.py`:**
+
+1. `EXPECTED_SEMANTIC_HASHES["specz_linkage_gate41"]` moves from
+   `46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650` to
+   `e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466`, which
+   equals a freshly computed `sha256sum src/etl/verify_specz_linkage_v11.py`
+   at the gate A2.5 bytes. Exactly one entry in that dict changes.
+2. The semantic-note literal the seal binds. The superseded "field-scale
+   median separation of 4,467.3 arcsec" becomes "field-scale median
+   separation of 4,054.34 arcsec over the all-links population of 37,219
+   carriers, measured from photometry_primary.ra/dec to the carried link's
+   specz_compilation_all.ra_corrected/dec_corrected", and the evidence
+   command is labelled "corrected gate 4.1 command". The corrected statistic
+   names its population and its coordinate basis, which the superseded one
+   did not. Every count in the note is unchanged because none was superseded:
+   24,364 of 37,219, stored range 223 to 165,312, `Id_specz` range 1 to
+   487,666.
+
+**Regeneration:**
+
+```bash
+doppler run --project ml01 --config dev -- \
+  /opt/agents/venv/bin/python src/etl/load_dictionary.py
+/opt/agents/venv/bin/python src/etl/generate_schema_v11.py
+/opt/agents/venv/bin/python src/etl/generate_conformance_v11.py
+```
+
+Dictionary: `dictionary rows: 1448`, profiling duration 2,026.350 s
+(33 m 46 s), peak RSS 5,591.875 MiB, 1,435 native rows profiled, 1,269 scalar
+and 166 vector fields over 830 vector indices.
+
+**Diff bounded by the A2.1 inventory, asserted in both directions:**
+
+| Artifact | Assertion | Result |
+|---|---|---|
+| `data/dictionary/columns-v11.csv` | header identical, 1,448 to 1,448 rows, row-key sequence identical, no key added or removed, per-field diff over all 32 fields | exactly one row changed, csv line 5, key `(photometry_primary, id_specz_khostovan25)`, exactly the two fields `semantic_note` and `semantic_note_source_sha256` |
+| `docs/reference/sentinel-candidates-v11.md` | predicted byte-identical | `cmp` clean |
+| `src/etl/schema_v11.sql` | every `COMMENT ON COLUMN` statement compared by target; the DDL outside those statements compared byte for byte | 1,461 statements, exactly one changed (`"source"."photometry_primary"."id_specz_khostovan25"`); everything else byte-identical |
+| `src/etl/conformance_cases_v11.py` | every case compared by `case_id` | 1,448 cases, exactly one changed (`0004:photometry_primary.id_specz_khostovan25`) |
+
+Nothing differed where the inventory did not predict, with one exception,
+handled below rather than pushed through.
+
+**The gate halted once, on an inventory gap, and the inventory was extended
+rather than the halt overridden.** `generate_schema_docs_v11.py` refused with
+"documentation dictionary seal mismatch". The dictionary CSV is pinned in
+five places, not one: the loader's semantic-source seal, plus
+`SEALED_CSV_SHA256` and `SEALED_PREFIX_SHA256` in
+`src/etl/validate_dictionary_seal.py` and `SEALED_ROWS_SHA256` and
+`SEALED_CSV_SHA256` in `src/etl/generate_schema_docs_v11.py`. The gate A2.1
+sweep searched for the superseded values and for the digest of the file whose
+seal moves; it did not search for the digests of the artifacts being
+regenerated, so it missed three of the five. **That gap is the executor's.**
+The inventory now carries §3.2 with all four constants, their prior and new
+values, and a corrected search method, which re-run at this gate returns those
+four and nothing else. The four constants were computed with each module's own
+digest function, not by hand, and no other line of either module changed.
+
+Those two modules are not in the spec's Modify list. Updating their dictionary
+seals is nonetheless the narrowest action that makes the gate executable:
+`docs/reference/schema-v11.md` is named in Modify and cannot be regenerated at
+all while they hold stale digests. Recorded as an authoring defect at A2.6.
+
+**A second sequencing constraint, forced by a generator rather than by the
+spec.** `docs/reference/schema-v11.md` cannot be regenerated at this gate at
+all. Its generator validates the regenerated conformance case against the
+**live** `pg_description` snapshot and halts with `conformance comment
+mismatch: 0004:photometry_primary.id_specz_khostovan25` while the database
+still carries the superseded comment. It is regenerated at gate A2.3,
+immediately after the comment application, which is the first moment it is
+possible. Recorded in inventory §3.3 and at A2.6.
+
+**Seal discrimination, proved by mutation.** Reverting the
+`specz_linkage_gate41` entry alone, changing nothing else, reproduces the
+rejection at the same site:
+
+```text
+ValueError: Semantic source hash mismatch for specz_linkage_gate41:
+expected 46a7b8274d1459a875eb2319dc02c4069bf48a47965657add5d808b33d30c650,
+observed e55f2a44f4ec1dd89f5dae8ec89757afe972ddead288ead6f94d330625594466
+```
+
+`1 failed in 4.17s`. Restoring the entry returns `1 passed in 4.33s`. The
+seal still discriminates; it was updated, not bypassed, and no fallback
+provider was added.
+
+**Established suite, zero failures and zero errors:**
+
+```bash
+/opt/agents/venv/bin/python -m pytest -q \
+  -k 'not test_default_check_reproduces_tracked_dictionary_byte_identical'
+```
+
+`455 passed, 1 deselected in 123.68s`.
+
+**Byte-identity check, run and not deselected:**
+
+```bash
+doppler run --project ml01 --config dev -- /opt/agents/venv/bin/python -m pytest -q \
+  tests/test_load_dictionary.py::test_default_check_reproduces_tracked_dictionary_byte_identical
+```
+
+`1 passed in 2006.34s (0:33:26)`. The test asserts `dictionary check PASSED:
+1448 profiled rows reproduce byte-identical` and `candidate report check
+PASSED`, so the tracked dictionary and the tracked candidate report both
+reproduce from the corrected code. The seal now asserts a provenance that is
+true.
+
+**Artifact digests at this gate:**
+
+| Artifact | At `4f98e49` | At A2.2 |
+|---|---|---|
+| `src/etl/load_dictionary.py` | `8e79a0b7...900f` | `f8425e39...b686` |
+| `src/etl/validate_dictionary_seal.py` | `636f8603...6fbb` | `76ed1e26...ff39` |
+| `src/etl/generate_schema_docs_v11.py` | `c8bce46f...29bb` | `42310866...8987` |
+| `data/dictionary/columns-v11.csv` | `a20457c8...cfcd5` | `324d3ea1...e8b8` |
+| `src/etl/schema_v11.sql` | `592ba562...581d` | `0ca5aa58...e476` |
+| `src/etl/conformance_cases_v11.py` | `524b8378...f0dd` | `2a707bde...72cc` |
+| `docs/reference/sentinel-candidates-v11.md` | `2384292c...e034c` | unchanged |
+
+No database object changed at this gate. The only live session was the
+read-only one the dictionary build and the schema-docs attempt opened; both
+issue `SELECT` only, and the schema-docs attempt halted before any write path.
+
 ---
 
 ## 2. Files Changed
@@ -460,6 +601,13 @@ the verifier itself before it reads.
 | [tests/README.md](../tests/README.md) | Updated (gate A2.5) |
 | [docs/research/specz-linkage-evidence.md](../docs/research/specz-linkage-evidence.md) | Updated (gate A2.5, link depth and evidence digest) |
 | [docs/research/README.md](../docs/research/README.md) | Updated (gate A2.5, index row) |
+| [src/etl/load_dictionary.py](../src/etl/load_dictionary.py) | Updated (gate A2.2, seal entry and the note it binds) |
+| [src/etl/validate_dictionary_seal.py](../src/etl/validate_dictionary_seal.py) | Updated (gate A2.2, two dictionary seals) |
+| [src/etl/generate_schema_docs_v11.py](../src/etl/generate_schema_docs_v11.py) | Updated (gate A2.2, two dictionary seals) |
+| [data/dictionary/columns-v11.csv](../data/dictionary/columns-v11.csv) | Regenerated (gate A2.2) |
+| [src/etl/schema_v11.sql](../src/etl/schema_v11.sql) | Regenerated (gate A2.2) |
+| [src/etl/conformance_cases_v11.py](../src/etl/conformance_cases_v11.py) | Regenerated (gate A2.2) |
+| [docs/research/specz-linkage-propagation-inventory.md](../docs/research/specz-linkage-propagation-inventory.md) | Updated (gate A2.2, §3.2 and §3.3) |
 
 ---
 
@@ -469,6 +617,9 @@ the verifier itself before it reads.
 |-------|------------|
 | `cosmos2025_v11_ro` refused by `pg_hba.conf` from ML01 | Recorded, not worked around. Fell back to the spec's named alternative: admin identity with `default_transaction_read_only=on` at connection time. The HBA gap is a pending operator action already recorded in `AGENTS.md`. |
 | Repository spec archive carries two filename conventions | Recorded for later triage per the spec's Archive Precedence section. Not normalized: renaming an archived record edits a closed artifact. |
+| The A2.1 propagation sweep missed three of the five files pinning the dictionary, because it searched for the superseded values and the moving seal's digest but not for the digests of the artifacts being regenerated. **Executor deviation, not an authoring defect.** | Gate A2.2 halted on the resulting generator refusal rather than pushing through. The inventory gained §3.2 with all four constants and a corrected search method, re-run at A2.2 and clean. |
+| `src/etl/validate_dictionary_seal.py` and `src/etl/generate_schema_docs_v11.py` pin the dictionary but are absent from Modify | Their four dictionary seals updated as the narrowest action that makes an in-Modify artifact regenerable. No other line of either module changed. Recorded as an authoring defect at A2.6. |
+| `docs/reference/schema-v11.md` cannot be regenerated before the live comment is applied | Its generator validates the regenerated conformance case against live `pg_description`. Regenerated at A2.3 immediately after the comment application. Recorded at A2.6. |
 | P2R-04b's execution order seals and propagates bytes that its own gate A2.5 changes | Gates A2.4 and A2.5 executed before A2.2 and A2.3. No deliverable moved between gates. Reasoning in §0.1; recorded as an authoring defect at A2.6. |
 
 ---
