@@ -5,7 +5,7 @@ description: "RED regression coverage for the P2R-04 evidence-layer defects"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-31"
 version: "1.0"
-status: "in-progress"
+status: "partial"
 tags:
   - type: worklog
   - domain: testing
@@ -21,10 +21,12 @@ related_documents:
 
 | Attribute | Value |
 |-----------|-------|
-| Status | Complete through A1.4 |
-| Gate | A1.4 corrected evidence review surface |
+| Status | 🔄 partial (sealed 2026-09-02 by P2R-04b gate A2.7) |
+| Gates landed | A1.1 through A1.4 |
+| Gate not reached | A1.5, blocked on a contradiction the spec did not permit resolving |
 | Branch | `task/4-specz-linkage-correction` |
 | Base | `04b42e16faacbd2388979d9c608d54db26118a50` |
+| Remediation | P2R-04b, `spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04b-seal-and-propagation-repair.md` |
 
 Objective: establish deterministic regression tests for the P2R-04 evidence
 layer before changing either generator.
@@ -241,3 +243,125 @@ Focused regression command:
 
 Result: `7 passed in 0.41s`. `git diff --check` passed. This documentation
 gate opened no database session and changed no database object.
+
+
+---
+
+## Closeout seal
+
+**Sealed 2026-09-02 at gate A2.7 of P2R-04b. Status `partial`, per the
+`spec-closeout` Blocked path: four gates landed cleanly and the fifth did
+not.**
+
+This unit never closed. It left an `in-progress` worklog and no registry row,
+so the queue and the registry could not say what was owed, which is the
+failure the amendment convention exists to prevent. Closing it from a later
+unit is an explicit operator decision recorded in P2R-04b, not an executor
+judgement, and it completes a record that was left open rather than reopening
+a closed one.
+
+Nothing above this heading is revised. The four gate checkpoints stand as the
+executor wrote them.
+
+### Gate commits
+
+| Gate | SHA | Subject |
+|---|---|---|
+| A1.1 | `35e95de97cdce7302b3c65c6dd2dc9d4a1ee90cf` | gate A1.1: reproduce evidence-layer defects with RED tests |
+| A1.2 | `f9feada407faa42c17ff1bdce3d4d8ba1a7172fe` | gate A1.2: correct defective-path geometry |
+| A1.3 | `d45f068b69d6da4aafffea2c2bd3e80a2bbac515` | gate A1.3: reconcile distributions and add radius sensitivity |
+| A1.4 | `4f98e490a07ccd1ea16a147e6930b108a6ca24d1` | gate A1.4: correct the evidence review surface |
+| A1.5 | none | not reached; no commit was made, correctly |
+
+All four are intact, linear, and unchanged. Tree digests `15d87463`,
+`b26d87a7`, `6a3f497c`, `8748829c`.
+
+### Runtime facts
+
+| Fact | Value |
+|---|---|
+| Host | ml01 |
+| Repository | cosmos2025-anomalies |
+| Branch | `task/4-specz-linkage-correction`, off `main` at `e65242a7802422cc86ed47d96945e2a86e0b27a3` |
+| Starting branch | `task/4-specz-linkage-correction` (the parent's unmerged branch, reused per the amendment rule) |
+| Base commit | `04b42e16faacbd2388979d9c608d54db26118a50` |
+| Model | `unreported` |
+| Duration | not reported by the executor. Observed span from committed and working artifacts: first gate commit 2026-09-01 00:02:54 -0400, last 01:22:21 -0400, with the A1.5 consistency-pass report written at 01:24. Roughly 1 h 30 m from planning artifact to final report. |
+| Remote operations | none |
+| Database sessions | read-only throughout; `cosmos2025_v11` as `clusteradmin_pg01` with `default_transaction_read_only=on` and `transaction_read_only=on`. Zero database objects changed. |
+
+**On `unreported`.** The `spec-closeout` skill requires the executor's actual
+reported model string and forbids guessing one. P2R-04a's executor recorded
+no model string in its worklog, its five task reports, or its progress file,
+and no attestation trailer exists because no closeout commit was made. A
+different seat sealing this record cannot supply that value truthfully, so it
+is `unreported` in both this worklog and the registry row, and the two agree.
+
+### The blocking contradiction
+
+Gate A1.2 required correcting `src/etl/verify_specz_linkage_v11.py`. Gate
+A1.5 required the established suite to pass.
+`src/etl/load_dictionary.py` pins that verifier's SHA-256 in
+`EXPECTED_SEMANTIC_HASHES["specz_linkage_gate41"]`, and
+`_semantic_source_context()` rejects a changed source at line 712 before any
+dictionary profiling or generation. The spec's Modify list omitted the
+dictionary loader and its do-not-touch list froze parent gates 4.2 through
+4.6 and their generated outputs, so the only path that reconciles the two
+requirements was excluded by the same spec that imposed both.
+
+Observed at HEAD `4f98e49`:
+
+```text
+4 failed, 436 passed, 1 deselected, 8 errors in 124.88s
+```
+
+All twelve halt at `src/etl/load_dictionary.py:712` with `Semantic source hash
+mismatch for specz_linkage_gate41: expected 46a7b827..., observed
+2db4890d...`, before their subject assertions.
+
+**The executor blocked correctly.** It did not force a green closeout, did
+not deselect the discriminating check, did not add a fallback provider on its
+own authority, and did not widen scope. It wrote the contradiction up and
+stopped, which is what the process wants. The defect is the spec author's and
+is recorded as SD-071 in `spec/spec-defect-register.md`.
+
+### Issues, attributed to executor deviation
+
+These four are executor deviations, not authoring defects, and are
+deliberately **absent from the defect register**, which records authoring
+defects only. All four were self-reported by this unit's own A1.5 review,
+which is why they were repairable at all.
+
+| # | Issue | Resolution |
+|---|---|---|
+| 1 | The D1 test ultimately asserted only `geometry.defective_path.median == 0.0`. A1.1 explicitly forbade a test asserting only a median, requiring instead that the catalog source paired with each link be asserted by direct lookup. | Repaired by P2R-04b gate A2.4, commit `840dbf778325fca5b1e949b2ca54d4149e103b16`, in a new commit naming gate A1.1. `35e95de` is not rewritten. |
+| 2 | The D2 tests hardcoded bucket literals and compared `bucket_sum`, `attached_entry_total`, and `independent_entry_count` against each other, three fields the generator sets equal by construction, rather than deriving the observed categories and independently counting the fixture. | Repaired by P2R-04b gate A2.4, same commit. |
+| 3 | Gate A1.2 removed `load_catalog`'s catalog contiguity and order guard while leaving three sites in the same file that index catalog arrays by an `Id_COSMOS25` identifier, including the compilation-crossmatch control. | Repaired by P2R-04b gate A2.5, commit `9b86c2d89448952cff0f452a468d4e43879f67d1`, in a new commit naming gate A1.2. `f9feada` is not rewritten. The repair altered no result: every evidence subdocument is byte-identical, including the control at canonical digest `9a22f4b6...`. |
+| 4 | `tests/README.md` was left without the new amendment regression suite. | Repaired by P2R-04b gate A2.5, same commit. |
+
+Two supplemental style items were also self-reported and were not
+spec-stated validations: default Ruff reported four diagnostics and Black
+would reformat three changed Python files. P2R-04b gate A2.5 suppressed the
+two import-order findings at the `sys.path`-dependent imports that cause
+them; the remaining items are unchanged and are not tracked as gate failures
+by either spec.
+
+### What this unit delivered
+
+Gates A1.1 through A1.4 stand and are not in doubt. The defective-path
+geometry is corrected and reproduces the investigation prior exactly on the
+all-links population; the F-10 distributions are complete and reconciled; the
+population-A classification is reported at three radii with its stability
+stated; and the review surface carries the corrected values with every
+separation statistic naming its population and coordinate basis. F-08's
+population-A result stands: all 694 representatives name a different catalog
+source and none names the same one.
+
+### Records
+
+- Registry: one row appended 2026-09-02 with status `partial`, distinct from
+  P2R-04's row 110 and from P2R-04b's own.
+- Archive: `spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction.md`
+  in the central tree, with a byte-identical index copy in the repository,
+  proven by `cmp`. Absent from the active queue.
+- P2R-04's archived spec, worklog, and registry row are byte-unchanged.

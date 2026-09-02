@@ -808,6 +808,89 @@ that records authoring defects.
 Repository diff at this gate: this worklog only. The register is central and
 outside any git repository, so there is nothing to commit for it.
 
+### Gate A2.7: Close out P2R-04a as `partial`
+
+P2R-04a reached gate A1.4 and blocked at A1.5. Per the `spec-closeout`
+Blocked path it closes as `partial`, not `completed`: some deliverables
+landed cleanly and others did not.
+
+This completes a record that was never closed. It is not a reopening. Its
+`in-progress` worklog and missing registry row left the queue and the
+registry unable to say what was owed, which is the failure the amendment
+convention exists to prevent, and P2R-04b names closing it from here as an
+explicit operator decision.
+
+**Worklog sealed.** Status `in-progress` to `partial`, the summary table
+extended with the gate that was not reached and this unit as the remediation,
+and a "Closeout seal" section appended below everything the P2R-04a executor
+wrote. Nothing above that heading is revised; the four gate checkpoints stand
+as written. The seal records the four exact gate SHAs and tree digests, the
+runtime facts, the blocking contradiction with its observed failure output,
+the four executor-side issues with their repairs, what the unit did deliver,
+and its records. Sealed worklog SHA-256
+`7bd41df280f42c8f484a55f5d7986b7815b76d9303339968c8b7b267da51b62a`.
+
+**Model recorded as `unreported`, not guessed.** The `spec-closeout` skill
+requires the executor's actual reported model string and forbids inventing
+one. P2R-04a's executor recorded none in its worklog, its five task reports,
+or its progress file, and there is no attestation trailer because no closeout
+commit was ever made. A different seat cannot supply that value truthfully.
+`unreported` appears in both the worklog and the registry row, so the two
+agree, which is the property the skill actually protects.
+
+**The four executor-side issues are in the worklog's Issues section and
+absent from the defect register**, which records authoring defects only. Each
+is paired with the P2R-04b commit that repaired it: issues 1 and 2 by gate
+A2.4 (`840dbf778325fca5b1e949b2ca54d4149e103b16`, naming gate A1.1), issues 3
+and 4 by gate A2.5 (`9b86c2d89448952cff0f452a468d4e43879f67d1`, naming gate
+A1.2).
+
+**Registry row appended.** A pre-image was captured first to
+`/opt/agents/recycle-bin/work-registry.csv.pre-p2r-04b-a27.2026-09-02`,
+SHA-256 `6f123556ed08df4e505cafac7bdc7a2f0dea2ed2dedbbdbd60dd0a6a17f36919`,
+verified equal to the live file. One row, 23 fields, no column shifted or
+added, status `partial` matching the worklog, category `astronomy`,
+`token_usage_source` `unavailable` with token and cost fields empty rather
+than fabricated. Exactly one P2R-04a row exists.
+
+**Archived to both positions per Archive Precedence.** `git mv` does not
+apply: the spec lived in the central tree, which is not a git repository.
+
+```bash
+cp -p /opt/agents/repos/spec/2026-08-31-...-p2r-04a-....md \
+      spec/2026-08/2026-08-31-...-p2r-04a-....md
+mv    /opt/agents/repos/spec/2026-08-31-...-p2r-04a-....md \
+      /opt/agents/repos/spec/2026-08/
+cmp   /opt/agents/repos/spec/2026-08/...  spec/2026-08/...
+```
+
+Byte-identical proven by `cmp`, not by inspection; both at SHA-256
+`6e6ec6527e724fc8b19b1e196d2d97662b70acc21614b7ca9e29559406c3cdd1`. Absent
+from the active central queue, which now holds only P2R-04b for this
+repository. No archive collision existed at either position. The full central
+filename is retained, matching P2R-04, per the archive-convention note in §0.
+
+**The parent's records are byte-unchanged, asserted:**
+
+| Record | Digest | Matches |
+|---|---|---|
+| P2R-04 worklog | `fe992b655cf1cc31a378a5ceb520e09f563a748bbe3a87683d308efb6f864aad` | the value P2R-04a recorded |
+| P2R-04 archived spec, central | `a3bbdcdb933a7aac62d51e6b3ed1188b8e0f0adb8f8e2ea8abf003c5e9d7c5c8` | yes |
+| P2R-04 archived spec, repository index | `a3bbdcdb933a7aac62d51e6b3ed1188b8e0f0adb8f8e2ea8abf003c5e9d7c5c8` | yes, and `cmp`-identical to the central copy |
+| P2R-04 registry row, file line 110 | `1e528e0895213883b704f4a3c79ccdfebda3f31298d944d8176cc82f8df35d82` | yes, over the row including its trailing newline, which is how P2R-04a computed it; byte-identical to the pre-image captured at this gate |
+
+`35e95de`, `f9feada`, `d45f068`, and `4f98e49` are unchanged, verified by
+subject and tree digest.
+
+**Pre-existing registry defect recorded, not repaired.** The P2R-04 registry
+row (file line 110) carries 24 fields where the header defines 23. Its
+summary text sits in the `tokens_total` column, shifted one place right by an
+empty field inserted before it, so `summary` is empty on that row. It is the
+only row in the file with a field-count anomaly. P2R-04b's do-not-touch list
+names that row as closed and final, so it is recorded here for operator
+triage and left exactly as it stands. This unit's own rows are written with
+the correct 23 fields.
+
 ---
 
 ## 2. Files Changed
@@ -830,6 +913,10 @@ outside any git repository, so there is nothing to commit for it.
 | [docs/reference/schema-v11.md](../docs/reference/schema-v11.md) | Regenerated (gate A2.3) |
 | `source.photometry_primary.id_specz_khostovan25` column comment | Updated (gate A2.3, database) |
 | `/opt/agents/repos/spec/spec-defect-register.md` (central, not in this repo) | Updated (gate A2.6): SD-068 corrected in place, SD-071 to SD-076 appended, class table reconciled |
+| [work-logs/2026-08-31-cosmos2025-worklog-p2r-04a-evidence-layer-correction.md](2026-08-31-cosmos2025-worklog-p2r-04a-evidence-layer-correction.md) | Sealed `partial` (gate A2.7) |
+| [spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction.md](../spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction.md) | Added, repository index copy (gate A2.7) |
+| `/opt/agents/repos/spec/2026-08/2026-08-31-cosmos2025-spec-p2r-04a-evidence-layer-correction.md` (central) | Archived from the active queue (gate A2.7) |
+| `/opt/agents/repos/work-logs/work-registry.csv` (central) | One row appended for P2R-04a, status `partial` (gate A2.7) |
 | [docs/research/specz-linkage-propagation-inventory.md](../docs/research/specz-linkage-propagation-inventory.md) | Updated (gate A2.2, §3.2 and §3.3) |
 
 ---
@@ -839,6 +926,7 @@ outside any git repository, so there is nothing to commit for it.
 | Issue | Resolution |
 |-------|------------|
 | `cosmos2025_v11_ro` refused by `pg_hba.conf` from ML01 | Recorded, not worked around. Fell back to the spec's named alternative: admin identity with `default_transaction_read_only=on` at connection time. The HBA gap is a pending operator action already recorded in `AGENTS.md`. |
+| P2R-04's registry row carries 24 fields against a 23-field header, with its summary shifted into `tokens_total` | Recorded for operator triage, not repaired. That row is named in the do-not-touch list as closed and final. This unit's own rows carry the correct 23 fields. |
 | Repository spec archive carries two filename conventions | Recorded for later triage per the spec's Archive Precedence section. Not normalized: renaming an archived record edits a closed artifact. |
 | The A2.1 propagation sweep missed three of the five files pinning the dictionary, because it searched for the superseded values and the moving seal's digest but not for the digests of the artifacts being regenerated. **Executor deviation, not an authoring defect.** | Gate A2.2 halted on the resulting generator refusal rather than pushing through. The inventory gained §3.2 with all four constants and a corrected search method, re-run at A2.2 and clean. |
 | `src/etl/validate_dictionary_seal.py` and `src/etl/generate_schema_docs_v11.py` pin the dictionary but are absent from Modify | Their four dictionary seals updated as the narrowest action that makes an in-Modify artifact regenerable. No other line of either module changed. Recorded as an authoring defect at A2.6. |
