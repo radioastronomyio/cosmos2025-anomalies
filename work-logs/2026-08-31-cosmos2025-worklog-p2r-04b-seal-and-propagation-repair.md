@@ -682,6 +682,132 @@ errors.
 and digest are held in `staging/a21-pg-description-capture.json` and,
 independently, in `src/etl/schema_v11.sql` at commit `4f98e49` line 1734.
 
+### Gate A2.6: Reconcile the defect register
+
+`spec/spec-defect-register.md` is central, outside any git repository, so its
+reversal class is `platform-state` and its undo is a pre-image restore.
+
+**Pre-image, captured before the first edit:**
+
+```bash
+cp -p /opt/agents/repos/spec/spec-defect-register.md \
+  /opt/agents/recycle-bin/spec-defect-register.md.pre-p2r-04b-a26.2026-09-02
+```
+
+Recycle surface: `/opt/agents/recycle-bin/`, the platform-level surface, because
+the register lives outside any repo. Pre-image SHA-256
+`ff4e1153540afcc929d8807a07a1b8fe7bd8ddd663a79473a103fd9cd370a066`, verified
+equal to the live file at capture time. Nothing was deleted. Post-edit SHA-256
+`4b329d57c21b0c07d9603a8a0128bdfab0778ba85fb726c1f216a7bb930b4538`.
+
+**SD-068 corrected in place, not deleted.** Its heading now carries "(claim
+corrected 2026-09-02)" so a reader scanning headings is not misled. Its
+original "What was wrong", "Consequence", and "Fix" text is preserved
+verbatim and labelled "as originally recorded", followed by a block quote
+recording that the claim is disproved: the 4,054 arcsec prior reproduces
+exactly, at 4,054.34 arcsec, on the all-links population of 37,219 carriers
+against `specz_compilation_all.ra_corrected/dec_corrected`, confirmed by
+three routes (the corrected Astropy primary path, an independent dictionary
+association with a clamped spherical law of cosines at 4,054.341555895
+arcsec, and the PostgreSQL route recorded in P2R-04a). All three bases the
+row cites were produced by the defective pairing code, so the row is an
+artifact of the bug it was written to excuse. The revised "Fix" states the
+general rule: a prior that fails to reproduce is a defect report against the
+measurement until an independent recomputation establishes the population and
+coordinate basis it was authored on.
+
+**Six rows appended, SD-071 through SD-076.** Each carries class, date, repo,
+spec, PR, found-by, attribution to the spec author, remediation, and the
+exact text the spec did or did not carry.
+
+| Row | Subject | Class, re-derived |
+|---|---|---|
+| SD-071 | P2R-04a required changing a verifier whose SHA-256 another file pins, with that file excluded from Modify and the suite required green | `required-path-missing-from-modify`, `spec-internally-inconsistent` |
+| SD-072 | P2R-04a froze the defect register without reading it, over a claim the same chain disproves | `spec-asserts-unverified-state` |
+| SD-073 | P2R-04a scoped the correction to the layer the defect was found in, not where its output went | `required-path-missing-from-modify` |
+| SD-074 | P2R-04a stated an additive-history rule with no recovery path for an earlier gate's unmet validation | `spec-internally-inconsistent` |
+| SD-075 | P2R-04b's execution order seals and propagates bytes its own gate A2.5 changes, and its schema-reference regeneration precedes the comment its generator validates against | `spec-internally-inconsistent`, with a vocabulary gap recorded |
+| SD-076 | P2R-04b authorized changing the dictionary while omitting three of the five files pinning its digest | `required-path-missing-from-modify` |
+
+**Every classification was re-derived from the register's current class
+table, not accepted from the spec, and the reasoning is recorded in each
+row.** Two of the spec's own suggestions were tested and one was declined:
+
+- The spec suggested defects 1 and 3 both plausibly belong to
+  `required-path-missing-from-modify` and defect 1 arguably also to
+  `spec-internally-inconsistent`. Both hold on the class definitions and are
+  assigned.
+- `constraint-scope-overreach` was considered for SD-073 and **rejected with
+  the reasoning recorded in the row**: the read-only constraint matched
+  P2R-04a's own declared role, so nothing was extended from a narrower role
+  to a broader one. The defect is that the declared role was scoped to the
+  wrong layer, which is a Modify-scope defect. Declining matters because that
+  class stands at exactly two instances, and inflating it on a stretched
+  reading would move a class toward a skill patch it has not earned.
+- `domain-unenumerated` was considered for SD-074 and rejected: the defect is
+  two requirements that cannot both hold once a landed gate is found
+  deficient, not an unstated domain for a value.
+
+**Vocabulary gap recorded rather than a class invented.** SD-075 is a
+*sequencing* defect: each requirement is individually satisfiable and only
+their stated order is wrong, so the remedy is to reorder execution rather
+than to change a requirement. No class in the table names that.
+`spec-internally-inconsistent` is assigned as the closest fit, and a
+candidate name, `execution-order-contradicts-dependencies`, is recorded in
+the row and in the reconciliation note for operator triage. No class was
+added to the table for it.
+
+**Class instance counts reconciled, and every count is now derived.** Counts
+were recomputed by parsing the `Class` field of all 74 instance bodies rather
+than carried forward. Verified afterwards: every tabulated class's stated
+count equals its derived count, with one recorded lineage exception.
+
+| Class | Table before | Table after | Derived |
+|---|---:|---:|---:|
+| `spec-asserts-unverified-state` | 10 | 17 | 17 |
+| `spec-internally-inconsistent` | 11 | 14 | 14 |
+| `detector-not-discriminator` | 11 | 11 | 11 |
+| `contract-stated-never-enforced` | 8 | 8 | 8 |
+| `domain-unenumerated` | 3 and 6, two rows | 8, merged | 8 |
+| `required-path-missing-from-modify` | 4 | 7 | 7 |
+| `pattern-not-role` | 4 | 3 | 3, plus SD-008 under the predecessor name |
+| `constraint-scope-overreach` | 1 | 2 | 2 |
+| `spec-contract-drift` | absent | 3 | 3 |
+| `validation-target-incapable` | absent | 1 | 1 |
+| `spec-contradicts-own-freeze` | absent | 1 | 1 |
+| `closeout-paths-missing-from-modify` | 2 | 0, flagged | 0 |
+| all others | 1 | 1 | 1 |
+
+Five pre-existing discrepancies were found and are recorded in a new "Class
+table reconciliation, 2026-09-02" section rather than quietly repaired: the
+duplicated `domain-unenumerated` row, the drifted
+`spec-asserts-unverified-state` count, three classes with instance bodies but
+no table row, `closeout-paths-missing-from-modify` at 2 with zero instance
+bodies, and SD-008 carrying the predecessor class name. SD-026 carries no
+`Class` field at all; recorded for triage and not assigned one here, because
+classifying another unit's finding from its prose would be inventing an
+attribution.
+
+**The skill's failure-mode table is unchanged.** No class newly reached the
+promotion threshold: every class this unit incremented was already above two
+and already marked `Pending` or `Already in skill`, and
+`constraint-scope-overreach` reached two at SD-057, before this unit. Nothing
+was owed, and nothing was written to
+`/opt/agents/repos/local-agent-skills/skills/spec-driven-prompt/SKILL.md`,
+whose SHA-256 is `404b7d70f50f117ebc2346f579e4e2c0e1ed6e213b49ed17b564906d3f648eb6`.
+That repository's working tree was already dirty on four tracked files before
+this run and remains so, untouched, which is the same condition SD-016
+recorded as its reason for leaving a patch pending.
+
+**Executor-side items are not here.** The four issues P2R-04a's own review
+self-reported (D1 asserting a median, D2 comparing generator self-fields, the
+removed contiguity guard, and `tests/README.md`) are executor deviations and
+belong in P2R-04a's worklog Issues section at gate A2.7, not in a register
+that records authoring defects.
+
+Repository diff at this gate: this worklog only. The register is central and
+outside any git repository, so there is nothing to commit for it.
+
 ---
 
 ## 2. Files Changed
@@ -703,6 +829,7 @@ independently, in `src/etl/schema_v11.sql` at commit `4f98e49` line 1734.
 | [src/etl/conformance_cases_v11.py](../src/etl/conformance_cases_v11.py) | Regenerated (gate A2.2) |
 | [docs/reference/schema-v11.md](../docs/reference/schema-v11.md) | Regenerated (gate A2.3) |
 | `source.photometry_primary.id_specz_khostovan25` column comment | Updated (gate A2.3, database) |
+| `/opt/agents/repos/spec/spec-defect-register.md` (central, not in this repo) | Updated (gate A2.6): SD-068 corrected in place, SD-071 to SD-076 appended, class table reconciled |
 | [docs/research/specz-linkage-propagation-inventory.md](../docs/research/specz-linkage-propagation-inventory.md) | Updated (gate A2.2, §3.2 and §3.3) |
 
 ---
