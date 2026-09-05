@@ -177,7 +177,8 @@ def test_live_dictionary_uses_exact_declared_target_table_set() -> None:
         "lss_overdensity",
         "galaxy_groups",
         "galaxy_group_memberships",
-        "specz_compilation",
+        "specz_compilation_unique",
+        "specz_compilation_all",
     }
 
 
@@ -198,18 +199,19 @@ def test_live_inventory_reconciles_every_source_field_and_metadata_row() -> None
         "lss_overdensity": 4,
         "galaxy_groups": 14,
         "galaxy_group_memberships": 4,
-        "specz_compilation": 32,
+        "specz_compilation_unique": 32,
+        "specz_compilation_all": 32,
     }
     assert evidence["master_tfields_total"] == 1_349
     assert evidence["master_prior_expectation"] == 1_349
     assert evidence["master_prior_difference"] == 0
-    assert evidence["native_total"] == 1_403
+    assert evidence["native_total"] == 1_435
     assert evidence["origin_counts"] == {
-        "source_native": 1_403,
+        "source_native": 1_435,
         "source_row_metadata": 7,
         "id_injected": 6,
     }
-    assert len(rows) == 1_416
+    assert len(rows) == 1_448
 
 
 def test_cli_writes_configured_csv_without_contextual_id_rename(tmp_path: Path) -> None:
@@ -233,10 +235,10 @@ def test_cli_writes_configured_csv_without_contextual_id_rename(tmp_path: Path) 
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "dictionary rows: 1416" in result.stdout
+    assert "dictionary rows: 1448" in result.stdout
     with output.open(newline="") as handle:
         rows = list(csv.DictReader(handle))
-    assert len(rows) == 1_416
+    assert len(rows) == 1_448
     toni_id = [
         row
         for row in rows
@@ -259,7 +261,7 @@ def test_default_check_reproduces_tracked_dictionary_byte_identical() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert (
-        "dictionary check PASSED: 1416 profiled rows reproduce byte-identical"
+        "dictionary check PASSED: 1448 profiled rows reproduce byte-identical"
         in result.stdout
     )
     assert "candidate report check PASSED" in result.stdout

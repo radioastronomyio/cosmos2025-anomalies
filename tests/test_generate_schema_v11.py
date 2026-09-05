@@ -49,9 +49,10 @@ EXPECTED_TABLES = (
     "lss_overdensity",
     "galaxy_groups",
     "galaxy_group_memberships",
-    "specz_compilation",
+    "specz_compilation_unique",
+    "specz_compilation_all",
 )
-EXPECTED_COUNTS = (288, 150, 45, 58, 152, 463, 206, 4, 14, 4, 32)
+EXPECTED_COUNTS = (288, 150, 45, 58, 152, 463, 206, 4, 14, 4, 32, 32)
 
 
 # =============================================================================
@@ -89,7 +90,7 @@ def test_table_boundary_column_order_and_type_passthrough() -> None:
 
     assert tuple(schema) == EXPECTED_TABLES
     assert tuple(len(schema[table]) for table in schema) == EXPECTED_COUNTS
-    assert sum(map(len, schema.values())) == 1_416
+    assert sum(map(len, schema.values())) == 1_448
     for table, contract_rows in schema.items():
         expected = [row for row in rows if row["target_table"] == table]
         assert [column.name for column in contract_rows] == [
@@ -173,8 +174,11 @@ def test_master_key_contract_is_exact_and_supplements_are_unconstrained() -> Non
             "photometry_primary",
             ("id",),
         )
-    for table in EXPECTED_TABLES[7:]:
+    for table in EXPECTED_TABLES[7:-1]:
         assert constraints[table] == ()
+    # P2R-04 gate 4.3: Id_specz is the sole, gate-4.1-established key.
+    assert [item.kind for item in constraints[EXPECTED_TABLES[-1]]] == ["primary_key"]
+    assert constraints[EXPECTED_TABLES[-1]][0].columns == ("id_specz",)
 
 
 def test_provenance_contract_is_versioned_importable_and_fidelity_safe() -> None:
@@ -226,14 +230,14 @@ def test_every_column_has_one_separated_provenance_aware_comment() -> None:
     rows = _rows()
     comments = module.column_comment_contract(rows)
 
-    assert len(comments) == 1_416
+    assert len(comments) == 1_448
     assert len(module.PROVENANCE_CONTRACT) == 13
     assert (
         sum(
             line.startswith("COMMENT ON COLUMN ")
             for line in module.generate_sql(rows).splitlines()
         )
-        == 1_429
+        == 1_461
     )
     undocumented = next(
         comment
@@ -269,7 +273,7 @@ def test_sql_literal_and_identifier_escaping_preserves_source_prose() -> None:
         item
         for row, item in zip(rows, comments, strict=True)
         if row["target_identifier"] == "survey"
-        and row["target_table"] == "specz_compilation"
+        and row["target_table"] == "specz_compilation_unique"
     )
     assert "survey'" in comment.text
     assert "survey''" in comment.sql

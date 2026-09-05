@@ -236,13 +236,18 @@ def _protected_state(connection: psycopg.Connection) -> ProtectedState:
 
 
 def _assert_protected_precondition(state: ProtectedState) -> None:
-    """Halt if the unauthorized target database or role already exists."""
+    """Halt unless both sealed databases and the analyst role are present.
+
+    P2R-03 gate 3.6 asserted pre-creation absence. Since the mirror sealed,
+    the protected state is presence-plus-identity: this run must leave the
+    v1 baseline, the cosmos2025_v11 mirror, and the analyst role untouched.
+    """
     if "cosmos2025" not in state.database_oids:
         raise ValueError("protected v1 database is unexpectedly absent")
-    if "cosmos2025_v11" in state.database_oids:
-        raise ValueError("cosmos2025_v11 must remain absent in Gate 3.6")
-    if state.role_present:
-        raise ValueError("cosmos2025_v11_ro must remain absent in Gate 3.6")
+    if "cosmos2025_v11" not in state.database_oids:
+        raise ValueError("sealed cosmos2025_v11 mirror is unexpectedly absent")
+    if not state.role_present:
+        raise ValueError("analyst role cosmos2025_v11_ro is unexpectedly absent")
 
 
 def _inspect_columns(
@@ -502,7 +507,7 @@ def _removed_row_mutation(
     except ValueError as exc:
         diagnostic = str(exc)
         connection.rollback()
-        if "expected 1416, observed 1415" not in diagnostic:
+        if "expected 1448, observed 1447" not in diagnostic:
             raise ValueError("removed-row mutation had unexpected diagnostic") from exc
         return diagnostic
     connection.rollback()
@@ -589,9 +594,8 @@ def run_scratch_verification(config_path: Path) -> dict[str, object]:
         "removed_row_diagnostic": removed_row,
         "cleanup_confirmed": True,
         "scratch_databases_remaining": 0,
-        "cosmos2025_v11_absent": True,
-        "cosmos2025_v11_ro_absent": True,
-        "cosmos2025_unchanged": True,
+        "sealed_databases_unchanged": True,
+        "analyst_role_unchanged": True,
     }
 
 

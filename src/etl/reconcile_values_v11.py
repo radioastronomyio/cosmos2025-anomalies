@@ -70,7 +70,7 @@ GATE311_TABLES = (
     "lss_overdensity",
     "galaxy_groups",
     "galaxy_group_memberships",
-    "specz_compilation",
+    "specz_compilation_unique",
 )
 MASTER_TABLES = GATE311_TABLES[:7]
 
@@ -78,7 +78,7 @@ MATCH_SOURCE_CANDIDATES = {
     "lss_overdensity": ("id",),
     "galaxy_groups": ("ID",),
     "galaxy_group_memberships": ("GALID", "ID"),
-    "specz_compilation": ("Id_specz",),
+    "specz_compilation_unique": ("Id_specz",),
 }
 
 HISTORICAL_TARGET_KEYS = {
@@ -275,6 +275,10 @@ def build_table_contracts(
     cases: Sequence[Mapping[str, Any]],
 ) -> dict[str, TableContract]:
     """Build all eleven source contracts solely from generated case fields."""
+    historical = [
+        case for case in cases if case["table"] in set(GATE311_TABLES)
+    ]
+    cases = historical
     if len(cases) != 1_416 or tuple(dict.fromkeys(case["table"] for case in cases)) != (
         GATE311_TABLES
     ):
@@ -1231,7 +1235,7 @@ def _fixture_native_value(case: Mapping[str, Any], row: int, column_index: int) 
         ("galaxy_groups", "ID"): 3_000 + effective_row,
         ("galaxy_group_memberships", "GALID"): 4_000 + effective_row,
         ("galaxy_group_memberships", "ID"): 5_000 + effective_row,
-        ("specz_compilation", "Id_specz"): 6_000 + effective_row,
+        ("specz_compilation_unique", "Id_specz"): 6_000 + effective_row,
     }
     if (table, source) in special_integer:
         return special_integer[(table, source)]
@@ -1440,7 +1444,7 @@ def scratch_cast_parity_evidence(fixture: ScratchFixture) -> dict[str, int]:
             ("galaxy_groups", "ID"),
             ("galaxy_group_memberships", "GALID"),
             ("galaxy_group_memberships", "ID"),
-            ("specz_compilation", "Id_specz"),
+            ("specz_compilation_unique", "Id_specz"),
         }
     )
     bigint_values = [
@@ -1795,18 +1799,18 @@ def _run_scratch_body(settings: ReconciliationSettings) -> dict[str, Any]:
                     ),
                     (
                         "missing_row",
-                        "specz_compilation",
+                        "specz_compilation_unique",
                         (
-                            'DELETE FROM "source"."specz_compilation" '
+                            'DELETE FROM "source"."specz_compilation_unique" '
                             'WHERE "id_specz"=6000',
                         ),
                     ),
                     (
                         "extra_row",
-                        "specz_compilation",
+                        "specz_compilation_unique",
                         (
-                            'INSERT INTO "source"."specz_compilation" '
-                            'SELECT * FROM "source"."specz_compilation" LIMIT 1',
+                            'INSERT INTO "source"."specz_compilation_unique" '
+                            'SELECT * FROM "source"."specz_compilation_unique" LIMIT 1',
                         ),
                     ),
                     (

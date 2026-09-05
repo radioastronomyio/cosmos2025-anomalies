@@ -34,6 +34,36 @@ from src.etl import load_dictionary  # noqa: E402
 CONFIG_PATH = REPO_ROOT / "configs/data_paths.yaml"
 
 
+@pytest.fixture(autouse=True)
+def pinned_p2r03_evidence_provider(monkeypatch: pytest.MonkeyPatch):
+    """Supply the P2R-03-committed bytes the frozen surface regenerates from.
+
+    P2R-04 legitimately extended the live dictionary, DDL, conformance cases,
+    and candidate report. The Gate 3.13 compiler stays offline in module
+    source, so the historical bytes come from the local git object store via
+    this fixture and are seal-checked by the module before use.
+    """
+    import subprocess
+
+    def provider(blob_path: str):
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(REPO_ROOT),
+                "show",
+                f"{module.P2R03_EVIDENCE_REF}:{blob_path}",
+            ],
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            return None
+        return result.stdout
+
+    monkeypatch.setattr(module, "historical_evidence_provider", provider)
+    yield provider
+
+
 def test_verification_surface_compiler_module_exists() -> None:
     """Gate 3.13 begins with an importable offline compiler."""
     assert (REPO_ROOT / "src/etl/generate_verification_surface_v11.py").is_file()
@@ -66,8 +96,11 @@ def test_exact_evidence_paths_resolve_under_repository() -> None:
         "/opt/agents/repos/spec/2026-08/"
         "2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
     )
+    # Post-closeout durable state: the spec lives in the month archive and the
+    # active queue no longer holds it, so the read path is the archive inode.
     assert paths.central_spec_read == Path(
-        "/opt/agents/repos/spec/2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
+        "/opt/agents/repos/spec/2026-08/"
+        "2026-08-16-cosmos2025-spec-p2r-03-etl-v2-mirror.md"
     )
 
 
@@ -108,7 +141,10 @@ def test_post_archive_simulation_keeps_all_four_checks_green(
     simulated_active = tmp_path / "active" / historical.name
     simulated_archive = tmp_path / "2026-08" / historical.name
     simulated_archive.parent.mkdir()
-    simulated_archive.write_bytes(historical.read_bytes())
+    # Post-closeout durable state: the active queue no longer holds the spec,
+    # so the sealed bytes come from the month archive.
+    archived = Path(config["verification_surface"]["central_spec_archive"])
+    simulated_archive.write_bytes(archived.read_bytes())
     config_path = tmp_path / "data_paths.yaml"
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
@@ -329,8 +365,12 @@ def test_cross_artifact_conformance_and_manifest_boundaries_reject_drift(
     module.validate_manifest_boundary(paths, worklog)
 
     changed_dictionary = tmp_path / "columns.csv"
+    pinned_dictionary = module.historical_evidence_provider(
+        "data/dictionary/columns-v11.csv"
+    )
+    assert pinned_dictionary is not None
     changed_dictionary.write_text(
-        paths.dictionary.read_text().replace(
+        pinned_dictionary.decode("utf-8").replace(
             "HDU 1 [PHOTOMETRY HOTCOLD AND SE++]",
             "HDU 1 [DRIFT]",
             1,

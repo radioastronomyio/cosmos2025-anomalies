@@ -49,7 +49,8 @@ LIVE_COUNTS = {
     "lss_overdensity": 164_155,
     "galaxy_groups": 1_678,
     "galaxy_group_memberships": 1_745_652,
-    "specz_compilation": 261_975,
+    "specz_compilation_unique": 261_975,
+    "specz_compilation_all": 482_579,
 }
 
 
@@ -106,7 +107,7 @@ def _complete_snapshot(module, cases):
         columns=columns,
         constraints=module.expected_constraints(),
         provenance_tables=module.MIRROR_TABLES,
-        provenance_count=11,
+        provenance_count=12,
         provenance_loaded_rows=LIVE_COUNTS,
         table_acls={
             table: (True, False, False, False, False, False, False) for table in tables
@@ -238,19 +239,19 @@ def test_complete_snapshot_validates_every_explicit_case_once() -> None:
     report = module.validate_snapshot(cases, _complete_snapshot(module, cases))
 
     assert report == {
-        "case_assertions": 1_416,
+        "case_assertions": 1_448,
         "master_native": 1_349,
         "supplement_native": 22,
-        "specz_native": 32,
+        "specz_native": 64,
         "metadata": 13,
-        "native_total": 1_403,
+        "native_total": 1_435,
         "array_assertions": 166,
-        "objects": 12,
-        "columns": 1_429,
-        "constraints": 192,
-        "provenance_rows": 11,
-        "analyst_select_tables": 12,
-        "analyst_denied_capabilities": 72,
+        "objects": 13,
+        "columns": 1_461,
+        "constraints": 193,
+        "provenance_rows": 12,
+        "analyst_select_tables": 13,
+        "analyst_denied_capabilities": 78,
     }
 
 
@@ -261,7 +262,7 @@ def test_runtime_constraint_contract_uses_generated_cases_not_a_default_path(
     module = _module()
     monkeypatch.chdir(tmp_path)
 
-    assert len(module.expected_constraints()) == 192
+    assert len(module.expected_constraints()) == 193
 
 
 def test_array_case_element_count_is_bound_to_named_dimension_constraint() -> None:
@@ -395,7 +396,7 @@ def test_snapshot_boundary_mutations_fail_exactly(mutation: str, message: str) -
         snapshot = replace(snapshot, columns=columns)
     elif mutation == "acl":
         acls = dict(snapshot.table_acls)
-        acls["specz_compilation"] = (True, True, False, False, False, False, False)
+        acls["specz_compilation_unique"] = (True, True, False, False, False, False, False)
         snapshot = replace(snapshot, table_acls=acls)
     elif mutation == "origin":
         cases[0]["column_origin"] = "id_injected"
@@ -481,7 +482,7 @@ def test_live_orchestration_reuses_snapshot_and_runs_all_security_matrices(
 
     assert connection_calls == ["cosmos2025_v11"]
     assert len(connection.queries) == 5
-    assert report["conformance"]["case_assertions"] == 1_416
+    assert report["conformance"]["case_assertions"] == 1_448
     assert report["master_matrix"] == {
         "positive": 1,
         "negative": 11,
@@ -492,7 +493,7 @@ def test_live_orchestration_reuses_snapshot_and_runs_all_security_matrices(
     assert report["provenance_matrix"] == {
         "positive": 1,
         "negative": 6,
-        "rows": 11,
+        "rows": 12,
     }
     assert report["v1_fingerprint"] == "v1-fixed"
     assert report["v1_unchanged"] is True
@@ -558,7 +559,7 @@ def test_scratch_lifecycle_detects_both_mutations_rolls_back_and_cleans(
             raise ValueError("conformance comment mismatch")
         if current.state == "type":
             raise ValueError("conformance type mismatch")
-        return {"case_assertions": 1_416}
+        return {"case_assertions": 1_448}
 
     monkeypatch.setattr(module, "_validate_scratch_snapshot", validate_scratch)
 
@@ -568,7 +569,7 @@ def test_scratch_lifecycle_detects_both_mutations_rolls_back_and_cleans(
     assert connection.commits == 1
     assert connection.rollbacks == 2
     assert report == {
-        "baseline_case_assertions": 1_416,
+        "baseline_case_assertions": 1_448,
         "comment_mutation_detected": True,
         "type_mutation_detected": True,
         "transactions_rolled_back": 2,
@@ -626,12 +627,12 @@ def test_scratch_lifecycle_failure_paths_stop_without_success(
 
     def validate_scratch(current):
         if failure == "missing_detection":
-            return {"case_assertions": 1_416}
+            return {"case_assertions": 1_448}
         if current.state == "comment":
             raise ValueError("conformance comment mismatch")
         if current.state == "type":
             raise ValueError("conformance type mismatch")
-        return {"case_assertions": 1_416}
+        return {"case_assertions": 1_448}
 
     monkeypatch.setattr(module, "_validate_scratch_snapshot", validate_scratch)
 

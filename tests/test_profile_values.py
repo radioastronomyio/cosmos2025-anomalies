@@ -503,8 +503,8 @@ def test_tracked_dictionary_has_complete_gate_33_profiles() -> None:
     dictionary_path = REPO_ROOT / "data" / "dictionary" / "columns-v11.csv"
     raw_records = list(csv.reader(dictionary_path.read_text().splitlines()))
 
-    assert len(rows) == 1_416
-    assert len(raw_records) == 1_417
+    assert len(rows) == 1_448
+    assert len(raw_records) == 1_449
     assert {len(record) for record in raw_records} == {32}
     assert list(rows[0])[-9:] == [
         "profile_json",
@@ -518,9 +518,9 @@ def test_tracked_dictionary_has_complete_gate_33_profiles() -> None:
         "candidate_sentinel_values_json",
     ]
     evidence = profiler.validate_profiled_rows(rows)
-    assert evidence["native_rows_profiled"] == 1_403
-    assert evidence["source_tables"] == 11
-    assert evidence["scalar_fields"] == 1_237
+    assert evidence["native_rows_profiled"] == 1_435
+    assert evidence["source_tables"] == 12
+    assert evidence["scalar_fields"] == 1_269
     assert evidence["vector_fields"] == 166
     assert evidence["vector_indices"] == 830
     assert evidence["metadata_rows_not_applicable"] == 13

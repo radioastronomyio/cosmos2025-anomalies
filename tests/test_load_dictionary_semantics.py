@@ -247,15 +247,15 @@ def test_semantic_statuses_and_provenance_are_complete(
     }
     assert all(required_fields <= row.keys() for row in rows)
     assert Counter(str(row["description_status"]) for row in rows) == {
-        "verified": 1_150,
+        "verified": 1_153,
         "pattern_expanded": 204,
-        "undocumented_upstream": 49,
+        "undocumented_upstream": 78,
         "project_derived": 13,
     }
     assert evidence["description_status_counts"] == {
-        "verified": 1_150,
+        "verified": 1_153,
         "pattern_expanded": 204,
-        "undocumented_upstream": 49,
+        "undocumented_upstream": 78,
         "project_derived": 13,
     }
     for row in rows:
@@ -453,13 +453,36 @@ def test_units_and_semantic_notes_use_independent_evidence_fields(
     assert {
         str(row["source_column"]) for row in noted if row["target_table"] == "cigale"
     } == cigale_columns
-    assert len(noted) == 15
-    assert evidence["semantic_note_count"] == 15
+    linkage_note = [
+        row
+        for row in noted
+        if row["target_table"] == "photometry_primary"
+        and row["source_column"] == "id_specz_khostovan25"
+    ]
+    assert len(linkage_note) == 1
+    linkage_row = linkage_note[0]
+    assert linkage_row["semantic_note_source"].endswith(
+        "verify_specz_linkage_v11.py"
+    )
+    assert (
+        "specz-linkage-evidence.md" in str(linkage_row["semantic_note"])
+    )
+    assert linkage_row["description_status"] != "project_derived"
+    assert len(noted) == 16
+    assert evidence["semantic_note_count"] == 16
     unit_conventions = REPO_ROOT / "docs" / "reference" / "unit-conventions.md"
     expected_hash = sha256_independently(unit_conventions)
-    assert {row["semantic_note_source_sha256"] for row in noted} == {expected_hash}
+    unit_noted = [
+        row
+        for row in noted
+        if row["target_table"] in {"lephare", "cigale"}
+    ]
+    assert {row["semantic_note_source_sha256"] for row in unit_noted} == {
+        expected_hash
+    }
     assert all(
-        "unit-conventions.md" in str(row["semantic_note_source"]) for row in noted
+        "unit-conventions.md" in str(row["semantic_note_source"])
+        for row in unit_noted
     )
     assert all("log10" not in str(row["description_text"]) for row in noted)
     assert all("linear space" not in str(row["description_text"]) for row in noted)
@@ -508,7 +531,7 @@ def test_csv_schema_is_fixed_and_contains_no_embedded_newlines(
     serialized = load_dictionary.dictionary_csv_text(rows)
     parsed = list(csv.reader(io.StringIO(serialized, newline="")))
     assert parsed[0] == expected_header
-    assert len(parsed) == 1_417
+    assert len(parsed) == 1_449
     assert {len(record) for record in parsed} == {len(expected_header)}
     assert all(
         "\n" not in str(value) and "\r" not in str(value)

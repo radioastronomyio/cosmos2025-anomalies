@@ -71,9 +71,9 @@ def configured_dictionary_path(config_path: Path = DEFAULT_CONFIG_PATH) -> Path:
 
 DICTIONARY_PATH = configured_dictionary_path()
 README_PATH = DICTIONARY_PATH.with_name("README.md")
-SEALED_CSV_SHA256 = "623e98f82f435c2ee5112af2d07d4553864f665a82a895c175a47d3edfa883cf"
+SEALED_CSV_SHA256 = "324d3ea17b23a57223d84043559b8fa94c87c95c4710b3719f31358cd881e8b8"
 SEALED_PREFIX_SHA256 = (
-    "8d9eec917a7e51ef4aa02c0660549b8e80481c34fb5e9e7fbe6a58894a8f1218"
+    "62018697ee5ba499ec6bda70926c623ccc92f62f11b1f7a422fd3b72a1104bde"
 )
 SEALED_PREFIX_FIELDS = load_dictionary.CSV_FIELDS[:23]
 
@@ -95,11 +95,12 @@ ALLOWED_TARGET_TABLES = {
     "lss_overdensity",
     "galaxy_groups",
     "galaxy_group_memberships",
-    "specz_compilation",
+    "specz_compilation_unique",
+    "specz_compilation_all",
 }
 ALLOWED_ORIGINS = {"source_native", "source_row_metadata", "id_injected"}
 EXPECTED_ORIGINS = {
-    "source_native": 1_403,
+    "source_native": 1_435,
     "source_row_metadata": 7,
     "id_injected": 6,
 }
@@ -114,19 +115,20 @@ EXPECTED_NATIVE_TABLE_COUNTS = {
     "lss_overdensity": 4,
     "galaxy_groups": 14,
     "galaxy_group_memberships": 4,
-    "specz_compilation": 32,
+    "specz_compilation_unique": 32,
+    "specz_compilation_all": 32,
 }
 EXPECTED_SOURCE_FAMILY_COUNTS = {
     "master_catalog": 1_362,
     "hatamnia_lss": 4,
     "toni_groups": 14,
     "toni_memberships": 4,
-    "specz_compilation": 32,
+    "specz_compilation": 64,
 }
 EXPECTED_STATUSES = {
-    "verified": 1_150,
+    "verified": 1_153,
     "pattern_expanded": 204,
-    "undocumented_upstream": 49,
+    "undocumented_upstream": 78,
     "project_derived": 13,
 }
 ALLOWED_UNITS = {

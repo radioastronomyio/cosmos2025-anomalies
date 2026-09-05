@@ -32,7 +32,7 @@ related_documents:
 This project applies outlier detection methods to the COSMOS-Web v1.1
 photometric catalog (Shuntov et al. 2025), a 784,016-source dataset spanning
 37 photometric bands from UV through mid-infrared. The verified
-`cosmos2025_v11.source` mirror preserves all eleven release and supplement
+`cosmos2025_v11.source` mirror preserves all twelve release and supplement
 tables. The next science stage exploits *tension between independent
 measurements* after operator approval of MetaMCP cutover and T_A v2.
 
@@ -55,9 +55,9 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 |------|--------|-------------|
 | Data acquisition | ✅ Complete | v1.1 holdings pinned by the repository SHA-256 manifest; raw sources remain immutable |
 | Literature landscape | ✅ Complete | Independent deep research surveys (Gemini, GPT) converged on tension-first strategy; four-axis tension vector defined |
-| Catalog profiling | ✅ Complete | Seven master extensions plus four supplement/spec-z products sealed in a 1,416-row dictionary |
-| ETL execution | ✅ Complete | Eleven lossless mirrors plus provenance loaded into `cosmos2025_v11.source` |
-| ETL verification | ✅ Complete | Source pins, schema, values, provenance, analyst permissions, and v1 identity passed Gates 3.5–3.11 |
+| Catalog profiling | ✅ Complete | Seven master extensions plus five supplement/spec-z products sealed in a 1,448-row dictionary |
+| ETL execution | ✅ Complete | Twelve lossless mirrors plus provenance loaded into `cosmos2025_v11.source` |
+| ETL verification | ✅ Complete | Source pins, schema, values, provenance, analyst permissions, and v1 identity passed Gates 3.5–3.11; P2R-04 spec-z linkage unit passed Gates 4.1–4.6 |
 | Runtime cutover | ⏳ Pending approval | MetaMCP cutover and direct analyst HBA validation remain operator actions |
 | Feature engineering | ⏳ Pending approval | T_A v2 design follows cutover; v1 Phase 2 products remain historical evidence only |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
@@ -71,8 +71,10 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 ### Current data boundary
 
 The release-driven ETL reads immutable v1.1 artifacts into seven master
-mirrors, three environmental supplement tables, and one spec-z compilation.
-`source.provenance` records the eleven source registrations separately. The
+mirrors, three environmental supplement tables, and the two-table Khostovan
+spec-z compilation (galaxy-level `specz_compilation_unique` and
+measurement-level `specz_compilation_all`). `source.provenance` records the
+twelve source registrations separately. The
 read-only `cosmos2025_v11_ro` role is the runtime boundary; cleaned or derived
 science products belong in a future `analysis` schema.
 
@@ -134,7 +136,7 @@ and the Khostovan spec-z compilation. See
 | Master catalog (7 extensions) | Shuntov et al. 2025 | 8.4 GB | Seven lossless source mirrors |
 | Galaxy group catalog | Toni et al. 2025 | ~1 MB | O5 environmental context |
 | LSS overdensity catalog | Hatamnia et al. 2025 | 289 MB | O5 environmental context |
-| Spec-z compilation | Khostovan et al. | 261,975 rows | Calibration/validation evidence; allocation deferred |
+| Spec-z compilation | Khostovan et al. | 261,975 galaxy / 482,579 measurement rows | Calibration/validation evidence; sample definition deferred to operator disposition of the linkage review surface |
 | CIGALE best-fit SEDs | Shuntov et al. 2025 | 436 GB (extracted) | Phase 2 characterization |
 | LePhare best-fit SEDs | Shuntov et al. 2025 | 141 GB (compressed) | Phase 2 characterization |
 | LePhare PDFz distributions | Shuntov et al. 2025 | 26 GB | Phase 2 — T_z tension metrics |

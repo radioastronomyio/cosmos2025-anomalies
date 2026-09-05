@@ -56,7 +56,8 @@ MIRROR_TABLE_ORDER = (
     "lss_overdensity",
     "galaxy_groups",
     "galaxy_group_memberships",
-    "specz_compilation",
+    "specz_compilation_unique",
+    "specz_compilation_all",
 )
 MASTER_EXTENSION_TABLES = MIRROR_TABLE_ORDER[1:7]
 PROVENANCE_CONTRACT_VERSION = "1.0.1"
@@ -241,9 +242,9 @@ def build_schema_contract(
     rows: list[dict[str, str]],
 ) -> dict[str, tuple[ColumnContract, ...]]:
     """Validate and group the exact sealed mirror boundary in DDL order."""
-    if len(rows) != 1_416:
+    if len(rows) != 1_448:
         raise ValueError(
-            f"sealed dictionary row count mismatch: expected 1416, found {len(rows)}"
+            f"sealed dictionary row count mismatch: expected 1448, found {len(rows)}"
         )
     observed_tables = {row["target_table"] for row in rows}
     if observed_tables != set(MIRROR_TABLE_ORDER):
@@ -335,6 +336,16 @@ def table_constraint_contract(
                 ("photometry_primary", ("id",)),
             ),
         )
+    # P2R-04 gate 4.3: Id_specz is the measurement-level primary key because
+    # gate 4.1 measured 482,579 distinct values over 482,579 rows in the
+    # pinned artifact. No other key is invented for this table.
+    constraints["specz_compilation_all"] = (
+        TableConstraint(
+            "primary_key",
+            ("id_specz",),
+            constraint_name("primary_key", "specz_compilation_all", "id_specz"),
+        ),
+    )
     return constraints
 
 
@@ -557,7 +568,7 @@ def main() -> None:
         raise SystemExit(f"schema v1.1 generation check FAILED: {exc}") from exc
     action = "checked" if args.check else "wrote"
     print(
-        f"schema v1.1 {action}: 11 mirrors, 1416 mirror columns, "
+        f"schema v1.1 {action}: 12 mirrors, 1448 mirror columns, "
         f"166 array checks, 13 provenance columns at {output_path}"
     )
 

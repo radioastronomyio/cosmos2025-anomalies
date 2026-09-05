@@ -90,7 +90,7 @@ def test_recorded_seed_boundary_is_exact() -> None:
         "lss_overdensity": 4_976_263_942_886_350_198,
         "galaxy_groups": 4_652_599_078_883_424_958,
         "galaxy_group_memberships": 15_583_989_488_859_696_288,
-        "specz_compilation": 9_076_022_164_977_561_485,
+        "specz_compilation_unique": 9_076_022_164_977_561_485,
     }
 
 

@@ -64,14 +64,14 @@ GATE38_TABLES = (
     "lss_overdensity",
     "galaxy_groups",
     "galaxy_group_memberships",
-    "specz_compilation",
+    "specz_compilation_unique",
 )
 GATE38_EMPTY_TABLES = (*GATE38_TABLES, "provenance")
 EXPECTED_NATIVE_COLUMNS = {
     "lss_overdensity": 4,
     "galaxy_groups": 14,
     "galaxy_group_memberships": 4,
-    "specz_compilation": 32,
+    "specz_compilation_unique": 32,
 }
 QUALITY_DEFINITIONS = {
     "4": {"confidence_percent": 97, "description": "Very Reliable Redshift"},
@@ -123,7 +123,7 @@ GATE38_STAGES = frozenset(
         "load_lss_overdensity",
         "load_galaxy_groups",
         "load_galaxy_group_memberships",
-        "load_specz_compilation",
+        "load_specz_compilation_unique",
         "grant_analyst_select",
         "verify_admin",
         "verify_analyst",
@@ -212,7 +212,7 @@ def resolve_gate38_contract(
             "galaxy_group_memberships": Path(
                 config["supplementary"]["group_catalog_memberships"]
             ),
-            "specz_compilation": Path(config["specz"]["unique_fits"]),
+            "specz_compilation_unique": Path(config["specz"]["unique_fits"]),
         }
     except (KeyError, TypeError) as exc:
         raise ValueError("missing Gate 3.8 source path configuration") from exc
@@ -250,7 +250,7 @@ def quality_flag_definition_evidence(
     matches = [
         row
         for row in rows
-        if row["target_table"] == "specz_compilation"
+        if row["target_table"] == "specz_compilation_unique"
         and row["target_identifier"] == "flag"
     ]
     if len(matches) != 1:
@@ -292,7 +292,7 @@ def supplement_version_evidence() -> dict[str, str]:
     return {
         table: SUPPLEMENT_VERSION
         for table in GATE38_TABLES
-        if table != "specz_compilation"
+        if table != "specz_compilation_unique"
     }
 
 
@@ -682,7 +682,7 @@ def _gate38_denied_operations(table: str, admin_role: str) -> tuple[sql.Composed
             "lss_overdensity": "id",
             "galaxy_groups": "id",
             "galaxy_group_memberships": "galid",
-            "specz_compilation": "id_specz",
+            "specz_compilation_unique": "id_specz",
         }[table]
     )
     return (
@@ -755,7 +755,7 @@ def validate_gate38_admin_observation(
         raise ValueError("Gate 3.8 target count mismatch")
     if dict(source_flags) != dict(target_flags):
         raise ValueError("Gate 3.8 quality flag mismatch")
-    if source_flags.get("rows") != source_counts["specz_compilation"]:
+    if source_flags.get("rows") != source_counts["specz_compilation_unique"]:
         raise ValueError("Gate 3.8 quality flag row-count mismatch")
     if not isinstance(primary_specz_matches, int) or primary_specz_matches < 0:
         raise ValueError("Gate 3.8 primary/spec-z match count invalid")
@@ -1000,7 +1000,7 @@ def _source_quality_flags(
     contract: Gate38Contract,
 ) -> dict[str, Any]:
     """Tabulate the complete immutable spec-z flag population."""
-    table = "specz_compilation"
+    table = "specz_compilation_unique"
     rows = contract.tables[table]
     flag_row = next(row for row in rows if row["target_identifier"] == "flag")
     with fits.open(contract.paths[table], memmap=True) as hdul:
@@ -1030,7 +1030,7 @@ def final_gate38_preflight(
     v1 = bootstrap_v11.capture_v1_fingerprint(settings)
     select_acl = gate38_select_acl(settings)
     source_flags = _source_quality_flags(contract)
-    if source_flags["rows"] != sources["specz_compilation"].row_count:
+    if source_flags["rows"] != sources["specz_compilation_unique"].row_count:
         raise ValueError("source spec-z flag population mismatch")
     return {
         "rows": rows,
@@ -1087,7 +1087,7 @@ def _quality_summary_from_distribution(
 def _target_quality_flags(connection: Any) -> dict[str, Any]:
     """Read the complete retained target quality-flag distribution."""
     rows = connection.execute(
-        'SELECT flag, count(*) FROM "source"."specz_compilation" '
+        'SELECT flag, count(*) FROM "source"."specz_compilation_unique" '
         "GROUP BY flag ORDER BY flag"
     ).fetchall()
     return _quality_summary_from_distribution(dict(rows))
@@ -1110,7 +1110,7 @@ def validate_retained_gate38(
         table: _profile_row_count(contract.tables[table]) for table in GATE38_TABLES
     }
     expected_flags = _quality_summary_from_distribution(expected_flag_distribution)
-    if expected_flags["rows"] != expected_counts["specz_compilation"]:
+    if expected_flags["rows"] != expected_counts["specz_compilation_unique"]:
         raise ValueError("sealed Gate 3.8 flag/count contract mismatch")
     with _connect_target(settings) as connection:
         structure = verify_gate38_schema(connection, dictionary_rows)
@@ -1141,7 +1141,7 @@ def validate_retained_gate38(
         matches = connection.execute(
             "SELECT count(*), count(DISTINCT p.id) "
             'FROM "source"."photometry_primary" p '
-            'JOIN "source"."specz_compilation" s '
+            'JOIN "source"."specz_compilation_unique" s '
             "ON s.id_specz=p.id_specz_khostovan25"
         ).fetchone()
         if matches != (
@@ -1257,7 +1257,7 @@ def verify_gate38_admin(
                 ),
             }
         flag_rows = connection.execute(
-            'SELECT flag, count(*) FROM "source"."specz_compilation" '
+            'SELECT flag, count(*) FROM "source"."specz_compilation_unique" '
             "GROUP BY flag ORDER BY flag"
         ).fetchall()
         target_flags = summarize_quality_flags(
@@ -1266,7 +1266,7 @@ def verify_gate38_admin(
         matches = connection.execute(
             "SELECT count(*), count(DISTINCT p.id) "
             'FROM "source"."photometry_primary" p '
-            'JOIN "source"."specz_compilation" s '
+            'JOIN "source"."specz_compilation_unique" s '
             "ON s.id_specz=p.id_specz_khostovan25"
         ).fetchone()
         if matches[0] != matches[1]:

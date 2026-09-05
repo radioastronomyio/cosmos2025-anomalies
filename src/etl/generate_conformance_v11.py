@@ -152,7 +152,7 @@ def generate_cases(
         }
         for index, row in enumerate(rows, start=1)
     )
-    if len(cases) != 1_416 or len({case["case_id"] for case in cases}) != len(cases):
+    if len(cases) != 1_448 or len({case["case_id"] for case in cases}) != len(cases):
         raise ValueError("sealed conformance case boundary mismatch")
     return cases
 
@@ -220,7 +220,7 @@ def main() -> None:
     except ValueError as exc:
         raise SystemExit(f"conformance generation FAILED: {exc}") from exc
     action = "checked" if args.check else "wrote"
-    print(f"conformance cases {action}: 1416 cases at {output_path}")
+    print(f"conformance cases {action}: 1448 cases at {output_path}")
 
 
 # =============================================================================

@@ -15,8 +15,8 @@ tags:
 # ETL Pipeline
 
 Dictionary-driven FITS/text-to-PostgreSQL pipeline and verification surface for
-the verified COSMOS-Web v1.1 source mirror: seven master tables, four
-supplement/spec-z tables, and the eleven-row provenance registry.
+the verified COSMOS-Web v1.1 source mirror: seven master tables, five
+supplement/spec-z tables, and the twelve-row provenance registry.
 
 ---
 
@@ -29,13 +29,13 @@ supplement/spec-z tables, and the eleven-row provenance registry.
 | `validate_dictionary_seal.py` | Resolves the configured Gate 3.4 dictionary and validates its formal README, fixed JSON/count contract, and narrow Git ignore exception without live profiling |
 | `verify_source_fidelity.py` | Runs the read-only Gate 3.5 manifest/input preflight and exact seven-table standalone/master fidelity comparison with importable structured evidence |
 | `generate_schema_v11.py` | Generates the ETL v2 `source` mirror DDL solely from the sealed dictionary and versioned provenance contract; `--check` rejects hand drift |
-| `schema_v11.sql` | Generated-only Gate 3.6 DDL for eleven source mirrors plus the fixed provenance table; never edit this artifact directly |
+| `schema_v11.sql` | Generated-only Gate 3.6/P2R-04 DDL for twelve source mirrors plus the fixed provenance table; never edit this artifact directly |
 | `verify_schema_v11_scratch.py` | Creates one random prefix-scoped scratch database, verifies catalogs/comments/constraints and mutations, and drops it in `finally` |
 | `bootstrap_v11.py` | Performs the guarded, one-time Gate 3.7 master bootstrap and separate post-load verification for `cosmos2025_v11` |
 | `load_supplements_v11.py` | Streams and verifies the four Gate 3.8 supplement/spec-z mirrors and supports source-free post-seal administration resume |
-| `load_provenance_v11.py` | Registers and verifies the exact eleven-row Gate 3.9 dual-hash provenance set with phase-aware commit classification |
+| `load_provenance_v11.py` | Registers and verifies the exact twelve-row Gate 3.9 dual-hash provenance set with phase-aware commit classification |
 | `generate_conformance_v11.py` | Generates one explicit Gate 3.10 conformance case per sealed dictionary row; `--check` rejects artifact drift |
-| `conformance_cases_v11.py` | Generated-only 1,416-case Python contract spanning every mirror column, comment, origin, type, and array check |
+| `conformance_cases_v11.py` | Generated-only 1,448-case Python contract spanning every mirror column, comment, origin, type, and array check |
 | `verify_conformance_v11.py` | Captures one batched catalog snapshot, validates every generated case and security boundary, and runs rollback-isolated scratch mutations |
 | `reconciliation_core_v11.py` | Provides pure deterministic sampling, exact target-cast/IEEE canonicalization, and protected complete mismatch-ledger primitives for Gate 3.11 |
 | `reconcile_values_v11.py` | Performs the one-pass, source-fresh Gate 3.11 value reconciliation against one read-only PostgreSQL snapshot and runs its disposable full-pipeline proof |
@@ -182,7 +182,7 @@ from ML01 remains an operator infrastructure action and is not claimed.
 
 ## Gate 3.9 provenance registration
 
-The non-idempotent load requires all eleven mirrors exact and
+The non-idempotent load requires all mirrors exact and
 `source.provenance` empty. It freshly hashes every configured source against
 the Gate 3.5 manifest, guards one stable manifest identity across declared-pin
 reads, rechecks physical and live counts plus each table's single load
@@ -195,7 +195,7 @@ doppler run --project ml01 --config dev -- \
 ```
 
 That transaction applies the generated provenance-contract 1.0.1 COMMENT and
-inserts exactly eleven rows. `load_timestamp` is the shared PostgreSQL
+inserts exactly twelve rows. `load_timestamp` is the shared PostgreSQL
 `transaction_timestamp()` of this provenance-registration transaction after
 mirror verification; it is not a reconstructed historical table-load commit
 time. Each note preserves the exact table-load `xmin` and states that the
@@ -204,8 +204,8 @@ off. No extension was installed and no timestamp was approximated.
 
 Precommit failure rolls back both COMMENT and rows. An ambiguous commit or
 connection-close result reconnects and accepts only exact zero with an
-authorized old/amended comment or exact eleven with the amended comment and
-field-perfect rows. Postcommit verifier failure retains the eleven rows for
+authorized old/amended comment or exact twelve with the amended comment and
+field-perfect rows. Postcommit verifier failure retains the rows for
 the separate read-only verification path; it never deletes or reloads mirror
 data.
 
@@ -356,3 +356,55 @@ byte-identical rather than rewriting history.
 | [configs/](../../configs/) | `data_paths.yaml` provides input/output paths and DB connection config |
 | [docs/verification-report.md](../../docs/verification-report.md) | Output of `verify_catalog.py` |
 | [docs/reference/data-manifest-v1.1.md](../../docs/reference/data-manifest-v1.1.md) | Immutable source boundary validated before any fidelity comparison |
+
+---
+
+## P2R-04 spec-z linkage correction and measurement-level mirror
+
+The unit corrected the catalog-to-compilation join path by mirroring the
+measurement-level artifact, renaming the galaxy-level mirror, annotating the
+defective catalog identifier, and characterizing the recovery populations and
+selection function without deciding their policy. Evidence commands:
+
+```bash
+# Gate 4.1: reproduce the linkage evidence against priors (read-only)
+doppler run --project ml01 --config dev -- \
+  python src/etl/verify_specz_linkage_v11.py
+
+# Gate 4.4: rename galaxy-level mirror and re-verify (or --verify-only)
+doppler run --project ml01 --config dev -- \
+  python src/etl/rename_specz_unique_v11.py --rename
+
+# Gate 4.5: guarded load + verification (also --verify-only)
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_specz_all_v11.py --load
+
+# Gate 4.5: independent seeded value reconciliation (read-only)
+doppler run --project ml01 --config dev -- \
+  python src/etl/reconcile_specz_all_v11.py
+
+# Gate 4.6: register the dual-hash provenance row (also --sync-link-comment)
+doppler run --project ml01 --config dev -- \
+  python src/etl/load_specz_all_v11.py --register-provenance
+
+# Gate 4.7: characterize linkage, recovery populations, selection function
+doppler run --project ml01 --config dev -- \
+  python src/etl/characterize_specz_linkage_v11.py
+```
+
+| File | Description |
+|------|-------------|
+| `verify_specz_linkage_v11.py` | Read-only gate 4.1 evidence command reproducing every spec prior observation and the four establishments from the pinned FITS and the sealed mirror |
+| `rename_specz_unique_v11.py` | Gate 4.4 rename/re-verify utility for the galaxy-level mirror; `--verify-only` re-checks the post state against the dictionary contract |
+| `load_specz_all_v11.py` | Gate 4.5/4.6 guarded loader for `specz_compilation_all` with provenance registration and the authorized link-comment sync |
+| `reconcile_specz_all_v11.py` | Gate 4.5 table-scoped value reconciliation, reusing the P2R-03 core under a recorded seed (12,006,315,477,097,142,501) |
+| `characterize_specz_linkage_v11.py` | Gate 4.7 read-only characterization; writes no rows, no views, applies no threshold, promotes nothing |
+
+The load seal is declared at gate 4.5 (worklog
+`work-logs/2026-08-31-cosmos2025-worklog-p2r-04-specz-linkage-correction.md`):
+reloading the sealed table requires explicit operator authorization. The
+review surface carrying the operator dispositions is
+`docs/research/specz-linkage-evidence.md`. The Gate 3.8 supplement loader and
+Gate 3.11 eleven-table reconciler remain historical verifiers of their sealed
+gates; P2R-04 renamed their galaxy-level table reference and the reconciler
+filters the regenerated case surface to its frozen boundary.

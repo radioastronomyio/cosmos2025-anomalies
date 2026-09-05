@@ -66,11 +66,11 @@ EXPECTED_TABLES = (*MIRROR_TABLES, "provenance")
 EXPECTED_GROUP_COUNTS = {
     "master_native": 1_349,
     "supplement_native": 22,
-    "specz_native": 32,
+    "specz_native": 64,
     "metadata": 13,
 }
 EXPECTED_ORIGIN_COUNTS = {
-    "source_native": 1_403,
+    "source_native": 1_435,
     "source_row_metadata": 7,
     "id_injected": 6,
 }
@@ -303,7 +303,7 @@ def _expected_origin_and_group(table: str, column: str) -> tuple[str, str]:
         return "id_injected", "metadata"
     if table in MASTER_TABLES:
         return "source_native", "master_native"
-    if table == "specz_compilation":
+    if table in {"specz_compilation_unique", "specz_compilation_all"}:
         return "source_native", "specz_native"
     return "source_native", "supplement_native"
 
@@ -348,7 +348,7 @@ def validate_snapshot(
     cases: Sequence[Mapping[str, object]], snapshot: CatalogSnapshot
 ) -> dict[str, int]:
     """Validate the entire fixed database boundary and every generated case."""
-    if len(cases) != 1_416 or len({case["case_id"] for case in cases}) != 1_416:
+    if len(cases) != 1_448 or len({case["case_id"] for case in cases}) != 1_448:
         raise ValueError("generated case boundary mismatch")
     for index, case in enumerate(cases, start=1):
         expected_id = f"{index:04d}:{case['table']}.{case['column']}"
@@ -379,9 +379,9 @@ def validate_snapshot(
     canonical_constraints = expected_constraints(cases)
     if snapshot.constraints != canonical_constraints:
         raise ValueError("source constraint boundary mismatch")
-    if len(canonical_constraints) != 192:
+    if len(canonical_constraints) != 193:
         raise ValueError("canonical constraint count mismatch")
-    if snapshot.provenance_count != 11 or snapshot.provenance_tables != MIRROR_TABLES:
+    if snapshot.provenance_count != 12 or snapshot.provenance_tables != MIRROR_TABLES:
         raise ValueError("provenance row coverage mismatch")
     if set(snapshot.provenance_loaded_rows) != set(MIRROR_TABLES) or any(
         not isinstance(count, int) or count < 0
@@ -436,7 +436,7 @@ def run_live(settings: bootstrap_v11.Settings) -> dict[str, object]:
     }
     gate38_matrix = load_supplements_v11.verify_gate38_analyst(settings, gate38_counts)
     provenance_matrix = load_provenance_v11.verify_provenance_analyst(
-        settings, expected_rows=11
+        settings, expected_rows=12
     )
     after = bootstrap_v11.capture_v1_fingerprint(settings)
     if before.sha256 != after.sha256:

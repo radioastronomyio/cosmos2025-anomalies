@@ -94,7 +94,7 @@ def complete_catalog_snapshot():
         columns=columns,
         constraints=verify.expected_constraints(),
         provenance_tables=verify.MIRROR_TABLES,
-        provenance_count=11,
+        provenance_count=12,
         provenance_loaded_rows=counts,
         table_acls={
             table: (True, False, False, False, False, False, False) for table in tables
@@ -271,7 +271,7 @@ def test_documentation_contract_covers_exact_dictionary_boundaries() -> None:
     """A missing/reclassified row must change a hand-checked boundary."""
     contract = module.build_documentation_contract(dictionary_rows())
 
-    assert len(contract.columns) == 1_416
+    assert len(contract.columns) == 1_448
     assert Counter(column.row["target_table"] for column in contract.columns) == {
         "photometry_primary": 288,
         "lephare": 45,
@@ -283,14 +283,15 @@ def test_documentation_contract_covers_exact_dictionary_boundaries() -> None:
         "lss_overdensity": 4,
         "galaxy_groups": 14,
         "galaxy_group_memberships": 4,
-        "specz_compilation": 32,
+        "specz_compilation_unique": 32,
+        "specz_compilation_all": 32,
     }
     assert Counter(column.row["column_origin"] for column in contract.columns) == {
-        "source_native": 1_403,
+        "source_native": 1_435,
         "source_row_metadata": 7,
         "id_injected": 6,
     }
-    assert len(contract.undocumented_case_ids) == 49
+    assert len(contract.undocumented_case_ids) == 78
     assert (
         sum(column.row["target_type"].endswith("[]") for column in contract.columns)
         == 166
@@ -330,7 +331,7 @@ def test_profile_evidence_derives_rows_and_nulls_without_relabeling_sentinels() 
         for column in contract.columns
         if json.loads(column.row["candidate_sentinel_values_json"])
     ]
-    assert len(candidates) == 476
+    assert len(candidates) == 494
     assert all(
         "finite sentinels preserved" in column.null_encoding for column in candidates
     )
@@ -345,7 +346,8 @@ def test_profile_evidence_derives_rows_and_nulls_without_relabeling_sentinels() 
         "lss_overdensity": 164_155,
         "galaxy_groups": 1_678,
         "galaxy_group_memberships": 1_745_652,
-        "specz_compilation": 261_975,
+        "specz_compilation_unique": 261_975,
+        "specz_compilation_all": 482_579,
     }
 
 
@@ -356,9 +358,9 @@ def test_renderer_emits_every_ordered_case_and_provenance_field_once() -> None:
 
     cases = re.findall(r"<!-- schema-case:([^ ]+) -->", rendered)
     provenance = re.findall(r"<!-- provenance-field:([^ ]+) -->", rendered)
-    assert len(cases) == len(set(cases)) == 1_416
+    assert len(cases) == len(set(cases)) == 1_448
     assert cases[0] == "0001:photometry_primary.id"
-    assert cases[-1] == "1416:specz_compilation.groupsize"
+    assert cases[-1] == "1448:specz_compilation_all.groupsize"
     assert provenance == [
         "table_name",
         "source_file",
@@ -396,7 +398,7 @@ def test_renderer_includes_required_contract_sections_and_field_destinations() -
         "truncation and collision repair are forbidden",
     ):
         assert literal in rendered
-    assert rendered.count("<!-- undocumented-upstream:") == 49
+    assert rendered.count("<!-- undocumented-upstream:") == 78
     for field, surface in module.FIELD_SURFACE.items():
         assert (
             f"| `{field}` | {surface.destination} | `{surface.transform}` |" in rendered
@@ -467,7 +469,7 @@ def test_capture_live_observation_uses_seven_batched_read_queries() -> None:
         sum("documentation_physical_counts" in item for item in connection.queries) == 1
     )
     count_query = connection.queries[-1]
-    assert count_query.count("count(*)") == 11
+    assert count_query.count("count(*)") == 12
     assert "INSERT" not in count_query.upper()
     assert "UPDATE" not in count_query.upper()
     assert "DELETE" not in count_query.upper()
@@ -753,7 +755,7 @@ def test_run_generate_check_uses_one_read_only_connection_and_closes_identity(
     assert connection.rollbacks == 1
     assert identities == [settings, settings]
     assert result["information_schema_diff"] == 0
-    assert result["documented_mirror_columns"] == 1_416
+    assert result["documented_mirror_columns"] == 1_448
     assert result["protected_identity_unchanged"] is True
 
 
@@ -1023,9 +1025,9 @@ def test_runtime_config_separates_v1_baseline_v11_runtime_and_admin_bootstrap() 
             "configs/README.md",
             ("PGSQL01_COSMOS2025_V11_DB", "bootstrap", "read-only"),
         ),
-        ("docs/reference/README.md", ("schema-v11.md", "generated", "1,416")),
+        ("docs/reference/README.md", ("schema-v11.md", "generated", "1,448")),
         ("src/etl/README.md", ("generate_schema_docs_v11.py", "one", "read-only")),
-        ("tests/README.md", ("test_generate_schema_docs_v11.py", "1,416", "assets")),
+        ("tests/README.md", ("test_generate_schema_docs_v11.py", "1,448", "assets")),
     ),
 )
 def test_operational_orientation_surfaces_agree(

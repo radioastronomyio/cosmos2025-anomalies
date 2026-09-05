@@ -9,7 +9,7 @@ Link         : https://github.com/radioastronomyio/cosmos2025-anomalies
 
 Description
 -----------
-Exercises the exact eleven-row evidence boundary, the amended registration
+Exercises the exact twelve-row evidence boundary, the amended registration
 timestamp semantics, mutation detection, and post-commit retention policy.
 
 Usage
@@ -77,12 +77,12 @@ def _expected(module):
 
 
 def test_build_expected_provenance_preserves_independent_evidence_and_versions():
-    """All eleven records must preserve exact paths, digests, counts, and XIDs."""
+    """All twelve records must preserve exact paths, digests, counts, and XIDs."""
     module = _module()
     rows = _expected(module)
 
     assert tuple(row.table_name for row in rows) == module.PROVENANCE_TABLES
-    assert len(rows) == 11
+    assert len(rows) == 12
     assert all(row.manifest_sha256 == row.observed_sha256 for row in rows)
     assert all(row.source_file == Path(row.source_path).name for row in rows)
     assert all(row.source_rows == row.loaded_rows for row in rows)
@@ -101,7 +101,7 @@ def test_build_expected_provenance_preserves_independent_evidence_and_versions()
         )
 
 
-def test_all_eleven_source_paths_are_config_selected_without_abbreviation():
+def test_all_twelve_source_paths_are_config_selected_without_abbreviation():
     """Provenance paths must come from the exact configured artifact boundary."""
     module = _module()
     paths = module._source_paths(CONFIG_PATH)
@@ -111,8 +111,11 @@ def test_all_eleven_source_paths_are_config_selected_without_abbreviation():
         "COSMOSWeb_mastercatalog_v1.1_photom_primary.fits"
     )
     assert paths["galaxy_group_memberships"].name == "memberships.txt"
-    assert paths["specz_compilation"].name == (
+    assert paths["specz_compilation_unique"].name == (
         "specz_compilation_COSMOS_DR1.1_unique.fits"
+    )
+    assert paths["specz_compilation_all"].name == (
+        "specz_compilation_COSMOS_DR1.1_all.fits"
     )
 
 
@@ -212,7 +215,7 @@ class _RegistrationConnection:
         if "SELECT count(*) FROM" in text:
             return _Result((0,))
         if "count(*), count(DISTINCT load_timestamp)" in text:
-            return _Result((11, 1, self.timestamp))
+            return _Result((12, 1, self.timestamp))
         return _Result()
 
     class _Cursor:
@@ -258,7 +261,7 @@ def test_registration_transaction_uses_one_database_timestamp_and_exact_comment(
     assert "transaction_timestamp()" in rendered
     assert "DELETE" not in rendered
     assert "TRUNCATE" not in rendered
-    assert len(connection.inserted) == 11
+    assert len(connection.inserted) == 12
     assert connection.commits == 1
     assert connection.rollbacks == 0
 
@@ -302,7 +305,7 @@ def test_postcommit_verifier_failure_is_redacted_and_retains_rows(monkeypatch):
 
     with pytest.raises(
         module.ProvenanceFailure,
-        match=r"stage=verify_postcommit exception=RuntimeError sqlstate=none retained=11",
+        match=r"stage=verify_postcommit exception=RuntimeError sqlstate=none retained=12",
     ) as captured:
         module.run_registration(_expected(module), connect, fail_verify)
     assert "sensitive" not in str(captured.value)
@@ -388,7 +391,7 @@ class _ClassifyConnection:
     def execute(self, statement, parameters=None):
         text = str(statement)
         if "SELECT count(*) FROM" in text:
-            return _Result((11 if self.committed else 0,))
+            return _Result((12 if self.committed else 0,))
         raise AssertionError(text)
 
     def rollback(self):
@@ -477,7 +480,7 @@ def test_verify_only_rebuilds_fresh_evidence_and_never_registers(monkeypatch):
     )
     result = module.run_provenance_verify_only(settings)
     assert result["mode"] == "verify-only"
-    assert result["verification"] == {"rows": 11, "v1": "v1"}
+    assert result["verification"] == {"rows": 12, "v1": "v1"}
 
 
 def test_verify_only_preobservation_failure_reports_unvalidated_retention(monkeypatch):
@@ -515,7 +518,7 @@ def test_load_orchestration_preflights_registers_then_verifies(monkeypatch):
         module,
         "verify_persistent_provenance",
         lambda value, rows, *, expected_v1_fingerprint: (
-            calls.append(("verify", len(rows), expected_v1_fingerprint)) or {"rows": 11}
+            calls.append(("verify", len(rows), expected_v1_fingerprint)) or {"rows": 12}
         ),
     )
 
@@ -529,8 +532,8 @@ def test_load_orchestration_preflights_registers_then_verifies(monkeypatch):
     assert result["status"] == "passed"
     assert calls == [
         ("preflight", True),
-        ("register", 11),
-        ("verify", 11, "v1"),
+        ("register", 12),
+        ("verify", 12, "v1"),
     ]
 
 
@@ -563,7 +566,7 @@ def test_post_registration_output_failure_reports_retained_rows(monkeypatch):
     monkeypatch.setattr("builtins.print", fail_second_print)
     with pytest.raises(
         module.ProvenanceFailure,
-        match=r"stage=post_registration exception=BrokenPipeError .* retained=11",
+        match=r"stage=post_registration exception=BrokenPipeError .* retained=12",
     ) as captured:
         module.run_provenance_load(object())
     assert "sensitive" not in str(captured.value)

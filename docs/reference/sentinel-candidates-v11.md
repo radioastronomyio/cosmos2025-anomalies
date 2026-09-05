@@ -26,16 +26,16 @@ documented sentinels, and conservative candidates at the same time.
 
 ## 1. Scope and Result
 
-The profiler read 1403 native fields across
-11 source tables. It recorded
-1237 scalar profiles,
+The profiler read 1435 native fields across
+12 source tables. It recorded
+1269 scalar profiles,
 166 vector fields, and 830
 separate vector-index profiles. The 13
 project metadata rows use the explicit empty/not-applicable convention and
 contain no invented observations.
 
-This report contains 793 conservative candidate
-observations across 476 fields. Frequency is not
+This report contains 812 conservative candidate
+observations across 494 fields. Frequency is not
 evidence of sentinel meaning.
 
 ## 2. Profile and Candidate Contract
@@ -61,7 +61,7 @@ or the scalar marker, and rule version.
 ## 3. FITS Masks
 
 `has_fits_mask` is true for 3 native
-fields and false for 1400. Only declared
+fields and false for 1432. Only declared
 FITS null metadata creates these masks.
 
 | Table | Column | Index | Mask count | Source rows | Fraction |
@@ -73,7 +73,7 @@ FITS null metadata creates these masks.
 ## 4. NaNs
 
 `has_nan` is true for 305 native fields and false
-for 1098. NaNs are counted independently of FITS
+for 1130. NaNs are counted independently of FITS
 masks.
 
 | Table | Column | Index | NaN count | Source rows | Fraction |
@@ -1223,25 +1223,44 @@ otherwise it is literal `unknown`. It is never inferred from a column name.
 | `galight_morph` | `m20_f444w` | scalar | `-999.0` | 7957 | 784016 | 0.010149027570865901 | M20 in xxx filter | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
 | `galight_morph` | `m20_f444w` | scalar | `-99.0` | 31690 | 784016 | 0.04042009346748025 | M20 in xxx filter | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
 | `galight_morph` | `cas_flag_f444w` | scalar | `-999.0` | 7957 | 784016 | 0.010149027570865901 | Statmorph quality flag | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `specz` | scalar | `-99.0` | 24781 | 261975 | 0.0945929955148392 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `Id_COS20_Classic` | scalar | `-999` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `ra_COS20_Classic` | scalar | `-999.0` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `dec_COS20_Classic` | scalar | `-999.0` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `Id_COS20_Farmer` | scalar | `-999` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `ra_COS20_Farmer` | scalar | `-999.0` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `dec_COS20_Farmer` | scalar | `-999.0` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `Id_COSMOS25` | scalar | `-999` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `ra_COSMOS25` | scalar | `-999.0` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `dec_COSMOS25` | scalar | `-999.0` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `Id_COSMOS15` | scalar | `-999` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `ra_COSMOS15` | scalar | `-999.0` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `dec_COSMOS15` | scalar | `-999.0` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `Id_COSMOS09` | scalar | `-999` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `ra_COSMOS09` | scalar | `-999.0` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `dec_COSMOS09` | scalar | `-999.0` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `photoz` | scalar | `-999.0` | 130904 | 261975 | 0.49968126729649776 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `photoz` | scalar | `-99.0` | 61438 | 261975 | 0.2345185609313866 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
-| `specz_compilation` | `photoz_type` | scalar | `-999` | 130874 | 261975 | 0.4995667525527245 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `specz` | scalar | `-99.0` | 24781 | 261975 | 0.0945929955148392 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `Id_COS20_Classic` | scalar | `-999` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `ra_COS20_Classic` | scalar | `-999.0` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `dec_COS20_Classic` | scalar | `-999.0` | 131910 | 261975 | 0.5035213283710278 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `Id_COS20_Farmer` | scalar | `-999` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `ra_COS20_Farmer` | scalar | `-999.0` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `dec_COS20_Farmer` | scalar | `-999.0` | 189993 | 261975 | 0.725233323790438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `Id_COSMOS25` | scalar | `-999` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `ra_COSMOS25` | scalar | `-999.0` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `dec_COSMOS25` | scalar | `-999.0` | 216782 | 261975 | 0.8274911728218342 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `Id_COSMOS15` | scalar | `-999` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `ra_COSMOS15` | scalar | `-999.0` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `dec_COSMOS15` | scalar | `-999.0` | 155128 | 261975 | 0.5921481057352801 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `Id_COSMOS09` | scalar | `-999` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `ra_COSMOS09` | scalar | `-999.0` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `dec_COSMOS09` | scalar | `-999.0` | 163540 | 261975 | 0.6242580398893024 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `photoz` | scalar | `-999.0` | 130904 | 261975 | 0.49968126729649776 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `photoz` | scalar | `-99.0` | 61438 | 261975 | 0.2345185609313866 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_unique` | `photoz_type` | scalar | `-999` | 130874 | 261975 | 0.4995667525527245 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `specz` | scalar | `-99.0` | 34665 | 482579 | 0.0718327983604757 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `Id_COS20_Classic` | scalar | `-999` | 226677 | 482579 | 0.4697199836710673 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `ra_COS20_Classic` | scalar | `-999.0` | 226677 | 482579 | 0.4697199836710673 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `dec_COS20_Classic` | scalar | `-999.0` | 226677 | 482579 | 0.4697199836710673 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `Id_COS20_Farmer` | scalar | `-999` | 339189 | 482579 | 0.7028673025556438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `ra_COS20_Farmer` | scalar | `-999.0` | 339189 | 482579 | 0.7028673025556438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `dec_COS20_Farmer` | scalar | `-999.0` | 339189 | 482579 | 0.7028673025556438 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `Id_COSMOS25` | scalar | `-999` | 390220 | 482579 | 0.8086137192045241 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `ra_COSMOS25` | scalar | `-999.0` | 390220 | 482579 | 0.8086137192045241 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `dec_COSMOS25` | scalar | `-999.0` | 390220 | 482579 | 0.8086137192045241 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `Id_COSMOS15` | scalar | `-999` | 266936 | 482579 | 0.553144666469117 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `ra_COSMOS15` | scalar | `-999.0` | 266936 | 482579 | 0.553144666469117 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `dec_COSMOS15` | scalar | `-999.0` | 266936 | 482579 | 0.553144666469117 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `Id_COSMOS09` | scalar | `-999` | 281794 | 482579 | 0.5839334077943715 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `ra_COSMOS09` | scalar | `-999.0` | 281794 | 482579 | 0.5839334077943715 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `dec_COSMOS09` | scalar | `-999.0` | 281794 | 482579 | 0.5839334077943715 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `photoz` | scalar | `-999.0` | 225276 | 482579 | 0.4668168320627296 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `photoz` | scalar | `-99.0` | 114946 | 482579 | 0.23819105265666346 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
+| `specz_compilation_all` | `photoz_type` | scalar | `-999` | 225190 | 482579 | 0.46663862289904867 | unknown | `abs(value)=10^k-1; count>=1000; count*1000>=non_null_count` | `cosmos_v11_candidate_sentinel_v1` |
 
 ## 7. Decision Boundary
 

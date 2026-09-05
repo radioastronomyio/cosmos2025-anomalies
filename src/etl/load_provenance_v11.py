@@ -9,7 +9,7 @@ Link         : https://github.com/radioastronomyio/cosmos2025-anomalies
 
 Description
 -----------
-Builds eleven provenance records from separately declared and freshly observed
+Builds provenance records from separately declared and freshly observed
 Gate 3.5 evidence. Persistent registration is transactional and records one
 PostgreSQL transaction timestamp after all mirror loads have been verified.
 
@@ -91,7 +91,7 @@ class ProvenanceObservation(ExpectedProvenance):
 
 
 def _require_exact_keys(label: str, values: Mapping[str, Any]) -> None:
-    """Require evidence for the exact eleven-table ordered boundary."""
+    """Require evidence for the exact twelve-table ordered boundary."""
     if set(values) != set(PROVENANCE_TABLES):
         raise ValueError(f"provenance table boundary mismatch: {label}")
 
@@ -258,7 +258,7 @@ def _insert_parameters(row: ExpectedProvenance) -> tuple[Any, ...]:
 def register_provenance_transaction(
     connection: Any, expected: Sequence[ExpectedProvenance]
 ) -> datetime:
-    """Atomically apply the amended COMMENT and eleven provenance rows."""
+    """Atomically apply the amended COMMENT and twelve provenance rows."""
     if tuple(row.table_name for row in expected) != PROVENANCE_TABLES:
         raise ValueError("provenance registration table boundary mismatch")
     try:
@@ -276,7 +276,7 @@ def register_provenance_transaction(
             "SELECT count(*), count(DISTINCT load_timestamp), min(load_timestamp) "
             'FROM "source"."provenance"'
         ).fetchone()
-        if observation is None or observation[:2] != (11, 1):
+        if observation is None or observation[:2] != (12, 1):
             raise ValueError("provenance registration timestamp boundary mismatch")
         connection.commit()
         return observation[2]
@@ -313,7 +313,7 @@ def classify_registration_state(
             connection.rollback()
             return "rolled_back", None
         if (
-            count == 11
+            count == 12
             and comment == generate_schema_v11.PROVENANCE_CONTRACT[7].comment
         ):
             timestamp = validate_provenance_observation(
@@ -372,7 +372,7 @@ def run_registration(
     try:
         verify_callback()
     except BaseException as error:
-        raise _safe_failure("verify_postcommit", error, retained=11) from None
+        raise _safe_failure("verify_postcommit", error, retained=12) from None
     return timestamp
 
 
@@ -380,7 +380,7 @@ resolve_settings = bootstrap_v11.resolve_settings
 
 
 def _source_paths(config_path: Path) -> dict[str, Path]:
-    """Resolve all eleven source artifacts only through repository config."""
+    """Resolve all twelve source artifacts only through repository config."""
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     try:
         catalogs = config["catalogs"]
@@ -399,7 +399,8 @@ def _source_paths(config_path: Path) -> dict[str, Path]:
             "galaxy_group_memberships": Path(
                 supplementary["group_catalog_memberships"]
             ),
-            "specz_compilation": Path(specz["unique_fits"]),
+            "specz_compilation_unique": Path(specz["unique_fits"]),
+            "specz_compilation_all": Path(specz["all_fits"]),
         }
     except (KeyError, TypeError) as error:
         raise ValueError("missing Gate 3.9 source path configuration") from error
@@ -458,7 +459,7 @@ def observe_source_counts(
 def fresh_manifest_evidence(
     settings: bootstrap_v11.Settings, paths: Mapping[str, Path]
 ) -> tuple[dict[str, verify_source_fidelity.InputEvidence], str]:
-    """Pin eleven inputs and bind them to one stable manifest byte identity."""
+    """Pin twelve inputs and bind them to one stable manifest byte identity."""
     digest_before = verify_source_fidelity.sha256_of(settings.manifest_path)
     manifest = bootstrap_v11._manifest_contract(settings)
     pins = {
@@ -567,7 +568,7 @@ def _verify_provenance_acl(connection: Any) -> dict[str, bool]:
 
 
 def verify_provenance_analyst(
-    settings: bootstrap_v11.Settings, *, expected_rows: int = 11
+    settings: bootstrap_v11.Settings, *, expected_rows: int = 12
 ) -> dict[str, Any]:
     """Prove analyst SELECT and deterministic write/DDL/GRANT denial."""
     operations = (
@@ -634,7 +635,7 @@ def build_live_expected(
         ).fetchone()[0]
         connection.rollback()
     if source_counts != loaded_counts:
-        raise ValueError("eleven-table source/live count mismatch")
+        raise ValueError("twelve-table source/live count mismatch")
     if require_provenance_zero:
         if provenance_count != 0:
             raise ValueError("provenance registration requires preflight-zero")
@@ -643,7 +644,7 @@ def build_live_expected(
             generate_schema_v11.PROVENANCE_CONTRACT[7].comment,
         }:
             raise ValueError("pre-registration provenance comment mismatch")
-    elif provenance_count != 11:
+    elif provenance_count != 12:
         raise ValueError("provenance row-count mismatch")
     if str(track_commit_timestamp).lower() not in {"off", "false"}:
         raise ValueError("track_commit_timestamp evidence changed")
@@ -756,9 +757,9 @@ def run_provenance_load(settings: bootstrap_v11.Settings) -> dict[str, Any]:
             verify_after_commit,
         )
         stage = "post_registration"
-        retained = 11
+        retained = 12
         print(
-            "gate39_stage=register status=committed rows=11 comment=amended",
+            "gate39_stage=register status=committed rows=12 comment=amended",
             flush=True,
         )
         print("gate39_stage=verify_postcommit status=passed", flush=True)
@@ -766,7 +767,7 @@ def run_provenance_load(settings: bootstrap_v11.Settings) -> dict[str, Any]:
             "gate": "3.9",
             "status": "passed",
             "mode": "load",
-            "rows": 11,
+            "rows": 12,
             "registration_timestamp": timestamp.isoformat(),
             "verification": verification,
             "direct_analyst_network_auth_exercised": False,
@@ -779,7 +780,7 @@ def run_provenance_load(settings: bootstrap_v11.Settings) -> dict[str, Any]:
 
 
 def run_provenance_verify_only(settings: bootstrap_v11.Settings) -> dict[str, Any]:
-    """Verify an existing exact eleven-row registration without mutation."""
+    """Verify an existing exact twelve-row registration without mutation."""
     retained: int | str = "unvalidated"
     try:
         evidence = build_live_expected(settings, require_provenance_zero=False)

@@ -60,8 +60,8 @@ ALLOWED_TRANSFORMS = {
     "section",
 }
 DEFAULT_CONFIG_PATH = REPO_ROOT / "configs" / "data_paths.yaml"
-SEALED_ROWS_SHA256 = "674f971d1d4b5194ec5e9186a6eb41e6fa33fdd85c49e6c31fdc36e2e1638dd1"
-SEALED_CSV_SHA256 = "623e98f82f435c2ee5112af2d07d4553864f665a82a895c175a47d3edfa883cf"
+SEALED_ROWS_SHA256 = "d99700110760923ba68a25380eaade19d1b1eda18928e56686b3ee62be493aa7"
+SEALED_CSV_SHA256 = "324d3ea17b23a57223d84043559b8fa94c87c95c4710b3719f31358cd881e8b8"
 
 
 @dataclass(frozen=True)
@@ -242,10 +242,10 @@ def _validate_sealed_dictionary_rows(rows: Sequence[Mapping[str, str]]) -> None:
 def build_documentation_contract(
     rows: Sequence[Mapping[str, str]],
 ) -> DocumentationContract:
-    """Build the exact 1,416-case documentation contract from sealed rows."""
+    """Build the exact 1,448-case documentation contract from sealed rows."""
     validate_field_surface(rows)
     _validate_sealed_dictionary_rows(rows)
-    if len(rows) != 1_416:
+    if len(rows) != 1_448:
         raise ValueError("documentation dictionary row boundary mismatch")
     table_order = tuple(generate_schema_v11.MIRROR_TABLE_ORDER)
     expected_tables = set(table_order)
@@ -270,7 +270,7 @@ def build_documentation_contract(
         )
 
     if origins != {
-        "source_native": 1_403,
+        "source_native": 1_435,
         "source_row_metadata": 7,
         "id_injected": 6,
     }:
@@ -294,7 +294,7 @@ def build_documentation_contract(
         for column in columns
         if column.row["description_status"] == "undocumented_upstream"
     )
-    if len(undocumented) != 49:
+    if len(undocumented) != 78:
         raise ValueError("undocumented-upstream boundary mismatch")
     return DocumentationContract(
         columns=columns,
@@ -380,7 +380,7 @@ def _information_schema_query(contract: DocumentationContract) -> str:
 
 
 def _physical_count_query(contract: DocumentationContract) -> str:
-    """Return one fixed-table UNION query for all eleven exact physical counts."""
+    """Return one fixed-table UNION query for all twelve exact physical counts."""
     statements = [
         "SELECT '{}'::text AS table_name, count(*)::bigint AS row_count "
         'FROM "source".{}'.format(table, generate_schema_v11.quote_identifier(table))
@@ -780,9 +780,9 @@ def _render_provenance_contract() -> list[str]:
     lines = [
         "## Provenance infrastructure",
         "",
-        "`source.provenance` is project infrastructure, not a twelfth source mirror. "
+        "`source.provenance` is project infrastructure, not a thirteenth source mirror. "
         f"Provenance contract version {generate_schema_v11.PROVENANCE_CONTRACT_VERSION} "
-        "contains thirteen fields and one registered row for each of the eleven mirrors.",
+        "contains thirteen fields and one registered row for each of the twelve mirrors.",
         "",
         "| Field | PostgreSQL type | Nullable | Primary key | Check | Comment |",
         "|-------|-----------------|----------|-------------|-------|---------|",
@@ -940,8 +940,8 @@ def render_schema_document(
         "",
         "# COSMOS-Web v1.1 Source Mirror Schema",
         "",
-        "Generated from the sealed 1,416-row dictionary and a verified live "
-        "`cosmos2025_v11.source` catalog observation. The eleven mirror tables "
+        "Generated from the sealed 1,448-row dictionary and a verified live "
+        "`cosmos2025_v11.source` catalog observation. The twelve mirror tables "
         "are lossless source representations after declared target casting. "
         "Cleaned, expanded, or science-derived products belong in a future "
         "`analysis` schema.",
@@ -961,6 +961,31 @@ def render_schema_document(
         )
     lines.extend(
         (
+            "",
+            "## Spec-z compilation boundary",
+            "",
+            "The Khostovan et al. compilation ships two distinct upstream "
+            "products, mirrored as two distinct tables with their own "
+            "provenance rows. `source.specz_compilation_all` is the "
+            "measurement-level artifact (`specz_compilation_COSMOS_DR1.1_all.fits`, "
+            "482,579 rows, one row per redshift measurement). "
+            "`source.specz_compilation_unique` is the galaxy-level artifact "
+            "(`specz_compilation_COSMOS_DR1.1_unique.fits`, 261,975 rows, one "
+            "row per spectroscopic source after deduplication by the highest "
+            "quality flag, ties to the most recent redshift; definition at the "
+            "pinned checkout `specz_compilation/README.md`, List of Surveys "
+            "section, SHA-256 "
+            "`43992cf6a30d5893d9421dd1d0b837e1f8dc4975a92e8372ba8cb3b7be78d0c1`). "
+            "Both artifacts are shipped upstream; neither is derived in this "
+            "repository. The observed relationship, measured at spec P2R-04 "
+            "gate 4.1 from the pinned artifacts, is full row-and-column "
+            "equality between the galaxy-level table and the measurement-level "
+            "rows at `Priority = 1` (column sets identical; positional "
+            "per-column value equality including masks and NaN). The catalog "
+            "column `id_specz_khostovan25` does not resolve against either "
+            "artifact's `Id_specz` namespace; see the semantic note on "
+            "`photometry_primary.id_specz_khostovan25` and the review surface "
+            "`docs/research/specz-linkage-evidence.md`.",
             "",
             "## Identifier and relational metadata contract",
             "",

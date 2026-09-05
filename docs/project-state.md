@@ -29,8 +29,13 @@ Operating state of `cosmos2025-anomalies`: phase, live database inventory, data 
 
 The v1.1 ETL v2 mirror passed source integrity, schema, load, provenance,
 conformance, and full-coverage value reconciliation through Gate 3.11. It is
-built and verified in `cosmos2025_v11.source`. MetaMCP cutover, direct ML01
-analyst HBA validation, and T_A v2 remain pending operator approval.
+built and verified in `cosmos2025_v11.source`. P2R-04 extended the mirror
+with the measurement-level spec-z compilation (`specz_compilation_all`),
+renamed the galaxy-level table to `specz_compilation_unique`, and produced
+the linkage evidence review surface; its gates 4.1-4.6 are sealed with the
+load seal declared. MetaMCP cutover, direct ML01 analyst HBA validation,
+disposition of the spec-z linkage review surface, and T_A v2 remain pending
+operator approval.
 
 The retired `cosmos2025.catalog` v1 objects remain a read-only comparison
 baseline. No DDL or DML runs against either database outside an approved
@@ -66,13 +71,24 @@ and renders no credential value.
 | `source.lss_overdensity` | 164,155 | 4 | Hatamnia supplement |
 | `source.galaxy_groups` | 1,678 | 14 | Toni groups |
 | `source.galaxy_group_memberships` | 1,745,652 | 4 | Toni memberships |
-| `source.specz_compilation` | 261,975 | 32 | Khostovan spec-z compilation |
-| `source.provenance` | 11 | 13 | Project infrastructure; one registration per mirror |
+| `source.specz_compilation_unique` | 261,975 | 32 | Khostovan spec-z compilation, galaxy level |
+| `source.specz_compilation_all` | 482,579 | 32 | Khostovan spec-z compilation, measurement level (P2R-04) |
+| `source.provenance` | 12 | 13 | Project infrastructure; one registration per mirror |
 
-The eleven mirrors contain 1,403 native columns plus seven `source_row` and
+The twelve mirrors contain 1,435 native columns plus seven `source_row` and
 six injected `id` fields. Only FITS masks and NaN become SQL NULL; finite
 sentinels remain source values. Complete schema and provenance evidence is in
 [`reference/schema-v11.md`](reference/schema-v11.md).
+
+Spec-z linkage state (P2R-04): the catalog column
+`photometry_primary.id_specz_khostovan25` does not resolve against the held
+DR1.1 compilation and is mirrored as shipped with a semantic note and database
+comment recording the finding. The correct join path is the compilation's own
+`Id_COSMOS25` crossmatch into `photometry_primary.id` (zero-separation
+coordinate identity, verified). Recovery-population and selection-function
+evidence awaiting operator disposition is in
+[`research/specz-linkage-evidence.md`](research/specz-linkage-evidence.md);
+no spectroscopic sample, view, or materialized join exists.
 
 ### Read-only v1 baseline
 
