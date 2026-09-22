@@ -282,3 +282,42 @@ Completed 2026-09-22.
   measurement-inherits-source; no-balance-redistribution.
 
 Gate 5.5 validation checklist: all five items satisfied.
+
+---
+
+## Gate 5.6 — Install through bounded bootstrap and prove repeatability
+
+Completed 2026-09-22.
+
+- `src/features/specz_science/install.py`: transactional installer for the
+  four `analysis.specz_p2r05_*` tables (explicit type map, composite keys,
+  FK to the runs table, comments, four targeted indexes, USAGE + SELECT
+  grants to `cosmos2025_v11_ro` only). Identity-aware: an existing
+  identical run verifies and changes nothing; a conflicting same-id payload
+  fails before modifying rows; a pre-existing non-conformant relation or a
+  schema carrying unrelated objects stops the bootstrap. Uncertain commits
+  retain work; the down operation removes only this unit's rows and only
+  ledger-proven new objects.
+- Scratch up/down proofs (`tests/test_specz_science_install_scratch.py`,
+  6 tests under the Doppler runtime, guarded scratch-prefix databases,
+  created and dropped per test): declared relations, PK and FK
+  enforcement, analyst grants, pending-adoption state, full down
+  reversal, pre-existing relation stop, unrelated-object inventory and
+  retention, repeat-install nonmutation plus conflicting-payload refusal,
+  post-commit-failure retention, and precommit rollback.
+- Production installation (44 s through the bounded admin bootstrap):
+  run `2bb71fb075cb5bd72a8f28908765bc8e0484c59f212a9e74ed26dbc06b333ae5`;
+  counts 482,579 / 784,016 / 784,016. No source or v1 object touched; the
+  bootstrap created only the analysis schema, four tables, four indexes,
+  and the bounded grants.
+- `check_installed_product.py` (analyst path, 34 s): identity and
+  connection-time read-only confirmed; SELECT on all four tables; no
+  INSERT/UPDATE/DELETE/TRUNCATE anywhere; no CREATE on analysis or
+  source; source counts unchanged (784,016 / 482,579 / 12); product state
+  `pending_scientific_adoption`, seal null. Canonical content digests
+  recomputed from the installed rows match the staging artifacts for all
+  three products (counts alone would not have passed).
+- Repeat install request: `installed: false, unchanged: true`, counts
+  and product state identical; no rows, grants, or timestamps changed.
+
+Gate 5.6 validation checklist: all five items satisfied.
