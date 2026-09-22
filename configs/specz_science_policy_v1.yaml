@@ -1,0 +1,160 @@
+policy_id: p2r05-specz-policy-v1
+
+# Frozen semantic configuration for spec P2R-05 v1.0 (operator approved
+# 2026-09-22). This file is the single source of science policy for the
+# spectroscopic association and eligibility product. Loaders reject missing
+# fields, unexpected keys, wrong types, and out-of-domain values; no default,
+# environment variable, or command-line flag may override any value here.
+# Storage paths and batch sizes are implementation configuration and live in
+# configs/data_paths.yaml, outside this policy's semantic digest.
+spec_identity:
+  version: "1.0"
+  sha256: 7f481111ad826dd80b01106eeec71bfdaf0f5c649c0cc79b8661a0087af2757b
+
+# P-01: association and population A.
+association:
+  compilation_join_column: id_cosmos25
+  catalog_join_column: id
+  catalog_relation: photometry_primary
+  no_association_sentinel: -999
+  retain_all_measurements: true
+  summarize_all_catalog_sources: true
+  population_a_ineligible_for_secure_use: true
+  promote_priority_zero: false
+
+# P-02: numeric validity and quality mapping.
+numeric_validity:
+  require_non_null: true
+  require_finite: true
+  require_strictly_positive: true
+  upper_redshift_limit: null
+quality:
+  recognized_measured_flags: [1, 2, 3, 4, 9, 11, 12, 13, 14, 19]
+  base_flag_confidence:
+    1: 50
+    2: 80
+    3: 95
+    4: 97
+    9: 85
+  broad_line_offset: 10
+  non_measured_flags: [0, 10]
+  unrecognized_flags_unclassified: true
+secure_measurement:
+  allowed_flags: [3, 4, 13, 14]
+  confidence_min: 95
+  confidence_max: 100
+  require_mapping_consistency: true
+  require_numeric_valid_z: true
+
+# P-03: preferred reported redshift.
+preferred_reported_z:
+  candidate_surface: unique
+  candidate_predicate: numeric_valid
+  confidence_domain: [0, 100]
+  tie_break: ascending_id_specz
+  value_source: copy_selected_row
+
+# P-04: conflict policy.
+conflict:
+  metric: absolute_difference
+  threshold: 0.005
+  agreement_is_equality_or_within_threshold: true
+  veto_flags: [unique_numeric_conflict, secure_all_conflict]
+  audit_flags:
+    - unique_numeric_conflict
+    - secure_all_conflict
+    - other_measurement_disagreement
+  minimum_entries_to_assess: 2
+
+# P-05: classification and eligibility routing.
+classification:
+  photometric_type_relation: lephare
+  photometric_type_column: type
+  galaxy_type: 0
+  stellar_type: 1
+  qso_type: 2
+  stellar_type_vetoes_secure_use: true
+  broad_line_flags: [11, 12, 13, 14, 19]
+  broad_line_predicate: any_numeric_valid_all_measurement
+  photometric_qso_type: 2
+eligibility:
+  primary_galaxy:
+    requires_resolved_association: true
+    requires_secure_preferred_unique_entry: true
+    requires_neither_veto_conflict: true
+    requires_photometric_type: 0
+    requires_no_broad_line_evidence: true
+    requires_valid_split_assignment: true
+  separate_validation:
+    requires_resolved_association: true
+    requires_secure_preferred_unique_entry: true
+    requires_neither_veto_conflict: true
+    requires_valid_split_assignment: true
+    allowed_photometric_types: [0, 2]
+    requires_broad_line_or_photometric_qso: true
+  mutually_exclusive: true
+
+# P-06: frozen partitions.
+splits:
+  salt: cosmos2025-p2r05-spatial-v1
+  hash_algorithm: sha256
+  encoding: utf-8
+  trailing_newline: false
+  sort_key: digest_hex_then_tile
+  valid_tile_domain:
+    - A1
+    - A2
+    - A3
+    - A4
+    - A5
+    - A6
+    - A7
+    - A8
+    - A9
+    - A10
+    - B1
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B9
+    - B10
+  holdout_count: 4
+  validation_count: 4
+  development_count: 12
+  unassigned_label: unassigned
+  rebalancing_prohibited: true
+
+# P-07: diagnostics and the three fixed sensitivity variants.
+diagnostics:
+  magnitude_band: mag_auto_f444w
+  color_blue_band: mag_auto_f150w
+  color_red_band: mag_auto_f277w
+  color_display_domain: [-10.0, 50.0]
+  color_not_evaluated_label: color_not_evaluated_display_domain
+sensitivity:
+  preserve_baseline_ordering: true
+  share_frozen_partitions: true
+  variants:
+    - name: min_confidence_97
+      dimension: confidence_min
+      confidence_min: 97
+    - name: abs_threshold_0p001
+      dimension: conflict_threshold
+      threshold: 0.001
+    - name: normalized_0p005
+      dimension: normalized_conflict_threshold
+      normalized_threshold: 0.005
+
+# P-08: upstream report handling.
+upstream_report:
+  transmission: prohibited
+  renumbering_status: hypothesis_unconfirmed
+
+# P-09: adoption state.
+adoption:
+  product_state: pending_scientific_adoption
+  consumer_alias_prohibited: true
