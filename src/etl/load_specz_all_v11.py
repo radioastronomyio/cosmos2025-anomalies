@@ -477,6 +477,139 @@ def _register_provenance(
 
 
 # =============================================================================
+# Uncertain-commit handling (P2R-05 gate 5.2)
+# =============================================================================
+
+
+def _classify_uncertain_commit(
+    settings: bootstrap_v11.Settings, expected_rows: int
+) -> dict[str, object]:
+    """Classify a possibly-committed load through an independent connection.
+
+    Opens a fresh admin connection (never the failed one) and reports the
+    target as absent, complete (present with exactly the expected row count
+    and a unique, non-null id_specz key), or inconsistent. The classification
+    is read-only: no rollback, drop, or repair is attempted here, because a
+    commit that may have succeeded must never be followed by destructive
+    cleanup.
+    """
+    with bootstrap_v11._connect(settings, settings.target_database) as probe:
+        exists = probe.execute(
+            "SELECT to_regclass(%s) IS NOT NULL", (f'source."{TABLE}"',)
+        ).fetchone()[0]
+        if not exists:
+            return {"state": "absent", "rows": 0, "expected_rows": expected_rows}
+        rows = _row_count(probe, TABLE)
+        keys = probe.execute(
+            sql.SQL("SELECT count({id}), count(DISTINCT {id}) FROM {}.{}").format(
+                sql.Identifier("source"),
+                sql.Identifier(TABLE),
+                id=sql.Identifier("id_specz"),
+            )
+        ).fetchone()
+        consistent = rows == expected_rows and keys[0] == rows and keys[1] == rows
+        return {
+            "state": "complete" if consistent else "inconsistent",
+            "rows": rows,
+            "expected_rows": expected_rows,
+            "id_specz_count": int(keys[0]),
+            "id_specz_distinct": int(keys[1]),
+        }
+
+
+def _handle_load_failure(
+    connection: psycopg.Connection,
+    *,
+    commit_attempted: bool,
+    classify_uncertain_commit,
+) -> dict[str, object]:
+    """Contain a failed load without destroying possibly-committed work.
+
+    Precommit failures roll the transaction back; no compensating DROP runs
+    (the CREATE rode in the same transaction, so rollback removes it, and a
+    DROP could only ever hit unrelated or committed work). Failures at or
+    after the commit attempt are uncertain commits: the handler classifies
+    the outcome read-only through an independent connection and retains
+    whatever the server kept.
+    """
+    if not commit_attempted:
+        rollback_error = None
+        try:
+            connection.rollback()
+        except Exception as error:  # noqa: BLE001 - broken connection is expected here
+            rollback_error = repr(error)
+        evidence = {
+            "phase": "precommit",
+            "rollback_error": rollback_error,
+            "compensating_drop": False,
+        }
+        print(json.dumps(evidence, indent=2), file=sys.stderr)
+        return evidence
+    classification = None
+    classification_error = None
+    try:
+        classification = classify_uncertain_commit()
+    except Exception as error:  # noqa: BLE001 - classification failure is itself evidence
+        classification_error = repr(error)
+    evidence = {
+        "phase": "uncertain_commit",
+        "classification": classification,
+        "classification_error": classification_error,
+        "compensating_drop": False,
+    }
+    print(json.dumps(evidence, indent=2), file=sys.stderr)
+    return evidence
+
+
+def _load_transaction(
+    connection: psycopg.Connection,
+    *,
+    statements: list[str],
+    copy_statement: str,
+    frames,
+    expected_rows: int,
+    classify_uncertain_commit,
+) -> dict[str, object]:
+    """Create, load, verify, and commit the target table in one transaction.
+
+    ``frames`` is an iterable of COPY payload chunks; production wiring
+    streams them from the pinned FITS artifact, tests inject fixtures. Any
+    failure routes through ``_handle_load_failure`` and re-raises.
+    """
+    commit_attempted = False
+    try:
+        for statement in statements:
+            connection.execute(statement)
+        with connection.cursor().copy(copy_statement) as copy:
+            for frame in frames:
+                copy.write(frame)
+        loaded = _row_count(connection, TABLE)
+        keys = connection.execute(
+            sql.SQL("SELECT count({id}), count(DISTINCT {id}) FROM {}.{}").format(
+                sql.Identifier("source"),
+                sql.Identifier(TABLE),
+                id=sql.Identifier("id_specz"),
+            )
+        ).fetchone()
+        if loaded != expected_rows:
+            raise SystemExit(
+                f"load FAILED: {loaded} rows != source {expected_rows}"
+            )
+        if keys[0] != loaded or keys[1] != loaded:
+            raise SystemExit(f"load FAILED: id_specz key violation: {keys}")
+        commit_attempted = True
+        connection.commit()
+    except BaseException as error:
+        _handle_load_failure(
+            connection,
+            commit_attempted=commit_attempted,
+            classify_uncertain_commit=classify_uncertain_commit,
+        )
+        raise
+    return {"loaded_rows": loaded}
+
+
+# =============================================================================
 # Entry Point
 # =============================================================================
 def _sync_link_comment(
@@ -562,6 +695,23 @@ def _sync_link_comment(
     }
 
 
+def _ensure_target_absent(connection: psycopg.Connection) -> None:
+    """Refuse to proceed when the target relation already exists.
+
+    A same-named relation is either prior work to verify or an unrelated
+    object; neither may be dropped or commandeered. The refusal fires before
+    any statement in the load transaction executes.
+    """
+    existing = connection.execute(
+        "SELECT to_regclass(%s) IS NOT NULL", (f'source."{TABLE}"',)
+    ).fetchone()[0]
+    if existing:
+        raise SystemExit(
+            f"load FAILED: {TABLE} already exists; refusing to modify "
+            "a pre-existing relation"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=bootstrap_v11.DEFAULT_CONFIG_PATH)
@@ -596,11 +746,7 @@ def main() -> None:
             return
         principal = _assert_principal(connection)
         if args.load:
-            existing = connection.execute(
-                "SELECT to_regclass(%s) IS NOT NULL", (f'source."{TABLE}"',)
-            ).fetchone()[0]
-            if existing:
-                raise SystemExit(f"load FAILED: {TABLE} already exists")
+            _ensure_target_absent(connection)
             baseline = _invariance(connection)
             provenance_counts = {
                 row[0]: row[1]
@@ -615,45 +761,25 @@ def main() -> None:
                     raise SystemExit(
                         f"invariance FAILED: {table} count disagrees with provenance"
                     )
-            try:
-                for statement in statements:
-                    connection.execute(statement)
-                with connection.cursor().copy(_copy_statement(table_rows)) as copy:
-                    for frame in load_supplements_v11.iter_fits_copy_frames(
-                        Path(pin.path),
-                        table_rows,
-                        batch_rows=settings.copy_batch_rows,
-                    ):
-                        copy.write(frame)
-                loaded = _row_count(connection, TABLE)
-                keys = connection.execute(
-                    sql.SQL("SELECT count({id}), count(DISTINCT {id}) FROM {}.{}").format(
-                        sql.Identifier("source"),
-                        sql.Identifier(TABLE),
-                        id=sql.Identifier("id_specz"),
-                    )
-                ).fetchone()
-                observation = load_supplements_v11.inspect_fits_source(
-                    Path(pin.path), table_rows
-                )
-                if loaded != observation.row_count:
-                    raise SystemExit(
-                        f"load FAILED: {loaded} rows != source {observation.row_count}"
-                    )
-                if keys[0] != loaded or keys[1] != loaded:
-                    raise SystemExit(f"load FAILED: id_specz key violation: {keys}")
-                connection.commit()
-            except BaseException:
-                connection.rollback()
-                for statement in statements:
-                    if statement.startswith("CREATE TABLE"):
-                        connection.execute(
-                            sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
-                                sql.Identifier("source"), sql.Identifier(TABLE)
-                            )
-                        )
-                        connection.commit()
-                raise
+            observation = load_supplements_v11.inspect_fits_source(
+                Path(pin.path), table_rows
+            )
+            expected_rows = observation.row_count
+            load_result = _load_transaction(
+                connection,
+                statements=statements,
+                copy_statement=_copy_statement(table_rows),
+                frames=load_supplements_v11.iter_fits_copy_frames(
+                    Path(pin.path),
+                    table_rows,
+                    batch_rows=settings.copy_batch_rows,
+                ),
+                expected_rows=expected_rows,
+                classify_uncertain_commit=lambda: _classify_uncertain_commit(
+                    settings, expected_rows
+                ),
+            )
+            evidence["load_transaction"] = load_result
         evidence = _verify_loaded(connection, settings, table_rows, pin)
         evidence["principal_identity"] = principal
         evidence["ddl_statements_executed"] = len(statements) if args.load else None

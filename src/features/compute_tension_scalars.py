@@ -5,22 +5,22 @@ Phase 2 tension scalar computation for COSMOS2025.
 Creates the plausibility-filtered analysis sample, materializes cross-code
 LePhare/CIGALE disagreement metrics, and writes a markdown diagnostic report.
 
-Usage:
+PRODUCTION EXECUTION DISABLED (spec P2R-05 gate 5.2): this runner recreates
+catalog.v_analysis_sample and catalog.tension_scalars in the irreplaceable
+read-only v1 baseline. The CLI refuses before any connection is opened.
+Importable computation and report helpers remain available for historical
+tests; a future T_A v2 runner requires its own approved spec.
+
+Usage (historical, now refused):
     source /opt/agents/venv/bin/activate
     doppler run --project ml01 --config prd -- \
         python src/features/compute_tension_scalars.py
     (run from /opt/agents/repos/cosmos2025-anomalies)
 
-Outputs:
+Outputs (historical, 2026-05 run only):
     catalog.v_analysis_sample
-        Materialized view containing one `id` column for the clean analysis
-        sample.
     catalog.tension_scalars
-        Persistent table containing raw deltas, propagated uncertainties,
-        error-normalized tension metrics, chi2 context, and quality metadata.
     docs/phase2-tension-diagnostic-report.md
-        Markdown validation report summarizing sample attrition and tension
-        distribution diagnostics.
 """
 
 import math
@@ -1016,34 +1016,33 @@ def run_validations(cur):
 
 
 def main():
-    """Run the end-to-end Phase 2 tension scalar workflow.
+    """Refuse production execution before any connection or write occurs.
+
+    Spec P2R-05 gate 5.2 disables this historical runner: its workflow
+    recreates ``catalog.v_analysis_sample`` and ``catalog.tension_scalars``
+    in the read-only v1 baseline, which cannot be rebuilt. There is no
+    override flag; a future T_A v2 runner needs its own approved spec.
+    Pure helpers (``build_insert_tension_sql``, ``render_report``, the
+    fetch/format functions) remain importable for historical tests.
 
     Returns:
         None.
 
+    Raises:
+        SystemExit: Always, with the explanatory refusal message.
+
     Side effects:
-        Opens a database connection, recreates the materialized view and
-        tension table, writes the diagnostic report, and prints progress to
-        stdout.
+        None. The refusal is raised before ``load_config`` or the
+        connection factory is called.
     """
-    print("Loading configuration...")
-    config = load_config()
-    with get_db_connection(config) as conn:
-        with conn.cursor() as cur:
-            print("Verifying F770W weight column...")
-            f770w_column = verify_f770w_column(cur)
-            print("Creating materialized view...")
-            create_analysis_sample(cur)
-            print("Creating tension scalar table...")
-            create_tension_table(cur)
-            print("Computing tension scalars...")
-            populate_tension_table(cur, f770w_column)
-            print("Validating database objects...")
-            run_validations(cur)
-            print("Generating diagnostic report...")
-            generate_report(cur)
-        conn.commit()
-    print(f"Wrote {REPORT_PATH}")
+    raise SystemExit(
+        "compute_tension_scalars.py production execution is disabled "
+        "(spec P2R-05 gate 5.2): it drops and recreates "
+        "catalog.v_analysis_sample and catalog.tension_scalars in the "
+        "irreplaceable read-only v1 baseline. Import computation/report "
+        "helpers directly for historical tests; T_A v2 requires its own "
+        "approved spec."
+    )
 
 
 if __name__ == "__main__":
