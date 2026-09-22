@@ -87,7 +87,13 @@ def phase_build(paths: ss_config.SpeczSciencePaths, policy) -> dict[str, object]
 
 
 def phase_finalize(paths: ss_config.SpeczSciencePaths, policy) -> dict[str, object]:
-    """Gate 5.5: tile map, finalized eligibility, content digests."""
+    """Gate 5.5: tile map, finalized eligibility, content digests.
+
+    Regenerates the measurement audit in the same pass so every product
+    file carries one run identity: the implementation digest covers the
+    verifier modules too, and a build executed before a verifier change
+    must not ship under a stale identity.
+    """
     data = ssv.load_snapshot_data(paths=paths)
     identity = resolve_run_identity(paths)
     run_id = ss_canonical.run_id_from_identity(identity)
@@ -98,11 +104,17 @@ def phase_finalize(paths: ss_config.SpeczSciencePaths, policy) -> dict[str, obje
         raise SystemExit("finalize FAILED: tile map not deterministic")
     unassigned_label = dict(policy)["splits"]["unassigned_label"]
     salt = dict(policy)["splits"]["salt"]
+    sentinel = int(dict(policy)["association"]["no_association_sentinel"])
     out_dir = paths.staging_dir / "products"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    measurements_digest, measurement_rows = ss_canonical.write_jsonl(
+        out_dir / "measurements.jsonl",
+        ss_build.build_measurement_records(
+            data, run_id=run_id, no_association_sentinel=sentinel
+        ),
+    )
     unassigned = 0
-    final_sources: list[dict] = []
 
     def finalized_records():
         nonlocal unassigned
@@ -128,12 +140,6 @@ def phase_finalize(paths: ss_config.SpeczSciencePaths, policy) -> dict[str, obje
             f"finalize FAILED: {unassigned} unassigned sources; partition "
             "completion halted for investigation (P-06)"
         )
-    measurements_digest = json.loads(
-        (out_dir / "build-summary.json").read_text(encoding="utf-8")
-    )["measurements_digest"]
-    measurement_rows = json.loads(
-        (out_dir / "build-summary.json").read_text(encoding="utf-8")
-    )["measurement_rows"]
     content = ss_canonical.content_digest_document(
         measurements=measurements_digest,
         sources=sources_digest,

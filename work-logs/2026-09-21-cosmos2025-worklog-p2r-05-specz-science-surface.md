@@ -243,3 +243,42 @@ Completed 2026-09-22.
   across the fixture zoo, and the split gate in finalize_eligibility.
 
 Gate 5.4 validation checklist: all six items satisfied.
+
+---
+
+## Gate 5.5 — Freeze assignments and finalize eligibility
+
+Completed 2026-09-22.
+
+- `pipeline.py --phase finalize` regenerates all three products under one
+  run identity `2bb71fb075cb5bd72a8f28908765bc8e0484c59f212a9e74ed26dbc06b333ae5`
+  (a mid-run verifier repair had changed the implementation digest after
+  the first 5.4 build; rather than ship mixed identities, finalize now
+  rebuilds measurements in the same pass — the superseded pre-split
+  artifacts remain in staging as diagnostic evidence, no sealed product
+  was destroyed). Content digests: measurements
+  `1086a118ec4bd6c4...`, sources `31c6179385bb9f21...`, splits
+  `52313bb4095d3a4d...` (full values in
+  `staging/derived/specz-p2r05/products/finalize-summary.json`).
+- Tile map: canonical digest
+  `c6406d37e32e4b5cfeb89fc91cda0eb9ed4abf0a192d8c5ab7e56fb893635937`;
+  tracked artifact `docs/research/specz-science-p2r05/tile-map.md`.
+  Holdout A1, A7, B3, B7; validation A3, A10, B1, B5; development the
+  remaining twelve labels.
+- Zero unassigned production sources (native tile domain check and the
+  independent assignment reduction both). Source split counts:
+  development 476,137, validation 147,721, holdout 160,158.
+- Finalized eligibility: primary galaxy 18,402; separate validation 668;
+  both true 0 (mutually exclusive). Eligible sources appear in all three
+  partitions as the map dictates; no redistribution occurred.
+- `check_splits_agreement.py`: independent SHA-256 map recomputation (no
+  imports from the builder's splits module) matches the recorded map and
+  every one of the 784,016 assignments; source/split agreement; the split
+  gate applies exactly; mutual exclusivity holds.
+- Tests: `tests/test_specz_science_splits.py` (8) — production map equals
+  independent recomputation; invariance to ordering/batching/filtering;
+  moved-source, changed-salt, and duplicate-assignment negative controls;
+  injected null/out-of-domain tiles visible, ineligible, unredistributed;
+  measurement-inherits-source; no-balance-redistribution.
+
+Gate 5.5 validation checklist: all five items satisfied.
