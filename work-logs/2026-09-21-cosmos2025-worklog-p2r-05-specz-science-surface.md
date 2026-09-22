@@ -114,3 +114,79 @@ Completed 2026-09-22. Checkpoint facts:
 
 Gate 5.1 validation checklist: all six items satisfied; noted deviations:
 none.
+
+---
+
+## Gate 5.2 — Remove the three known execution hazards
+
+Completed 2026-09-22 (checkpoint appended with the 5.3 commit; the 5.2
+commit is `13d2291`).
+
+- `src/features/compute_tension_scalars.py`: `main()` now refuses with an
+  explanatory SystemExit before `load_config` or the connection factory can
+  be called; no override flag exists; all computation/report helpers remain
+  importable and the historical tests still pass.
+- `src/etl/load_specz_all_v11.py`: the load transaction is extracted into
+  `_load_transaction` with `_handle_load_failure` and
+  `_classify_uncertain_commit`. Precommit failures roll back with no
+  compensating DROP; failures at/after the commit attempt are classified
+  read-only through an independent admin connection and retained.
+  `_ensure_target_absent` refuses pre-existing relations. No production
+  invocation of load/provenance/comment-mutation modes occurred; the source
+  mirror was not reloaded or mutated.
+- `REVIEW.md`: corrected the join-direction bullet (compilation
+  `Id_COSMOS25` into `photometry_primary.id` is the only verified path; the
+  catalog link column does not resolve against the held DR1.1 compilation),
+  updated the mirror boundary to twelve mirrors, added the grain bullet for
+  the two compilation surfaces, and separated source fidelity from
+  permissible derived rejection under approved policy.
+- Tests: `tests/test_specz_hazard_repairs.py` (14 tests) cover the CLI
+  refusal, no-connection assertion, no-override scan, helper importability,
+  precommit rollback, uncertain-commit retention with independent
+  classification, interruption, classification failure, unknown state
+  reporting, and — under the scoped Doppler runtime — scratch-database
+  proofs that a post-commit failure retains the installed table and data,
+  a precommit failure leaves no table, and the existing-object guard
+  retains observable values. Verified under `doppler run --project ml01
+  --config dev` (14 passed).
+
+## Gate 5.3 — Reproduce and extend the decision evidence
+
+Completed 2026-09-22.
+
+- The snapshot column list was extended before any build consumed it with
+  `photometry_primary.ra`, `dec`, and `id_specz_khostovan25` (required for
+  the P-08 defective-path reproduction on its documented all-links basis).
+  The re-captured manifest SHA-256 is
+  `06b19654fc715106ba1f788b52e084df1e94043343517f2b8a49fd44abfff7a4`; the
+  superseded first manifest's diagnostic evidence is preserved in this
+  paragraph (first manifest `48671278...`, photometry digest then
+  `65d72042...`). This is a pre-seal export replacement, not a destructive
+  rebuild: no build output existed.
+- `src/features/specz_science/verify.py` re-derives every prior from the
+  captured snapshot independently of the P2R-04 generators and the 5.4
+  builders. All priors reproduced exactly on first computation, including
+  the defective-path median (4,054.3415558937 arcsec vs the recorded
+  4,054.341555894), the full 17-row prior table, and the v0.2
+  qualified-before-type cross-tab (19,419; type 0/1/2 = 18,473/349/597;
+  broad-line 71/2/188).
+- Structural results: `_unique` == `_all`@Priority 1 across all 31 non-key
+  native fields over 261,975 rows (identifier-lookup join); per-surface
+  unrecognized-flag bound reproduced (flag 5 @ 90 in both surfaces, 6/10 @
+  -99, confidence-zero categories, -3 in `_all` only, nothing >= 95); zero
+  mapping inconsistencies among flag-domain/conf-range entries (272,909 in
+  `_all`); secure preferred population 20,100 with 681 P-04 vetoes.
+- Durable evidence: `docs/research/specz-science-p2r05/evidence-5-3.md`
+  (tracked) and `staging/derived/specz-p2r05/priors-5-3.json` (staging).
+- Hostile fixtures: `tests/test_specz_science_verify.py` (11 tests) —
+  shuffled/non-contiguous/colliding identifiers, tampered-equality
+  detection, single-`_unique` + conflicting secure Priority 0 detection,
+  population-A structural zero with no neighbour claim, tie-break and
+  invalid-confidence ordering, Priority 0 never preferred, manual
+  defective-median haversine check, per-surface unrecognized bound,
+  B-count/enumeration reconciliation, historical rule boundaries, and the
+  0.005 threshold boundary with the float caveat verified empirically
+  (zero production pairs within ulps of the threshold).
+
+Gate 5.3 validation checklist: all five items satisfied; discrepancies:
+none.
