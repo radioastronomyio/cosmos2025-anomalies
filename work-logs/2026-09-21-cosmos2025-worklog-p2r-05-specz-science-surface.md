@@ -5,7 +5,7 @@ description: "Build and verify the reproducible source-level spectroscopy produc
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-09-21"
 version: "1.0"
-status: "in-progress"
+status: "completed"
 tags:
   - type: worklog
   - domain: astronomy
@@ -22,7 +22,7 @@ hostname: "ml01"
 spec_ref: "spec/2026-09/2026-09-21-cosmos2025-spec-p2r-05-specz-science-surface.md"
 repo: "cosmos2025-anomalies"
 category: "astronomy"
-duration_seconds:
+duration_seconds: 19800
 # --- Token Usage and Cost ---
 token_usage_source: "unavailable"
 tokens_total:
@@ -431,3 +431,87 @@ Completed 2026-09-22.
   and amendment history are untouched.
 
 Gate 5.8 validation checklist: all four items satisfied.
+
+---
+
+## Gate 5.9 — Close out the long-horizon run
+
+Completed 2026-09-22. Clean closeout: no blocked record, no partial state.
+
+### Per-gate commits
+
+| Gate | Commit |
+|---|---|
+| 5.1 Executable contract and input identity | `7f2b082f0be45c9ec2c552db63fcd18c03c9e549` |
+| 5.2 Remove the three known execution hazards | `13d22912a955f4e357673f46db4c4db86bdec7bd` |
+| 5.3 Reproduce and extend the decision evidence | `9c8948e048c6df7be9e0b4090603460607d7c66e` |
+| 5.4 Build the complete measurement and source products | `f1d40bce74eeb21edac45397db9e50a91fc7d26f` |
+| 5.5 Freeze assignments and finalize eligibility | `aa45e1b30c9535858de0eeae6ff37562197b4914` |
+| 5.6 Install through bounded bootstrap and prove repeatability | `b04491f069f7c8ee0e5268687fb5eab0b941c00e` |
+| 5.7 Full verification, coverage, and mechanical seal | `7ec85b4257b9f58a3ba4e4b6a8da40e58e12e2d0` |
+| 5.8 Review document and upstream-report draft | `7b72da01983665efbe6a09e7112cb2994822422f` |
+| 5.9 Closeout | the commit carrying this worklog revision |
+
+### Runtime facts
+
+- Executor: Kilo CLI (`kilo`), model `kilo/zai-coding/glm-5.3`, hostname
+  `ml01`, shared venv `/opt/agents/venv/` (Python 3.12.3, psycopg 3).
+- Session duration ≈ 19,800 s of wall time across gates 5.1–5.9; peak RSS
+  during the build 2,448,884 KiB; full-suite wall time 2,156.87 s.
+- Token usage: `unavailable` (no trustworthy source exposed by this
+  runtime); no values fabricated.
+
+### Destructive-rebuild budget
+
+1 of 2 used (gate 5.7; implementation-identity defect; superseded unsealed
+run `2bb71fb0...` removed with the tested down operation and reinstalled
+under the corrected identity; identical content, recorded in the seal).
+Sealed-product removal: none. Source reimports: none.
+
+### Operator interactions
+
+One, recorded durably in
+`docs/research/specz-science-p2r05/operator-interactions.md`: the
+2026-09-22 dispatch-session approval of spec v1.0 with P-01..P-09 frozen,
+including the frontmatter-update instruction that preceded digest
+computation. No other operator question arose; tool approvals and runtime
+confirmations are not decisions and are not recorded.
+
+### Final handoff
+
+- **Review document:** `docs/research/specz-science-p2r05/review.md` — the
+  operator's entry point, with findings S5-F01..S5-F10 and the five
+  pending acceptance questions.
+- **Product identity:** run `1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c`
+  in `cosmos2025_v11.analysis`; mechanical seal 2026-09-22T10:21:25Z;
+  `product_state = pending_scientific_adoption`.
+- **Branch / commits:** `task/5-specz-science-surface` off `main` at
+  `2f2c84e`; nine gate commits ending with this closeout commit. Local
+  commits only — no push, no PR, no remote operation; the operator owns
+  review, push, and merge.
+- **Verification:** independent installed-product verification over all
+  784,016 source and 482,579 measurement rows; six negative controls each
+  caught on their intended invariant; full pytest suite 563 passed
+  (including dictionary byte-identity and full-manifest checks);
+  generator byte-identity and live conformance green; source/v1/pins
+  invariant against gate 5.1.
+- **Pending decisions for the operator:** S5-Q01..S5-Q05 (association
+  product input acceptance; primary-galaxy eligibility adoption;
+  broad-line/QSO validation-population adoption; partition acceptance;
+  authorization to send the upstream report). Until answered, no
+  spectroscopic calibration or outcome evaluation may run against this
+  product.
+- **Operator actions outstanding:** review and merge of the local branch;
+  MetaMCP cutover (unchanged by this unit); the S5 decisions above.
+
+### Closeout consistency
+
+Deliverables in the spec's Modify list were checked against the
+filesystem; the docs pass refreshed every touched index; the central spec
+moved to its month archive with approved bytes unchanged
+(SHA-256 `7f481111ad826dd80b01106eeec71bfdaf0f5c649c0cc79b8661a0087af2757b`,
+verified identical for the repository archive copy). Earlier archived
+specs, worklogs, and registry seals are unchanged. Recycle surface: not
+used this run; no tracked file was deleted and no superseded untracked
+artifact required retirement (staging exports remain in place as
+diagnostic evidence per the reversal contract).
