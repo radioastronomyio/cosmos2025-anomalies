@@ -37,7 +37,7 @@ docs/
 | Directory | Description |
 |-----------|-------------|
 | [reference/](reference/README.md) | Column schemas, v1/v1.1 structural profiles, pinned v1.1 manifest, unit conventions, quality flags, upstream documentation |
-| [research/](research/README.md) | Science opportunities (O1/O5), v1.1 readiness review, ETL one-pager, Phase 1 code review |
+| [research/](research/README.md) | Science opportunities (O1/O5), v1.1 readiness review, ETL one-pager, Phase 1 code review, spec-z linkage and P2R-05 science surfaces |
 | [documentation-standards/](documentation-standards/README.md) | Document templates, tagging strategy, writing style guide, script header standards |
 
 ---

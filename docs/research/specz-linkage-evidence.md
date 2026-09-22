@@ -5,7 +5,7 @@ description: "P2R-04 review surface: defective identifier, corrected join path, 
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-08-31"
 version: "1.0"
-status: "Active - Awaiting Operator Disposition"
+status: "Disposed - P2R-05 approval record supersedes; historical figures preserved"
 tags:
   - type: research
   - domain: astronomy
@@ -432,3 +432,18 @@ the defective-path prior.
 | Flagged sources absent from galaxy surface | 3,062 | 3,062 | Yes |
 | Flagged sources absent from measurement surface | 2,378 | 2,378 | Yes |
 | Multiply-named sources, galaxy level | 185 groups / 371 rows | 185 / 371 | Yes |
+
+---
+
+## Disposition record (appended 2026-09-22; historical content above unchanged)
+
+The D-01 through D-07 closed questions were disposed for execution by the
+operator's 2026-09-22 approval of spec P2R-05 v1.0 with policy defaults
+P-01 through P-09 frozen. The durable decision record, including the
+approval digest and the disposition-to-policy linkage, is
+[`specz-science-dispositions.md`](specz-science-dispositions.md); the
+built product and its pending adoption questions are in
+[`specz-science-p2r05/review.md`](specz-science-p2r05/review.md). All
+figures, definitions, and the amendment history in this document are
+preserved as historical evidence and were reproduced independently at
+P2R-05 gate 5.3.

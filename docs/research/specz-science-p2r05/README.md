@@ -11,10 +11,16 @@ in the database product and referenced here by run/table/key identity.
 | Path | Content |
 |---|---|
 | `operator-interactions.md` | Durable operator decision record for this run |
-| `review.md` | Gate 5.8 human review document (added at 5.8) |
-| `derived-schema-contract.md` | Physical field names of derived products (added at 5.4) |
-| `coverage-baseline.md` | Gate 5.7 coverage, attrition, and sensitivity evidence (added at 5.7) |
-| `upstream-report-draft.md` | Local, unsent incompatibility report (added at 5.8) |
+| `evidence-5-3.md` | Gate 5.3 prior reproduction with surfaces, predicates, denominators |
+| `tile-map.md` | Frozen P-06 partition map with canonical digest |
+| `coverage-baseline.md` | Gate 5.7 coverage, attrition, and sensitivity evidence |
+| `derived-schema-contract.md` | Physical field names and meanings of all derived columns |
+| `review.md` | Gate 5.8 human review document with S5-F01+ findings and S5-Q01..Q05 |
+| `upstream-report-draft.md` | Local, unsent incompatibility report (renumbering hypothesis unconfirmed) |
 
 The approval/decision record for the run is
 [`../specz-science-dispositions.md`](../specz-science-dispositions.md).
+Staging evidence (snapshot manifest, priors, coverage JSON, negative
+controls, seal record, product summaries) lives under
+`staging/derived/specz-p2r05/` and is gitignored; every durable claim in
+the tracked documents carries its reproduction command.

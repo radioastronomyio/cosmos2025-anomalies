@@ -23,6 +23,7 @@ Derived feature computation for the COSMOS2025 anomaly detection pipeline. This 
 | File | Description |
 |------|-------------|
 | `compute_tension_scalars.py` | Creates the plausibility-filtered analysis sample (`catalog.v_analysis_sample`), computes error-normalized LePhare/CIGALE disagreement metrics into `catalog.tension_scalars`, and generates `docs/phase2-tension-diagnostic-report.md` |
+| `specz_science/` | P2R-05 spectroscopic association and eligibility product: frozen policy validation, snapshot capture, canonical run identity, measurement/source builders, frozen tile partitions, bounded bootstrap, independent verification, coverage and sensitivity diagnostics |
 
 ---
 

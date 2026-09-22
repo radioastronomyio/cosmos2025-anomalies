@@ -387,3 +387,47 @@ Completed 2026-09-22. Mechanical seal declared at
   at `staging/derived/specz-p2r05/mechanical-seal-5-7.json`.
 
 Gate 5.7 validation checklist: all eight items satisfied.
+
+---
+
+## Gate 5.8 — Deliver the human review document and upstream-report draft
+
+Completed 2026-09-22.
+
+- `docs/research/specz-science-p2r05/review.md`: full review surface for an
+  uninvolved reader — product identity (run `1e604a81...`, seal timestamp),
+  compact policy rendering of P-01..P-09 as executed, full sample accounting
+  with explicit denominators (46,039 → 45,007 → 20,100 → 19,419 → 18,402
+  primary / 668 separate validation; state accounting closes to 784,016),
+  sensitivity summary with membership-change reasons, limitations (LePHARE
+  selection, representativeness, partition limits, held-out reads, mass
+  truth bounds), and ten stable findings S5-F01..S5-F10, each with
+  statement, evidence locator, reproduction command, and closed question.
+  All five acceptance questions S5-Q01..S5-Q05 are stated and unanswered;
+  every final statistic was reproduced by this run (two prior-derived
+  figures in S5-F04 were re-derived from the installed product before
+  commit: 671/57/6 conflict decomposition and 649 single-`_unique`
+  secure-conflict sources; three mis-cited entry-distribution figures in
+  the coverage document were corrected against the evidence JSON before
+  commit).
+- `upstream-report-draft.md`: local, unsent P-08 report with exact release
+  pins, the claimed correspondence, corrected query definitions, the
+  measured geometry (median 4,054.3415558937 arcsec on the documented
+  all-links basis; exact `Id_COSMOS25` crossmatch for contrast), and the
+  renumbering hypothesis explicitly unconfirmed. No external transmission
+  occurred; sending awaits S5-Q05.
+- `derived-schema-contract.md`: physical names and meanings of every
+  derived column across the four tables (the sealed dictionary is not
+  extended).
+- Orientation refresh distinguishing completed construction from pending
+  adoption: `AGENTS.md` identity paragraph, `README.md` status/architecture/
+  data-product rows, `docs/project-state.md` phase/inventory with the new
+  analysis-schema section and resolved HBA statement, `REVIEW.md` (gate
+  5.2), `docs/research/README.md`, `docs/README.md`, `src/features/README.md`,
+  `src/etl/README.md`, `configs/README.md`, `work-logs/README.md`, and the
+  evidence directory README. The old disposition surface
+  (`specz-linkage-evidence.md`) received only a frontmatter status change
+  and an appended disposition pointer; its historical figures, definitions,
+  and amendment history are untouched.
+
+Gate 5.8 validation checklist: all four items satisfied.

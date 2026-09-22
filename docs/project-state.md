@@ -33,9 +33,18 @@ built and verified in `cosmos2025_v11.source`. P2R-04 extended the mirror
 with the measurement-level spec-z compilation (`specz_compilation_all`),
 renamed the galaxy-level table to `specz_compilation_unique`, and produced
 the linkage evidence review surface; its gates 4.1-4.6 are sealed with the
-load seal declared. MetaMCP cutover, direct ML01 analyst HBA validation,
-disposition of the spec-z linkage review surface, and T_A v2 remain pending
-operator approval.
+load seal declared. Direct ML01 analyst HBA coverage was resolved by the
+operator on 2026-09-21; fresh analyst connections are verified with
+connection-time read-only enforcement. MetaMCP cutover and T_A v2 remain
+pending operator approval.
+
+The P2R-05 spectroscopic association and eligibility product (operator
+approval 2026-09-22, spec v1.0 with P-01..P-09 frozen) is built, installed,
+and mechanically sealed in `cosmos2025_v11.analysis` — see section 2.
+It remains `pending_scientific_adoption`: the acceptance questions
+S5-Q01..S5-Q05 in `research/specz-science-p2r05/review.md` are unanswered,
+and no spectroscopic calibration or outcome evaluation may run against it
+before that decision.
 
 The retired `cosmos2025.catalog` v1 objects remain a read-only comparison
 baseline. No DDL or DML runs against either database outside an approved
@@ -54,10 +63,11 @@ Open items the restart addresses, carried from the May/July diagnostic work as f
 ### Verified v1.1 source mirror
 
 Database `cosmos2025_v11`, schema `source`, host psql01 (10.25.20.8). The
-operator handoff names the read-only role `cosmos2025_v11_ro`; direct network
-authentication from ML01 remains pending SCRAM HBA coverage. Verification uses
-the approved administrator transport with PostgreSQL session authorization
-and renders no credential value.
+operator handoff names the read-only role `cosmos2025_v11_ro`; direct ML01
+analyst authentication is verified (operator resolved SCRAM HBA coverage
+2026-09-21) with connection-time read-only enforcement. Verification
+transport uses the approved administrator path with PostgreSQL session
+authorization and renders no credential value.
 
 | Table | Rows | Dictionary columns | Boundary |
 |-------|-----:|-------------------:|----------|
@@ -80,15 +90,30 @@ six injected `id` fields. Only FITS masks and NaN become SQL NULL; finite
 sentinels remain source values. Complete schema and provenance evidence is in
 [`reference/schema-v11.md`](reference/schema-v11.md).
 
-Spec-z linkage state (P2R-04): the catalog column
+Spec-z linkage state (P2R-04, disposed by P2R-05): the catalog column
 `photometry_primary.id_specz_khostovan25` does not resolve against the held
 DR1.1 compilation and is mirrored as shipped with a semantic note and database
 comment recording the finding. The correct join path is the compilation's own
 `Id_COSMOS25` crossmatch into `photometry_primary.id` (zero-separation
-coordinate identity, verified). Recovery-population and selection-function
-evidence awaiting operator disposition is in
-[`research/specz-linkage-evidence.md`](research/specz-linkage-evidence.md);
-no spectroscopic sample, view, or materialized join exists.
+coordinate identity, verified). The D-01..D-07 closed questions are disposed
+by the operator-approved P2R-05 policy
+([`research/specz-science-dispositions.md`](research/specz-science-dispositions.md)).
+
+### P2R-05 derived product (pending scientific adoption)
+
+Database `cosmos2025_v11`, schema `analysis`. Mechanically sealed
+2026-09-22; every row is `pending_scientific_adoption` and no downstream
+spectroscopic calibration may consume it before the adoption review.
+
+| Table | Rows | Content |
+|---|---:|---|
+| `analysis.specz_p2r05_runs` | 1 | Run identity, policy/input/implementation identities, content digests, seal evidence (run `1e604a81...`) |
+| `analysis.specz_p2r05_measurements` | 482,579 | Measurement audit over `_all`: 32 native fields preserved plus association, numeric/quality predicates and reasons |
+| `analysis.specz_p2r05_sources` | 784,016 | One summary per catalog source: preferred entry with tie provenance, conflict flags with witnesses, classification evidence, finalized eligibility (18,402 primary galaxy / 668 separate validation), exclusion reasons |
+| `analysis.specz_p2r05_splits` | 784,016 | Frozen P-06 tile partitions (4 holdout / 4 validation / 12 development tiles; zero unassigned) |
+
+Analyst SELECT on all four tables; no analyst write privilege. Review
+surface: [`research/specz-science-p2r05/review.md`](research/specz-science-p2r05/review.md).
 
 ### Read-only v1 baseline
 
