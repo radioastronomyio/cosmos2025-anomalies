@@ -321,3 +321,69 @@ Completed 2026-09-22.
   and product state identical; no rows, grants, or timestamps changed.
 
 Gate 5.6 validation checklist: all five items satisfied.
+
+---
+
+## Gate 5.7 — Full verification, coverage, and mechanical seal
+
+Completed 2026-09-22. Mechanical seal declared at
+2026-09-22T10:21:25Z on run
+`1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c`;
+`product_state` remains `pending_scientific_adoption`.
+
+- **Implementation-defect repair and destructive rebuild 1 of 2:** the run
+  identity had hashed diagnostic modules (`verify.py`, `coverage.py`), so a
+  gate 5.7 diagnostics edit moved the run id of already-built products. The
+  identity now covers build-affecting modules only (policy, config,
+  canonical, build, splits, snapshot, pipeline), per the product contract's
+  "implementation identity names the build-affecting code bytes". The
+  superseded unsealed run `2bb71fb0...` was removed with the tested down
+  operation (rows and newly created objects only; no unrelated object
+  touched) and the corrected-identity run `1e604a81...` installed and fully
+  re-verified. Discarded validated scope: byte-identical content under the
+  superseded identity label. Recorded in the seal evidence.
+- **Independent verification:** `check_installed_independent.py` reproduced
+  preferred entries and values, conflict flags, association statuses and
+  resolved ids, secure predicates, split assignments, both eligibility
+  booleans, and complete exclusion-reason sets for all 784,016 sources and
+  482,579 measurements from the captured native input, using only the
+  independent restatements. One verifier gap found and fixed during
+  controls: `resolved_catalog_id` is now compared directly, not only the
+  status string.
+- **Negative controls** (`negative_controls.py`, guarded scratch databases,
+  real artifacts, one tamper each): removed exclusion category, altered
+  source association, promoted population-A entry, erased secure conflict,
+  changed tied preferred entry, moved source between splits — each caught
+  on its intended invariant (evidence:
+  `staging/derived/specz-p2r05/negative-controls-5-7.json`).
+- **Coverage and sensitivity:** `coverage.py` and the tracked
+  `docs/research/specz-science-p2r05/coverage-baseline.md` render every
+  figure with predicate and denominator: full-catalog accounting
+  (18,402 primary / 668 separate validation / 722 vetoed / 349 type-routed
+  / 763,875 no-secure-preferred = 784,016), overlapping reason counts, the
+  pre-photometric-type diagnostic (19,419 with the full cross-tab),
+  survey/confidence/flag distributions with every observed category, tile
+  and photometric coverage with native-missing and display-domain bins,
+  and the three fixed sensitivity variants with membership-change reasons
+  (confidence floor: -3,877/+213; absolute 0.001: -1,410; normalized:
+  +165). No winner chosen; no adopted boolean touched.
+- **Protected invariance:** 13 source relations byte-identical to the 5.1
+  capture including seeded content digests; v1 fingerprint
+  `82fb7e09f212...` unchanged; manifest/provenance pins agree with freshly
+  observed hashes; policy, dictionary, data_paths, spec, and dispositions
+  bytes unchanged since 5.1.
+- **Suites and generators:** full pytest under the Doppler runtime — 563
+  passed in 2,156.87 s including the expensive dictionary byte-identity
+  and full-manifest checks and all scratch-database tests;
+  `generate_schema_v11.py --check` byte-identical (12 mirrors, 1448
+  columns); `verify_conformance_v11.py --live` passed with the analyst
+  capability matrix and unchanged v1.
+- **No forbidden science:** no photo-z residuals, fitted corrections,
+  anomaly scores, SFR/mass tension, or held-out outcome performance were
+  computed anywhere in this unit.
+- Seal evidence (commands, results, identities, runtime including peak
+  RSS 2,448,884 KiB during finalize, recovery history) is stored in the
+  run row (`mechanical_seal_at`, `mechanical_seal_evidence`) and mirrored
+  at `staging/derived/specz-p2r05/mechanical-seal-5-7.json`.
+
+Gate 5.7 validation checklist: all eight items satisfied.

@@ -20,15 +20,16 @@ from typing import Any, Iterable, Iterator, Mapping, Sequence
 import psycopg
 
 IMPLEMENTATION_MODULE_NAMES = (
+    # Build-affecting modules only: these bytes change product content.
+    # Verification and coverage modules are deliberately excluded so that
+    # diagnostic edits cannot move the run identity of installed products.
     "policy",
     "config",
     "canonical",
     "build",
     "splits",
     "snapshot",
-    "install",
-    "verify",
-    "coverage",
+    "pipeline",
 )
 
 
