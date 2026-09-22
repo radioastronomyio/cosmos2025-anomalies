@@ -697,7 +697,8 @@ def conflict_flags_independent(
             entry for entry in data.all_groups[source_id] if entry.numeric_valid_z
         ]
     flags: dict[int, dict[str, Any]] = {}
-    for source_id, entries in data.unique_groups.items():
+    for source_id in sorted(set(data.unique_groups) | set(data.all_groups)):
+        entries = data.unique_groups.get(source_id, [])
         numeric_unique = [entry for entry in entries if entry.numeric_valid_z]
         unique_conflict = pairwise_span(numeric_unique, lambda e: e.specz) > tolerance
         secure_conflict = (
@@ -717,7 +718,7 @@ def conflict_flags_independent(
             "unique_numeric_conflict": unique_conflict,
             "secure_all_conflict": secure_conflict,
             "other_measurement_disagreement": other,
-            "assessable": len(numeric_unique) >= 2 or len(secure_by_source.get(source_id, [])) >= 2,
+            "assessable": len(numeric_unique) >= 2 or len(secure_by_source.get(source_id, []) ) >= 2,
         }
     return flags
 

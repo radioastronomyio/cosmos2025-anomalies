@@ -190,3 +190,56 @@ Completed 2026-09-22.
 
 Gate 5.3 validation checklist: all five items satisfied; discrepancies:
 none.
+
+---
+
+## Gate 5.4 — Build the complete measurement and source products
+
+Completed 2026-09-22.
+
+- `src/features/specz_science/canonical.py`: canonical JSONL serialization
+  (sorted keys, declared row order), streaming digests, run identity over
+  policy digest + snapshot digests + implementation module bytes and
+  dependency versions (closeout commit deliberately excluded), and the
+  three-domain content digest document.
+- `src/features/specz_science/build.py`: measurement audit records (32
+  native fields untouched plus derived association status, resolved catalog
+  id, `_unique` membership, numeric/quality predicates and reasons) and
+  source summary records (preferred entry with tie provenance, entry
+  counts, A/B membership, three independent conflict flags with resolvable
+  witness records, classification evidence, broad-line/QSO evidence,
+  mask/blend context, pre-split eligibility bases, and overlapping
+  exclusion reasons). Split-dependent eligibility fields are null here by
+  design; `finalize_eligibility` applies the P-06 gate at 5.5.
+- `src/features/specz_science/pipeline.py --phase build`: run id
+  `a956dca27a3fe9dacd0ad3d522ee27bfada11a5eadb1cc3e69a1ae4433b5a1f7`;
+  482,579 measurement rows; 784,016 source rows; zero
+  unresolved-identifier entries (no contract discrepancy on this hold);
+  measurements content digest
+  `e494df8a6d7ec610545406fa2da14bd4559ec537521b4e3e2920593b71076933`.
+- `src/features/specz_science/check_build_agreement.py`: full-data
+  independent comparison against the verify.py restatements over the
+  complete snapshot — key-set equality both products, preferred-entry and
+  tie-list agreement for every source, conflict-flag agreement, population
+  A/B agreement (1,032 / 185), no Priority 0 preferred, native-field
+  fidelity for every audited entry. Status OK. One verifier defect was
+  found and fixed during this check: `conflict_flags_independent` had
+  iterated only `_unique` groups and missed population-A sources for the
+  audit-only `other_measurement_disagreement` flag (129 sources); the fix
+  widens its domain to the union of both group maps and all 5.3 priors
+  were re-verified unchanged afterwards.
+- Baseline pre-split bases: primary-galaxy 18,402; separate-validation
+  668; vetoed sources 722; corroboration: singly 11,490, multiply 8,357,
+  conflicting 671, not assessable 763,498.
+- Tests: `tests/test_specz_science_build.py` (36 tests) — z failure modes,
+  flag categories including 0/10/unrecognized, secure conjunction and
+  named block reasons, native/derived separation, association statuses,
+  zero/one/multiple representatives, tie-break and invalid-confidence
+  ordering, copy-not-average, conflict boundaries and vetoes (secure
+  alternatives veto; low-quality demoted disagreement does not),
+  witness resolution, classification routing and reasons, broad-line
+  routing and numeric-validity requirement, flag_star inertness for
+  classification/eligibility, population A reasons, mutual exclusivity
+  across the fixture zoo, and the split gate in finalize_eligibility.
+
+Gate 5.4 validation checklist: all six items satisfied.
