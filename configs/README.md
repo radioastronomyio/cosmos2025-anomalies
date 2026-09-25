@@ -22,7 +22,8 @@ Configuration files consumed by pipeline source code. All paths and connection p
 
 | File | Description |
 |------|-------------|
-| `data_paths.yaml` | Master config. Defines immutable inputs, generated dictionary/DDL/schema reference, named v1 baseline, bootstrap verification transport, v1.1 read-only runtime contract, scratch/persistent targets, handoff, and bounded ETL settings |
+| `data_paths.yaml` | Master config. Defines immutable inputs, generated dictionary/DDL/schema reference, named v1 baseline, bootstrap verification transport, v1.1 read-only runtime contract, scratch/persistent targets, handoff, and bounded ETL settings; the `specz_science` section resolves P2R-05 staging, evidence, snapshot, and analysis-table paths (implementation configuration only) |
+| `specz_science_policy_v1.yaml` | P2R-05 frozen science policy (policy id `p2r05-specz-policy-v1`): association, quality and secure predicates, preferred-entry and conflict rules, eligibility routing, frozen split algorithm, sensitivity variants, adoption state. Validated by `src/features/specz_science/policy.py`; no default or override may change it |
 | `.gitkeep` | Placeholder to preserve directory in git |
 
 ---

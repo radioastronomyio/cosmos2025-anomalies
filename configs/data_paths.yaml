@@ -100,6 +100,29 @@ specz_linkage:
   gate_4_1_evidence: /opt/agents/repos/cosmos2025-anomalies/staging/specz-linkage-g41-evidence.json
 
 # ---------------------------------------------------------------------------
+# P2R-05 spec-z science surface (implementation configuration only; science
+# policy semantics live in configs/specz_science_policy_v1.yaml)
+# ---------------------------------------------------------------------------
+specz_science:
+  policy_path: /opt/agents/repos/cosmos2025-anomalies/configs/specz_science_policy_v1.yaml
+  staging_dir: /opt/agents/repos/cosmos2025-anomalies/staging/derived/specz-p2r05
+  evidence_dir: /opt/agents/repos/cosmos2025-anomalies/docs/research/specz-science-p2r05
+  # Fixed analyst handoff names (PGSQL01_COSMOS2025_V11_*); values never here.
+  analyst_env_handoff: /opt/agents/repos/cosmos2025-anomalies/internal-files/cosmos2025-v11.env
+  target_database: cosmos2025_v11
+  analysis_schema: analysis
+  product_tables:
+    - specz_p2r05_runs
+    - specz_p2r05_measurements
+    - specz_p2r05_sources
+    - specz_p2r05_splits
+  # Build snapshot: read-only capture of every field the build and its
+  # evidence consume, extracted through the analyst path before any build.
+  snapshot_dir: /opt/agents/repos/cosmos2025-anomalies/staging/derived/specz-p2r05/input-snapshot
+  snapshot_batch_rows: 50000
+  install_batch_rows: 2000
+
+# ---------------------------------------------------------------------------
 # Database (psql01)
 # ---------------------------------------------------------------------------
 database:

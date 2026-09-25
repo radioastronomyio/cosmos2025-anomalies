@@ -396,7 +396,7 @@ doppler run --project ml01 --config dev -- \
 |------|-------------|
 | `verify_specz_linkage_v11.py` | Read-only gate 4.1 evidence command reproducing every spec prior observation and the four establishments from the pinned FITS and the sealed mirror |
 | `rename_specz_unique_v11.py` | Gate 4.4 rename/re-verify utility for the galaxy-level mirror; `--verify-only` re-checks the post state against the dictionary contract |
-| `load_specz_all_v11.py` | Gate 4.5/4.6 guarded loader for `specz_compilation_all` with provenance registration and the authorized link-comment sync |
+| `load_specz_all_v11.py` | Gate 4.5/4.6 guarded loader for `specz_compilation_all` with provenance registration and the authorized link-comment sync; P2R-05 gate 5.2 added uncertain-commit containment (precommit rollback, read-only independent classification, existing-object refusal; no compensating DROP after a possibly successful commit) |
 | `reconcile_specz_all_v11.py` | Gate 4.5 table-scoped value reconciliation, reusing the P2R-03 core under a recorded seed (12,006,315,477,097,142,501) |
 | `characterize_specz_linkage_v11.py` | Gate 4.7 read-only characterization; writes no rows, no views, applies no threshold, promotes nothing |
 
