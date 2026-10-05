@@ -344,6 +344,37 @@ or frozen database fields.
   strength and photometric-QSO labels distinct, report the 16 tentative-only
   broad-line cases explicitly, and respect the frozen partition restrictions.
 
+  Within the separate diagnostic population, a **tentative-only broad-line
+  case** has `broad_line_reported IS TRUE` and no associated broad-line
+  measurement that satisfies the P-02 secure-quality rule. Source locators
+  are `analysis.specz_p2r05_sources.run_id`, `.catalog_id`,
+  `.eligibility_separate_validation`, and `.broad_line_reported`.
+  Measurement locators are
+  `analysis.specz_p2r05_measurements.run_id`, `.resolved_catalog_id`,
+  `.native_flag`, and `.secure_measurement`. The broad-line flag domain is
+  `(11, 12, 13, 14, 19)`.
+
+  ```sql
+  SELECT count(*) AS tentative_only_broad_line_sources
+  FROM analysis.specz_p2r05_sources AS s
+  WHERE s.run_id =
+    '1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c'
+    AND s.eligibility_separate_validation IS TRUE
+    AND s.broad_line_reported IS TRUE
+    AND NOT EXISTS (
+        SELECT 1
+        FROM analysis.specz_p2r05_measurements AS m
+        WHERE m.run_id = s.run_id
+          AND m.resolved_catalog_id = s.catalog_id
+          AND m.native_flag IN (11, 12, 13, 14, 19)
+          AND m.secure_measurement IS TRUE
+    );
+  ```
+
+  Executed through `cosmos2025_v11_ro` on 2026-10-05 with both
+  `default_transaction_read_only` and `transaction_read_only` set to
+  `on`; the result is **16**.
+
 - **S5-Q04:** Accept the frozen partitions and documented
   coverage/independence limitations for a subsequent modelling spec?
 
