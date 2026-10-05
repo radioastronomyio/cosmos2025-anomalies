@@ -3,8 +3,8 @@
 title: "Agent Instructions"
 description: "Repository identity, constraints, conventions, and the work-spec execution contract for cosmos2025-anomalies"
 author: "VintageDon (https://github.com/vintagedon/)"
-date: "2026-08-15"
-version: "2.0"
+date: "2026-10-05"
+version: "2.1"
 status: "Active"
 tags:
   - type: policy
@@ -70,7 +70,10 @@ Agents working on this repository should load context in this order:
   remains a source value; future cleaning belongs in `analysis`.
 - Science logic changes (tension formulas, SFR censoring handling, `chi2_ratio`) require an approved spec; executors record defects, they do not fix them in passing.
 - Agents never delete tracked files; retired content moves to `recycle-bin/` with worklog justification.
-- Executors never perform remote git operations (fetch, push, PR). The operator owns the remote.
+- Executors may push only their working branch and open or update its pull
+  request. Merges occur only on Don's explicit instruction, performed by the
+  instructed agent and recorded in the worklog with his words. Automated
+  merges and direct changes to `main` are prohibited.
 
 ## Documentation Conventions
 
@@ -104,7 +107,12 @@ an active queue. A dispatched central spec is the authorization; this section
 is the procedure.
 
 - **Branch:** `task/<n>-<slug>` off `main`, created at startup after `spec-startup` preflight. The executor notes the starting branch and base commit for the worklog.
-- **Commits:** one commit per gate, each referencing its gate number. Closeout commits stop at local commits: **no push, no PR, no remote operations by the executor**; the operator reviews, pushes, and owns merges.
+- **Commits and remote operations:** one commit per gate, each referencing its
+  gate number. At closeout, the executor may push only its working branch and
+  open or update that branch's pull request. A merge requires Don's explicit
+  instruction, must be performed by the instructed agent, and must be recorded
+  in the worklog with his words. Never automate a merge or change `main`
+  directly.
 - **Worklog:** `work-logs/worklog-YYYY-MM-DD-<slug>.md`, appended per gate as checkpoints, sealed at close with per-gate commit SHAs and runtime facts.
 - **Specs:** dispatch from `/opt/agents/repos/spec/`, named
   `YYYY-MM-DD-<series>-NN-<slug>.md`. Completed specs archive to the repository

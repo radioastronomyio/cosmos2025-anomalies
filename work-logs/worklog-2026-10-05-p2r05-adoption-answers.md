@@ -42,6 +42,7 @@ related_documents:
 | Agent | Codex desktop / GPT-5 |
 | Host | ML01 |
 | Authorization | Action Registry `rec4acLZWCuN1tJk9`; Don, 2026-10-05 09:13 EDT “I dont see anything in your responses to veto.” and 09:15 EDT “Approved to execute.” |
+| Remote-operation rule | Don, same registry record, 2026-10-05 10:19 EDT: “no *automated* merges or changes to main. That rule stays.” The GPT seat may perform bounded pushes and merges only on his instruction. |
 | Starting branch/base | `main` / `04b698226bcd409e9df4c7862356b623d21cd0cf` |
 | Execution branch | `task/p2r05-adoption-answers` |
 
@@ -54,9 +55,11 @@ S5-Q01 through S5-Q05 without changing the sealed database product.
   `3360a1163ed7d5d0ef59af5b7744c90ef9f464b1`.
 - Confirmed no reviewer finding appeared after that head. The latest findings
   were the already-resolved Greptile G1/G2 review on the preceding revision.
-- Merged PR #2 with merge commit
+- Under Don's explicit instructed-seat authorization in Action Registry
+  `rec4acLZWCuN1tJk9`, the GPT seat merged PR #2 with merge commit
   `04b698226bcd409e9df4c7862356b623d21cd0cf` at 2026-10-05 09:21 EDT and
-  fast-forwarded local `main` to that commit.
+  fast-forwarded local `main` to that commit. This was a bounded instructed
+  merge, not an automated merge or direct unreviewed change to `main`.
 
 ## Step 2: record operator answers
 
@@ -91,6 +94,8 @@ seal metadata.
 - Confirmed the P2R-05 frozen spec, policy configuration, seven identity-hashed
   modules, sealed tables, and seal metadata are untouched.
 
-The single local commit carries `Co-authored-by`, `Model`, and `Spec` trailers.
-The branch is pushed and a pull request is opened for Claude review; it remains
-unmerged.
+The original adoption-answer commit carries `Co-authored-by`, `Model`, and
+`Spec` trailers. Under Don's explicit instructed-seat authorization in
+Action Registry `rec4acLZWCuN1tJk9`, the GPT seat pushed
+`task/p2r05-adoption-answers` and opened PR #3 for review. This was a bounded
+working-branch push; PR #3 remains unmerged.
