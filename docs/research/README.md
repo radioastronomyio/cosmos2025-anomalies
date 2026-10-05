@@ -33,6 +33,7 @@ research/
 ├── specz-linkage-propagation-inventory.md  # P2R-04b gate A2.1 propagation trace
 ├── specz-science-dispositions.md     # P2R-05 operator approval and decision record
 ├── specz-science-p2r05/              # P2R-05 evidence, coverage, review, tile map, upstream draft
+├── ta-v2-design/                     # P2R-06 proposed T_A v2 design contract (pending approval)
 ├── v11-readiness-review.md           # ETL v2 approval surface (P2R-01)
 ├── etl-pipeline-one-pager.md         # v1 ETL design record (historical)
 ├── phase1-precommit-codex-review.md  # Phase 1 code review (historical)
@@ -49,6 +50,7 @@ research/
 | [specz-linkage-evidence.md](specz-linkage-evidence.md) | P2R-04 spec-z linkage findings, recovery populations, selection function, and the deferred dispositions D-01..D-07 | ✅ Disposed by P2R-05 |
 | [specz-science-dispositions.md](specz-science-dispositions.md) | Operator approval of P2R-05 v1.0 with P-01..P-09 frozen; D-01..D-07 linkage; policy/priors/adoption separation | ✅ Active |
 | [specz-science-p2r05/](specz-science-p2r05/README.md) | P2R-05 run evidence: gate 5.3 reproduction, coverage and sensitivity, frozen tile map, review document with recorded S5-Q01..Q05 answers, local upstream draft | ✅ Adopted with conditions (2026-10-05); sealed rows retain `pending_scientific_adoption` |
+| [ta-v2-design/](ta-v2-design/README.md) | P2R-06 proposed T_A v2 scientific design contract: input contract, feature contract, synthetic validation, evaluation protocol, review surface TA2-Q01..Q06 | 📝 Proposed, pending approval |
 | [specz-linkage-propagation-inventory.md](specz-linkage-propagation-inventory.md) | P2R-04b trace of every artifact carrying a separation statistic from the defective pairing code, with in-scope disposition | ✅ Active |
 | [etl-v2-verification.md](etl-v2-verification.md) | Generated Gate 3.13 findings, complete evidence appendices, deferred questions, and blank operator dispositions | 📝 Draft |
 | [v11-readiness-review.md](v11-readiness-review.md) | Findings and closed questions the operator answers to approve ETL v2 | ✅ Active |
