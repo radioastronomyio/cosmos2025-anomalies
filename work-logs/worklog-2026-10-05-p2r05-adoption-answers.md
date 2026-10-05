@@ -51,7 +51,7 @@ S5-Q01 through S5-Q05 without changing the sealed database product.
 ## Step 1: merge P2R-05 errata
 
 - Confirmed GitHub reported PR #2 as mergeable and clean at reviewed head
-  `3360a116453d9a8709904a8eab3faea382faebcc`.
+  `3360a1163ed7d5d0ef59af5b7744c90ef9f464b1`.
 - Confirmed no reviewer finding appeared after that head. The latest findings
   were the already-resolved Greptile G1/G2 review on the preceding revision.
 - Merged PR #2 with merge commit
