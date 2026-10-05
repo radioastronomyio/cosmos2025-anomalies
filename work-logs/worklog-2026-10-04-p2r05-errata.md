@@ -3,7 +3,7 @@ title: "P2R-05 evidence errata worklog"
 description: "Gate checkpoints for repairs to evidence code and documents"
 author: "Codex"
 date: "2026-10-04"
-version: "1.0"
+version: "1.1"
 status: "completed"
 tags:
   - type: worklog
@@ -37,11 +37,11 @@ related_documents:
 
 | Attribute | Value |
 |---|---|
-| Status | Completed locally; Claude review pending |
+| Status | Initial errata approved and published; PR #2 fix round complete locally |
 | Agent | Codex desktop; exact runtime/model identifier unreported |
 | Host | ML01; shared venv Python 3.12.3, psycopg 3.3.3, pytest 9.0.2 |
 | Authorization | Don, coordinator chat, 2026-10-04 21:42 ET “Yes”, conveyed by dispatch |
-| Review seat | Claude; handoff through Don, review pending |
+| Review seat | Claude approved the initial five gates; G1/G2 fixes ready for review and Don to push |
 | Starting branch/base | `main` / `f358b6d3e317edb0d95e21b612a59b6573c9e57f` |
 | Execution branch | `task/p2r05-errata` |
 | Evidence | `staging/2026-10-04-astra-p2r05-errata/README.md` |
@@ -269,3 +269,36 @@ completed GitHub review summary. No additional actionable Codex finding was
 present at this checkpoint. The initial seal and exact check pin are in
 `fix-round-preflight.json`. G1's commit is the commit carrying this checkpoint;
 its full SHA is recorded at G2 and in the staged fix-round closeout.
+
+### G2: identify ML01-local, gitignored evidence
+
+G1 commit: `79b06f7a8942b473c2128f7bd897d80035523b8f`.
+
+Greptile finding [4180364960](https://github.com/radioastronomyio/cosmos2025-anomalies/pull/2#discussion_r4180364960)
+is addressed in the October errata spec. Each staging hyperlink, including
+the frontmatter reference, now says ML01-local and gitignored. The evidence
+access section gives the ML01 repository root, the adoption and errata
+staging directories, and the committed worklog as the fresh-checkout entry
+point. It explicitly says the artifacts are absent from a fresh checkout and
+the staging links do not resolve on GitHub. No staging evidence was published.
+
+`fix-g2-validation.json` confirms all five staging links have both labels,
+local targets exist, YAML frontmatter parses, and protected file hashes match.
+The original staged Gate 0 spec is retained; the explicit G2 authorization
+adds location labels to the October archive, so the earlier byte-identity
+statement describes the original Gate 4 closeout. The frozen September
+scientific spec and policy remain untouched. The prior closeout helper's
+archive-equality assertion is historical and was not applied to this expressly
+authorized documentation clarification.
+
+Final review read: `fix-round-review-final.json` is identical to the initial
+snapshot. Codex's GitHub review is completed at `810c565` and contains no
+additional actionable findings. Both Greptile findings are addressed; there
+are no out-of-scope findings to list from these review snapshots. No comment
+or review state was changed remotely.
+
+The two fixes have one local commit per ID, each with Co-authored-by, Model
+and Spec trailers. Model identity remains `unreported`, consistent with the
+runtime and earlier closeout. G2's commit is the commit carrying this
+checkpoint; both full SHAs and the final clean-tree check are recorded in
+`fix-round-closeout.json`. Don pushes; neither fix was pushed in this round.

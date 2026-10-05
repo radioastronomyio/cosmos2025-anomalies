@@ -4,7 +4,7 @@ title: "P2R-05 evidence errata"
 description: "Repair evidence code and reporting without changing the sealed spectroscopic product"
 author: "Codex (builder); Don (scope authorization)"
 date: "2026-10-04"
-version: "1.0"
+version: "1.1"
 status: "Authorized"
 tags:
   - type: specification
@@ -12,7 +12,7 @@ tags:
   - tech: [python, postgresql]
 related_documents:
   - "../../AGENTS.md"
-  - "../../staging/2026-10-04-astra-p2r05-adoption/adoption-review.md"
+  - "[Adoption review (ML01-local, gitignored)](../../staging/2026-10-04-astra-p2r05-adoption/adoption-review.md)"
   - "../../spec/2026-09/2026-09-21-cosmos2025-spec-p2r-05-specz-science-surface.md"
 ---
 -->
@@ -53,13 +53,30 @@ governs and the explicit dispatch overrides generic lifecycle publication.
 The supplied authorization permits this unit to run without intermediate
 operator approval until a stop condition or the final independent review.
 
+## Evidence access: ML01-local, gitignored
+
+Every `staging/` evidence reference in this spec is **ML01-local and
+gitignored**. These artifacts are absent from a fresh checkout and their
+relative links do not resolve on GitHub. They remain on ML01 under
+`/opt/agents/repos/cosmos2025-anomalies/`:
+
+- [Adoption review (ML01-local, gitignored)](../../staging/2026-10-04-astra-p2r05-adoption/adoption-review.md),
+  with its check outputs in `staging/2026-10-04-astra-p2r05-adoption/`.
+- [Errata evidence index (ML01-local, gitignored)](../../staging/2026-10-04-astra-p2r05-errata/README.md),
+  with its check outputs in `staging/2026-10-04-astra-p2r05-errata/`.
+
+A fresh-checkout reviewer can read the committed
+[errata worklog](../../work-logs/worklog-2026-10-04-p2r05-errata.md) for the
+validation record and request ML01 access or the named artifacts from Don
+for raw evidence. This clarification does not publish the staging evidence.
+
 ## Scope
 
 ### Pre-existing
 
 - Clean `main` at `f358b6d3e317edb0d95e21b612a59b6573c9e57f`.
 - Sealed run `1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c`.
-- Adoption staging evidence, especially `independent-sensitivity.json`,
+- ML01-local, gitignored adoption staging evidence, especially `independent-sensitivity.json`,
   `identity-audit.json`, `selection-audit.json`, `supplemental-selects.json`,
   `upstream-geometry-audit.json`, and `upstream-release-pins.json`.
 
@@ -68,7 +85,8 @@ operator approval until a stop condition or the final independent review.
 - `src/features/specz_science/coverage.py` and `check_installed_product.py`.
 - Focused new coverage/verifier tests in `tests/`.
 - `docs/research/specz-science-p2r05/{review,coverage-baseline,upstream-report-draft}.md`.
-- This staging directory: spec, README, checks, logs, review handoff and closeout.
+- The ML01-local, gitignored errata staging directory above: spec, README,
+  checks, logs, review handoff and closeout.
 - `work-logs/worklog-2026-10-04-p2r05-errata.md` and its interior index.
 - Lifecycle closeout only: byte-identical repository archive copy of this new
   spec under `spec/2026-10/`, its README, parent index, and the registry entry
@@ -169,8 +187,9 @@ Claude. Follow spec-closeout subject to the explicit local-only boundary.
 
 ## Review surface and end boundary
 
-`README.md` in this staging directory indexes a `review-handoff.md` with pending
-yes/no questions E-Q01 (count repair), E-Q02 (mode/identity checks), E-Q03
+The [errata evidence index (ML01-local, gitignored)](../../staging/2026-10-04-astra-p2r05-errata/README.md)
+links to the [review handoff (ML01-local, gitignored)](../../staging/2026-10-04-astra-p2r05-errata/review-handoff.md)
+with pending yes/no questions E-Q01 (count repair), E-Q02 (mode/identity checks), E-Q03
 (numerical errata and unchanged S5), E-Q04 (accurate portable upstream draft),
 E-Q05 (sealed identity and scope preserved). Each names evidence and related
 AR finding. Claude reviews; Don owns disposition and any publication. Completion
@@ -181,7 +200,8 @@ of this unit neither grants adoption nor dispatches T_A v2.
 Only SELECT database access. Do not invoke builder, installer, sealer, negative
 controls that mutate databases, or broad test suites containing write fixtures.
 Use no-bytecode Python, disabled pytest caches and focused in-memory tests;
-all check output goes here. No deletion. Ordinary code/document changes are
+all check output goes to the ML01-local, gitignored errata directory above.
+No deletion. Ordinary code/document changes are
 reversible repository changes; there are no non-repository state effects other
 than the required append-only lifecycle record and retained staging evidence.
 Choose helper names, test decomposition and formatting freely; preserve all
