@@ -1,11 +1,11 @@
 <!--
 ---
 title: "P2R-05 Review Document: Spectroscopic Association and Eligibility Product"
-description: "Human review surface for the mechanically sealed P2R-05 product: policy rendering, full sample accounting, sensitivity results, limitations, stable findings S5-F01 onward, and the five pending acceptance questions"
+description: "Human review surface for the mechanically sealed P2R-05 product: policy rendering, full sample accounting, sensitivity results, limitations, stable findings S5-F01 onward, and the operator's S5-Q01 through S5-Q05 decisions"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-09-22"
-version: "1.1"
-status: "Active - Awaiting Operator Adoption Review"
+version: "1.2"
+status: "Active - Adopted with Conditions"
 tags:
   - type: research
   - domain: astronomy
@@ -25,10 +25,13 @@ related_documents:
 This document is written for a reader who has not followed the execution.
 Everything claimed here resolves to verified evidence with a reproduction
 command; nothing was copied forward from a prior document without
-reproduction. The product is **mechanically complete and sealed** and
-**pending scientific adoption**: every table row carries
-`pending_scientific_adoption`, and the five acceptance questions at the end
-are unanswered.
+reproduction. The product is **mechanically complete and sealed** and was
+**scientifically adopted with conditions on 2026-10-05**. The five operator
+decisions and their conditions are recorded at the end of this document.
+Every installed table row still carries the frozen
+`pending_scientific_adoption` value because the approved P2R-05 design does
+not define a database transition and this decision-record unit does not
+authorize one.
 
 ## Product identity
 
@@ -41,6 +44,7 @@ are unanswered.
 | Input snapshot | manifest SHA-256 `06b19654fc715106ba1f788b52e084df1e94043343517f2b8a49fd44abfff7a4` |
 | Rows | measurements 482,579; sources 784,016; splits 784,016 |
 | Mechanical seal | 2026-09-22T10:21:25Z; evidence in the run row |
+| Scientific adoption | Adopted with conditions on 2026-10-05; see S5-Q01 through S5-Q05 below |
 
 Reproduce the core verification:
 
@@ -55,7 +59,7 @@ The post-seal command verifies the seal, run identity and installed content
 against sealed metadata using SELECT-only analyst access. The historical
 `--mode pre-seal` check requires an unsealed candidate and compares against
 staging artifacts; it is expected to reject this sealed run. Neither mode
-changes the seal or answers the pending adoption questions.
+changes the seal or the recorded adoption decisions.
 
 Full enumerations live in the installed tables under the run id above;
 this document links figures to `analysis.specz_p2r05_<table>` columns
@@ -99,8 +103,11 @@ rather than pasting 784k rows.
   and photometric/spatial coverage, and exactly three sensitivity
   variants. No residual performance, fitted correction, or outcome metric
   was computed.
-- **Upstream report (P-08):** prepared locally, not sent.
-- **Adoption (P-09):** nothing is adopted by this document.
+- **Upstream report (P-08):** prepared locally; sending is authorized by
+  S5-Q05, but no channel has been chosen and this unit does not send it.
+- **Adoption (P-09):** the product is adopted with the conditions recorded in
+  S5-Q01 through S5-Q05. This scientific decision does not alter the sealed
+  product or its frozen database status value.
 
 ## Full sample accounting
 
@@ -213,7 +220,8 @@ bookkeeping only.** 37,722 sources have a numeric-valid preferred entry;
 54 preferred selections were ties broken by ascending `id_specz`; tie
 lists are carried (`preferred_tied_ids`). Evidence:
 `specz_p2r05_sources.preferred_*`. *Closed question: none for construction;
-S5-Q02 decides whether this baseline is adopted for calibration use.*
+S5-Q02 adopts this baseline for calibration use under its recorded
+conditions.*
 
 **S5-F04 — Conflict vetoes flag 722 sources catalog-wide, including
 681 of the 20,100 secure-preferred sources.** Secure alternatives dominate
@@ -224,7 +232,7 @@ conflicts (6 overlap). Evidence: `specz_p2r05_sources` flags and
 `conflict_witnesses`; reproduction: `check_installed_independent.py`. *Closed
 question: the policy deliberately treats shipped-representative
 disagreement more conservatively than low-quality demoted discrepancies;
-S5-Q02/Q03 confirm or revise that choice.*
+S5-Q02/Q03 retain that choice under their recorded conditions.*
 
 **S5-F05 — The quality mapping is internally exact on this hold.** Every
 one of the 272,909 flag-domain/confidence-range entries matches the
@@ -250,8 +258,9 @@ directions.** The confidence floor loses 3,877 primary members and gains
 loses 109 and gains 39, for a net loss of 70. The tighter absolute tolerance
 only loses members (1,410 primary, 188 separate); the normalized rule only
 gains members on this hold (165 primary, 92 separate). Evidence:
-`coverage-baseline.md` sensitivity tables. *Closed
-question: S5-Q02 decides whether the 0.005 absolute baseline stands.*
+`coverage-baseline.md` sensitivity tables. *Closed question: S5-Q02 retains
+the 0.005 absolute baseline and requires all three frozen variants to be
+predeclared and reported.*
 
 **S5-F08 — Partitions are frozen, complete, and unbalanced by design.**
 Zero unassigned sources; 4/4/12 tiles; no survey or outcome rebalancing.
@@ -296,22 +305,63 @@ independent reconstruction. `gate3-document-counts.json` records the exact
 SELECT queries for denominator and type/broad-line counts. All five acceptance
 questions below remain byte-identical to the pre-errata document.
 
-## Acceptance questions (all pending)
+## Acceptance questions (answered 2026-10-05)
+
+Don recorded the answers below under Action Registry record
+`rec4acLZWCuN1tJk9`. The authorization record includes the 2026-10-05
+utterances at 09:13 EDT, “I dont see anything in your responses to veto.”,
+and at 09:15 EDT, “Approved to execute.” These decisions adopt the scientific
+product under the stated conditions; they do not change its mechanical seal
+or frozen database fields.
 
 - **S5-Q01:** Accept the mechanically verified association and
   preferred-entry product as a reproducible input for subsequent approved
   work?
+
+  **Answer (2026-10-05): Adopt.**
+
 - **S5-Q02:** Adopt the baseline primary galaxy eligibility policy for the
   declared spectroscopic calibration/validation use, given its exclusions
   and sensitivity?
+
+  **Answer (2026-10-05): Adopt with conditions.**
+
+  1. Claims are stated as conditional on the frozen LePHARE type-0,
+     no-broad-line, secure-preferred, unvetoed selection, never as
+     unconditional pipeline accuracy.
+  2. The 0.005 absolute baseline is retained. The three frozen sensitivity
+     variants are predeclared and reported in any downstream analysis and are
+     never used to pick a threshold from held-out performance.
+  3. Spectroscopic eligibility carries no stellar-mass or SFR truth
+     interpretation.
+  4. The October 4 errata carry into downstream review material.
+
 - **S5-Q03:** Adopt the separately labelled broad-line/photometric-QSO
   validation population for its declared diagnostic use?
+
+  **Answer (2026-10-05): Adopt for separately reported diagnostics only.**
+  Never pool this population into primary fitting. Keep broad-line evidence
+  strength and photometric-QSO labels distinct, report the 16 tentative-only
+  broad-line cases explicitly, and respect the frozen partition restrictions.
+
 - **S5-Q04:** Accept the frozen partitions and documented
   coverage/independence limitations for a subsequent modelling spec?
+
+  **Answer (2026-10-05): Adopt with conditions.** Fit preprocessing and
+  hyperparameters on development only; use validation for declared choices;
+  use holdout once, after the modelling contract is fixed; cluster uncertainty
+  by tile and survey; do not reroll or rebalance; and state that independence
+  from upstream spectroscopic calibration is unestablished.
+
 - **S5-Q05:** Authorize sending the prepared upstream incompatibility
   report through an operator-chosen channel?
 
-No answer is filled by the executor. A mechanically successful run can
-recommend declining any of these; the sensitivity table above is the
-material input to S5-Q02, and the limitations section bounds S5-Q01/Q03/Q04.
-The upstream draft is local and unsent pending S5-Q05.
+  **Answer (2026-10-05): Sending the corrected
+  `upstream-report-draft.md` is authorized.** Don has not chosen a channel, so
+  it remains local and unsent in this unit.
+
+No database transition accompanies these answers. The frozen spec, policy,
+installer, seal, and verifier define and enforce
+`pending_scientific_adoption`, but they define no successor value or
+transition procedure. Changing the installed run would therefore require a
+separately authorized design and database migration; none is performed here.

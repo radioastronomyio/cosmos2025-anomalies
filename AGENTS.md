@@ -34,11 +34,12 @@ disposed by the operator-approved P2R-05 policy
 compilation; the correct spec-z join path is the compilation's
 `Id_COSMOS25` crossmatch. The P2R-05 spectroscopic association and
 eligibility product is built, installed, and mechanically sealed in
-`cosmos2025_v11.analysis` (run record `analysis.specz_p2r05_runs`) and
-remains `pending_scientific_adoption` until the operator answers
-S5-Q01..S5-Q05 in docs/research/specz-science-p2r05/review.md; no
-spectroscopic calibration or outcome evaluation may run against it before
-that adoption decision.
+`cosmos2025_v11.analysis` (run record `analysis.specz_p2r05_runs`) and was
+scientifically adopted with conditions on 2026-10-05, as recorded in
+docs/research/specz-science-p2r05/review.md. Downstream work must follow those
+S5-Q01..S5-Q05 conditions. The sealed database rows retain the frozen
+`pending_scientific_adoption` value because no database transition is defined
+or authorized by that decision record.
 
 ## Context Loading
 
