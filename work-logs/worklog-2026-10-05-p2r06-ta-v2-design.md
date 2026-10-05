@@ -119,3 +119,67 @@ Validation (gate 6.1 checklist):
 
 Gate 6.1 checkpoint: this commit. Gate 6.1a commit: `433ffad`.
 
+## Gate 6.2: scientific feature contract and recommended design
+
+- `feature-contract.yaml` (56 outputs, 8 state machines, 9 forbidden
+  dependency patterns, 2 center families, 2 scale groups): grain/key;
+  declared constants separated into mathematical, declared-domain, and
+  development-fitted kinds (ln10; LePhare log domain [-20,15]; CIGALE
+  first-order log-error domain 0.3 relative; sfr_floor_k = 1.0; center
+  min-support 200; zero-scale guard). Six explicit populations carried
+  from gate 6.1. State machines: mass point/scale, sfr_inst/sfr_100
+  point/scale, ssfr_inst/ssfr_100 gates — every required SFR state
+  (`point_comparable`, `upper_limit_supported` declared unreachable on
+  this catalog, `floor_or_censoring_suspected`, `nonpositive_log_undefined`
+  with zero/negative reason split, `missing`, `invalid_or_unsupported`)
+  present with ordered precedence and reasons.
+- Mass outputs: raw `delta_mass_dex` with hidden-shift guard; center
+  outputs `expected_delta_mass_dex`/`center_model_id`/`center_support`
+  (C0 constant vs C1 binned median over zpdf_med × mag_auto_f444w, both
+  development-only, neither fitted here); `residual_mass_dex` as the
+  primary proposed ranking surface (rare deviations survive
+  normalization); `score_mass` as secondary normalized residual with an
+  explicit not-a-calibrated-significance guard; separate lp/cig sigma
+  outputs with the approximation domain; sigma_sys by a development-only
+  robust-spread rule (historical 0.1/0.2 dex floors are context only).
+- SFR/sSFR: per-timescale paths, `timescale_caveat_lephare`, unscored
+  `upper_limit_path` (no epsilon, no fabricated floor), declared
+  algebraic coupling `delta_ssfr = delta_sfr − delta_mass`, and
+  `score_ssfr_*` = `unsupported_correlated_errors` (NULL) because the
+  mass–SFR error correlation is unknown.
+- Fit context: three separately named chi-square passthroughs plus
+  ctx_nbfilt, context-only, never predictors; no quotient under any name;
+  no dof recovery.
+- Partition use rules and S5-bound spectroscopic interface declarations
+  included; forbidden covariate list for centers (any mass/SFR/sSFR
+  estimate, chi2, spec-z fields, tile/survey identity, the target delta).
+- `scientific-design.md`: rationale/identified-alternative/limitation/
+  approval question for every choice above, the frozen-input → response →
+  failure-case table, and the explicit non-goals.
+- Sanity: YAML parses under `yaml.safe_load`; identity JSON parses.
+
+Validation (gate 6.2 checklist):
+
+- [x] Every state has a complete domain, precedence rule, and explicit
+  output and reason; unsupported cases cannot default to a finite ranked
+  value (first-match ordered machines; unreachable bound state declared).
+- [x] Raw difference, expected center, centered residual, score, support
+  flag, and model identity are separate outputs; a universal hidden shift
+  is rejected by contract validation (hidden_shift_guard; enforced at
+  gate 6.3).
+- [x] Center and scale procedures specified with no fitted catalog
+  coefficients and no observed residual/ranking distribution; no
+  illustrative number appears outside labelled synthetic fixtures.
+- [x] Changing SFR between positive, zero, and undefined leaves raw mass
+  disagreement unchanged; censored/unsupported SFR cannot manufacture
+  infinite or extreme ranked tension (separate populations + state
+  machines; proved at gate 6.3 by FX-03/FX-04).
+- [x] No chi2_ratio, inferred dof, independent-CIGALE-photo-z field, or
+  mass-truth label among permitted predictors/targets; renaming is caught
+  by the structural dependency check (gate 6.3).
+- [x] Every scientific choice has rationale, alternative, limitation, and
+  a linked approval question; none is marked accepted.
+
+Gate 6.2 checkpoint: this commit.
+
+
