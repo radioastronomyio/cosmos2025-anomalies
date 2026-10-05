@@ -58,7 +58,7 @@ The project is catalog-only — no image-level analysis, no spectroscopy, no pro
 | Catalog profiling | ✅ Complete | Seven master extensions plus five supplement/spec-z products sealed in a 1,448-row dictionary |
 | ETL execution | ✅ Complete | Twelve lossless mirrors plus provenance loaded into `cosmos2025_v11.source` |
 | ETL verification | ✅ Complete | Source pins, schema, values, provenance, analyst permissions, and v1 identity passed Gates 3.5–3.11; P2R-04 spec-z linkage unit passed Gates 4.1–4.6 |
-| Spec-z science surface | 🔶 Built, adoption pending | P2R-05 association/eligibility product installed in `cosmos2025_v11.analysis` and mechanically sealed; scientific adoption (S5-Q01..Q05) pending |
+| Spec-z science surface | ✅ Adopted with conditions | P2R-05 association/eligibility product installed and mechanically sealed; scientifically adopted on 2026-10-05 per `review.md`; downstream work follows the S5 conditions; sealed rows retain the frozen `pending_scientific_adoption` value |
 | Runtime cutover | ⏳ Pending approval | MetaMCP cutover remains an operator action; direct analyst access is verified |
 | Feature engineering | ⏳ Pending approval | T_A v2 design follows cutover; v1 Phase 2 products remain historical evidence only |
 | Anomaly detection | 🔲 Planned | Isolation Forest, SOM-based density estimation on tension features |
@@ -78,8 +78,12 @@ measurement-level `specz_compilation_all`). `source.provenance` records the
 twelve source registrations separately. The read-only `cosmos2025_v11_ro`
 role is the runtime boundary. The P2R-05 spectroscopic association and
 eligibility product lives in the `analysis` schema
-(`specz_p2r05_*`) and is pending scientific adoption; other cleaned or
-derived science products also belong in `analysis`, never in `source`.
+(`specz_p2r05_*`) and was scientifically adopted with conditions on
+2026-10-05, as recorded in
+`docs/research/specz-science-p2r05/review.md`. Downstream work follows the
+S5 conditions. The sealed rows retain the frozen
+`pending_scientific_adoption` value; other cleaned or derived science
+products also belong in `analysis`, never in `source`.
 
 The retained architecture and dataset infographics under `assets/` describe
 the retired v1 pipeline and are intentionally not presented as current.
@@ -139,7 +143,7 @@ and the Khostovan spec-z compilation. See
 | Master catalog (7 extensions) | Shuntov et al. 2025 | 8.4 GB | Seven lossless source mirrors |
 | Galaxy group catalog | Toni et al. 2025 | ~1 MB | O5 environmental context |
 | LSS overdensity catalog | Hatamnia et al. 2025 | 289 MB | O5 environmental context |
-| Spec-z compilation | Khostovan et al. | 261,975 galaxy / 482,579 measurement rows | P2R-05 association/eligibility product built in `analysis`; scientific adoption pending |
+| Spec-z compilation | Khostovan et al. | 261,975 galaxy / 482,579 measurement rows | P2R-05 product scientifically adopted with conditions on 2026-10-05; downstream work follows S5; sealed rows retain `pending_scientific_adoption` |
 | CIGALE best-fit SEDs | Shuntov et al. 2025 | 436 GB (extracted) | Phase 2 characterization |
 | LePhare best-fit SEDs | Shuntov et al. 2025 | 141 GB (compressed) | Phase 2 characterization |
 | LePhare PDFz distributions | Shuntov et al. 2025 | 26 GB | Phase 2 — T_z tension metrics |
