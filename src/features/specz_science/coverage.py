@@ -376,6 +376,8 @@ def sensitivity_variant(
         validation = (
             is_secure and not veto and valid_tile and lephare in (0, 2) and (broad or lephare == 2)
         )
+        changes["primary_galaxy"] += primary
+        changes["separate_validation"] += validation
         baseline_flag = baseline_flags.get(source_id, {})
         baseline_veto = bool(
             baseline_flag.get("unique_numeric_conflict")

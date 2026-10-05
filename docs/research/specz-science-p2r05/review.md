@@ -4,7 +4,7 @@ title: "P2R-05 Review Document: Spectroscopic Association and Eligibility Produc
 description: "Human review surface for the mechanically sealed P2R-05 product: policy rendering, full sample accounting, sensitivity results, limitations, stable findings S5-F01 onward, and the five pending acceptance questions"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-09-22"
-version: "1.0"
+version: "1.1"
 status: "Active - Awaiting Operator Adoption Review"
 tags:
   - type: research
@@ -45,9 +45,17 @@ are unanswered.
 Reproduce the core verification:
 
 ```
-python src/features/specz_science/check_installed_product.py
+python -B src/features/specz_science/check_installed_product.py \
+    --mode post-seal \
+    --run-id 1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c
 python src/features/specz_science/check_installed_independent.py
 ```
+
+The post-seal command verifies the seal, run identity and installed content
+against sealed metadata using SELECT-only analyst access. The historical
+`--mode pre-seal` check requires an unsealed candidate and compares against
+staging artifacts; it is expected to reject this sealed run. Neither mode
+changes the seal or answers the pending adoption questions.
 
 Full enumerations live in the installed tables under the run id above;
 this document links figures to `analysis.specz_p2r05_<table>` columns
@@ -124,6 +132,13 @@ exclusion reasons and their counts are in
 [`coverage-baseline.md`](coverage-baseline.md); reasons are retained per
 source in `exclusion_reasons`, never collapsed.
 
+Among the 20,100 secure-preferred sources, 681 have either P-04 veto;
+19,419 remain qualified before photometric type. The 722 catalog-wide veto
+count also includes 41 without a secure preferred entry. Secure-preferred
+corroboration is 11,183 singly supported, 8,263 multiply supported and 654
+conflicting, summing to 20,100. Corroboration describes secure `_all`
+measurements; its conflicting category is not the union of both P-04 vetoes.
+
 ## Sensitivity summary
 
 | Variant | Primary galaxy | Net change | Separate validation | Net change |
@@ -147,8 +162,10 @@ selected.
 - **Selection on LePHARE classification.** Primary-membership conditions
   on the photometric pipeline whose behavior a later unit may evaluate. Of
   the 19,419 otherwise-qualified sources, 349 carry LePHARE type 1 and are
-  excluded, and 261 of the type-0/type-2 members carry broad-line
-  evidence routing them out of primary use. Performance claims made on
+  excluded, and 259 of the type-0/type-2 members carry broad-line
+  evidence routing them out of primary use. The pre-type broad-line total
+  is 261, including two type-1 sources already counted among the 349 excluded.
+  Performance claims made on
   these populations apply to the selected LePHARE-classified samples and
   cannot establish unconditional performance across stellar/QSO
   classification failures or the full spectroscopic population. A passing
@@ -198,8 +215,9 @@ lists are carried (`preferred_tied_ids`). Evidence:
 `specz_p2r05_sources.preferred_*`. *Closed question: none for construction;
 S5-Q02 decides whether this baseline is adopted for calibration use.*
 
-**S5-F04 — Conflict vetoes remove 722 sources, dominated by secure
-alternatives rather than shipped disagreements.** 671 sources carry a
+**S5-F04 — Conflict vetoes flag 722 sources catalog-wide, including
+681 of the 20,100 secure-preferred sources.** Secure alternatives dominate
+over shipped disagreements: 671 sources catalog-wide carry a
 secure `_all` conflict (including 649 with a single `_unique` entry —
 detectable only through the `_all` audit), 57 carry `_unique` numeric
 conflicts (6 overlap). Evidence: `specz_p2r05_sources` flags and
@@ -217,17 +235,22 @@ Evidence: gate 5.3 evidence document; `specz_p2r05_measurements.flag_confidence_
 explicitly, per the approved policy.*
 
 **S5-F06 — Photometric-type routing removes 349 otherwise-qualified
-stellar sources and re-routes 261 broad-line members.** The
-pre-photometric-type diagnostic cross-tab (19,419 sources) reconciles
+stellar sources and re-routes 259 type-0/type-2 broad-line members.**
+The pre-type broad-line total of 261 also includes two type-1 sources
+excluded with the stellar classification. The pre-photometric-type
+diagnostic cross-tab (19,419 sources) reconciles
 exactly with the final booleans; it changes no eligibility. Evidence:
 `coverage-baseline.md`; `specz_p2r05_sources.classification_label`,
 `broad_line_reported`. *Closed question: S5-Q02/Q03; the excluded-star
 count is documentation of selection, not evidence of misclassification.*
 
-**S5-F07 — Sensitivity is material and one-sided per dimension.** The
-confidence floor removes 3,664 net primary members (and dissolves 213
-vetoes); the tighter absolute tolerance removes 1,410; the normalized rule
-adds 165. Evidence: `coverage-baseline.md` sensitivity tables. *Closed
+**S5-F07: Sensitivity is material; confidence changes membership in both
+directions.** The confidence floor loses 3,877 primary members and gains
+213 through dissolved vetoes, for a net loss of 3,664. The separate population
+loses 109 and gains 39, for a net loss of 70. The tighter absolute tolerance
+only loses members (1,410 primary, 188 separate); the normalized rule only
+gains members on this hold (165 primary, 92 separate). Evidence:
+`coverage-baseline.md` sensitivity tables. *Closed
 question: S5-Q02 decides whether the 0.005 absolute baseline stands.*
 
 **S5-F08 — Partitions are frozen, complete, and unbalanced by design.**
@@ -243,13 +266,35 @@ module, not a spec defect; caught before any seal. Evidence: seal record
 `recovery_history` in the run row. *Closed question: none.*
 
 **S5-F10 — The upstream incompatibility is confirmed and reportable.**
-The catalog's `id_specz_khostovan25` does not resolve against the held
-DR1.1 compilation (24,364/37,219 coincidental resolutions; field-scale
-geometry, median 4,054.3415558937 arcsec on the documented all-links
-basis; value range consistent with an earlier release's renumbering,
-which remains an unconfirmed hypothesis). Evidence:
+The catalog's carried links resolve numerically in `_unique` for
+24,364/37,219 values and in `_all` for all 37,219. Only 227 `_all` matches
+name the same catalog source through `Id_COSMOS25`; carried-link geometry
+has median 4,054.3415558937 arcsec on the documented all-links basis.
+An earlier release's renumbering is one unconfirmed explanation, not an
+established cause. Evidence:
 [`upstream-report-draft.md`](upstream-report-draft.md). *Closed question:
 S5-Q05.*
+
+## Evidence errata (2026-10-04)
+
+These corrections repair reporting and verification instructions. They do not
+change the policy, installed product, seal, adoption state, or S5 questions.
+Evidence is retained in `staging/2026-10-04-astra-p2r05-errata/` and indexed in
+[the errata worklog](../../../work-logs/worklog-2026-10-04-p2r05-errata.md).
+
+| Finding | Previous statement | Correction and reason |
+|---|---|---|
+| AR-F01 | Current verification command expected an unsealed candidate | Use explicit post-seal mode and the pinned run ID; the prior state predicate rejects a correctly sealed product |
+| AR-F03 | Sensitivity was “one-sided per dimension” | Confidence 97 loses 3,877 primary / 109 separate and gains 213 / 39 as vetoes dissolve; net counts concealed membership changes in both directions |
+| AR-F04 | 261 type-0/type-2 broad-line members rerouted | 259 eligible broad-line members (71 type 0 + 188 type 2); two further broad-line sources are type 1 and excluded, yielding 261 before type routing |
+| AR-F04 | Catalog-wide veto/support figures could be read as secure-preferred attrition | 681 vetoed among 20,100 secure-preferred versus 722 catalog-wide; secure-preferred corroboration is 11,183 / 8,263 / 654 singly / multiply / conflicting |
+| AR-F05 | S5-F10 summarized the mismatch as compilation-wide non-resolution | Distinguish `_unique` and `_all` numeric matches and the 227 same-source correspondences; propagate the corrected upstream report into its existing summary |
+| AR-F02 | Raw variant headline fields were zero despite nonzero membership changes | Gate 1 repaired the two counters; all three totals now reproduce the independently reconstructed table without changing eligibility predicates |
+
+`gate1-sensitivity-comparison.json` checks totals and gains/losses against the
+independent reconstruction. `gate3-document-counts.json` records the exact
+SELECT queries for denominator and type/broad-line counts. All five acceptance
+questions below remain byte-identical to the pre-errata document.
 
 ## Acceptance questions (all pending)
 
