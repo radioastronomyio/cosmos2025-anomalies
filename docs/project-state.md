@@ -40,11 +40,13 @@ pending operator approval.
 
 The P2R-05 spectroscopic association and eligibility product (operator
 approval 2026-09-22, spec v1.0 with P-01..P-09 frozen) is built, installed,
-and mechanically sealed in `cosmos2025_v11.analysis` — see section 2.
-It remains `pending_scientific_adoption`: the acceptance questions
-S5-Q01..S5-Q05 in `research/specz-science-p2r05/review.md` are unanswered,
-and no spectroscopic calibration or outcome evaluation may run against it
-before that decision.
+and mechanically sealed in `cosmos2025_v11.analysis` (see section 2). Don
+scientifically adopted it with conditions on 2026-10-05, as recorded in
+`research/specz-science-p2r05/review.md`. Downstream work follows the
+S5-Q01 through S5-Q05 conditions. The sealed database rows retain the frozen
+`pending_scientific_adoption` value because no database transition is
+defined or authorized; that mechanical value does not prohibit work approved
+under the recorded conditions.
 
 The retired `cosmos2025.catalog` v1 objects remain a read-only comparison
 baseline. No DDL or DML runs against either database outside an approved
@@ -99,11 +101,14 @@ coordinate identity, verified). The D-01..D-07 closed questions are disposed
 by the operator-approved P2R-05 policy
 ([`research/specz-science-dispositions.md`](research/specz-science-dispositions.md)).
 
-### P2R-05 derived product (pending scientific adoption)
+### P2R-05 derived product (scientifically adopted with conditions)
 
 Database `cosmos2025_v11`, schema `analysis`. Mechanically sealed
-2026-09-22; every row is `pending_scientific_adoption` and no downstream
-spectroscopic calibration may consume it before the adoption review.
+2026-09-22 and scientifically adopted with conditions on 2026-10-05.
+Downstream work must follow the S5 conditions in
+`research/specz-science-p2r05/review.md`. Every sealed row retains the
+frozen `pending_scientific_adoption` value; no database transition was
+defined or performed.
 
 | Table | Rows | Content |
 |---|---:|---|
