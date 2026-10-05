@@ -124,6 +124,25 @@ sealed metadata row are unchanged. The verifier hashes current implementation
 bytes but uses the run's recorded input identities; it does not rehash raw
 FITS files or perform new scientific verification. Gate 2 validation passed.
 
+
+### Gate 3: visible numerical errata (AR-F03, AR-F04)
+
+Gate 2 commit: `23d83bbe753e47a6787f25e05729dec7b4997c55`.
+
+Corrected both evidence documents with visible errata tables explaining changes
+and causes: confidence gains/losses in both populations, 259 eligible broad-line
+members versus 261 before type routing (two excluded type-1 sources), 681/20,100
+secure-preferred vetoes versus 722 catalog-wide, and the 11,183 / 8,263 / 654
+secure-preferred corroboration split. The existing sensitivity table was
+already numerically correct; its one-sided characterization was not.
+
+Fresh analyst SELECTs reproduce all denominator and type/broad-line figures
+(`gate3-document-counts.json`). `gate3-document-validation.json` confirms the
+entire S5 acceptance section and compact policy rendering remain byte-identical
+to main. Coverage reproduction now specifies errata staging; scratch-database
+negative controls are clearly historical and were not rerun. Diff whitespace
+checks pass. Gate 3 validation passed; adoption remains pending.
+
 ## 2. Files changed
 
 Gate 0: new worklog, worklog index, and staged spec/README/check evidence.

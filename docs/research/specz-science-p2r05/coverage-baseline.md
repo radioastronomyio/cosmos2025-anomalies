@@ -4,7 +4,7 @@ title: "Gate 5.7 Coverage, Attrition, and Sensitivity Evidence"
 description: "Baseline coverage with explicit predicates and denominators, source attrition and conflict provenance, the pre-photometric-type diagnostic, and the three fixed sensitivity comparisons for the P2R-05 product"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-09-22"
-version: "1.0"
+version: "1.1"
 status: "Active"
 tags:
   - type: research
@@ -22,11 +22,14 @@ related_documents:
 Reproduction commands (repository root):
 
 ```
-python src/features/specz_science/coverage.py
-python src/features/specz_science/check_installed_independent.py
-doppler run --project ml01 --config dev -- \
-    python src/features/specz_science/negative_controls.py
+python -B src/features/specz_science/coverage.py \
+    --output staging/2026-10-04-astra-p2r05-errata/coverage-rerun.json
+python -B src/features/specz_science/check_installed_independent.py
 ```
+
+The output override preserves the original sealed-run evidence. The negative
+controls described below are historical seal-time results; they require scratch
+database writes and are not part of SELECT-only errata verification.
 
 Product identity of record: run
 `1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c` in
@@ -61,12 +64,18 @@ unique_numeric_conflict 57; broad_line_evidence_present 426.
 
 Attrition with explicit denominators: of 46,039 sources reached through
 `_all`, 45,007 carry `_unique` entries; 20,100 carry a secure preferred
-`_unique` entry (P-02/P-03 predicates over distinct sources); 722 are
-vetoed by P-04; 18,402 and 668 finalize into the two secure-use
-populations after P-05 routing and the P-06 split gate. Of the 20,100
-secure-preferred sources, 11,490 are singly supported and 8,357 multiply
-supported (agreement among secure `_all` measurements); 671 carry
-conflicting secure alternatives.
+`_unique` entry (P-02/P-03 predicates over distinct sources). Among those
+20,100, **681** have either P-04 veto, leaving **19,419** qualified before
+type routing; 18,402 and 668 finalize into the two secure-use populations.
+The **722** catalog-wide vetoes include another **41** sources without a
+secure preferred entry, so 722 is not attrition from the 20,100 denominator.
+
+Of the 20,100 secure-preferred sources, **11,183** are singly supported,
+**8,263** multiply supported and **654** conflicting according to
+`corroboration_status`, summing to 20,100. The earlier 11,490 / 8,357 / 671
+figures describe these categories catalog-wide, including sources without a
+secure preferred entry. Corroboration is determined from secure `_all`
+measurements; its conflicting category is not the union of both P-04 vetoes.
 
 ## Pre-photometric-type diagnostic (P-07)
 
@@ -82,6 +91,11 @@ and broad-line reporting:
 | 2 | 188 | 409 | 597 |
 | missing/other | 0 | 0 | 0 |
 | **Total** | **261** | **19,158** | **19,419** |
+
+The 261 pre-type broad-line sources comprise 259 eligible type-0/type-2
+members (71 + 188) and two type-1 sources excluded with the other 347
+otherwise-qualified type-1 sources. Thus 261 is not the eligible broad-line
+count.
 
 This is exclusion accounting. It cannot change either eligibility boolean,
 is not an adopted sample, and does not establish that excluded stars or
@@ -134,6 +148,10 @@ preferred-row ordering, and shares the frozen partitions:
 | abs_threshold_0p001 | absolute tolerance 0.005→0.001 | 16,992 | -1,410 (all losses) | 480 | -188 (all losses) |
 | normalized_0p005 | pairwise d = abs(z_i-z_j)/(1+min(z_i,z_j)) > 0.005 | 18,567 | +165 (all gains) | 760 | +92 (all gains) |
 
+The confidence-floor variant is not one-sided: it gains 213 primary and 39
+separate members through dissolved vetoes while losing 3,877 and 109. Net
+losses of 3,664 and 70 do not describe the full membership turnover.
+
 Membership-change reasons: every min_confidence_97 loss is
 `preferred_entry_left_secure_domain` (confidence in [95,97)); every gain is
 `conflict_veto_resolved_under_variant` (one member of a conflicting secure
@@ -159,3 +177,22 @@ diagnostic alternatives, not parallel adopted samples.
 - No photo-z residual, stellar-mass tension, SFR ranking, fitted
   correction, anomaly score, or held-out outcome performance was computed
   anywhere in this unit.
+
+## Evidence errata (2026-10-04)
+
+The policy, booleans, sealed content and adoption state are unchanged. See
+[the errata worklog](../../../work-logs/worklog-2026-10-04-p2r05-errata.md) and
+`staging/2026-10-04-astra-p2r05-errata/` for check outputs.
+
+| Finding | What changed | Why |
+|---|---|---|
+| AR-F03 | Explicitly report 213 primary / 39 separate gains alongside 3,877 / 109 losses | Raising the confidence floor can dissolve conflict vetoes; the existing table was correct, but the main review's one-sided characterization was not |
+| AR-F04 | Distinguish 261 pre-type broad-line sources from 259 eligible and two excluded type-1 sources | The type/broad-line cross-tab has different denominators before and after routing |
+| AR-F04 | Replace 722 within secure-preferred attrition with 681; retain 722 catalog-wide | The former prose mixed denominator populations; the remaining 41 vetoes lack secure preferred entries |
+| AR-F04 | Replace secure-preferred support counts 11,490 / 8,357 / 671 with 11,183 / 8,263 / 654 | The former counts were catalog-wide; the corrected split sums to its stated denominator of 20,100 |
+| AR-F02 | Restore accumulation of variant headline totals in coverage.py; retain the published nonzero table | Independent membership reconstruction and repaired output agree; the defect was zero counters, not changed scientific selection |
+
+Fresh SELECT counts are in `gate3-document-counts.json`; repaired sensitivity
+output and its independent comparison are `gate1-coverage.json` and
+`gate1-sensitivity-comparison.json`. Current reproduction directs coverage to
+errata staging; historical scratch-database negative controls were not rerun.
