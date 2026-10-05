@@ -99,3 +99,18 @@ The original adoption-answer commit carries `Co-authored-by`, `Model`, and
 Action Registry `rec4acLZWCuN1tJk9`, the GPT seat pushed
 `task/p2r05-adoption-answers` and opened PR #3 for review. This was a bounded
 working-branch push; PR #3 remains unmerged.
+
+## Correction (2026-10-05, recorded under P2R-06 gate 6.1, issue #5)
+
+The validation summary above — "Confirmed only the decision record,
+repository state paragraph, and worklog index/log are changed from the
+merged base" — described the original adoption-answer commit `58577bf` and
+did not survive the authorized PR #3 fix round. Commits `e50a0c9` through
+`7c5ca91` (findings C1–C5 plus review P1) additionally changed, from the
+merged base: `README.md`, `docs/project-state.md`,
+`docs/research/specz-science-dispositions.md`,
+`docs/research/specz-science-p2r05/review.md`,
+`docs/research/specz-science-p2r05/upstream-report-draft.md`, `AGENTS.md`,
+and this work-logs directory's index and this file. The exclusivity wording
+of the original sentence is superseded by this note; the commit-time text is
+preserved above as history. PR #3 commits were not rewritten.

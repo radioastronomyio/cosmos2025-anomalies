@@ -34,6 +34,7 @@ Chronological execution logs documenting what was done, what failed, and what wa
 | [2026-09-21-cosmos2025-worklog-p2r-05-specz-science-surface.md](2026-09-21-cosmos2025-worklog-p2r-05-specz-science-surface.md) | P2R-05 Gates 5.1 through 5.9: approval record, hazard repairs, evidence reproduction, product build, frozen partitions, bounded installation, mechanical seal, review document, closeout |
 | [worklog-2026-10-04-p2r05-errata.md](worklog-2026-10-04-p2r05-errata.md) | P2R-05 errata gates 0 through 4: sensitivity totals, verifier modes, numerical errata and upstream draft; sealed product unchanged |
 | [worklog-2026-10-05-p2r05-adoption-answers.md](worklog-2026-10-05-p2r05-adoption-answers.md) | PR #2 merge verification and operator answers for P2R-05 S5-Q01 through S5-Q05; sealed database unchanged |
+| [worklog-2026-10-05-p2r06-ta-v2-design.md](worklog-2026-10-05-p2r06-ta-v2-design.md) | P2R-06 gates 6.1 through 6.5: T_A v2 proposed design contract, synthetic validation, evaluation protocol, review surface TA2-Q01..Q06; issues #4/#5 closed; nothing fitted or adopted |
 
 ---
 
