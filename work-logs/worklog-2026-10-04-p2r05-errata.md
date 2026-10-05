@@ -223,3 +223,49 @@ authorize T_A v2 or scientific use. No contact, paid model invocation, deletion
 or recycle action occurred.
 
 <!-- Agent: codex; Runtime: Codex desktop; Model: unreported; Session: interactive -->
+
+
+## 5. PR #2 review fix round
+
+Authorization: Don explicitly authorized G1 and G2 after Greptile and Claude
+review. Starting branch `task/p2r05-errata`, clean at
+`810c5653b04e97a619350f68d2485affd8e6cbe0`. The initial five commits were
+previously approved and published as PR #2 under a separate explicit approval.
+This fix round stays local; Don pushes. No history rewrite, PR update, merge,
+adoption or upstream send is authorized here.
+
+The review evidence is ML01-local and gitignored in
+`staging/2026-10-04-astra-p2r05-errata/`. The original closeout narrative above
+is historical; the checkpoints below record this later authorization.
+
+### G1: pin the nine recorded seal verifications
+
+Greptile finding [4180364939](https://github.com/radioastronomyio/cosmos2025-anomalies/pull/2#discussion_r4180364939)
+is reproduced: nonempty failed records, missing/extra checks, duplicate or
+renamed checks, and unrecognized result text were accepted. The red regression
+run has 10 expected failures and 35 passes (`fix-g1-red.log`).
+
+The verifier now pins the canonical digest of all nine historical check/result
+records sorted by check name:
+`5a8c39f8b128ec3c9812630526ca34a08bedb22a2d33f3191350bc18f25c20a4`.
+Names, multiplicities and exact free-text results must match; ordering does
+not matter. Failure markers are also explicitly rejected, case-insensitively.
+No “OK” prefix is required: all five historical success results without that
+prefix remain accepted. Unexpected wording fails closed against the seal pin.
+The fixture carries the original nine records so tests do not depend on
+ML01-only staging files. Pre-seal behavior is unchanged.
+
+Validation: 71 focused tests pass (`fix-g1-green.log`), including failed,
+missing, extra, duplicate, renamed, malformed, reordered and original free-text
+records. Static checks pass (`fix-g1-lint.log`). Fresh live post-seal verification
+passes (`fix-g1-post-seal.json`). `fix-g1-identity.json` rehashes the seven
+protected modules, recomputes run
+`1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c`, and confirms
+all three full installed content digests and the entire seal record unchanged.
+Database statements are SELECT-only; no build, install or re-seal ran.
+
+`fix-round-review-initial.json` records both Greptile findings and Codex's
+completed GitHub review summary. No additional actionable Codex finding was
+present at this checkpoint. The initial seal and exact check pin are in
+`fix-round-preflight.json`. G1's commit is the commit carrying this checkpoint;
+its full SHA is recorded at G2 and in the staged fix-round closeout.

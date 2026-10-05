@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -52,6 +53,18 @@ DIGEST_NAMES = {
     ssi.SOURCES: "sources",
     ssi.SPLITS: "splits",
 }
+
+
+# The nine historical check/result records for run 1e604a81, sealed 2026-09-22.
+# Pin complete free-text results, sorted by check name and canonically encoded.
+# These are evidence labels, not commands to rerun; unknown wording fails closed.
+SEALED_VERIFIED_CHECKS_SHA256 = (
+    "5a8c39f8b128ec3c9812630526ca34a08bedb22a2d33f3191350bc18f25c20a4"
+)
+SEAL_FAILURE_MARKERS = re.compile(
+    r"\b(?:fail(?:ed|ure|ures|ing|s)?|errors?|exceptions?|traceback|not[\s_-]+ok)\b",
+    re.IGNORECASE,
+)
 
 
 def check_run_contract(
@@ -114,10 +127,21 @@ def check_run_contract(
                 failures.append("seal identities differ from run metadata")
             checks = seal.get("verified_checks")
             if not isinstance(checks, list) or not checks or not all(
-                isinstance(item, dict) and item.get("check") and item.get("result")
+                isinstance(item, dict)
+                and isinstance(item.get("check"), str) and item["check"].strip()
+                and isinstance(item.get("result"), str) and item["result"].strip()
                 for item in checks
             ):
-                failures.append("seal lacks recorded verification evidence")
+                failures.append("seal lacks valid recorded verification evidence")
+            else:
+                checks_digest = canonical.digest_records(
+                    sorted(checks, key=lambda item: item["check"])
+                )
+                if checks_digest != SEALED_VERIFIED_CHECKS_SHA256:
+                    failures.append("seal verification records differ from the pinned nine checks")
+                for item in checks:
+                    if SEAL_FAILURE_MARKERS.search(item["result"]):
+                        failures.append(f"seal recorded check indicates failure: {item['check']}")
 
         for table, name in DIGEST_NAMES.items():
             field = f"{name}_content_sha256"

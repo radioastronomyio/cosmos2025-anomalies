@@ -26,6 +26,86 @@ from src.features.specz_science import canonical, install, splits
 from src.features.specz_science import check_installed_product as check
 
 
+# Nine unmodified seal records from run 1e604a81, sealed 2026-09-22.
+SEALED_VERIFIED_CHECKS = [
+    {
+        "check": "python src/features/specz_science/check_installed_product.py",
+        "result": (
+            "OK: analyst identity and read-only, SELECT on four tables, no write "
+            "privileges, source counts unchanged, installed content digests equal staging "
+            "artifacts"
+        ),
+    },
+    {
+        "check": "python src/features/specz_science/check_installed_independent.py",
+        "result": (
+            "OK: 784,016 source rows and 482,579 measurement rows reproduced from the "
+            "captured native input (preferred, conflicts, association, secure, splits, "
+            "eligibility, reasons)"
+        ),
+    },
+    {
+        "check": (
+            "doppler run --project ml01 --config dev -- python "
+            "src/features/specz_science/negative_controls.py"
+        ),
+        "result": (
+            "OK: six tampers each caught on the intended invariant (remove category, alter "
+            "association, promote A entry, erase secure conflict, change tied preferred, "
+            "move split)"
+        ),
+    },
+    {
+        "check": "python src/features/specz_science/check_splits_agreement.py",
+        "result": (
+            "OK: independent tile-map recomputation and all 784,016 assignments agree; zero"
+            " unassigned"
+        ),
+    },
+    {
+        "check": (
+            "python -m pytest tests/ -q (under doppler run --project ml01 --config dev)"
+        ),
+        "result": (
+            "563 passed in 2156.87 s, including dictionary byte-identity and full-manifest "
+            "checks, scratch database tests, and all P2R-05 suites"
+        ),
+    },
+    {
+        "check": "python src/etl/generate_schema_v11.py --check (under doppler)",
+        "result": (
+            "byte-identical: 12 mirrors, 1448 mirror columns, 166 array checks, 13 "
+            "provenance columns"
+        ),
+    },
+    {
+        "check": "python src/etl/verify_conformance_v11.py --live (under doppler)",
+        "result": (
+            "conformance passed; analyst capability matrix 78 denials / 13 selects; v1 "
+            "fingerprint 82fb7e09... unchanged (v1_unchanged true)"
+        ),
+    },
+    {
+        "check": (
+            "python src/features/specz_science/preflight.py --before-state / --pins (5.7 "
+            "rerun)"
+        ),
+        "result": (
+            "13 source relations identical to the 5.1 capture including seeded content "
+            "digests; manifest/provenance pins agree with freshly observed hashes; policy, "
+            "dictionary, data_paths, spec, dispositions bytes unchanged since 5.1"
+        ),
+    },
+    {
+        "check": "repeat install request",
+        "result": (
+            "installed=false, unchanged=true: no rows, timestamps, grants, or "
+            "adoption-state changes"
+        ),
+    },
+]
+
+
 @pytest.fixture
 def contract():
     implementation = {
@@ -66,7 +146,7 @@ def contract():
             "snapshot_manifest_sha256": run["snapshot_manifest_digest"],
             "tile_map_canonical_digest": run["tile_map_canonical_digest"],
         },
-        "verified_checks": [{"check": "original check", "result": "OK"}],
+        "verified_checks": deepcopy(SEALED_VERIFIED_CHECKS),
     }
     return dict(run=run, run_id=run_id, implementation=implementation,
                 installed_digests=digests, staging_digests=recorded)
@@ -259,3 +339,58 @@ def test_post_seal_cli_requires_explicit_run_id():
     with pytest.raises(SystemExit) as caught:
         check.main(["--mode", "post-seal"])
     assert caught.value.code == 2
+
+
+@pytest.mark.parametrize("result", [
+    "FAILED: installed digest mismatch",
+    "failure: incomplete native verification",
+    "ERROR: read failed",
+    "not OK: changed tile assignment",
+    "OK: checks started; one check failed",
+])
+def test_post_seal_rejects_failed_recorded_check(contract, result):
+    contract["run"]["mechanical_seal_evidence"]["verified_checks"][0]["result"] = result
+    assert any("indicates failure" in failure for failure in failures(contract))
+
+
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate", "renamed"])
+def test_post_seal_rejects_changed_recorded_check_set(contract, mutation):
+    checks = contract["run"]["mechanical_seal_evidence"]["verified_checks"]
+    if mutation == "missing":
+        checks.pop()
+    elif mutation == "extra":
+        checks.append({"check": "unexpected check", "result": "completed"})
+    elif mutation == "duplicate":
+        checks[-1] = deepcopy(checks[0])
+    else:
+        checks[-1]["check"] = "renamed check"
+    assert failures(contract)
+
+
+def test_post_seal_accepts_all_nine_original_free_text_results(contract):
+    checks = contract["run"]["mechanical_seal_evidence"]["verified_checks"]
+    assert len(checks) == 9
+    assert sum(not item["result"].startswith("OK") for item in checks) == 5
+    assert failures(contract) == []
+
+
+def test_post_seal_pin_is_independent_of_check_order(contract):
+    contract["run"]["mechanical_seal_evidence"]["verified_checks"].reverse()
+    assert failures(contract) == []
+
+
+def test_post_seal_rejects_unrecognized_result_text(contract):
+    checks = contract["run"]["mechanical_seal_evidence"]["verified_checks"]
+    checks[0]["result"] = "native verification never completed"
+    assert failures(contract)
+
+
+@pytest.mark.parametrize("item", [
+    {"check": "name", "result": "   "},
+    {"check": "name", "result": True},
+    {"check": ["name"], "result": "OK"},
+    {"check": "name"},
+])
+def test_post_seal_rejects_malformed_recorded_check(contract, item):
+    contract["run"]["mechanical_seal_evidence"]["verified_checks"][0] = item
+    assert failures(contract)
