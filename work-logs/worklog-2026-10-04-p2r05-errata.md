@@ -74,6 +74,30 @@ Validation: environment and clean-base preflight pass; protected files and
 sealed identity baseline recorded. Gate 0 commit is the commit carrying this
 checkpoint (its full SHA is recorded at Gate 1 and in staged closeout).
 
+
+### Gate 1: sensitivity totals (AR-F02)
+
+Gate 0 commit: `bb00127580a6c9d01d30324011924718891455a8`.
+
+Added the two missing accumulations without changing any predicate. Three
+hand-counted variant fixtures fail against the original zero counters
+(`gate1-red.log`) and pass with primary and separate counts distinguished.
+The focused coverage, independent-reduction and split tests pass: 22 tests
+(`gate1-green.log`). Full native snapshot coverage matches the independent
+reconstruction in all headline and gained/lost counts:
+
+| Variant | Primary | Separate |
+|---|---:|---:|
+| Confidence 97 | 14,738 | 598 |
+| Absolute 0.001 | 16,992 | 480 |
+| Normalized 0.005 | 18,567 | 760 |
+
+`gate1-sensitivity-comparison.json` records the agreement. Confidence gains
+are 213 primary and 39 separate. `gate1-identity.json` confirms the seven
+modules recompute the pinned run ID, all three live content digests equal
+sealed values, and the complete run metadata and protected files are unchanged.
+No builder, installer or sealer ran. Gate 1 validation passed.
+
 ## 2. Files changed
 
 Gate 0: new worklog, worklog index, and staged spec/README/check evidence.
