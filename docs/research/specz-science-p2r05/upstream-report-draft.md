@@ -1,11 +1,11 @@
 <!--
 ---
 title: "Upstream Incompatibility Report Draft (Local, Unsent)"
-description: "Reproducible local report of the release mismatch between the held COSMOS-Web DR1 photometric catalog and the held DR1.1 spec-z compilation, with the renumbering hypothesis explicitly unconfirmed; prepared for operator review, not transmitted"
+description: "Reproducible local report of the held catalog/spec-z mismatch; S5-Q05 authorized transmission on 2026-10-05, the channel awaits Don's choice, and the report remains unsent"
 author: "VintageDon (https://github.com/vintagedon/)"
-date: "2026-09-22"
-version: "1.1"
-status: "Draft - Local Only; Transmission Prohibited Until S5-Q05"
+date: "2026-10-05"
+version: "1.2"
+status: "Draft - Local and Unsent; Transmission Authorized, Channel Pending"
 tags:
   - type: research
   - domain: astronomy
@@ -19,10 +19,10 @@ related_documents:
 
 # Draft Report: carried spec-z identifiers do not reliably identify the same source in the held DR1.1 compilation
 
-**Status: LOCAL DRAFT, NOT SENT.** Transmission through any channel remains
-prohibited until the operator answers S5-Q05. This report concerns the held
-release pair below. It does not assess newer releases or identify the cause
-of the mismatch.
+**Status: LOCAL DRAFT, NOT SENT.** S5-Q05 authorized transmission on
+2026-10-05. Don has not chosen a channel, so this report remains unsent. It
+concerns the held release pair below and does not assess newer releases or
+identify the cause of the mismatch.
 
 ## Artifacts tested
 
@@ -259,5 +259,5 @@ This is a local workaround for the held release pair, not an upstream fix.
    aggregate SQL and counts, and replaced legacy commands that write to old
    evidence locations with explicit output-safe reproduction.
 
-No message, upload or upstream report has been transmitted. Don retains the
-send decision under S5-Q05.
+No message, upload or upstream report has been transmitted. S5-Q05 authorized
+transmission on 2026-10-05; Don retains the channel choice.
