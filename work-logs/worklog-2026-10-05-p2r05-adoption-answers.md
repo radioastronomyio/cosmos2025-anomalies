@@ -42,7 +42,7 @@ related_documents:
 | Agent | Codex desktop / GPT-5 |
 | Host | ML01 |
 | Authorization | Action Registry `rec4acLZWCuN1tJk9`; Don, 2026-10-05 09:13 EDT “I dont see anything in your responses to veto.” and 09:15 EDT “Approved to execute.” |
-| Remote-operation rule | Don, same registry record, 2026-10-05 10:19 EDT: “no *automated* merges or changes to main. That rule stays.” The GPT seat may perform bounded pushes and merges only on his instruction. |
+| Remote-operation rule | Don, same registry record, 2026-10-05 10:19 EDT: “no *automated* merges or changes to main. That rule stays.” Executors may publish only their working branch and its pull request; merges require Don's explicit instruction and the instructed-agent record. |
 | Starting branch/base | `main` / `04b698226bcd409e9df4c7862356b623d21cd0cf` |
 | Execution branch | `task/p2r05-adoption-answers` |
 
