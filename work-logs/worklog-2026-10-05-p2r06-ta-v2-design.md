@@ -243,5 +243,51 @@ Validation (gate 6.3 checklist):
 
 Gate 6.3 checkpoint: this commit.
 
+## Gate 6.4: evaluation protocol and review surface
+
+- `evaluation-protocol.md`: preregistered plan separating non-spectroscopic
+  disagreement characterization from the redshift diagnostics; split-use
+  table implementing the Q04 conditions (development-only fitting,
+  validation for declared choices with the C0 tie-break fixed in writing
+  before outcomes, single holdout after the freeze checklist); declared
+  comparison set (C0/C1 mass centers, S0 SFR centers, robust-spread
+  scales; state constants explicitly not tuned); strata plan (redshift,
+  magnitude, colour, survey, support); the three frozen sensitivity
+  variants predeclared and never choice-driving; clustered tile+survey
+  uncertainty with the four holdout tiles (A1, A7, B3, B7) and
+  upstream-calibration independence stated as unestablished; support
+  policy (explicit unsupported strata, no weighted extrapolation);
+  separate-labelled diagnostics with the 16 tentative-only broad-line
+  cases reported explicitly; descriptive vs model-affecting table;
+  no outcome metric computed.
+- `review.md`: design identity table; twelve findings TA2-F01..F12, each
+  with statement, exact evidence locator (contract section, fixture, or
+  mutation control), recommendation, limitation, and closed question;
+  the six closed questions TA2-Q01..Q06 verbatim from the spec with
+  per-question resolution pointers; propagation guarantees (Q03 population
+  has no primary-fitting path; Q05 has no dependency edge); the truthful
+  reduced-SFR-scope recommendation; and the explicit approve/does-not-
+  authorize boundary.
+- Frontmatter and interior README links verified for the new documents;
+  every status says proposed/pending; no adopted claim or release promise.
+
+Validation (gate 6.4 checklist):
+
+- [x] Every question resolves to a concrete contract or protocol section
+  and discriminating evidence; none asks approval of an unspecified
+  threshold or algorithm.
+- [x] Every frozen input maps to a design response and at least one
+  failure case (TA2-F12; scientific-design.md section 7).
+- [x] S5 conditions propagate exactly; the Q03 population has no path into
+  primary fitting; Q05 has no dependency edge into scoring.
+- [x] Metrics, strata, model-choice rules and support thresholds are
+  specified before fitting; holdout results are absent.
+- [x] The review truthfully recommends reduced SFR scope (TA2-F06).
+- [x] Documentation has required frontmatter and interior README links and
+  says proposed or pending; no adopted claim or release promise.
+
+Gate 6.4 checkpoint: this commit.
+
+
 
 
