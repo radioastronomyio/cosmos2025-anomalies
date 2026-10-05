@@ -45,9 +45,17 @@ are unanswered.
 Reproduce the core verification:
 
 ```
-python src/features/specz_science/check_installed_product.py
+python -B src/features/specz_science/check_installed_product.py \
+    --mode post-seal \
+    --run-id 1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c
 python src/features/specz_science/check_installed_independent.py
 ```
+
+The post-seal command verifies the seal, run identity and installed content
+against sealed metadata using SELECT-only analyst access. The historical
+`--mode pre-seal` check requires an unsealed candidate and compares against
+staging artifacts; it is expected to reject this sealed run. Neither mode
+changes the seal or answers the pending adoption questions.
 
 Full enumerations live in the installed tables under the run id above;
 this document links figures to `analysis.specz_p2r05_<table>` columns

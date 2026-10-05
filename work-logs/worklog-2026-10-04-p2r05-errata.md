@@ -98,6 +98,32 @@ modules recompute the pinned run ID, all three live content digests equal
 sealed values, and the complete run metadata and protected files are unchanged.
 No builder, installer or sealer ran. Gate 1 validation passed.
 
+
+### Gate 2: installed verifier modes (AR-F01)
+
+Gate 1 commit: `ba1582371d512c7fabaf89dd59c338f651715e4e`.
+
+Added explicit `--mode pre-seal` and `--mode post-seal`. The default remains
+pre-seal for historical compatibility. Post-seal requires `--run-id` and never
+reads finalize-summary; it verifies sealed identities, three recorded and live
+content digests, current implementation/run identity, tile-map consistency,
+seal presence and pending adoption. Existing SELECT-only capability and source
+count checks remain. Updated the review's current verification command.
+
+`gate2-red.log`: 27 contract tests fail before implementation because the
+mode-aware contract is absent. `gate2-green.log`: 55 focused tests pass,
+including both modes, expected wrong-mode rejection, altered content/seal/input
+or implementation, absent run, SELECT-only queries, and no post-seal staging
+reads. Cache-free static checks pass (`gate2-lint.log`).
+
+Live post-seal verification passes (`gate2-post-seal.json`). Live pre-seal
+verification rejects this sealed run solely with “pre-seal mode requires an
+unsealed run” (`gate2-pre-seal.json`), as intended. `gate2-identity.json` repeats
+the full protected-module/run-ID/content guard: all identities and the entire
+sealed metadata row are unchanged. The verifier hashes current implementation
+bytes but uses the run's recorded input identities; it does not rehash raw
+FITS files or perform new scientific verification. Gate 2 validation passed.
+
 ## 2. Files changed
 
 Gate 0: new worklog, worklog index, and staged spec/README/check evidence.
