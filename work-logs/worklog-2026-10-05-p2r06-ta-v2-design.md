@@ -182,4 +182,66 @@ Validation (gate 6.2 checklist):
 
 Gate 6.2 checkpoint: this commit.
 
+## Gate 6.3: executable synthetic contract checks
+
+- `docs/research/ta-v2-design/fixtures.json`: 28 synthetic cases (FX-01
+  unit/sign/sentinel/nonpositive family; FX-02 centering cells, bias +
+  isolated-deviation survival, out-of-hull fallback, quantile-order
+  violation, full score path; FX-03 four SFR paths incl. the hypothetical
+  documented-limit record that no rule may reference; FX-04 mass/SFR
+  independence incl. negative-log-SFR point case; FX-05 inst score path;
+  FX-06 sSFR coupling/gating/unsupported score; FX-07 context passthroughs;
+  FX-08 non-galaxy routing), 4 fit requests (FX-P1..P4), 9 named mutation
+  controls (M1..M9), all labelled `provenance: synthetic`.
+- `src/inspection/validate_ta_v2_design.py`: pure validator — whitelisted
+  safe expression parser (no eval), ordered state-machine evaluation with
+  parent preconditions, synthetic center scenarios (C1 binned lookup with
+  cell/z/global/out-of-hull support; C0 constant; S0 per-timescale),
+  scale/score quadrature with the declared approximation domain and
+  zero-scale guard, contract-formula-driven delta evaluation, structural
+  dependency checks (chi2 quotient under any name, chi2 predictors,
+  dof-from-nbfilt, invented CIGALE photo-z, truth labels, forbidden center
+  covariates incl. specz/tile/survey, fit-request rule presence, required
+  SFR states, unreachable bound state, fixture synthetic labelling,
+  bound-field non-reference), and content-comparison identity checks
+  (tracked-file hashes, spec-file hash when present, input-contract
+  cross-anchors).
+- TDD followed: tests written first and confirmed red (validator absent),
+  then implementation to green. `tests/test_ta_v2_design_contract.py`: 26
+  tests — clean-run assertions, per-mutation nonzero exits with intended
+  reasons, no-op mutation control, boundary tests (no
+  psycopg/socket/sqlite in source, no `src.etl` import, no `--mode`
+  generation surface), fixture synthetic labelling, required-state and
+  unreachable-bound declarations, identity content match, scratch identity
+  rejection.
+- Recorded run: `docs/research/ta-v2-design/validation-results.json` —
+  cases 28/28 passed; fit requests 4/4 passed; mutations caught 9/9;
+  exit 0. Command: `python src/inspection/validate_ta_v2_design.py`
+  (contract/fixtures/identity SHA-256 values recorded inside).
+- Indexes updated: `src/inspection/README.md` and `tests/README.md`.
+- Environment note: `python3 src/inspection/check_frontmatter.py` reports
+  20 violations, 19 of which pre-date this branch (P2R-05-era research
+  docs using the `research`/`decision-record` type tags and work-logs using
+  plain YAML frontmatter, matching their existing convention); the one new
+  file in that class is this worklog, which follows the established
+  work-log frontmatter style of the two most recent logs. All new
+  `docs/research/ta-v2-design/*.md` files pass the checker. No pre-existing
+  file was modified for the checker.
+
+Validation (gate 6.3 checklist):
+
+- [x] Validator exits 0 on the complete contract with every expected
+  synthetic result within declared tolerance, and exits nonzero on each
+  named mutation with the intended reason (9/9 recorded).
+- [x] Results record correct cases and negative controls with stable case
+  IDs, expected and observed behaviour, command, input and contract
+  hashes, and exit codes.
+- [x] No fixture is described as astrophysical validation, measured
+  calibration, power estimate or real-data ranking (asserted by test).
+- [x] Validator has no database connection, no installer import and no
+  catalog feature-generation mode (asserted by tests and CLI surface).
+
+Gate 6.3 checkpoint: this commit.
+
+
 

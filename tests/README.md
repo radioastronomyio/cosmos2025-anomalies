@@ -18,6 +18,33 @@ related_documents:
 
 # Repository Test Suites
 
+## T_A v2 design contract (P2R-06)
+
+`test_ta_v2_design_contract.py` proves the gate 6.3 contract for the proposed
+T_A v2 design. Everything is synthetic; nothing connects to a database,
+imports an installer, or generates catalog features.
+
+- the validator exits 0 on the complete proposed contract with all synthetic
+  fixture cases within tolerance, and records stable FX- case IDs with
+  expected/observed values, command, input and contract hashes, and exit
+  codes in `validation-results.json`;
+- each named scratch-copy mutation (representation swap, dropped censoring
+  state, held-out fit admission, chi-square quotient, identity digest
+  change, hidden constant shift, reversed sign, forbidden covariates) exits
+  nonzero with its intended reason, and the no-op mutation control still
+  passes;
+- unit/sign conversion, ordered quantiles, sentinels, zero and negative
+  inputs, censoring states, out-of-hull covariates, and partition-use rules
+  are discriminated by fixtures FX-01 through FX-08 and fit requests FX-P1
+  through FX-P4;
+- the SFR state machines carry every required state and declare
+  `upper_limit_supported` unreachable on this catalog.
+
+```bash
+pytest tests/test_ta_v2_design_contract.py -v
+python src/inspection/validate_ta_v2_design.py
+```
+
 ## Load dictionary
 
 `test_load_dictionary.py` proves the ETL v2 Gate 3.1 structural contract:

@@ -1,0 +1,708 @@
+{
+  "generated_at": "2026-10-05T16:35:13.039171+00:00",
+  "command": "python /opt/agents/repos/cosmos2025-anomalies/docs/src/inspection/validate_ta_v2_design.py",
+  "mode": "full",
+  "validator": "src/inspection/validate_ta_v2_design.py",
+  "contract_sha256": "81fcf301026d8097d6ab921d1c68b713b8696184a711e4f685460c942f0f8df2",
+  "fixtures_sha256": "1fba5c2f952af96344f48ee28d6a2ece59a355c40aca0b98b5d06bf6c20b7e3a",
+  "identity_sha256": "8f4da2df418b1d9c8c6c5bb46857c5e0c4cc52c16032b367f7ba0c6e1661ecdd",
+  "fixtures_provenance": "synthetic",
+  "exit_code": 0,
+  "summary": {
+    "cases_total": 28,
+    "cases_passed": 28,
+    "fit_requests_total": 4,
+    "fit_requests_passed": 4,
+    "mutations_total": 9,
+    "mutations_caught": 9,
+    "failures": []
+  },
+  "cases": [
+    {
+      "id": "FX-01a",
+      "description": "LePhare log mass 10 against CIGALE linear mass 1e9 gives +1 dex",
+      "expected": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0
+      },
+      "observed": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-01c",
+      "description": "Equal physical masses give zero",
+      "expected": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 0.0
+      },
+      "observed": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 0.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-01e",
+      "description": "Undocumented finite -99.9 value is out of domain with an explicit reason, never NULL-inferred",
+      "expected": {
+        "mass_point_state": "invalid_or_unsupported",
+        "mass_point_reason": "lephare_value_out_of_domain",
+        "delta_mass_dex": null
+      },
+      "observed": {
+        "mass_point_state": "invalid_or_unsupported",
+        "mass_point_reason": "lephare_value_out_of_domain",
+        "delta_mass_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-01f",
+      "description": "Exact-zero CIGALE linear mass: log undefined, zero is a meaningful native value",
+      "expected": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "exact_zero_native_value",
+        "delta_mass_dex": null
+      },
+      "observed": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "exact_zero_native_value",
+        "delta_mass_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-01g",
+      "description": "Negative CIGALE linear mass (present in the catalog profile): log undefined with the negative reason",
+      "expected": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "negative_native_value",
+        "delta_mass_dex": null
+      },
+      "observed": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "negative_native_value",
+        "delta_mass_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02a",
+      "description": "Same raw delta in cell (z bin 0, mag bin 0) with center 0.20: raw unchanged, residual +0.04",
+      "expected": {
+        "delta_mass_dex": 0.24,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.04,
+        "center_support": "cell"
+      },
+      "observed": {
+        "delta_mass_dex": 0.2400000000000002,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0400000000000002,
+        "center_support": "cell"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02b",
+      "description": "Same raw delta in cell (z bin 1, mag bin 1) with center 0.28: different residual, unchanged raw delta",
+      "expected": {
+        "delta_mass_dex": 0.24,
+        "expected_delta_mass_dex": 0.28,
+        "residual_mass_dex": -0.04,
+        "center_support": "cell"
+      },
+      "observed": {
+        "delta_mass_dex": 0.2400000000000002,
+        "expected_delta_mass_dex": 0.28,
+        "residual_mass_dex": -0.039999999999999813,
+        "center_support": "cell"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02c1",
+      "description": "Uniformly biased synthetic sample (delta +1.00) centers to ~0 residual under a constant center equal to the bias",
+      "expected": {
+        "delta_mass_dex": 1.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "delta_mass_dex": 1.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 0.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02c2",
+      "description": "Injected isolated deviation (+5.00 dex) is not erased by the center",
+      "expected": {
+        "delta_mass_dex": 5.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 4.0
+      },
+      "observed": {
+        "delta_mass_dex": 5.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 4.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02d",
+      "description": "Out-of-hull covariate falls back to the global constant with an explicit support flag",
+      "expected": {
+        "expected_delta_mass_dex": 0.24,
+        "center_support": "out_of_hull"
+      },
+      "observed": {
+        "expected_delta_mass_dex": 0.24,
+        "center_support": "out_of_hull"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02e",
+      "description": "Ordered-quantile violation: scale path invalid with reason, raw delta still emitted",
+      "expected": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "quantile_order_violation",
+        "score_mass": null
+      },
+      "observed": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "quantile_order_violation",
+        "score_mass": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-02f",
+      "description": "Mass score path: components combine in declared quadrature; raw, center, residual and score are all separate outputs",
+      "expected": {
+        "delta_mass_dex": 0.04,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": -0.16,
+        "sigma_mass_lp_dex": 0.2,
+        "sigma_mass_cig_dex": 0.08685889638065036,
+        "sigma_sys_mass_dex": 0.1,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "delta_mass_dex": 0.03999999999999915,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": -0.16000000000000086,
+        "sigma_mass_lp_dex": 0.1999999999999993,
+        "sigma_mass_cig_dex": 0.08685889638065035,
+        "sigma_sys_mass_dex": 0.1,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03a",
+      "description": "SFR-100 positive well-constrained path: point_comparable with delta",
+      "expected": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "expected_delta_sfr_100_dex": 0.3,
+        "residual_sfr_100_dex": -0.1010299956639812
+      },
+      "observed": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "expected_delta_sfr_100_dex": 0.3,
+        "residual_sfr_100_dex": -0.10102999566398119
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03b",
+      "description": "Exact-zero SFR: meaningful native value, log undefined, no point score",
+      "expected": {
+        "sfr_100_state": "nonpositive_log_undefined",
+        "sfr_100_reason": "exact_zero_native_value",
+        "delta_sfr_100_dex": null
+      },
+      "observed": {
+        "sfr_100_state": "nonpositive_log_undefined",
+        "sfr_100_reason": "exact_zero_native_value",
+        "delta_sfr_100_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03c",
+      "description": "Hypothetical documented upper limit: no rule may reference such a field; the record cannot inherit a point rank",
+      "expected": {
+        "sfr_100_state": "missing",
+        "sfr_100_reason": "missing_input",
+        "delta_sfr_100_dex": null
+      },
+      "observed": {
+        "sfr_100_state": "missing",
+        "sfr_100_reason": "missing_input",
+        "delta_sfr_100_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03d",
+      "description": "Unsupported floor: positive value whose quoted error spans zero is unscored, never a point rank",
+      "expected": {
+        "sfr_100_state": "floor_or_censoring_suspected",
+        "sfr_100_reason": "error_interval_spans_zero",
+        "delta_sfr_100_dex": null,
+        "score_sfr_100": null
+      },
+      "observed": {
+        "sfr_100_state": "floor_or_censoring_suspected",
+        "sfr_100_reason": "error_interval_spans_zero",
+        "delta_sfr_100_dex": null,
+        "score_sfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03e",
+      "description": "Missing SFR error: invalid with reason, unscored",
+      "expected": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "error_missing",
+        "delta_sfr_100_dex": null
+      },
+      "observed": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "error_missing",
+        "delta_sfr_100_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-03f",
+      "description": "LePhare -99.9 SFR value: out of domain with reason",
+      "expected": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "lephare_value_out_of_domain",
+        "delta_sfr_100_dex": null
+      },
+      "observed": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "lephare_value_out_of_domain",
+        "delta_sfr_100_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-04a",
+      "description": "Valid masses with exact-zero SFR: mass-only record retained, mass disagreement unchanged",
+      "expected": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "nonpositive_log_undefined",
+        "pop_sfr_100": false
+      },
+      "observed": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "nonpositive_log_undefined",
+        "pop_sfr_100": false
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-04b",
+      "description": "Same record with positive SFR: mass disagreement byte-identical",
+      "expected": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0
+      },
+      "observed": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-04c",
+      "description": "Same record with undefined (NULL) SFR: mass disagreement still unchanged; the record cannot vanish",
+      "expected": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "missing"
+      },
+      "observed": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "missing"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-04d",
+      "description": "Negative log SFR is not rejected by a linear positivity test: log10(1e-3) = -3 is a valid point comparison",
+      "expected": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.0
+      },
+      "observed": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.0
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-05a",
+      "description": "SFR-inst point path with full scale and score per declared quadrature",
+      "expected": {
+        "sfr_inst_state": "point_comparable",
+        "delta_sfr_inst_dex": 0.5,
+        "expected_delta_sfr_inst_dex": 0.05,
+        "residual_sfr_inst_dex": 0.45,
+        "sigma_sfr_lp_dex": 0.2,
+        "sigma_sfr_cig_inst_dex": 0.02171472409516259,
+        "sigma_sys_sfr_inst_dex": 0.2,
+        "score_sfr_inst": 1.586322143174101
+      },
+      "observed": {
+        "sfr_inst_state": "point_comparable",
+        "delta_sfr_inst_dex": 0.5,
+        "expected_delta_sfr_inst_dex": 0.05,
+        "residual_sfr_inst_dex": 0.45,
+        "sigma_sfr_lp_dex": 0.19999999999999998,
+        "sigma_sfr_cig_inst_dex": 0.02171472409516259,
+        "sigma_sys_sfr_inst_dex": 0.2,
+        "score_sfr_inst": 1.586322143174101
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-06a",
+      "description": "sSFR delta emitted with declared algebraic coupling to the mass and SFR deltas",
+      "expected": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_mass_dex": 0.0,
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "not_independent_of_mass_and_sfr": true
+      },
+      "observed": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_mass_dex": 0.0,
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "not_independent_of_mass_and_sfr": true
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-06b",
+      "description": "sSFR score stays unsupported on correlated-error grounds; the raw delta is still emitted",
+      "expected": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "score_ssfr_100": null
+      },
+      "observed": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "score_ssfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-06c",
+      "description": "sSFR is gated by its parents: a floored SFR blocks the sSFR path with an explicit reason",
+      "expected": {
+        "ssfr_100_state": "invalid_or_unsupported",
+        "ssfr_100_reason": "parent_state_not_permitted",
+        "delta_ssfr_100_dex": null
+      },
+      "observed": {
+        "ssfr_100_state": "invalid_or_unsupported",
+        "ssfr_100_reason": "parent_state_not_permitted",
+        "delta_ssfr_100_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-07a",
+      "description": "Fit-quality context passthroughs carry source values unchanged and are never ranked",
+      "expected": {
+        "ctx_chi2_lephare_total": 41.5,
+        "ctx_chi2_cigale_total": 9.5,
+        "ctx_chi2_cigale_reduced": 0.35,
+        "ctx_nbfilt": 11
+      },
+      "observed": {
+        "ctx_chi2_lephare_total": 41.5,
+        "ctx_chi2_cigale_total": 9.5,
+        "ctx_chi2_cigale_reduced": 0.35,
+        "ctx_nbfilt": 11
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-08a",
+      "description": "Non-galaxy types never enter scored populations; the raw delta stays an auditable measurement, never a ranked one",
+      "expected": {
+        "selection_type0": false,
+        "pop_mass": false,
+        "delta_mass_dex": 1.0
+      },
+      "observed": {
+        "selection_type0": false,
+        "pop_mass": false,
+        "delta_mass_dex": 1.0
+      },
+      "pass": true
+    }
+  ],
+  "fit_requests": [
+    {
+      "id": "FX-P1",
+      "description": "A fit request containing a validation or holdout catalog_id is rejected",
+      "expected": "rejected",
+      "observed": [
+        "validation or holdout catalog_id 3 in fit request",
+        "validation or holdout catalog_id 4 in fit request"
+      ],
+      "pass": true
+    },
+    {
+      "id": "FX-P2",
+      "description": "One source cannot appear in two partitions",
+      "expected": "rejected",
+      "observed": [
+        "catalog_id 5 appears in two partitions",
+        "validation or holdout catalog_id 5 in fit request"
+      ],
+      "pass": true
+    },
+    {
+      "id": "FX-P3",
+      "description": "One source cannot appear as multiple independent training rows",
+      "expected": "rejected",
+      "observed": [
+        "duplicate training rows for catalog_id 6"
+      ],
+      "pass": true
+    },
+    {
+      "id": "FX-P4",
+      "description": "A clean development-only fit request is accepted",
+      "expected": "accepted",
+      "observed": [
+        "accepted"
+      ],
+      "pass": true
+    }
+  ],
+  "mutations": {
+    "M1_swap_representation": {
+      "applied": true,
+      "description": "Treat the CIGALE linear mass as already logarithmic (swap log/linear metadata)",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "lephare.mass_med - cigale.mass"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
+      "observed_reasons": [
+        "case_mismatch:FX-01a:delta_mass_dex",
+        "case_mismatch:FX-01c:delta_mass_dex",
+        "case_mismatch:FX-02a:delta_mass_dex",
+        "case_mismatch:FX-02a:residual_mass_dex",
+        "case_mismatch:FX-02b:delta_mass_dex",
+        "case_mismatch:FX-02b:residual_mass_dex",
+        "case_mismatch:FX-02c1:delta_mass_dex",
+        "case_mismatch:FX-02c1:residual_mass_dex",
+        "case_mismatch:FX-02c2:delta_mass_dex",
+        "case_mismatch:FX-02c2:residual_mass_dex",
+        "case_mismatch:FX-02e:delta_mass_dex",
+        "case_mismatch:FX-02f:delta_mass_dex",
+        "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-04a:delta_mass_dex",
+        "case_mismatch:FX-04b:delta_mass_dex",
+        "case_mismatch:FX-04c:delta_mass_dex",
+        "case_mismatch:FX-06a:delta_mass_dex",
+        "case_mismatch:FX-08a:delta_mass_dex",
+        "delta_formula_identity:delta_mass_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M2_drop_censoring_state": {
+      "applied": true,
+      "description": "Drop the floor_or_censoring_suspected rule from the sfr_100 machine",
+      "action": {
+        "kind": "drop_state_rule",
+        "machine": "sfr_100_point",
+        "state": "floor_or_censoring_suspected"
+      },
+      "intended_reason": "required_state_missing:floor_or_censoring_suspected",
+      "observed_reasons": [
+        "case_mismatch:FX-03d:delta_sfr_100_dex",
+        "case_mismatch:FX-03d:sfr_100_reason",
+        "case_mismatch:FX-03d:sfr_100_state",
+        "case_mismatch:FX-06c:delta_ssfr_100_dex",
+        "case_mismatch:FX-06c:ssfr_100_reason",
+        "case_mismatch:FX-06c:ssfr_100_state",
+        "required_state_missing:floor_or_censoring_suspected"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M3_allow_heldout_fit": {
+      "applied": true,
+      "description": "Remove the fit-request rejection rule from partition_use",
+      "action": {
+        "kind": "drop_partition_rule",
+        "match": "validation or holdout catalog_id is rejected"
+      },
+      "intended_reason": "fit_request_rule_missing",
+      "observed_reasons": [
+        "fit_request_rule_missing"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M4_chi2_quotient": {
+      "applied": true,
+      "description": "Reintroduce the chi-square quotient under a new name",
+      "action": {
+        "kind": "add_output",
+        "output": {
+          "name": "ctx_fit_quality_ratio",
+          "kind": "context_passthrough",
+          "formula": "lephare.chi2_best / cigale.chi2_red_best_fit",
+          "context_only": true,
+          "rankable": false,
+          "permitted_predictor": false
+        }
+      },
+      "intended_reason": "chi2_quotient",
+      "observed_reasons": [
+        "chi2_quotient"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M5_identity_digest_change": {
+      "applied": true,
+      "description": "Change a tracked evidence digest in the identity record (scratch-copy identity mutation)",
+      "action": {
+        "kind": "change_identity_hash",
+        "path": "tracked_evidence_files[0].sha256",
+        "value": "deadbeef"
+      },
+      "intended_reason": "identity_content_mismatch",
+      "observed_reasons": [
+        "identity_content_mismatch"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M6_hidden_shift": {
+      "applied": true,
+      "description": "Bake a universal 0.24 dex subtraction into the raw mass delta",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "lephare.mass_med - log10(cigale.mass) - 0.24"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
+      "observed_reasons": [
+        "case_mismatch:FX-01a:delta_mass_dex",
+        "case_mismatch:FX-01c:delta_mass_dex",
+        "case_mismatch:FX-02a:delta_mass_dex",
+        "case_mismatch:FX-02a:residual_mass_dex",
+        "case_mismatch:FX-02b:delta_mass_dex",
+        "case_mismatch:FX-02b:residual_mass_dex",
+        "case_mismatch:FX-02c1:delta_mass_dex",
+        "case_mismatch:FX-02c1:residual_mass_dex",
+        "case_mismatch:FX-02c2:delta_mass_dex",
+        "case_mismatch:FX-02c2:residual_mass_dex",
+        "case_mismatch:FX-02e:delta_mass_dex",
+        "case_mismatch:FX-02f:delta_mass_dex",
+        "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-04a:delta_mass_dex",
+        "case_mismatch:FX-04b:delta_mass_dex",
+        "case_mismatch:FX-04c:delta_mass_dex",
+        "case_mismatch:FX-06a:delta_mass_dex",
+        "case_mismatch:FX-08a:delta_mass_dex",
+        "delta_formula_identity:delta_mass_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M7_reverse_definition": {
+      "applied": true,
+      "description": "Reverse the delta sign definition (CIGALE minus LePhare)",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "log10(cigale.mass) - lephare.mass_med"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
+      "observed_reasons": [
+        "case_mismatch:FX-01a:delta_mass_dex",
+        "case_mismatch:FX-02a:delta_mass_dex",
+        "case_mismatch:FX-02a:residual_mass_dex",
+        "case_mismatch:FX-02b:delta_mass_dex",
+        "case_mismatch:FX-02b:residual_mass_dex",
+        "case_mismatch:FX-02c1:delta_mass_dex",
+        "case_mismatch:FX-02c1:residual_mass_dex",
+        "case_mismatch:FX-02c2:delta_mass_dex",
+        "case_mismatch:FX-02c2:residual_mass_dex",
+        "case_mismatch:FX-02e:delta_mass_dex",
+        "case_mismatch:FX-02f:delta_mass_dex",
+        "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-08a:delta_mass_dex",
+        "delta_formula_identity:delta_mass_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M8_forbidden_covariate": {
+      "applied": true,
+      "description": "Admit an individual mass estimate as a centering covariate",
+      "action": {
+        "kind": "add_center_covariate",
+        "center": "mass_center",
+        "covariate": "lephare.mass_med"
+      },
+      "intended_reason": "forbidden_covariate:lephare.mass_med",
+      "observed_reasons": [
+        "forbidden_covariate:lephare.mass_med"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M9_specz_covariate": {
+      "applied": true,
+      "description": "Admit spec-z availability as a centering covariate",
+      "action": {
+        "kind": "add_center_covariate",
+        "center": "mass_center",
+        "covariate": "analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+      },
+      "intended_reason": "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy",
+      "observed_reasons": [
+        "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+      ],
+      "exit_code": 1,
+      "caught": true
+    }
+  },
+  "failures": []
+}

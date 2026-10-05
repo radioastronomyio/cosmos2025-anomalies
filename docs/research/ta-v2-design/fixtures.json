@@ -1,0 +1,754 @@
+{
+  "provenance": "synthetic",
+  "note": "Every record, model parameter, and expected number in this file is synthetic. Nothing here is astrophysical validation, measured calibration, a power estimate, or a real-data ranking. Center and scale model parameters are declared synthetic scenarios, not fitted catalog quantities.",
+  "declared_center_scenarios": {
+    "SYNTH-C1": {
+      "model_kind": "C1-conditional-binned-median",
+      "provenance": "synthetic",
+      "z_bin_edges": [
+        0.0,
+        1.0,
+        6.0
+      ],
+      "mag_bin_edges": [
+        0.0,
+        24.0,
+        40.0
+      ],
+      "cell_values": {
+        "0|0": 0.2,
+        "0|1": 0.22,
+        "1|0": 0.26,
+        "1|1": 0.28
+      },
+      "z_only_values": {
+        "0": 0.21,
+        "1": 0.27
+      },
+      "global_constant": 0.24,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-C0": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 1.0,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-S0": {
+      "model_kind": "S0-constant",
+      "provenance": "synthetic",
+      "constant_value_inst": 0.05,
+      "constant_value_100": 0.3,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    }
+  },
+  "cases": [
+    {
+      "id": "FX-01a",
+      "description": "LePhare log mass 10 against CIGALE linear mass 1e9 gives +1 dex",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0
+      }
+    },
+    {
+      "id": "FX-01c",
+      "description": "Equal physical masses give zero",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900003,
+        "lephare.type": 0,
+        "lephare.mass_med": 9.0,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-01e",
+      "description": "Undocumented finite -99.9 value is out of domain with an explicit reason, never NULL-inferred",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900005,
+        "lephare.type": 0,
+        "lephare.mass_med": -99.9,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "mass_point_state": "invalid_or_unsupported",
+        "mass_point_reason": "lephare_value_out_of_domain",
+        "delta_mass_dex": null
+      }
+    },
+    {
+      "id": "FX-01f",
+      "description": "Exact-zero CIGALE linear mass: log undefined, zero is a meaningful native value",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900006,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 0.0
+      },
+      "expect": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "exact_zero_native_value",
+        "delta_mass_dex": null
+      }
+    },
+    {
+      "id": "FX-01g",
+      "description": "Negative CIGALE linear mass (present in the catalog profile): log undefined with the negative reason",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900007,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": -500000000.0
+      },
+      "expect": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "mass_point_reason": "negative_native_value",
+        "delta_mass_dex": null
+      }
+    },
+    {
+      "id": "FX-02a",
+      "description": "Same raw delta in cell (z bin 0, mag bin 0) with center 0.20: raw unchanged, residual +0.04",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900010,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.24,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.04,
+        "center_support": "cell"
+      }
+    },
+    {
+      "id": "FX-02b",
+      "description": "Same raw delta in cell (z bin 1, mag bin 1) with center 0.28: different residual, unchanged raw delta",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900011,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "lephare.zpdf_med": 2.0,
+        "photometry_primary.mag_auto_f444w": 25.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.24,
+        "expected_delta_mass_dex": 0.28,
+        "residual_mass_dex": -0.04,
+        "center_support": "cell"
+      }
+    },
+    {
+      "id": "FX-02c1",
+      "description": "Uniformly biased synthetic sample (delta +1.00) centers to ~0 residual under a constant center equal to the bias",
+      "scenario": "SYNTH-C0",
+      "record": {
+        "catalog_id": 900012,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "delta_mass_dex": 1.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-02c2",
+      "description": "Injected isolated deviation (+5.00 dex) is not erased by the center",
+      "scenario": "SYNTH-C0",
+      "record": {
+        "catalog_id": 900013,
+        "lephare.type": 0,
+        "lephare.mass_med": 14.0,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "delta_mass_dex": 5.0,
+        "expected_delta_mass_dex": 1.0,
+        "residual_mass_dex": 4.0
+      }
+    },
+    {
+      "id": "FX-02d",
+      "description": "Out-of-hull covariate falls back to the global constant with an explicit support flag",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900014,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 45.0
+      },
+      "expect": {
+        "expected_delta_mass_dex": 0.24,
+        "center_support": "out_of_hull"
+      }
+    },
+    {
+      "id": "FX-02e",
+      "description": "Ordered-quantile violation: scale path invalid with reason, raw delta still emitted",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900015,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 9.8,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "mass_point_state": "point_valid",
+        "delta_mass_dex": 1.0,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "quantile_order_violation",
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-02f",
+      "description": "Mass score path: components combine in declared quadrature; raw, center, residual and score are all separate outputs",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900016,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.04,
+        "cigale.mass": 10000000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.04,
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": -0.16,
+        "sigma_mass_lp_dex": 0.2,
+        "sigma_mass_cig_dex": 0.08685889638065036,
+        "sigma_sys_mass_dex": 0.1,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-03a",
+      "description": "SFR-100 positive well-constrained path: point_comparable with delta",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900020,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "expected_delta_sfr_100_dex": 0.3,
+        "residual_sfr_100_dex": -0.1010299956639812
+      }
+    },
+    {
+      "id": "FX-03b",
+      "description": "Exact-zero SFR: meaningful native value, log undefined, no point score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900021,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 0.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_state": "nonpositive_log_undefined",
+        "sfr_100_reason": "exact_zero_native_value",
+        "delta_sfr_100_dex": null
+      }
+    },
+    {
+      "id": "FX-03c",
+      "description": "Hypothetical documented upper limit: no rule may reference such a field; the record cannot inherit a point rank",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900022,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": null,
+        "cigale.sfr_100myr_documented_upper_limit": 0.0001
+      },
+      "expect": {
+        "sfr_100_state": "missing",
+        "sfr_100_reason": "missing_input",
+        "delta_sfr_100_dex": null
+      },
+      "asserts_no_rule_references": "cigale.sfr_100myr_documented_upper_limit"
+    },
+    {
+      "id": "FX-03d",
+      "description": "Unsupported floor: positive value whose quoted error spans zero is unscored, never a point rank",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900023,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 0.05,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_state": "floor_or_censoring_suspected",
+        "sfr_100_reason": "error_interval_spans_zero",
+        "delta_sfr_100_dex": null,
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-03e",
+      "description": "Missing SFR error: invalid with reason, unscored",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900024,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": null
+      },
+      "expect": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "error_missing",
+        "delta_sfr_100_dex": null
+      }
+    },
+    {
+      "id": "FX-03f",
+      "description": "LePhare -99.9 SFR value: out of domain with reason",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900025,
+        "lephare.type": 0,
+        "lephare.sfr_med": -99.9,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_state": "invalid_or_unsupported",
+        "sfr_100_reason": "lephare_value_out_of_domain",
+        "delta_sfr_100_dex": null
+      }
+    },
+    {
+      "id": "FX-04a",
+      "description": "Valid masses with exact-zero SFR: mass-only record retained, mass disagreement unchanged",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900030,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "cigale.sfr_100myr": 0.0,
+        "lephare.sfr_med": 0.5
+      },
+      "expect": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "nonpositive_log_undefined",
+        "pop_sfr_100": false
+      }
+    },
+    {
+      "id": "FX-04b",
+      "description": "Same record with positive SFR: mass disagreement byte-identical",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900031,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.sfr_med": 0.5
+      },
+      "expect": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-04c",
+      "description": "Same record with undefined (NULL) SFR: mass disagreement still unchanged; the record cannot vanish",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900032,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "cigale.sfr_100myr": null
+      },
+      "expect": {
+        "pop_mass": true,
+        "delta_mass_dex": 0.0,
+        "sfr_100_state": "missing"
+      }
+    },
+    {
+      "id": "FX-04d",
+      "description": "Negative log SFR is not rejected by a linear positivity test: log10(1e-3) = -3 is a valid point comparison",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900033,
+        "lephare.type": 0,
+        "lephare.sfr_med": -3.0,
+        "cigale.sfr_100myr": 0.001,
+        "cigale.sfr_100myr_err": 1e-05
+      },
+      "expect": {
+        "sfr_100_state": "point_comparable",
+        "delta_sfr_100_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-05a",
+      "description": "SFR-inst point path with full scale and score per declared quadrature",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900040,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_inst": 1.0,
+        "cigale.sfr_inst_err": 0.05
+      },
+      "expect": {
+        "sfr_inst_state": "point_comparable",
+        "delta_sfr_inst_dex": 0.5,
+        "expected_delta_sfr_inst_dex": 0.05,
+        "residual_sfr_inst_dex": 0.45,
+        "sigma_sfr_lp_dex": 0.2,
+        "sigma_sfr_cig_inst_dex": 0.02171472409516259,
+        "sigma_sys_sfr_inst_dex": 0.2,
+        "score_sfr_inst": 1.586322143174101
+      }
+    },
+    {
+      "id": "FX-06a",
+      "description": "sSFR delta emitted with declared algebraic coupling to the mass and SFR deltas",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900050,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": -9.0
+      },
+      "expect": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_mass_dex": 0.0,
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "not_independent_of_mass_and_sfr": true
+      }
+    },
+    {
+      "id": "FX-06b",
+      "description": "sSFR score stays unsupported on correlated-error grounds; the raw delta is still emitted",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900051,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": -9.0
+      },
+      "expect": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.6989700043360187,
+        "score_ssfr_100": null
+      }
+    },
+    {
+      "id": "FX-06c",
+      "description": "sSFR is gated by its parents: a floored SFR blocks the sSFR path with an explicit reason",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 900052,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 0.05,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": -9.0
+      },
+      "expect": {
+        "ssfr_100_state": "invalid_or_unsupported",
+        "ssfr_100_reason": "parent_state_not_permitted",
+        "delta_ssfr_100_dex": null
+      }
+    },
+    {
+      "id": "FX-07a",
+      "description": "Fit-quality context passthroughs carry source values unchanged and are never ranked",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900060,
+        "lephare.type": 0,
+        "lephare.chi2_best": 41.5,
+        "cigale.chi2_best_fit": 9.5,
+        "cigale.chi2_red_best_fit": 0.35,
+        "lephare.nbfilt": 11
+      },
+      "expect": {
+        "ctx_chi2_lephare_total": 41.5,
+        "ctx_chi2_cigale_total": 9.5,
+        "ctx_chi2_cigale_reduced": 0.35,
+        "ctx_nbfilt": 11
+      }
+    },
+    {
+      "id": "FX-08a",
+      "description": "Non-galaxy types never enter scored populations; the raw delta stays an auditable measurement, never a ranked one",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 900070,
+        "lephare.type": 2,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0
+      },
+      "expect": {
+        "selection_type0": false,
+        "pop_mass": false,
+        "delta_mass_dex": 1.0
+      }
+    }
+  ],
+  "fit_requests": [
+    {
+      "id": "FX-P1",
+      "description": "A fit request containing a validation or holdout catalog_id is rejected",
+      "training_rows": [
+        {
+          "catalog_id": 1
+        },
+        {
+          "catalog_id": 2
+        },
+        {
+          "catalog_id": 3
+        },
+        {
+          "catalog_id": 4
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 1,
+          "split": "development"
+        },
+        {
+          "catalog_id": 2,
+          "split": "development"
+        },
+        {
+          "catalog_id": 3,
+          "split": "validation"
+        },
+        {
+          "catalog_id": 4,
+          "split": "holdout"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "validation or holdout catalog_id"
+    },
+    {
+      "id": "FX-P2",
+      "description": "One source cannot appear in two partitions",
+      "training_rows": [
+        {
+          "catalog_id": 5
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 5,
+          "split": "development"
+        },
+        {
+          "catalog_id": 5,
+          "split": "validation"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "appears in two partitions"
+    },
+    {
+      "id": "FX-P3",
+      "description": "One source cannot appear as multiple independent training rows",
+      "training_rows": [
+        {
+          "catalog_id": 6
+        },
+        {
+          "catalog_id": 6
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 6,
+          "split": "development"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "duplicate training rows"
+    },
+    {
+      "id": "FX-P4",
+      "description": "A clean development-only fit request is accepted",
+      "training_rows": [
+        {
+          "catalog_id": 7
+        },
+        {
+          "catalog_id": 8
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 7,
+          "split": "development"
+        },
+        {
+          "catalog_id": 8,
+          "split": "development"
+        }
+      ],
+      "expect": "accepted"
+    }
+  ],
+  "mutations": {
+    "M1_swap_representation": {
+      "description": "Treat the CIGALE linear mass as already logarithmic (swap log/linear metadata)",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "lephare.mass_med - cigale.mass"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex"
+    },
+    "M2_drop_censoring_state": {
+      "description": "Drop the floor_or_censoring_suspected rule from the sfr_100 machine",
+      "action": {
+        "kind": "drop_state_rule",
+        "machine": "sfr_100_point",
+        "state": "floor_or_censoring_suspected"
+      },
+      "intended_reason": "required_state_missing:floor_or_censoring_suspected"
+    },
+    "M3_allow_heldout_fit": {
+      "description": "Remove the fit-request rejection rule from partition_use",
+      "action": {
+        "kind": "drop_partition_rule",
+        "match": "validation or holdout catalog_id is rejected"
+      },
+      "intended_reason": "fit_request_rule_missing"
+    },
+    "M4_chi2_quotient": {
+      "description": "Reintroduce the chi-square quotient under a new name",
+      "action": {
+        "kind": "add_output",
+        "output": {
+          "name": "ctx_fit_quality_ratio",
+          "kind": "context_passthrough",
+          "formula": "lephare.chi2_best / cigale.chi2_red_best_fit",
+          "context_only": true,
+          "rankable": false,
+          "permitted_predictor": false
+        }
+      },
+      "intended_reason": "chi2_quotient"
+    },
+    "M5_identity_digest_change": {
+      "description": "Change a tracked evidence digest in the identity record (scratch-copy identity mutation)",
+      "action": {
+        "kind": "change_identity_hash",
+        "path": "tracked_evidence_files[0].sha256",
+        "value": "deadbeef"
+      },
+      "intended_reason": "identity_content_mismatch"
+    },
+    "M6_hidden_shift": {
+      "description": "Bake a universal 0.24 dex subtraction into the raw mass delta",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "lephare.mass_med - log10(cigale.mass) - 0.24"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex"
+    },
+    "M7_reverse_definition": {
+      "description": "Reverse the delta sign definition (CIGALE minus LePhare)",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_mass_dex",
+        "formula": "log10(cigale.mass) - lephare.mass_med"
+      },
+      "intended_reason": "case_mismatch:FX-01a:delta_mass_dex"
+    },
+    "M8_forbidden_covariate": {
+      "description": "Admit an individual mass estimate as a centering covariate",
+      "action": {
+        "kind": "add_center_covariate",
+        "center": "mass_center",
+        "covariate": "lephare.mass_med"
+      },
+      "intended_reason": "forbidden_covariate:lephare.mass_med"
+    },
+    "M9_specz_covariate": {
+      "description": "Admit spec-z availability as a centering covariate",
+      "action": {
+        "kind": "add_center_covariate",
+        "center": "mass_center",
+        "covariate": "analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+      },
+      "intended_reason": "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+    }
+  }
+}
