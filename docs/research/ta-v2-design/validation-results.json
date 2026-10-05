@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-05T16:35:13.039171+00:00",
+  "generated_at": "2026-10-05T16:40:31.923136+00:00",
   "command": "python /opt/agents/repos/cosmos2025-anomalies/docs/src/inspection/validate_ta_v2_design.py",
   "mode": "full",
   "validator": "src/inspection/validate_ta_v2_design.py",

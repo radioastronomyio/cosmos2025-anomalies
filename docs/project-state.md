@@ -48,6 +48,13 @@ S5-Q01 through S5-Q05 conditions. The sealed database rows retain the frozen
 defined or authorized; that mechanical value does not prohibit work approved
 under the recorded conditions.
 
+The proposed T_A v2 scientific design contract (spec P2R-06) is published
+at `research/ta-v2-design/` — inputs bound, feature contract, synthetic
+validation, evaluation protocol, and the review surface TA2-Q01..Q06 —
+pending Don's answers; implementation, fitting, installation, and
+publication await a later named approval. The frozen T_A design inputs in
+this section are unchanged by that proposal.
+
 The retired `cosmos2025.catalog` v1 objects remain a read-only comparison
 baseline. No DDL or DML runs against either database outside an approved
 central-queue spec.

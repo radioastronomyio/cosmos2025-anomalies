@@ -288,6 +288,85 @@ Validation (gate 6.4 checklist):
 
 Gate 6.4 checkpoint: this commit.
 
+## Gate 6.5: closeout
+
+- Bounded `docs/project-state.md` entry added (links the proposed design as
+  pending approval; frozen facts unchanged); `docs/README.md` research row
+  updated; `spec/2026-10/` archive copy added byte-identical (SHA-256
+  `04bb896050114207491603f7fc08971b59be274501454532e5c7ed6e5f42ecf0`),
+  `spec/2026-10/README.md` and `spec/README.md` indexes updated;
+  `work-logs/README.md` row added; this worklog sealed.
+- Central spec moved to the central month archive
+  `/opt/agents/repos/spec/2026-10/` (byte-identical; central archive
+  authoritative), per the repo's existing pattern.
+- Registry row appended to `/opt/agents/repos/work-logs/work-registry.csv`
+  after the final commit, with `model` equal to the `Model:` trailer
+  (`kilo/zai-coding/glm-5.3`).
+- Remote operations (authorized by current AGENTS.md and the spec's
+  lifecycle note): push `task/p2r06-ta-v2-design`, open one pull request
+  carrying `Closes #4, closes #5`. No merge; merges only on Don's explicit
+  instruction. The spec's anticipated AGENTS.md conflict at lines 72/106
+  was already resolved on `main` by fix-round commit `1244bf0`; recorded
+  in the Summary above, no AGENTS.md edit made.
+- Scope note: `docs/research/specz-science-p2r05/derived-schema-contract.md`
+  and `work-logs/worklog-2026-10-05-p2r05-adoption-answers.md` are outside
+  spec section 5.2's modify list; both edits were explicitly instructed by
+  the dispatch (issues #4/#5) and are recorded here as dispatch-authorized
+  surface. All other changes lie within section 5.2. No raw holding,
+  source table, P2R-05 product, production tension formula, or credential
+  was touched; no database statement of any kind ran in this unit.
+- No spec defects encountered; no stop condition arose; no lane was
+  stopped.
+
+### Per-gate commits
+
+| Gate | Commit |
+|---|---|
+| 6.1a (issues #4/#5, dispatch-authorized) | `433ffad615aaf43fc20f3300759a4f47e9a622c2` |
+| 6.1 | `5b395c41ceb0bfb7600d28b774af2a37f54e2a7a` |
+| 6.2 | `56b3dc98d636b4dfacc876074717fcf09014c27f` |
+| 6.3 | `8eae442b6482b43db6c78e417eda493d6f5b2a98` |
+| 6.4 | `66fa849c1c3ceb32a53efa0c681eb34d66332bd5` |
+| 6.5 | the commit carrying this closeout checkpoint |
+
+### Final validation
+
+- `pytest tests/test_ta_v2_design_contract.py -v`: 26/26 passed.
+- `python src/inspection/validate_ta_v2_design.py`: cases 28/28, fit
+  requests 4/4, mutations caught 9/9, exit 0; results tracked at
+  `docs/research/ta-v2-design/validation-results.json`.
+- Change surface verified against spec section 5.2 plus the two
+  dispatch-authorized files (`git diff --name-only main..HEAD`).
+- All new `docs/research/ta-v2-design/*.md` pass `check_frontmatter.py`.
+
+Runtime facts: ML01; system Python 3.12.3 with PyYAML for the validator,
+pytest 9.x via `/opt/agents/venv` for the suite. Elapsed time and token
+usage unavailable from this runtime; recorded as such in the registry row.
+
+## Files changed
+
+| Surface | Change |
+|---|---|
+| `docs/research/ta-v2-design/` (README, input-contract, input-identity.json, feature-contract.yaml, scientific-design, fixtures.json, validation-results.json, evaluation-protocol, review) | Created; the proposed design contract and its evidence |
+| `src/inspection/validate_ta_v2_design.py`, `src/inspection/README.md` | Pure validator and index row |
+| `tests/test_ta_v2_design_contract.py`, `tests/README.md` | Contract suite and index section |
+| `docs/research/README.md`, `docs/README.md`, `docs/project-state.md` | Index/status updates (bounded) |
+| `docs/research/specz-science-p2r05/derived-schema-contract.md` | Adoption-state reconciliation (dispatch, issue #4) |
+| `work-logs/worklog-2026-10-05-p2r05-adoption-answers.md` | Dated correction note (dispatch, issue #5) |
+| `spec/2026-10/`, `spec/README.md`, `work-logs/README.md`, this worklog | Archive, indexes, per-gate checkpoints |
+| Central queue `/opt/agents/repos/spec/` | Spec moved to `2026-10/` month archive; registry row appended |
+
+## Next steps
+
+Handoff: Don answers TA2-Q01 through TA2-Q06 in
+`docs/research/ta-v2-design/review.md`. Implementation, fitting, database
+installation, production scoring, and publication all await that approval
+and a later named implementation unit. The PR stays unmerged until Don
+instructs the merge in his own words.
+
+<!-- Agent: kilo; Runtime: Kilo CLI; Model: kilo/zai-coding/glm-5.3; Session: interactive -->
+
+
 
 
 
