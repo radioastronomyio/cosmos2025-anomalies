@@ -43,6 +43,7 @@ Repository archive/index contents:
 |------|-------------|
 | [spec/2026-08/](2026-08/) | Completed repository-local spec archive; active dispatch remains central |
 | [spec/2026-09/](2026-09/) | P2R-05 spectroscopic science surface (byte-identical archive copies; central month archive authoritative) |
+| [spec/2026-10/](2026-10/) | P2R-05 evidence errata, explicitly dispatched from staging; local completion and independent review handoff |
 
 ---
 

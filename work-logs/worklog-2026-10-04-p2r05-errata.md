@@ -4,7 +4,7 @@ description: "Gate checkpoints for repairs to evidence code and documents"
 author: "Codex"
 date: "2026-10-04"
 version: "1.0"
-status: "partial"
+status: "completed"
 tags:
   - type: worklog
   - domain: [astronomy, documentation]
@@ -13,10 +13,10 @@ runtime: "Codex desktop"
 runtime_version: "unreported"
 model: "unreported"
 hostname: "ML01"
-spec_ref: "../staging/2026-10-04-astra-p2r05-errata/2026-10-04-cosmos2025-spec-01-p2r05-errata.md"
+spec_ref: "../spec/2026-10/2026-10-04-cosmos2025-spec-01-p2r05-errata.md"
 repo: "cosmos2025-anomalies"
 category: "astronomy"
-duration_seconds: null
+duration_seconds: 1466
 token_usage_source: "unavailable"
 tokens_total:
 tokens_input:
@@ -37,7 +37,7 @@ related_documents:
 
 | Attribute | Value |
 |---|---|
-| Status | In progress |
+| Status | Completed locally; Claude review pending |
 | Agent | Codex desktop; exact runtime/model identifier unreported |
 | Host | ML01; shared venv Python 3.12.3, psycopg 3.3.3, pytest 9.0.2 |
 | Authorization | Don, coordinator chat, 2026-10-04 21:42 ET “Yes”, conveyed by dispatch |
@@ -48,8 +48,9 @@ related_documents:
 
 Objective: repair AR-F01 through AR-F05 without altering the sealed product.
 
-Outcome: checkpoints below; scientific adoption and upstream sending remain
-Don's decisions. No new scientific decision is made by this unit.
+Outcome: all five errata gates pass with local commits and staged review
+evidence. Scientific adoption and upstream sending remain Don's decisions.
+No new scientific decision is made by this unit.
 
 ## 1. Work completed
 
@@ -143,9 +144,70 @@ to main. Coverage reproduction now specifies errata staging; scratch-database
 negative controls are clearly historical and were not rerun. Diff whitespace
 checks pass. Gate 3 validation passed; adoption remains pending.
 
+
+### Gate 4: upstream draft and local closeout (AR-F05)
+
+Gate 3 commit: `c44e33003ba36ab3a74a4d7d0a8e0daf5309469c`.
+
+Applied all four report corrections: separate unique/all lookup counts and
+227 same-source correspondences; zero stored-coordinate identity versus
+nonzero corrected-coordinate geometry; distinct defective and crossmatch joins;
+full file hashes, held checkout/release refs, exact SQL and output-safe local
+reproduction. Updated the existing S5-F10 summary to match this corrected
+report, with a visible AR-F05 erratum, so the review does not retain the same
+misleading compilation-wide non-resolution shorthand. No question or policy
+text changed. The report remains local and unsent.
+
+Executed the three SQL blocks and the exact embedded reproduction program.
+`gate4-upstream-queries.json` and `upstream-query-rerun.json` agree.
+`gate4-upstream-validation.json` matches independent counts exactly and angular
+statistics within 1e-7 arcsec, confirms full manifest pins, and verifies the
+local HEAD/release identities and identical FITS pointer blobs. No raw FITS
+rehash, checkout change, download or remote operation occurred.
+
+Closeout follows spec-closeout's local-only exception. The requested staged
+spec is retained and a byte-identical copy is archived with an interior README
+and archive index. Corrected its relative reference links before archival;
+its scope and acceptance criteria are unchanged. Worklog and archive indexes
+were checked for valid paths. No parent spec, worklog or registry record changed.
+`review-handoff.md` gives Claude five pending closed questions with evidence.
+
+`final-validation.json` confirms allowed changed paths, unchanged protected
+files and live seal metadata, byte-identical policy/S5 sections, exact archive
+copy, matching portable reproduction, valid Markdown frontmatter/links and no
+deleted paths. Code was unchanged after the 55-test passing suite and static
+check. Full content guards passed after both code gates; no additional build
+or broad write-capable test suite was needed. No stop condition arose.
+
+#### Per-gate commits
+
+| Gate | Commit |
+|---|---|
+| 0 | `bb00127580a6c9d01d30324011924718891455a8` |
+| 1 | `ba1582371d512c7fabaf89dd59c338f651715e4e` |
+| 2 | `23d83bbe753e47a6787f25e05729dec7b4997c55` |
+| 3 | `c44e33003ba36ab3a74a4d7d0a8e0daf5309469c` |
+| 4 | The commit carrying this closeout checkpoint; full SHA in staged `closeout.json` and the appended registry summary |
+
+Runtime facts: shared venv Python 3.12.3, psycopg 3.3.3, pytest 9.0.2.
+Elapsed 1466 seconds from staged preflight to this closeout preparation;
+this excludes earlier context loading. The runtime does not expose an exact
+model/version string or trustworthy token/cost totals, so those are recorded
+as unreported/unavailable. The closeout attestation and registry use the same
+model value. The registry row is appended after the final local commit;
+staged `closeout.json` records its receipt and all five full commit SHAs.
+
 ## 2. Files changed
 
-Gate 0: new worklog, worklog index, and staged spec/README/check evidence.
+| Surface | Change |
+|---|---|
+| `src/features/specz_science/coverage.py` | Two counter accumulations |
+| `src/features/specz_science/check_installed_product.py` | Explicit modes and sealed-metadata verification |
+| `tests/test_specz_science_coverage.py`, `tests/test_specz_science_installed_check.py` | Focused synthetic regressions and SELECT-only/CLI checks |
+| `docs/research/specz-science-p2r05/review.md`, `coverage-baseline.md`, `upstream-report-draft.md` | Visible errata and accurate reproducible report |
+| `spec/2026-10/`, `spec/README.md` | This new spec's archive and indexes |
+| This worklog and `work-logs/README.md` | Per-gate checkpoints and closeout |
+| Errata staging | Spec, check scripts, retained red/green logs, exact query outputs, identity guards, README and review handoff |
 
 ## 3. Issues and stop conditions
 
@@ -154,7 +216,10 @@ No scientific calibration or outcome evaluation is authorized or performed.
 
 ## 4. Next steps
 
-Complete gates 1 through 4, then present the local branch and staged review
-surface for Claude. Do not publish or adopt the product.
+Handoff: Claude reviews `staging/2026-10-04-astra-p2r05-errata/review-handoff.md`
+and the local branch against main. Don owns disposition, push and any later
+merge or upstream send. All S5 answers remain pending; this unit does not
+authorize T_A v2 or scientific use. No contact, paid model invocation, deletion
+or recycle action occurred.
 
 <!-- Agent: codex; Runtime: Codex desktop; Model: unreported; Session: interactive -->

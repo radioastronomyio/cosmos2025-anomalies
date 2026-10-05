@@ -132,7 +132,6 @@ exclusion reasons and their counts are in
 [`coverage-baseline.md`](coverage-baseline.md); reasons are retained per
 source in `exclusion_reasons`, never collapsed.
 
-
 Among the 20,100 secure-preferred sources, 681 have either P-04 veto;
 19,419 remain qualified before photometric type. The 722 catalog-wide veto
 count also includes 41 without a secure preferred entry. Secure-preferred
@@ -165,7 +164,8 @@ selected.
   the 19,419 otherwise-qualified sources, 349 carry LePHARE type 1 and are
   excluded, and 259 of the type-0/type-2 members carry broad-line
   evidence routing them out of primary use. The pre-type broad-line total
-  is 261, including two type-1 sources already counted among the 349 excluded. Performance claims made on
+  is 261, including two type-1 sources already counted among the 349 excluded.
+  Performance claims made on
   these populations apply to the selected LePHARE-classified samples and
   cannot establish unconditional performance across stellar/QSO
   classification failures or the full spectroscopic population. A passing
@@ -266,11 +266,12 @@ module, not a spec defect; caught before any seal. Evidence: seal record
 `recovery_history` in the run row. *Closed question: none.*
 
 **S5-F10 — The upstream incompatibility is confirmed and reportable.**
-The catalog's `id_specz_khostovan25` does not resolve against the held
-DR1.1 compilation (24,364/37,219 coincidental resolutions; field-scale
-geometry, median 4,054.3415558937 arcsec on the documented all-links
-basis; value range consistent with an earlier release's renumbering,
-which remains an unconfirmed hypothesis). Evidence:
+The catalog's carried links resolve numerically in `_unique` for
+24,364/37,219 values and in `_all` for all 37,219. Only 227 `_all` matches
+name the same catalog source through `Id_COSMOS25`; carried-link geometry
+has median 4,054.3415558937 arcsec on the documented all-links basis.
+An earlier release's renumbering is one unconfirmed explanation, not an
+established cause. Evidence:
 [`upstream-report-draft.md`](upstream-report-draft.md). *Closed question:
 S5-Q05.*
 
@@ -287,6 +288,7 @@ Evidence is retained in `staging/2026-10-04-astra-p2r05-errata/` and indexed in
 | AR-F03 | Sensitivity was “one-sided per dimension” | Confidence 97 loses 3,877 primary / 109 separate and gains 213 / 39 as vetoes dissolve; net counts concealed membership changes in both directions |
 | AR-F04 | 261 type-0/type-2 broad-line members rerouted | 259 eligible broad-line members (71 type 0 + 188 type 2); two further broad-line sources are type 1 and excluded, yielding 261 before type routing |
 | AR-F04 | Catalog-wide veto/support figures could be read as secure-preferred attrition | 681 vetoed among 20,100 secure-preferred versus 722 catalog-wide; secure-preferred corroboration is 11,183 / 8,263 / 654 singly / multiply / conflicting |
+| AR-F05 | S5-F10 summarized the mismatch as compilation-wide non-resolution | Distinguish `_unique` and `_all` numeric matches and the 227 same-source correspondences; propagate the corrected upstream report into its existing summary |
 | AR-F02 | Raw variant headline fields were zero despite nonzero membership changes | Gate 1 repaired the two counters; all three totals now reproduce the independently reconstructed table without changing eligibility predicates |
 
 `gate1-sensitivity-comparison.json` checks totals and gains/losses against the
