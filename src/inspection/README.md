@@ -32,6 +32,7 @@ inspection/
 ├── diff_v1_v11.py                  # v1-to-v1.1 column/ID-space classification
 ├── param_migration_evidence.py     # CIGALE/LePhare value comparison vs live v1
 ├── supplement_evidence.py          # Supplement value-level comparison vs live tables
+├── validate_ta_v2_design.py        # P2R-06 synthetic T_A v2 contract validator (gate 6.3)
 └── README.md                       # This file
 ```
 
@@ -47,6 +48,7 @@ inspection/
 | [diff_v1_v11.py](diff_v1_v11.py) | Classifies column and ID-space deltas against documented and loaded v1 | ✅ Active |
 | [param_migration_evidence.py](param_migration_evidence.py) | Sampled value comparison of CIGALE/LePhare parameters, per tile group | ✅ Active |
 | [supplement_evidence.py](supplement_evidence.py) | Row counts and sampled value checks for LSS and group supplements | ✅ Active |
+| [validate_ta_v2_design.py](validate_ta_v2_design.py) | Pure synthetic-only validation of the proposed T_A v2 feature contract, fixtures, and identity record (P2R-06 gate 6.3); no database connection, no installer import, no feature-generation mode | ✅ Active |
 
 ---
 

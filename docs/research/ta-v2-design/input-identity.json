@@ -1,0 +1,73 @@
+{
+  "record_type": "ta_v2_input_identity",
+  "gate": "6.1",
+  "status": "proposed_not_adopted",
+  "recorded_at": "2026-10-05",
+  "base_commit": "01f28ee06383a4db9b44d8e6ef7125ea6ed722d9",
+  "authorizing_spec": {
+    "path": "/opt/agents/repos/spec/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+    "sha256": "04bb896050114207491603f7fc08971b59be274501454532e5c7ed6e5f42ecf0",
+    "version": "1.0",
+    "action_registry": "rec4acLZWCuN1tJk9",
+    "utterances_edt": [
+      "2026-10-05 09:13 I dont see anything in your responses to veto.",
+      "2026-10-05 09:15 Approved to execute."
+    ]
+  },
+  "s5_answers": {
+    "authority_document": "docs/research/specz-science-p2r05/review.md",
+    "authority_document_sha256_at_gate_6_1": "50d6158f00f9d92e30ce2679aac59459ab94d484571188bc33d3664f015ce5b1",
+    "section": "Acceptance questions (answered 2026-10-05)",
+    "answers": {
+      "S5-Q01": "adopt",
+      "S5-Q02": "adopt_with_conditions",
+      "S5-Q03": "adopt_separately_reported_diagnostics_only",
+      "S5-Q04": "adopt_with_conditions",
+      "S5-Q05": "sending_corrected_report_authorized_channel_pending"
+    }
+  },
+  "p2r05_product": {
+    "run_id": "1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c",
+    "database_schema": "cosmos2025_v11.analysis",
+    "policy_id": "p2r05-specz-policy-v1",
+    "policy_config": "configs/specz_science_policy_v1.yaml",
+    "policy_config_sha256_tracked": "fb6daa4fbbe6c61e8bfdc567147bf1317b99711926e10436014d768a6ae370ed",
+    "spec_version": "1.0",
+    "spec_sha256": "7f481111ad826dd80b01106eeec71bfdaf0f5c649c0cc79b8661a0087af2757b",
+    "snapshot_manifest_sha256": "06b19654fc715106ba1f788b52e084df1e94043343517f2b8a49fd44abfff7a4",
+    "tile_map_canonical_digest": "c6406d37e32e4b5cfeb89fc91cda0eb9ed4abf0a192d8c5ab7e56fb893635937",
+    "holdout_tiles": ["A1", "A7", "B3", "B7"],
+    "validation_tiles": ["A3", "A10", "B1", "B5"],
+    "sealed_state_value_retained": "pending_scientific_adoption"
+  },
+  "tracked_evidence_files": [
+    {"path": "data/dictionary/columns-v11.csv", "sha256": "324d3ea17b23a57223d84043559b8fa94c87c95c4710b3719f31358cd881e8b8", "role": "field semantics authority"},
+    {"path": "docs/reference/unit-conventions.md", "sha256": "8a4d3a724ba435fe5668260e50be45c41f067214567a8723d27d004d3df9ca4a", "role": "log10/linear authority"},
+    {"path": "docs/reference/data-manifest-v1.1.md", "sha256": "a0b3e31cd973317dfffd178d2cd841213a07a25e5565405911f2836133c3b139", "role": "raw manifest narrative layer"},
+    {"path": "docs/reference/data-manifest-v1.1.csv", "sha256": "5941abbbcde4e27d706ec1a49456482cb779f9c77e6cf573b7313a0450ee4c7e", "role": "raw manifest machine layer"},
+    {"path": "docs/research/specz-science-p2r05/review.md", "sha256": "50d6158f00f9d92e30ce2679aac59459ab94d484571188bc33d3664f015ce5b1", "role": "S5 authority"},
+    {"path": "docs/research/specz-science-p2r05/tile-map.md", "sha256": "41f5bcf39570b6e82ad09eb3f1547d9e6cd5f73bb4e4838108c569d7d35fb563", "role": "frozen partitions"}
+  ],
+  "ml01_local_evidence": [
+    {
+      "path": "staging/2026-10-04-astra-p2r05-adoption/adoption-review.md",
+      "sha256": "79d1fe50fab57625636474f0da184dccdd5b0444c39b6f027785fb78f1a90b72",
+      "gitignored": true,
+      "numbers_used_inline": [
+        "primary sample 18,402 of 784,016 sources",
+        "90.80 percent of primary sample in F444W [15,24)",
+        "12.22 percent of catalog in F444W [15,24)"
+      ],
+      "sole_support_for_any_claim": false
+    }
+  ],
+  "identity_handling": "content comparison; mutated identities in scratch copies are rejected by the gate 6.3 validator, never overwritten",
+  "boundary": {
+    "database_access": "SELECT-only, analyst role cosmos2025_v11_ro via PGSQL01_COSMOS2025_V11_* names",
+    "writes": "none; any write requirement is a stop condition",
+    "raw_manifest_refresh": "prohibited",
+    "v1_baseline_reads": "excluded",
+    "observed_residual_computation": "excluded",
+    "holdout_outcomes": "excluded"
+  }
+}

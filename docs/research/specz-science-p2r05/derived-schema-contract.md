@@ -4,7 +4,7 @@ title: "P2R-05 Derived Schema Contract"
 description: "Physical field names and meanings of the derived (non-native) columns in the four analysis.specz_p2r05_* product tables, separated from the sealed source dictionary"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-09-22"
-version: "1.0"
+version: "1.1"
 status: "Active"
 tags:
   - type: reference
@@ -36,7 +36,7 @@ and lives only in `cosmos2025_v11.analysis`. Physical types: `text`,
 | `measurements_content_sha256`, `sources_content_sha256`, `splits_content_sha256` | Canonical content digests over the three product record sets (this metadata row is outside those domains) |
 | `measurement_rows`, `source_rows`, `split_rows` | Row counts |
 | `tile_map`, `tile_map_canonical_digest` | The frozen P-06 map and its digest |
-| `product_state` | `pending_scientific_adoption` until the operator answers S5-Q01..Q05 |
+| `product_state` | Frozen at `pending_scientific_adoption` by the seal. The product was scientifically adopted with conditions on 2026-10-05 (S5-Q01..Q05 answers in [the review](review.md)); the sealed rows retain the frozen value because no database transition is defined or authorized |
 | `mechanical_seal_at`, `mechanical_seal_evidence` | Gate 5.7 seal timestamp and evidence document |
 | `created_at`, `installed_by` | Operational metadata |
 
