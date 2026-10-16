@@ -46,6 +46,42 @@
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
       "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-C0B": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": -0.21,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-C1C": {
+      "model_kind": "C1-conditional-binned-median",
+      "provenance": "synthetic",
+      "z_bin_edges": [
+        0.0,
+        1.0,
+        6.0
+      ],
+      "mag_bin_edges": [
+        0.0,
+        24.0,
+        40.0
+      ],
+      "cell_values": {
+        "0|0": 0.25,
+        "0|1": 0.25,
+        "1|0": 0.25,
+        "1|1": 0.25
+      },
+      "z_only_values": {
+        "0": 0.25,
+        "1": 0.25
+      },
+      "global_constant": 0.25,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
     }
   },
   "cases": [
@@ -261,10 +297,12 @@
         "delta_mass_dex": 0.04,
         "expected_delta_mass_dex": 0.2,
         "residual_mass_dex": -0.16,
-        "sigma_mass_lp_dex": 0.2,
         "sigma_mass_cig_dex": 0.08685889638065036,
         "sigma_sys_mass_dex": 0.1,
-        "score_mass_state": "point_valid"
+        "score_mass_state": "point_valid",
+        "sigma_mass_lp_lo_dex": 0.24,
+        "sigma_mass_lp_hi_dex": 0.16000000000000014,
+        "score_mass": -0.7702956124344129
       }
     },
     {
@@ -463,10 +501,11 @@
         "delta_sfr_inst_dex": 0.5,
         "expected_delta_sfr_inst_dex": 0.05,
         "residual_sfr_inst_dex": 0.45,
-        "sigma_sfr_lp_dex": 0.2,
         "sigma_sfr_cig_inst_dex": 0.02171472409516259,
         "sigma_sys_sfr_inst_dex": 0.2,
-        "score_sfr_inst": 1.586322143174101
+        "score_sfr_inst": 1.586322143174101,
+        "sigma_sfr_lp_lo_dex": 0.19999999999999998,
+        "sigma_sfr_lp_hi_dex": 0.19999999999999998
       }
     },
     {
@@ -859,6 +898,204 @@
         "sfr_100_scale_reason": "nonfinite_uncertainty_input",
         "score_sfr_100": null
       }
+    },
+    {
+      "id": "FX-R9a",
+      "description": "R9: asymmetric posterior (lower 0.05, upper 0.30) with a positive residual selects the lower half-width",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.25,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.3,
+        "residual_mass_dex": 0.09999999999999998,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": 0.891740157358414,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9b",
+      "description": "R9: same asymmetric widths with a negative residual select the upper half-width",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.1,
+        "lephare.mass_l68": 10.05,
+        "lephare.mass_u68": 10.4,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.1,
+        "residual_mass_dex": -0.1,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": -0.31610854496087415,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9c",
+      "description": "R9: raw delta (-0.10) and centered residual (+0.11) of opposite sign; the side follows the residual",
+      "scenario": "SYNTH-C0B",
+      "record": {
+        "catalog_id": 912003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "lephare.mass_l68": 9.95,
+        "lephare.mass_u68": 10.3,
+        "cigale.mass": 12589254117.941668,
+        "cigale.mass_err": 200000000.0
+      },
+      "expect": {
+        "delta_mass_dex": -0.09999999999999964,
+        "expected_delta_mass_dex": -0.21,
+        "residual_mass_dex": 0.11000000000000035,
+        "score_mass": 0.9820018620764585,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9d",
+      "description": "R9: zero-width selected side (med == l68 with positive residual) is degenerate with an explicit reason",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.3,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "sigma_mass_lp_lo_dex": 0.0,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width",
+        "score_mass_reason": "degenerate_quantile_width"
+      }
+    },
+    {
+      "id": "FX-R9e",
+      "description": "R9: zero-width unselected side (med == u68 with positive residual) leaves the score finite",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912005,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.0,
+        "lephare.mass_u68": 10.3,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "sigma_mass_lp_lo_dex": 0.3,
+        "sigma_mass_lp_hi_dex": 0.0,
+        "score_mass": 0.3161085449608741,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9f",
+      "description": "R9: exactly zero residual with both widths strictly positive gives score zero after validity",
+      "scenario": "SYNTH-C1C",
+      "record": {
+        "catalog_id": 912006,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.55,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "residual_mass_dex": 0.0,
+        "score_mass": 0.0,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9g",
+      "description": "R9: zero residual with a zero width is degenerate, never a silent zero score",
+      "scenario": "SYNTH-C1C",
+      "record": {
+        "catalog_id": 912007,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 10.25,
+        "lephare.mass_u68": 10.55,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "residual_mass_dex": 0.0,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width"
+      }
+    },
+    {
+      "id": "FX-R9h",
+      "description": "R9: median outside otherwise ordered endpoints fails mass containment; no score, raw delta retained",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912008,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.25,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "median_outside_quantile_interval",
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R9i",
+      "description": "R9: SFR directional width - negative SFR residual selects the upper half-width",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 912009,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.45,
+        "lephare.sfr_u68": 0.8,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sigma_sfr_lp_lo_dex": 0.05,
+        "sigma_sfr_lp_hi_dex": 0.3,
+        "score_sfr_100": -0.27969999459791833,
+        "score_sfr_100_state": "point_valid"
+      }
     }
   ],
   "fit_requests": [
@@ -1107,7 +1344,98 @@
         "machine": "sfr_100_scale",
         "match": "median_outside_quantile_interval"
       },
-      "intended_reason": "case_mismatch:FX-R2e:score_sfr_100"
+      "intended_reason": "case_mismatch:FX-R2e:sfr_100_scale_reason"
+    },
+    "M16_symmetric_average_restored": {
+      "description": "R9 reintroduced: the mass width policy symmetrizes (u68 - l68)/2 again",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "symmetric_average"
+      },
+      "intended_reason": "case_mismatch:FX-R9a:score_mass"
+    },
+    "M17_side_by_raw_delta": {
+      "description": "R9 reintroduced: the width side is chosen by the raw delta sign, not the conditionally centered residual",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "directional_by_delta_sign"
+      },
+      "intended_reason": "case_mismatch:FX-R9c:score_mass"
+    },
+    "M18_zero_width_guard_removed": {
+      "description": "R9 reintroduced: score_mass drops the directional width guard, admitting zero selected widths",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_mass",
+        "guards": [
+          "population",
+          "point_state",
+          "scale_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "guard_missing:score_mass:directional_width"
     }
-  }
+  },
+  "sigma_sys_solve_checks": [
+    {
+      "id": "SOLVE-1",
+      "description": "Solvable synthetic case: equal scales give an analytic oracle sqrt((1.4826*median|r|)^2 - s^2)",
+      "residuals": [
+        0.2,
+        -0.2,
+        0.3,
+        -0.3
+      ],
+      "scales": [
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "point_valid",
+        "reason": "none",
+        "value": 0.3569053410920044
+      }
+    },
+    {
+      "id": "SOLVE-2",
+      "description": "No admissible solution: residuals already smaller than the quoted scales; no negative floor is fabricated",
+      "residuals": [
+        0.01,
+        -0.01
+      ],
+      "scales": [
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "invalid_or_unsupported",
+        "reason": "no_admissible_systematic_solution",
+        "value": null
+      }
+    },
+    {
+      "id": "SOLVE-3",
+      "description": "Zero spread: identical residuals give MAD zero; unsupported rather than an invented sigma_sys",
+      "residuals": [
+        0.05,
+        0.05,
+        0.05
+      ],
+      "scales": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "invalid_or_unsupported",
+        "reason": "zero_residual_spread",
+        "value": null
+      }
+    }
+  ]
 }

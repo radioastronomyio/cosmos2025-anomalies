@@ -386,6 +386,117 @@ def evaluate_population(contract, pop_id, record, constants, states):
     return bool(value)
 
 
+def select_width(policy, residual, delta, lo, hi):
+    """Select the LePhare half-width entering a normalized score (A1.3).
+
+    Returns (width, zero_residual). The declared correct policy selects the
+    side by the sign of the conditionally centered residual; scratch
+    mutations of the declared policy (symmetric average, raw-delta side)
+    flow through here so their behaviour differs and the fixtures catch it.
+    """
+    if policy == "symmetric_average":
+        return (None if lo is None or hi is None else (lo + hi) / 2.0), False
+    if policy == "directional_by_delta_sign":
+        reference = delta
+    else:
+        reference = residual
+    if reference is not None and reference == 0:
+        return None, True
+    if reference is None:
+        return None, False
+    return (lo if reference > 0 else hi), False
+
+
+def evaluate_directional_score(residual, delta, lo, hi, cig, sys_sigma, guards, policy):
+    """Compute a normalized score under the declared width policy (A1.3).
+
+    Returns (score, state, reason). Guards evaluate in the contract's
+    declared precedence; a zero residual never bypasses them. Missing,
+    negative or non-finite widths never produce a score.
+    """
+    import math
+
+    width, zero_residual = select_width(policy, residual, delta, lo, hi)
+    if "directional_width" in guards:
+        for candidate in (lo, hi):
+            if candidate is not None and not math.isfinite(candidate):
+                return None, "invalid_or_unsupported", "nonfinite_quantile_width"
+        if zero_residual:
+            if lo is None or hi is None or lo <= 0 or hi <= 0:
+                return None, "degenerate_quantile_width", "degenerate_quantile_width"
+            width = 0.0
+        elif width is None or width <= 0 or not math.isfinite(width):
+            return None, "degenerate_quantile_width", "degenerate_quantile_width"
+    elif zero_residual:
+        width = 0.0 if width is None else width
+    if residual is None or cig is None or sys_sigma is None:
+        return None, "unsupported_scale", "scale_component_unavailable"
+    if width is None or not math.isfinite(width):
+        return None, "unsupported_scale", "scale_component_unavailable"
+    scale = math.sqrt(width * width + cig * cig + sys_sigma * sys_sigma)
+    if "combined_scale_guard" in guards and scale < 1.0e-12:
+        return None, "zero_combined_scale", "zero_combined_scale"
+    return residual / scale, "point_valid", "none"
+
+
+def solve_sigma_sys(residuals, scales, constants):
+    """Deterministic robust-spread solve for sigma_sys (A1.3, declared policy).
+
+    Solves g(sigma) = 1.4826 * median(|r_i / sqrt(s_i^2 + sigma^2)|) == 1 by
+    bisection under the contract's declared tolerance/iteration policy.
+    Returns a dict with state, value, reason. Pure; synthetic inputs only.
+    """
+    import math
+
+    tolerance = float(constants.get("sigma_sys_solve_tolerance", 1e-10))
+    max_iter = int(constants.get("sigma_sys_max_iterations", 200))
+    upper = float(constants.get("sigma_sys_search_upper_dex", 10.0))
+    interval_tol = float(constants.get("sigma_sys_interval_tolerance", 1e-12))
+
+    pairs = [(r, s) for r, s in zip(residuals, scales) if r is not None and s is not None]
+    if not pairs:
+        return {"state": "invalid_or_unsupported", "value": None, "reason": "no_admissible_systematic_solution"}
+
+    def median(values):
+        ordered = sorted(values)
+        n = len(ordered)
+        mid = n // 2
+        return ordered[mid] if n % 2 else (ordered[mid - 1] + ordered[mid]) / 2.0
+
+    def g(sigma):
+        ratios = [r / math.sqrt(s * s + sigma * sigma) for r, s in pairs]
+        center = median(ratios)
+        return 1.4826 * median([abs(x - center) for x in ratios])
+
+    def mad_zero():
+        ratios = [r / s for r, s in pairs if s != 0]
+        if not ratios:
+            return True
+        center = median(ratios)
+        return median([abs(x - center) for x in ratios]) == 0
+
+    if mad_zero():
+        return {"state": "invalid_or_unsupported", "value": None, "reason": "zero_residual_spread"}
+    g0 = g(0.0)
+    if abs(g0 - 1.0) <= tolerance:
+        return {"state": "point_valid", "value": 0.0, "reason": "none"}
+    if g0 < 1.0:
+        return {"state": "invalid_or_unsupported", "value": None, "reason": "no_admissible_systematic_solution"}
+    low, high = 0.0, upper
+    for _ in range(max_iter):
+        mid = (low + high) / 2.0
+        if high - low <= interval_tol:
+            break
+        if g(mid) >= 1.0:
+            low = mid
+        else:
+            high = mid
+    sigma = (low + high) / 2.0
+    if abs(g(sigma) - 1.0) > tolerance:
+        return {"state": "invalid_or_unsupported", "value": None, "reason": "sigma_sys_solve_failed"}
+    return {"state": "point_valid", "value": sigma, "reason": "none"}
+
+
 def output_decl(contract, name):
     """Return the declared output block for ``name`` (or None)."""
     for output in contract["outputs"]:
@@ -483,18 +594,20 @@ def evaluate_case(contract, case, scenarios):
 
     scale_state, scale_reason = run_machine("mass_scale", "mass_scale_state", "mass_scale_reason")
     score_guards = guard_list("score_mass")
+    mass_policy = contract["scales"]["mass_scale"]["width_selection"]["policy"]
     scale_ok_for_components = (
         scale_state == "point_valid" or "scale_state" not in score_guards
     )
     if scale_ok_for_components and outputs["mass_point_state"] == "point_valid":
-        outputs["sigma_mass_lp_dex"] = eval_formula("(lephare.mass_u68 - lephare.mass_l68) / 2.0")
+        outputs["sigma_mass_lp_lo_dex"] = eval_formula("lephare.mass_med - lephare.mass_l68")
+        outputs["sigma_mass_lp_hi_dex"] = eval_formula("lephare.mass_u68 - lephare.mass_med")
         outputs["sigma_mass_cig_dex"] = eval_formula("cigale.mass_err / (cigale.mass * ln10)")
     else:
-        outputs["sigma_mass_lp_dex"] = None
+        outputs["sigma_mass_lp_lo_dex"] = None
+        outputs["sigma_mass_lp_hi_dex"] = None
         outputs["sigma_mass_cig_dex"] = None
     outputs["sigma_sys_mass_dex"] = scenario.get("sigma_sys_mass_dex")
     score_member, _ = population_gate_ok("score_mass")
-    components = [outputs["sigma_mass_lp_dex"], outputs["sigma_mass_cig_dex"], outputs["sigma_sys_mass_dex"]]
     if not score_member:
         outputs["score_mass"], outputs["score_mass_state"] = None, "not_in_population"
         outputs["score_mass_reason"] = mass_reason
@@ -510,18 +623,20 @@ def evaluate_case(contract, case, scenarios):
     elif outputs["residual_mass_dex"] is None:
         outputs["score_mass"], outputs["score_mass_state"] = None, "unsupported_scale"
         outputs["score_mass_reason"] = "center_or_delta_unavailable"
-    elif not all(c is not None for c in components):
-        outputs["score_mass"], outputs["score_mass_state"] = None, "unsupported_scale"
-        outputs["score_mass_reason"] = "scale_component_unavailable"
     else:
-        scale = sum(c * c for c in components) ** 0.5
-        if "combined_scale_guard" in score_guards and scale < 1.0e-12:
-            outputs["score_mass"], outputs["score_mass_state"] = None, "zero_combined_scale"
-            outputs["score_mass_reason"] = "zero_combined_scale"
-        else:
-            outputs["score_mass"] = outputs["residual_mass_dex"] / scale
-            outputs["score_mass_state"] = "point_valid"
-            outputs["score_mass_reason"] = "none"
+        score_value, score_state, score_reason = evaluate_directional_score(
+            outputs["residual_mass_dex"],
+            outputs["delta_mass_dex"],
+            outputs["sigma_mass_lp_lo_dex"],
+            outputs["sigma_mass_lp_hi_dex"],
+            outputs["sigma_mass_cig_dex"],
+            outputs["sigma_sys_mass_dex"],
+            score_guards,
+            mass_policy,
+        )
+        outputs["score_mass"] = score_value
+        outputs["score_mass_state"] = score_state
+        outputs["score_mass_reason"] = score_reason
 
     # --- SFR paths (T in {inst, 100}; independent of POP-MASS) -----------
     for machine, state_name, reason_name, delta_name in [
@@ -555,13 +670,15 @@ def evaluate_case(contract, case, scenarios):
             if member and outputs[delta_name] is not None and s0.get(expected_key) is not None
             else None
         )
-    outputs["sigma_sfr_lp_dex"] = eval_formula("(lephare.sfr_u68 - lephare.sfr_l68) / 2.0")
+    outputs["sigma_sfr_lp_lo_dex"] = eval_formula("lephare.sfr_med - lephare.sfr_l68")
+    outputs["sigma_sfr_lp_hi_dex"] = eval_formula("lephare.sfr_u68 - lephare.sfr_med")
+    sfr_policy = contract["scales"]["sfr_scale"]["width_selection"]["policy"]
 
-    for suffix, point_state, scale_machine, cig_sigma, sys_sigma, cig_formula in [
+    for suffix, point_state, scale_machine, cig_sigma, sys_sigma, cig_formula, delta_name in [
         ("inst", "sfr_inst_state", "sfr_inst_scale", "sigma_sfr_cig_inst_dex",
-         "sigma_sys_sfr_inst_dex", "cigale.sfr_inst_err / (cigale.sfr_inst * ln10)"),
+         "sigma_sys_sfr_inst_dex", "cigale.sfr_inst_err / (cigale.sfr_inst * ln10)", "delta_sfr_inst_dex"),
         ("100", "sfr_100_state", "sfr_100_scale", "sigma_sfr_cig_100_dex",
-         "sigma_sys_sfr_100_dex", "cigale.sfr_100myr_err / (cigale.sfr_100myr * ln10)"),
+         "sigma_sys_sfr_100_dex", "cigale.sfr_100myr_err / (cigale.sfr_100myr * ln10)", "delta_sfr_100_dex"),
     ]:
         scale_state, scale_reason = run_machine(
             scale_machine, f"sfr_{suffix}_scale_state", f"sfr_{suffix}_scale_reason"
@@ -574,7 +691,6 @@ def evaluate_case(contract, case, scenarios):
         residual_name = f"residual_sfr_{suffix}_dex"
         score_guards = guard_list(score_name)
         member = outputs[f"pop_sfr_{suffix}"]
-        parts = [outputs["sigma_sfr_lp_dex"], outputs[cig_sigma], outputs[sys_sigma]]
         if not member:
             outputs[score_name] = None
             outputs[f"{score_name}_state"] = "not_in_population"
@@ -587,20 +703,24 @@ def evaluate_case(contract, case, scenarios):
             outputs[score_name] = None
             outputs[f"{score_name}_state"] = outputs[point_state]
             outputs[f"{score_name}_reason"] = outputs[f"sfr_{suffix}_reason"]
-        elif outputs[residual_name] is None or not all(p is not None for p in parts):
+        elif outputs[residual_name] is None:
             outputs[score_name] = None
             outputs[f"{score_name}_state"] = "unsupported_scale"
             outputs[f"{score_name}_reason"] = "scale_component_unavailable"
         else:
-            scale = sum(p * p for p in parts) ** 0.5
-            if "combined_scale_guard" in score_guards and scale < 1.0e-12:
-                outputs[score_name] = None
-                outputs[f"{score_name}_state"] = "zero_combined_scale"
-                outputs[f"{score_name}_reason"] = "zero_combined_scale"
-            else:
-                outputs[score_name] = outputs[residual_name] / scale
-                outputs[f"{score_name}_state"] = "point_valid"
-                outputs[f"{score_name}_reason"] = "none"
+            score_value, score_state, score_reason = evaluate_directional_score(
+                outputs[residual_name],
+                outputs[delta_name],
+                outputs["sigma_sfr_lp_lo_dex"],
+                outputs["sigma_sfr_lp_hi_dex"],
+                outputs[cig_sigma],
+                outputs[sys_sigma],
+                score_guards,
+                sfr_policy,
+            )
+            outputs[score_name] = score_value
+            outputs[f"{score_name}_state"] = score_state
+            outputs[f"{score_name}_reason"] = score_reason
 
     for machine, state_name, reason_name, delta_name, formula_key in [
         ("ssfr_inst_point", "ssfr_inst_state", "ssfr_inst_reason", "delta_ssfr_inst_dex", "delta_ssfr_inst_dex"),
@@ -823,9 +943,15 @@ def structural_checks(contract, fixtures):
                 failures.append(f"population_gate_missing:{output['name']}")
         if output.get("kind") == "normalized_residual":
             guards = output.get("guards") or []
-            for guard in ("population", "point_state", "scale_state", "combined_scale_guard"):
+            for guard in (
+                "population", "point_state", "scale_state", "directional_width",
+                "combined_scale_guard",
+            ):
                 if guard not in guards:
                     failures.append(f"guard_missing:{output['name']}:{guard}")
+        if output.get("kind") in ("uncertainty",) and output["name"].startswith("sigma_"):
+            if "_lp_dex" in output["name"]:
+                failures.append(f"symmetric_lp_output_present:{output['name']}")
 
     failures.extend(pop_mass_consistency(contract))
 
@@ -964,6 +1090,8 @@ def apply_mutation(contract, identity, action):
         for output in contract["outputs"]:
             if output["name"] == action["output"]:
                 output["guards"] = list(action["guards"])
+    elif kind == "edit_scales_policy":
+        contract["scales"][action["scale"]]["width_selection"]["policy"] = action["policy"]
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 
@@ -995,9 +1123,32 @@ def run_validation(contract, fixtures, identity, paths):
     for fit in fit_results:
         if not fit["pass"]:
             failures.append(f"fit_request:{fit['id']}")
+    solve_results = []
+    constants = {c["name"]: c["value"] for c in contract["declared_constants"]}
+    for check in fixtures.get("sigma_sys_solve_checks", []):
+        outcome = solve_sigma_sys(check["residuals"], check["scales"], constants)
+        expected = check["expect"]
+        ok = (
+            outcome["state"] == expected.get("state")
+            and outcome["reason"] == expected.get("reason", "none")
+            and (
+                expected.get("value") is None
+                or (
+                    outcome["value"] is not None
+                    and abs(outcome["value"] - expected["value"])
+                    <= NUMERIC_TOLERANCE * max(1.0, abs(expected["value"]))
+                )
+            )
+        )
+        if not ok:
+            failures.append(f"sigma_sys_solve:{check['id']}")
+        solve_results.append(
+            {"id": check["id"], "description": check["description"],
+             "expected": expected, "observed": outcome, "pass": ok}
+        )
     failures.extend(structural_checks(contract, fixtures))
     failures.extend(identity_checks(identity, *paths))
-    return failures, case_results, fit_results
+    return failures, case_results, fit_results, solve_results
 
 
 # =============================================================================
@@ -1047,7 +1198,7 @@ def main(argv=None):
             mutated_identity = copy.deepcopy(identity)
             apply_mutation(mutated_contract, mutated_identity, record["action"])
             action, description, intended = record["action"], record["description"], record["intended_reason"]
-        failures, case_results, fit_results = run_validation(
+        failures, case_results, fit_results, solve_results = run_validation(
             mutated_contract, fixtures, mutated_identity,
             (contract_path, fixtures_path, identity_path),
         )
@@ -1072,7 +1223,7 @@ def main(argv=None):
                 print("  no invariant failed (mutation not caught)")
             return exit_code
 
-    failures, case_results, fit_results = run_validation(
+    failures, case_results, fit_results, solve_results = run_validation(
         contract, fixtures, identity, (contract_path, fixtures_path, identity_path)
     )
     exit_code = 1 if failures else 0
@@ -1097,10 +1248,13 @@ def main(argv=None):
             "fit_requests_passed": sum(1 for f in fit_results if f["pass"]),
             "mutations_total": len(mutation_records),
             "mutations_caught": sum(1 for m in mutation_records.values() if m["caught"]),
+            "sigma_sys_checks_total": len(solve_results),
+            "sigma_sys_checks_passed": sum(1 for s in solve_results if s["pass"]),
             "failures": sorted(set(failures)),
         },
         "cases": case_results,
         "fit_requests": fit_results,
+        "sigma_sys_solve_checks": solve_results,
         "mutations": mutation_records,
         "failures": sorted(set(failures)),
     }
@@ -1109,6 +1263,7 @@ def main(argv=None):
     results_path.write_text(json.dumps(results, indent=2) + "\n")
     print(f"cases {results['summary']['cases_passed']}/{results['summary']['cases_total']} passed; "
           f"fit requests {results['summary']['fit_requests_passed']}/{results['summary']['fit_requests_total']} passed; "
+          f"sigma_sys checks {results['summary']['sigma_sys_checks_passed']}/{results['summary']['sigma_sys_checks_total']} passed; "
           f"mutations caught {results['summary']['mutations_caught']}/{results['summary']['mutations_total']}")
     if failures:
         print("failures:")

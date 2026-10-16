@@ -64,6 +64,9 @@ MUTATIONS = [
     "M13_sfr_population_gate_removed",
     "M14_pop_mass_conditions_disagree",
     "M15_median_containment_removed",
+    "M16_symmetric_average_restored",
+    "M17_side_by_raw_delta",
+    "M18_zero_width_guard_removed",
 ]
 
 
@@ -222,6 +225,59 @@ class TestA12PopulationAndScaleGates:
         failures = validator.pop_mass_consistency(contract)
         assert failures == [], failures
 
+
+
+class TestA13DirectionalWidths:
+    """P2R-06a A1.3 repairs: directional LePhare half-widths (R9, decision 2)."""
+
+    def test_directional_fixtures_present(self, results):
+        ids = {c["id"] for c in results["cases"]}
+        for required in [
+            "FX-R9a", "FX-R9b", "FX-R9c", "FX-R9d", "FX-R9e",
+            "FX-R9f", "FX-R9g", "FX-R9h", "FX-R9i",
+        ]:
+            assert required in ids, required
+
+    def test_asymmetric_scores_use_selected_side(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert abs(by_id["FX-R9a"]["observed"]["sigma_mass_lp_lo_dex"] - 0.05) < 1e-12
+        assert abs(by_id["FX-R9a"]["observed"]["sigma_mass_lp_hi_dex"] - 0.30) < 1e-12
+        # positive residual -> lower width 0.05; symmetric 0.175 would give 0.4957
+        assert abs(by_id["FX-R9a"]["observed"]["score_mass"] - 0.891740157358414) < 1e-9
+        # negative residual -> upper width 0.30
+        assert abs(by_id["FX-R9b"]["observed"]["score_mass"] - (-0.31610854496087415)) < 1e-9
+        # opposite-sign delta/residual: side follows the residual
+        assert abs(by_id["FX-R9c"]["observed"]["score_mass"] - 0.9820018620764585) < 1e-9
+
+    def test_degenerate_and_zero_residual_cases(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert by_id["FX-R9d"]["observed"]["score_mass_state"] == "degenerate_quantile_width"
+        assert by_id["FX-R9d"]["observed"]["score_mass"] is None
+        assert by_id["FX-R9e"]["observed"]["score_mass_state"] == "point_valid"
+        assert by_id["FX-R9e"]["observed"]["sigma_mass_lp_hi_dex"] == 0.0
+        assert by_id["FX-R9f"]["observed"]["score_mass"] == 0.0
+        assert by_id["FX-R9f"]["observed"]["score_mass_state"] == "point_valid"
+        assert by_id["FX-R9g"]["observed"]["score_mass_state"] == "degenerate_quantile_width"
+        assert by_id["FX-R9h"]["observed"]["mass_scale_reason"] == "median_outside_quantile_interval"
+        assert by_id["FX-R9h"]["observed"]["delta_mass_dex"] is not None
+
+    def test_sigma_sys_solve_policy_checks(self, results):
+        checks = results["sigma_sys_solve_checks"]
+        assert {c["id"] for c in checks} == {"SOLVE-1", "SOLVE-2", "SOLVE-3"}
+        assert all(c["pass"] for c in checks)
+        by_id = {c["id"]: c for c in checks}
+        assert abs(by_id["SOLVE-1"]["observed"]["value"] - 0.3569053410920044) < 1e-9
+        assert by_id["SOLVE-2"]["observed"]["reason"] == "no_admissible_systematic_solution"
+        assert by_id["SOLVE-3"]["observed"]["reason"] == "zero_residual_spread"
+
+    def test_no_symmetric_lp_outputs_remain(self):
+        import yaml
+        contract = yaml.safe_load(CONTRACT.read_text())
+        names = {o["name"] for o in contract["outputs"]}
+        assert "sigma_mass_lp_dex" not in names
+        assert "sigma_sfr_lp_dex" not in names
+        assert {"sigma_mass_lp_lo_dex", "sigma_mass_lp_hi_dex",
+                "sigma_sfr_lp_lo_dex", "sigma_sfr_lp_hi_dex"} <= names
 
 
 class TestValidatorBoundaries:

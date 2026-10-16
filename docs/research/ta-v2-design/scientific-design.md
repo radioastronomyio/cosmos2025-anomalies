@@ -135,27 +135,47 @@ scale-aware view without controlling the ranking. Raw and centered outputs
 are always emitted together with `center_model_id` and `center_support`, so
 no consumer can mistake one for the other.
 
-**Scales.** LePhare quantile half-width `(u68 − l68)/2` and the first-order
-CIGALE dex error `err/(value·ln10)` are *different summaries* — an ordered
-quantile interval versus a symmetric linear error of undocumented shape.
-They are kept as separate outputs and combined only in the declared
-quadrature score, with: nonpositive/missing error and mass cases enumerated
-(`error_missing`, `error_negative`, `exact_zero_native_value`,
-`negative_native_value`); ordered-quantile violations
-(`quantile_order_violation`); and a declared approximation domain for the
-first-order dex error (relative error ≤ 0.3) outside which the CIGALE
-sigma is NULL with reason rather than extrapolated. No distribution is
-inferred from a mean and an error: the score is explicitly *not* a
-calibrated Gaussian significance or n-sigma; that would require an approved
-validation argument (TA2-Q02). Asymmetric quantile information is retained
-by emitting `l68`/`u68`-derived widths per quantity rather than a single
-symmetrized number.
+**Scales.** LePhare 68% quantile intervals are generally asymmetric, so the
+contract emits **directional half-widths** (`med - l68` and `u68 - med`)
+and the width entering a normalized score is selected by the sign of the
+conditionally centered residual (P2R-06a decision 2): a positive residual
+uses the lower half-width, a negative residual the upper, and an exactly
+zero residual gives score zero only after population, point and
+uncertainty validity are established (both widths strictly positive,
+else `degenerate_quantile_width`). Symmetrizing to `(u68 - l68)/2`
+discards direction and is a caught mutation. The first-order CIGALE dex
+error `err/(value·ln10)` is a *different summary* — a symmetric linear
+error of undocumented shape — kept as a separate output and combined only
+in the declared quadrature score, with: nonpositive/missing error and
+mass cases enumerated (`error_missing`, `error_negative`,
+`exact_zero_native_value`, `negative_native_value`); complete quantile
+containment (`l68 <= med <= u68`, not merely `u68 >= l68`) plus a
+non-finite rejection; and a declared approximation domain for the
+first-order dex error (relative error <= 0.3, inclusive) outside which
+the CIGALE sigma is NULL with reason rather than extrapolated. No
+distribution is inferred from a mean and an error: the score is
+explicitly *not* a calibrated Gaussian significance or n-sigma; that
+would require an approved validation argument (TA2-Q02). The
+`sigma_sys_*` determination rule (1.4826 × MAD of residual over the
+**directional** combined scale equals 1 on development) carries a
+declared finite-nonnegative domain and a deterministic bisection solve
+policy with explicit `no_admissible_systematic_solution` and
+`zero_residual_spread` unsupported results; a negative floor is never
+fabricated and the historical 0.1/0.2 dex constants are not restored.
+CQ6's zero zero-width/reversed counts do not establish absence of
+missing or non-finite quantiles; the guards are fail-closed protection,
+not a correction for observed data. These proposed scale details remain
+under TA2-Q02; no real-data floor is fitted in this unit.
 
 **Floors.** The historical 0.1 dex (mass) and 0.2 dex (SFR) systematics are
 context, not v2 constants. The contract replaces them with a
-development-only determination rule (robust spread of residual/scale = 1)
-whose result is carried with `center_model_id`/`scale_model_id`; any new
-floor value is an approval question, not a silent constant.
+development-only determination rule (robust spread of residual over the
+directional scale = 1) whose result is carried with
+`center_model_id`/`scale_model_id`; any new floor value is an approval
+question, not a silent constant. The solve policy (bisection, declared
+tolerances, explicit unsupported results) is part of the TA2-Q02 proposal;
+when no admissible nonnegative solution exists the output is unsupported,
+never a fabricated negative floor.
 
 **Limitation.** Shared photometry and shared redshift assumptions correlate
 the two codes' errors, so quadrature combination overstates independence;

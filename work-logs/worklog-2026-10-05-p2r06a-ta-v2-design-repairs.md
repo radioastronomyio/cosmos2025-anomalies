@@ -231,3 +231,88 @@ scratch): cases 42/42, fit requests 4/4, mutations caught 15/15, exit 0.
 `pytest tests/test_ta_v2_design_contract.py -v`: 38/38 passed.
 
 Gate A1.2 checkpoint: this commit.
+
+## Gate A1.3: directional LePhare half-widths (R9; decision 2)
+
+Old-behaviour evidence (adapter
+`staging/2026-10-16-p2r06a-execution/regression/adapter_a13_r9.py`):
+on an asymmetric posterior (med 10.30, l68 10.25 → lo 0.05, u68 10.60 →
+hi 0.30) d4bc1a2 emits `sigma_mass_lp_dex = 0.175` for both residual
+signs and scores `+0.49567888926745` (positive residual) and
+`-0.49567888926744835` (negative residual). After repair the same
+records give `+0.891740157358414` (lower side 0.05 selected) and
+`-0.31610854496087415` (upper side 0.30 selected), each matching an
+independent full-precision oracle to 1e-9 and differing from the old
+symmetric values by > 1e-6.
+
+Repairs:
+
+- `feature-contract.yaml` scales section rewritten: `sigma_mass_lp_dex`
+  and `sigma_sfr_lp_dex` removed; `sigma_*_lp_lo_dex = med - l68` and
+  `sigma_*_lp_hi_dex = u68 - med` added; `width_selection` declares
+  `directional_by_residual_sign` with the zero-residual both-widths rule;
+  `sigma_sys_*` gains parameter domain (finite, nonnegative), the
+  directional-scale MAD determination rule, and a complete solve policy
+  (bisection on [0, 10], tolerance 1e-10, max 200 iterations, interval
+  tolerance 1e-12, `zero_residual_spread` / `no_admissible_systematic_solution`
+  / `sigma_sys_solve_failed` unsupported results; never a negative floor,
+  never the historical constants). New declared constants:
+  `sigma_sys_solve_tolerance`, `sigma_sys_max_iterations`,
+  `sigma_sys_search_upper_dex`, `sigma_sys_interval_tolerance`. Score
+  guards gain `directional_width`; score state domains gain
+  `degenerate_quantile_width`; structural check forbids any residual
+  symmetric `*_lp_dex` output.
+- `validate_ta_v2_design.py`: `select_width`/`evaluate_directional_score`
+  (side by conditionally centered residual; zero residual requires both
+  widths strictly positive; selected width strictly positive; missing/
+  negative/non-finite never scored; policy read from the contract so
+  policy mutations change behaviour); `solve_sigma_sys` implementing the
+  declared deterministic policy; solve checks integrated into
+  `run_validation` and the results payload; mutation kind
+  `edit_scales_policy`.
+- `fixtures.json`: nine new cases FX-R9a-i (asymmetric both signs;
+  opposite-sign delta -0.10 vs residual +0.11 selecting the residual side
+  with score 0.9820018620764585 where the wrong side would give
+  0.3477677796067538; zero-width selected side degenerate; zero-width
+  unselected side finite; zero residual with valid widths → score 0;
+  zero residual with zero width degenerate; mass median-outside
+  containment; SFR directional selection), scenarios SYNTH-C0B and
+  SYNTH-C1C (exact-representable zero residual), `sigma_sys_solve_checks`
+  SOLVE-1 (analytic oracle 0.3569053410920044 = sqrt((1.4826·0.25)² −
+  0.01)), SOLVE-2 (no_admissible_systematic_solution), SOLVE-3
+  (zero_residual_spread); mutations M16 (symmetric average restored),
+  M17 (side by raw delta), M18 (zero-width guard removed). FX-02f
+  expectations updated to lo 0.24/hi 0.16 and the resulting score
+  -0.7702956124344129 (residual -0.16 selects hi); FX-05a lo/hi 0.2/0.2
+  with the score unchanged (1.586322143174101). M15's intended reason
+  updated to the discriminating observation
+  (`case_mismatch:FX-R2e:sfr_100_scale_reason`): with directional widths
+  the removed containment rule surfaces through the scale state/reason,
+  while the directional guard independently fails the negative width.
+- `scientific-design.md` section 3.3 rewritten for the directional
+  half-widths, complete containment, non-finite rejection, the solve
+  policy status (TA2-Q02), and the CQ6 qualification.
+- `tests/test_ta_v2_design_contract.py`: `TestA13DirectionalWidths`
+  (5 tests) + MUTATIONS extended to M18.
+
+Validation (gate A1.3 checklist):
+
+- [x] Asymmetric-score and wrong-side assertions demonstrate the old
+  symmetric behaviour numerically (adapter; values above). New width
+  fields have explicit expected values (FX-R9a/b/i, FX-02f, FX-05a);
+  mutations fail for their intended reasons, not API absence (M16/M17
+  behavioural through the policy field; M18 behavioural
+  case_mismatch:FX-R9d plus guard_missing:score_mass:directional_width).
+- [x] Mutations caught: symmetric average restored (M16 →
+  case_mismatch:FX-R9a:score_mass); side chosen by raw delta (M17 →
+  case_mismatch:FX-R9c:score_mass); zero-width guard removed (M18 →
+  guard_missing:score_mass:directional_width).
+- [x] Raw deltas and eligible residuals remain available when only the
+  scale is unsupported (FX-R2a residual retained; FX-R9h delta retained);
+  synthetic no-solution and zero-spread cases exercise the declared
+  policy (SOLVE-2/3).
+
+Full run: cases 51/51, fit requests 4/4, sigma_sys checks 3/3, mutations
+caught 18/18, exit 0. `pytest`: 46/46 passed.
+
+Gate A1.3 checkpoint: this commit.
