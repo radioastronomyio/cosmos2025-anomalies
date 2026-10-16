@@ -22,8 +22,14 @@ related_documents:
 
 Preregistered before any implementation, fitting, or outcome computation.
 **No outcome metric is computed in this unit**, and nothing below may be
-read as a result. This protocol distinguishes two surfaces that must never
-share a denominator:
+read as a result. The design-stage data exposure that precedes this
+protocol is disclosed in [exposure-log.md](exposure-log.md) (P2R-06a gate
+A1.1): design was informed by full-catalog summaries containing holdout
+information, so the eventual holdout assessment below is **not an
+untouched test of feature-family selection**, and no claim in this
+protocol asserts an unexposed holdout or zero historical outcome-derived
+exposure. Future parameters are fitted on development only. This protocol
+distinguishes two surfaces that must never share a denominator:
 
 1. **Non-spectroscopic disagreement characterization** (POP-MASS,
    POP-SFR-*): cross-code behaviour over the photometric catalog.
