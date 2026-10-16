@@ -137,7 +137,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 0.5,
-        "photometry_primary.mag_auto_f444w": 21.0
+        "photometry_primary.mag_auto_f444w": 21.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 0.24,
@@ -156,7 +157,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 2.0,
-        "photometry_primary.mag_auto_f444w": 25.0
+        "photometry_primary.mag_auto_f444w": 25.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 0.24,
@@ -173,7 +175,8 @@
         "catalog_id": 900012,
         "lephare.type": 0,
         "lephare.mass_med": 10.0,
-        "cigale.mass": 1000000000.0
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 1.0,
@@ -189,7 +192,8 @@
         "catalog_id": 900013,
         "lephare.type": 0,
         "lephare.mass_med": 14.0,
-        "cigale.mass": 1000000000.0
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 5.0,
@@ -207,7 +211,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 0.5,
-        "photometry_primary.mag_auto_f444w": 45.0
+        "photometry_primary.mag_auto_f444w": 45.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "expected_delta_mass_dex": 0.24,
@@ -377,7 +382,8 @@
         "lephare.mass_med": 10.0,
         "cigale.mass": 10000000000.0,
         "cigale.sfr_100myr": 0.0,
-        "lephare.sfr_med": 0.5
+        "lephare.sfr_med": 0.5,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -397,7 +403,8 @@
         "cigale.mass": 10000000000.0,
         "cigale.sfr_100myr": 2.0,
         "cigale.sfr_100myr_err": 0.1,
-        "lephare.sfr_med": 0.5
+        "lephare.sfr_med": 0.5,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -413,7 +420,8 @@
         "lephare.type": 0,
         "lephare.mass_med": 10.0,
         "cigale.mass": 10000000000.0,
-        "cigale.sfr_100myr": null
+        "cigale.sfr_100myr": null,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -556,6 +564,300 @@
         "selection_type0": false,
         "pop_mass": false,
         "delta_mass_dex": 1.0
+      }
+    },
+    {
+      "id": "FX-R3a",
+      "description": "R3: type-0 valid masses with NULL CIGALE mass error are outside POP-MASS; raw delta stays a finite audit output, residual and score are NULL",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": null,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R3b",
+      "description": "R3: negative CIGALE mass error also falls outside POP-MASS with the same pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": -100000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8a",
+      "description": "R8: type-1 source with valid masses receives NULL residual and score with not_in_population; the raw delta stays auditable",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911003,
+        "lephare.type": 1,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R8b",
+      "description": "R8: type-2 source, same NULL pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911004,
+        "lephare.type": 2,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8c",
+      "description": "R8: unknown type (99), same NULL pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911005,
+        "lephare.type": 99,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8d",
+      "description": "R8: type-1 SFR source is outside POP-SFR-100; SFR residual and score NULL, raw SFR delta auditable",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911006,
+        "lephare.type": 1,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "pop_sfr_100": false,
+        "pop_sfr_100_reason": "not_in_population",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "residual_sfr_100_dex": null,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R2a",
+      "description": "R2: SFR relative error 0.31 is outside the declared approximation domain; scale state emitted, score NULL, residual retained",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911007,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.62
+      },
+      "expect": {
+        "sfr_100_state": "point_comparable",
+        "pop_sfr_100": true,
+        "sfr_100_scale_state": "approximation_out_of_domain",
+        "sfr_100_scale_reason": "log_error_approximation_domain_exceeded",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "approximation_out_of_domain"
+      }
+    },
+    {
+      "id": "FX-R2b",
+      "description": "R2 control: relative error 0.29 stays inside the domain with a finite score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911008,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.58
+      },
+      "expect": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.3263071119761467
+      }
+    },
+    {
+      "id": "FX-R2c",
+      "description": "R2 boundary control: relative error exactly 0.30 is inside the inclusive domain with a finite score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911009,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.6
+      },
+      "expect": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.324429488725637
+      }
+    },
+    {
+      "id": "FX-R2d",
+      "description": "R2: reversed SFR quantiles give an invalid scale state with reason; no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911010,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.7,
+        "lephare.sfr_u68": 0.3,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "quantile_order_violation",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R2e",
+      "description": "R2: median outside the otherwise ordered endpoints fails complete quantile containment; no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911011,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.45,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "median_outside_quantile_interval",
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R2f",
+      "description": "R2 control: missing SFR uncertainty stays missing with no score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911012,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": null,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "missing",
+        "sfr_100_scale_reason": "missing_uncertainty_input",
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R8e",
+      "description": "R8: SFR population independent of mass membership - nonpositive mass leaves the SFR residual and score intact",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911013,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 0.0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "pop_mass": false,
+        "residual_mass_dex": null,
+        "pop_sfr_100": true,
+        "pop_sfr_100_reason": "none",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": -0.356146931659015
+      }
+    },
+    {
+      "id": "FX-R2g",
+      "description": "R2: non-finite SFR uncertainty is rejected with an explicit reason and no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911014,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": NaN,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "nonfinite_uncertainty_input",
+        "score_sfr_100": null
       }
     }
   ],
@@ -749,6 +1051,63 @@
         "covariate": "analysis.specz_p2r05_sources.eligibility_primary_galaxy"
       },
       "intended_reason": "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+    },
+    "M10_pop_mass_error_clause_removed": {
+      "description": "R3 reintroduced: POP-MASS predicate loses the CIGALE mass-error validity conditions",
+      "action": {
+        "kind": "edit_population_predicate",
+        "population": "POP-MASS",
+        "predicate": "lephare.type == 0 AND mass_point_state == point_valid"
+      },
+      "intended_reason": "case_mismatch:FX-R3a:pop_mass"
+    },
+    "M11_mass_residual_population_gate_removed": {
+      "description": "R8 reintroduced: residual_mass_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_mass_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_mass_dex"
+    },
+    "M12_sfr_score_point_state_only": {
+      "description": "R2 reintroduced: score_sfr_100 drops the scale-state guard and is gated on point state only",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_sfr_100",
+        "guards": [
+          "population",
+          "point_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-R2a:score_sfr_100"
+    },
+    "M13_sfr_population_gate_removed": {
+      "description": "R8 reintroduced: residual_sfr_100_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_sfr_100_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_sfr_100_dex"
+    },
+    "M14_pop_mass_conditions_disagree": {
+      "description": "R3 drift: the feature contract's echo of the input-contract POP-MASS conditions disagrees with input-contract.md",
+      "action": {
+        "kind": "edit_pop_mass_echo",
+        "echo": "lephare.type = 0 and mass_med state = point_valid (no error condition)"
+      },
+      "intended_reason": "pop_mass_echo_drift:error present and \u2265 0"
+    },
+    "M15_median_containment_removed": {
+      "description": "R2 reintroduced: the complete median-containment rule is removed from the SFR-100 scale machine",
+      "action": {
+        "kind": "drop_machine_rule_matching",
+        "machine": "sfr_100_scale",
+        "match": "median_outside_quantile_interval"
+      },
+      "intended_reason": "case_mismatch:FX-R2e:score_sfr_100"
     }
   }
 }

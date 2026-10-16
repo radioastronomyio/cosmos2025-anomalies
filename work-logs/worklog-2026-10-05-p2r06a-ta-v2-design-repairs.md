@@ -142,3 +142,92 @@ Validation (gate A1.1 checklist):
 - [x] No query was executed in this gate.
 
 Gate A1.1 checkpoint: this commit.
+
+## Gate A1.2: population gating and SFR scale states (R2, R3, R8)
+
+Old-behaviour evidence (adapter
+`staging/2026-10-16-p2r06a-execution/regression/adapter_a12_r2r3r8.py`,
+ML01-local; values inline here, JSON evidence in the staging tree):
+
+- **R3:** type-0 record, `mass_med` 10.0, `cigale.mass` 1e9,
+  `cigale.mass_err` NULL → d4bc1a2 gives `pop_mass = True` with finite
+  `residual_mass_dex = 0.8` (score NULL only because sigma components were
+  absent). Same for a negative error. Repair: predicate
+  `lephare.type == 0 AND mass_point_state == point_valid AND
+  is_null(cigale.mass_err) == false AND cigale.mass_err >= 0` →
+  `pop_mass = False`, `pop_mass_reason = not_in_population`, residual/score
+  NULL, raw `delta_mass_dex = 1.0` retained.
+- **R8:** type-1/2/99 records with valid masses and error → d4bc1a2 gives
+  `residual_mass_dex = 0.8`, `score_mass = 3.334941328289389`. Type-1 SFR
+  record → `residual_sfr_100_dex = -0.10102999566398119`,
+  `score_sfr_100 = -0.356146931659015`. Repair: all NULL with
+  `not_in_population`; raw deltas retained (1.0 and 0.1989700043360188).
+- **R2:** rel-err 0.31 → d4bc1a2 `score_sfr_100 = -0.32252189801487147`
+  with `sfr_100_scale_state` never emitted (the declared SFR scale machines
+  were not evaluated at all); reversed quantiles →
+  `-0.356146931659015`; median outside ordered endpoints (l68 0.3 ≤ u68
+  0.45 < med 0.5) → `-0.4705613149408535`. Repair: scale machines now run
+  and emit state/reason (`approximation_out_of_domain` /
+  `quantile_order_violation` / `median_outside_quantile_interval` /
+  `nonfinite_uncertainty_input` / `missing_uncertainty_input`), scores NULL,
+  eligible residuals retained.
+- **Boundary controls pass on both sides:** rel-err exactly 0.30 →
+  `score_sfr_100 = -0.324429488725637` on d4bc1a2 and after repair
+  (identical to 1e-12); 0.29 → `-0.3263071119761467` both; member mass
+  delta/residual/score numerically identical.
+
+Repairs:
+
+- `feature-contract.yaml` → version `0.2.0-proposed`; `guard_precedence`
+  declaration (population → point domain → scale/uncertainty → arithmetic;
+  zero residual never bypasses an earlier guard); POP-MASS predicate gains
+  the error conditions with an `input_contract_echo` field; median-
+  containment and non-finite rules in all three scale machines;
+  `pop_mass_reason`/`pop_sfr_inst_reason`/`pop_sfr_100_reason` outputs;
+  `population_gate` fields on residuals and scores; `guards` lists on
+  scores; `score_sfr_inst_state/reason` and `score_sfr_100_state/reason`
+  outputs; `score_mass_state` domain gains `not_in_population`.
+- `validate_ta_v2_design.py`: `evaluate_case` rewritten around the declared
+  precedence; population membership and output gating read the contract's
+  declared predicates/`population_gate`/`guards` (scratch mutations of
+  those declarations change behaviour and are caught); SFR scale machines
+  evaluated and emitted; `_Symbol` resolution for bare state-value tokens
+  in predicates; `pop_mass_consistency()` compares the predicate and echo
+  against the input-contract.md POP-MASS row (R3 drift check); structural
+  requirements `population_gate_missing` and `guard_missing`; new mutation
+  kinds (`edit_population_predicate`, `edit_pop_mass_echo`,
+  `remove_output_field`, `edit_output_guards`,
+  `drop_machine_rule_matching`).
+- `fixtures.json`: 14 new cases (FX-R3a/b, FX-R8a-e, FX-R2a-g) and
+  mutations M10-M15; the eight membership-expecting legacy records
+  (FX-02a/b/c1/c2/d, FX-04a/b/c) gained a valid `cigale.mass_err`
+  (2e9) so their expectations remain population-membership claims under
+  the repaired predicate; `delta_mass_dex` expectations unchanged
+  (bit-identical on controls, e.g. FX-01a = 1.0, FX-R8a = 1.0).
+- `tests/test_ta_v2_design_contract.py`: `TestA12PopulationAndScaleGates`
+  (7 tests) + MUTATIONS extended to M15.
+
+Validation (gate A1.2 checklist):
+
+- [x] Each defect-revealing fixture fails against `d4bc1a2` behaviour
+  (adapter old-side assertions on existing fields: pop_mass True,
+  residual 0.8, scores -0.3225/-0.3561/-0.4706) and passes after repair;
+  boundary controls (FX-R2b/c, FX-04, FX-02f) pass on both.
+- [x] Mutations caught with intended reasons, 15/15: error clause removed
+  (M10 → case_mismatch:FX-R3a:pop_mass); population gate removed from
+  residual emission (M11 → population_gate_missing:residual_mass_dex); SFR
+  score gated on point state only (M12 →
+  case_mismatch:FX-R2a:score_sfr_100); SFR population gate removed (M13 →
+  population_gate_missing:residual_sfr_100_dex); artefact disagreement
+  (M14 → pop_mass_echo_drift:error present and ≥ 0); median-containment
+  check removed (M15 → case_mismatch:FX-R2e:score_sfr_100).
+- [x] `delta_mass_dex` bit-identical on finite point-domain-valid audit
+  controls (adapter CTL_member_mass delta/residual/score equal to < 1e-12;
+  FX-01a unchanged); new non-finite/domain-invalid cases fail closed
+  (FX-R2g nonfinite_uncertainty_input).
+
+Full run: `python src/inspection/validate_ta_v2_design.py` (results to
+scratch): cases 42/42, fit requests 4/4, mutations caught 15/15, exit 0.
+`pytest tests/test_ta_v2_design_contract.py -v`: 38/38 passed.
+
+Gate A1.2 checkpoint: this commit.

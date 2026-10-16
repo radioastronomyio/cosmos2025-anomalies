@@ -58,6 +58,12 @@ MUTATIONS = [
     "M7_reverse_definition",
     "M8_forbidden_covariate",
     "M9_specz_covariate",
+    "M10_pop_mass_error_clause_removed",
+    "M11_mass_residual_population_gate_removed",
+    "M12_sfr_score_point_state_only",
+    "M13_sfr_population_gate_removed",
+    "M14_pop_mass_conditions_disagree",
+    "M15_median_containment_removed",
 ]
 
 
@@ -161,6 +167,61 @@ class TestMutationControls:
         """Negative control for the harness: no-op mutation must not fail."""
         proc = run_validator("--mutation", "NONE", tmp_path=tmp_path)
         assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+class TestA12PopulationAndScaleGates:
+    """P2R-06a A1.2 repairs: population gating and SFR scale states (R2, R3, R8)."""
+
+    def test_population_gating_fixtures_present(self, results):
+        ids = {c["id"] for c in results["cases"]}
+        for required in [
+            "FX-R3a", "FX-R3b",  # POP-MASS error validity
+            "FX-R8a", "FX-R8b", "FX-R8c", "FX-R8d", "FX-R8e",  # population gates
+            "FX-R2a", "FX-R2b", "FX-R2c", "FX-R2d", "FX-R2e", "FX-R2f", "FX-R2g",
+        ]:
+            assert required in ids, required
+
+    def test_nonmember_residuals_and_scores_are_null(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        for fixture_id in ("FX-R3a", "FX-R3b", "FX-R8a", "FX-R8b", "FX-R8c"):
+            observed = by_id[fixture_id]["observed"]
+            assert observed["residual_mass_dex"] is None, fixture_id
+            assert observed["score_mass"] is None, fixture_id
+            assert observed["pop_mass"] is False, fixture_id
+        observed = by_id["FX-R8d"]["observed"]
+        assert observed["residual_sfr_100_dex"] is None
+        assert observed["score_sfr_100"] is None
+
+    def test_sfr_scores_respect_scale_states(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert by_id["FX-R2a"]["observed"]["score_sfr_100"] is None
+        assert by_id["FX-R2a"]["observed"]["sfr_100_scale_state"] == "approximation_out_of_domain"
+        assert by_id["FX-R2a"]["observed"]["residual_sfr_100_dex"] is not None
+        assert by_id["FX-R2d"]["observed"]["sfr_100_scale_reason"] == "quantile_order_violation"
+        assert by_id["FX-R2e"]["observed"]["sfr_100_scale_reason"] == "median_outside_quantile_interval"
+        assert by_id["FX-R2g"]["observed"]["sfr_100_scale_reason"] == "nonfinite_uncertainty_input"
+
+    def test_inclusive_boundary_controls_finite(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        for fixture_id in ("FX-R2b", "FX-R2c"):
+            assert isinstance(by_id[fixture_id]["observed"]["score_sfr_100"], float), fixture_id
+
+    def test_mass_delta_bit_identical_on_controls(self, results):
+        """delta_mass_dex stays numerically identical on point-valid audit controls."""
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert by_id["FX-01a"]["observed"]["delta_mass_dex"] == 1.0
+        assert by_id["FX-R8a"]["observed"]["delta_mass_dex"] == 1.0  # raw audit retained
+
+    def test_pop_mass_consistency_with_input_contract(self):
+        """The POP-MASS predicate and echo agree with input-contract.md section 6."""
+        import sys
+        sys.path.insert(0, str(REPO_ROOT / "src" / "inspection"))
+        import validate_ta_v2_design as validator
+        import yaml
+        contract = yaml.safe_load(CONTRACT.read_text())
+        failures = validator.pop_mass_consistency(contract)
+        assert failures == [], failures
+
 
 
 class TestValidatorBoundaries:

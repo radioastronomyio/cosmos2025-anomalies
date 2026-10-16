@@ -338,23 +338,294 @@ def normalize_formula(text):
 # =============================================================================
 
 
-def record_resolver(record, constants):
-    """Resolve identifiers against a synthetic record plus declared constants."""
+class _Symbol(str):
+    """Dotless identifier that failed variable resolution; compares by name.
+
+    Population predicates compare machine states to bare value tokens
+    (``mass_point_state == point_valid``); those tokens are not record
+    fields, so they resolve to symbols that compare equal to the state
+    string instead of vanishing to NULL.
+    """
+
+    __slots__ = ()
+
+
+def record_resolver(record, constants, states=None):
+    """Resolve identifiers against a synthetic record plus declared constants.
+
+    Computed states (e.g. ``mass_point_state``) overlay the record so that
+    population predicates can reference them exactly as declared. Dotted
+    record paths that are absent resolve to None (so ``is_null`` fires);
+    dotless unknown identifiers resolve to comparison symbols.
+    """
 
     def resolve(name):
+        if states is not None and name in states:
+            return states[name]
         if name in constants:
             return constants[name]
         if name in record:
             return record[name]
-        # AI NOTE: identifiers absent from the record resolve to None so that
-        # is_null(...) predicates fire; arithmetic with None yields None
-        # instead of an exception, keeping evaluation pure and total.
-        return None
+        if "." in name:
+            return None
+        return _Symbol(name)
 
     return resolve
 
 
-def evaluate_rule(machine, record, constants):
+def evaluate_population(contract, pop_id, record, constants, states):
+    """Evaluate a declared population predicate; first declared eligibility wins."""
+    population = next(p for p in contract["populations"] if p["id"] == pop_id)
+    try:
+        value = eval_node(
+            parse_expression(population["predicate"]),
+            record_resolver(record, constants, states),
+        )
+    except ExpressionError:
+        value = False
+    return bool(value)
+
+
+def output_decl(contract, name):
+    """Return the declared output block for ``name`` (or None)."""
+    for output in contract["outputs"]:
+        if output["name"] == name:
+            return output
+    return None
+
+
+def evaluate_case(contract, case, scenarios):
+    """Compute every declared output for one synthetic case record.
+
+    Guard precedence follows contract.guard_precedence: population guards
+    first, then point-domain guards, then scale/uncertainty guards, then
+    arithmetic. A zero residual never bypasses an earlier guard. Population
+    membership and output gating read the contract's declared predicates and
+    ``population_gate``/``guards`` fields, so a scratch-copy mutation of those
+    declarations changes behaviour and is caught by the fixtures (P2R-06a
+    A1.2: the evaluator may not ignore the declared predicate).
+    """
+    constants = {c["name"]: c["value"] for c in contract["declared_constants"]}
+    record = case["record"]
+    scenario = scenarios[case["scenario"]]
+    machines = contract["state_machines"]
+    # AI NOTE: delta outputs are evaluated through the contract's own declared
+    # formulas, so a mutated scratch formula yields mutated values that the
+    # fixtures catch; the canonical-identity guard is a separate structural
+    # check and does not mask value mismatches.
+    declared_formulas = {o["name"]: o["formula"] for o in contract["outputs"] if o.get("formula")}
+    outputs = {}
+    states = {}
+
+    def run_machine(name, output_state, output_reason):
+        machine = machines[name]
+        precondition = machine.get("precondition")
+        if precondition and not precondition_ok(precondition, states):
+            state, reason = "invalid_or_unsupported", "parent_state_not_permitted"
+        else:
+            state, reason = evaluate_rule(machine, record, constants, states)
+        states[name] = state
+        states[output_state] = state
+        outputs[output_state] = state
+        if output_reason:
+            outputs[output_reason] = reason
+        return state, reason
+
+    def eval_formula(text):
+        try:
+            return eval_node(parse_expression(text), record_resolver(record, constants, states))
+        except ExpressionError:
+            return None
+
+    def population_gate_ok(output_name):
+        decl = output_decl(contract, output_name) or {}
+        gate = decl.get("population_gate")
+        if gate is None:
+            return True, "none"
+        member = evaluate_population(contract, gate, record, constants, states)
+        return member, ("none" if member else "not_in_population")
+
+    def guard_list(output_name):
+        decl = output_decl(contract, output_name) or {}
+        return decl.get("guards") or []
+
+    # --- mass path -------------------------------------------------------
+    run_machine("mass_point", "mass_point_state", "mass_point_reason")
+    outputs["selection_type0"] = bool(
+        eval_node(parse_expression("lephare.type == 0"), record_resolver(record, constants, states))
+    )
+    outputs["delta_mass_dex"] = (
+        eval_formula(declared_formulas["delta_mass_dex"])
+        if outputs["mass_point_state"] == "point_valid"
+        else None
+    )
+    outputs["pop_mass"] = evaluate_population(contract, "POP-MASS", record, constants, states)
+    outputs["pop_mass_reason"] = "none" if outputs["pop_mass"] else "not_in_population"
+
+    if scenario["model_kind"] == "S0-constant":
+        # AI NOTE: S0 scenarios declare only the per-timescale SFR constants;
+        # mass-center outputs stay absent rather than being fabricated.
+        expected_delta, support = None, None
+    else:
+        expected_delta, support = evaluate_center(scenario, record)
+    outputs["expected_delta_mass_dex"] = (
+        expected_delta if outputs["pop_mass"] else None
+    )
+    outputs["center_support"] = support if outputs["pop_mass"] else None
+    member_mass, mass_reason = population_gate_ok("residual_mass_dex")
+    outputs["residual_mass_dex"] = (
+        outputs["delta_mass_dex"] - expected_delta
+        if member_mass
+        and outputs["delta_mass_dex"] is not None
+        and expected_delta is not None
+        else None
+    )
+
+    scale_state, scale_reason = run_machine("mass_scale", "mass_scale_state", "mass_scale_reason")
+    score_guards = guard_list("score_mass")
+    scale_ok_for_components = (
+        scale_state == "point_valid" or "scale_state" not in score_guards
+    )
+    if scale_ok_for_components and outputs["mass_point_state"] == "point_valid":
+        outputs["sigma_mass_lp_dex"] = eval_formula("(lephare.mass_u68 - lephare.mass_l68) / 2.0")
+        outputs["sigma_mass_cig_dex"] = eval_formula("cigale.mass_err / (cigale.mass * ln10)")
+    else:
+        outputs["sigma_mass_lp_dex"] = None
+        outputs["sigma_mass_cig_dex"] = None
+    outputs["sigma_sys_mass_dex"] = scenario.get("sigma_sys_mass_dex")
+    score_member, _ = population_gate_ok("score_mass")
+    components = [outputs["sigma_mass_lp_dex"], outputs["sigma_mass_cig_dex"], outputs["sigma_sys_mass_dex"]]
+    if not score_member:
+        outputs["score_mass"], outputs["score_mass_state"] = None, "not_in_population"
+        outputs["score_mass_reason"] = mass_reason
+    elif (
+        "scale_state" in score_guards
+        and scale_state != "point_valid"
+    ):
+        outputs["score_mass"], outputs["score_mass_reason"] = None, scale_reason
+        outputs["score_mass_state"] = scale_state
+    elif outputs["mass_point_state"] != "point_valid":
+        outputs["score_mass"], outputs["score_mass_reason"] = None, outputs["mass_point_reason"]
+        outputs["score_mass_state"] = outputs["mass_point_state"]
+    elif outputs["residual_mass_dex"] is None:
+        outputs["score_mass"], outputs["score_mass_state"] = None, "unsupported_scale"
+        outputs["score_mass_reason"] = "center_or_delta_unavailable"
+    elif not all(c is not None for c in components):
+        outputs["score_mass"], outputs["score_mass_state"] = None, "unsupported_scale"
+        outputs["score_mass_reason"] = "scale_component_unavailable"
+    else:
+        scale = sum(c * c for c in components) ** 0.5
+        if "combined_scale_guard" in score_guards and scale < 1.0e-12:
+            outputs["score_mass"], outputs["score_mass_state"] = None, "zero_combined_scale"
+            outputs["score_mass_reason"] = "zero_combined_scale"
+        else:
+            outputs["score_mass"] = outputs["residual_mass_dex"] / scale
+            outputs["score_mass_state"] = "point_valid"
+            outputs["score_mass_reason"] = "none"
+
+    # --- SFR paths (T in {inst, 100}; independent of POP-MASS) -----------
+    for machine, state_name, reason_name, delta_name in [
+        ("sfr_inst_point", "sfr_inst_state", "sfr_inst_reason", "delta_sfr_inst_dex"),
+        ("sfr_100_point", "sfr_100_state", "sfr_100_reason", "delta_sfr_100_dex"),
+    ]:
+        state, _ = run_machine(machine, state_name, reason_name)
+        outputs[delta_name] = (
+            eval_formula(declared_formulas[delta_name]) if state == "point_comparable" else None
+        )
+    outputs["pop_sfr_inst"] = evaluate_population(contract, "POP-SFR-INST", record, constants, states)
+    outputs["pop_sfr_inst_reason"] = "none" if outputs["pop_sfr_inst"] else "not_in_population"
+    outputs["pop_sfr_100"] = evaluate_population(contract, "POP-SFR-100", record, constants, states)
+    outputs["pop_sfr_100_reason"] = "none" if outputs["pop_sfr_100"] else "not_in_population"
+    outputs["timescale_caveat_lephare"] = True
+
+    s0 = scenarios.get("SYNTH-S0", scenario)
+    outputs["expected_delta_sfr_inst_dex"] = (
+        s0.get("constant_value_inst") if outputs["pop_sfr_inst"] else None
+    )
+    outputs["expected_delta_sfr_100_dex"] = (
+        s0.get("constant_value_100") if outputs["pop_sfr_100"] else None
+    )
+    for suffix, delta_name, residual_name, expected_key, pop_flag in [
+        ("inst", "delta_sfr_inst_dex", "residual_sfr_inst_dex", "constant_value_inst", "pop_sfr_inst"),
+        ("100", "delta_sfr_100_dex", "residual_sfr_100_dex", "constant_value_100", "pop_sfr_100"),
+    ]:
+        member = outputs[pop_flag]
+        outputs[residual_name] = (
+            outputs[delta_name] - s0[expected_key]
+            if member and outputs[delta_name] is not None and s0.get(expected_key) is not None
+            else None
+        )
+    outputs["sigma_sfr_lp_dex"] = eval_formula("(lephare.sfr_u68 - lephare.sfr_l68) / 2.0")
+
+    for suffix, point_state, scale_machine, cig_sigma, sys_sigma, cig_formula in [
+        ("inst", "sfr_inst_state", "sfr_inst_scale", "sigma_sfr_cig_inst_dex",
+         "sigma_sys_sfr_inst_dex", "cigale.sfr_inst_err / (cigale.sfr_inst * ln10)"),
+        ("100", "sfr_100_state", "sfr_100_scale", "sigma_sfr_cig_100_dex",
+         "sigma_sys_sfr_100_dex", "cigale.sfr_100myr_err / (cigale.sfr_100myr * ln10)"),
+    ]:
+        scale_state, scale_reason = run_machine(
+            scale_machine, f"sfr_{suffix}_scale_state", f"sfr_{suffix}_scale_reason"
+        )
+        outputs[cig_sigma] = (
+            eval_formula(cig_formula) if outputs[point_state] == "point_comparable" else None
+        )
+        outputs[sys_sigma] = scenario.get(sys_sigma)
+        score_name = f"score_sfr_{suffix}"
+        residual_name = f"residual_sfr_{suffix}_dex"
+        score_guards = guard_list(score_name)
+        member = outputs[f"pop_sfr_{suffix}"]
+        parts = [outputs["sigma_sfr_lp_dex"], outputs[cig_sigma], outputs[sys_sigma]]
+        if not member:
+            outputs[score_name] = None
+            outputs[f"{score_name}_state"] = "not_in_population"
+            outputs[f"{score_name}_reason"] = "not_in_population"
+        elif "scale_state" in score_guards and scale_state != "point_valid":
+            outputs[score_name] = None
+            outputs[f"{score_name}_state"] = scale_state
+            outputs[f"{score_name}_reason"] = scale_reason
+        elif outputs[point_state] != "point_comparable":
+            outputs[score_name] = None
+            outputs[f"{score_name}_state"] = outputs[point_state]
+            outputs[f"{score_name}_reason"] = outputs[f"sfr_{suffix}_reason"]
+        elif outputs[residual_name] is None or not all(p is not None for p in parts):
+            outputs[score_name] = None
+            outputs[f"{score_name}_state"] = "unsupported_scale"
+            outputs[f"{score_name}_reason"] = "scale_component_unavailable"
+        else:
+            scale = sum(p * p for p in parts) ** 0.5
+            if "combined_scale_guard" in score_guards and scale < 1.0e-12:
+                outputs[score_name] = None
+                outputs[f"{score_name}_state"] = "zero_combined_scale"
+                outputs[f"{score_name}_reason"] = "zero_combined_scale"
+            else:
+                outputs[score_name] = outputs[residual_name] / scale
+                outputs[f"{score_name}_state"] = "point_valid"
+                outputs[f"{score_name}_reason"] = "none"
+
+    for machine, state_name, reason_name, delta_name, formula_key in [
+        ("ssfr_inst_point", "ssfr_inst_state", "ssfr_inst_reason", "delta_ssfr_inst_dex", "delta_ssfr_inst_dex"),
+        ("ssfr_100_point", "ssfr_100_state", "ssfr_100_reason", "delta_ssfr_100_dex", "delta_ssfr_100_dex"),
+    ]:
+        state, _ = run_machine(machine, state_name, reason_name)
+        outputs[delta_name] = (
+            eval_formula(declared_formulas[formula_key]) if state == "point_valid" else None
+        )
+    outputs["pop_ssfr_inst"] = bool(outputs["selection_type0"] and outputs["ssfr_inst_state"] == "point_valid")
+    outputs["pop_ssfr_100"] = bool(outputs["selection_type0"] and outputs["ssfr_100_state"] == "point_valid")
+    outputs["not_independent_of_mass_and_sfr"] = True
+    # AI NOTE: the sSFR score is unsupported by declared evidence (unknown
+    # mass-SFR error correlation); it stays NULL rather than assuming
+    # independence, per the contract's unsupported_correlated_errors state.
+    outputs["score_ssfr_inst"] = None
+    outputs["score_ssfr_100"] = None
+
+    for output in contract["outputs"]:
+        if output.get("kind") == "context_passthrough" and "source" in output:
+            outputs[output["name"]] = record.get(output["source"])
+    return outputs
+
+
+def evaluate_rule(machine, record, constants, states=None):
     """Apply a state machine's ordered rules; the first match supplies state and reason."""
     for rule in machine["rules"]:
         predicate = str(rule.get("when", "true"))
@@ -363,7 +634,7 @@ def evaluate_rule(machine, record, constants):
         if predicate == "false":
             continue
         try:
-            value = eval_node(parse_expression(predicate), record_resolver(record, constants))
+            value = eval_node(parse_expression(predicate), record_resolver(record, constants, states))
         except ExpressionError:
             value = False
         if value:
@@ -414,163 +685,6 @@ def evaluate_center(scenario, record):
             return z_only, "z_fallback"
         return scenario["global_constant"], "global_fallback"
     raise ExpressionError(f"unknown scenario kind {kind!r}")
-
-
-def evaluate_case(contract, case, scenarios):
-    """Compute every declared output for one synthetic case record."""
-    constants = {c["name"]: c["value"] for c in contract["declared_constants"]}
-    record = case["record"]
-    scenario = scenarios[case["scenario"]]
-    machines = contract["state_machines"]
-    # AI NOTE: delta outputs are evaluated through the contract's own declared
-    # formulas, so a mutated scratch formula yields mutated values that the
-    # fixtures catch; the canonical-identity guard is a separate structural
-    # check and does not mask value mismatches.
-    declared_formulas = {o["name"]: o["formula"] for o in contract["outputs"] if o.get("formula")}
-    outputs = {}
-    states = {}
-
-    def run_machine(name, output_state, output_reason):
-        machine = machines[name]
-        precondition = machine.get("precondition")
-        if precondition and not precondition_ok(precondition, states):
-            state, reason = "invalid_or_unsupported", "parent_state_not_permitted"
-        else:
-            state, reason = evaluate_rule(machine, record, constants)
-        states[name] = state
-        states[output_state] = state
-        outputs[output_state] = state
-        if output_reason:
-            outputs[output_reason] = reason
-        return state, reason
-
-    def eval_formula(text):
-        try:
-            return eval_node(parse_expression(text), record_resolver(record, constants))
-        except ExpressionError:
-            return None
-
-    run_machine("mass_point", "mass_point_state", "mass_point_reason")
-    outputs["selection_type0"] = bool(
-        eval_node(parse_expression("lephare.type == 0"), record_resolver(record, constants))
-    )
-    outputs["delta_mass_dex"] = (
-        eval_formula(declared_formulas["delta_mass_dex"])
-        if outputs["mass_point_state"] == "point_valid"
-        else None
-    )
-    outputs["pop_mass"] = bool(outputs["selection_type0"] and outputs["mass_point_state"] == "point_valid")
-
-    if scenario["model_kind"] == "S0-constant":
-        # AI NOTE: S0 scenarios declare only the per-timescale SFR constants;
-        # mass-center outputs stay absent rather than being fabricated.
-        expected_delta, support = None, None
-    else:
-        expected_delta, support = evaluate_center(scenario, record)
-    outputs["expected_delta_mass_dex"] = expected_delta
-    outputs["center_support"] = support
-    outputs["residual_mass_dex"] = (
-        outputs["delta_mass_dex"] - expected_delta
-        if outputs["delta_mass_dex"] is not None and expected_delta is not None
-        else None
-    )
-
-    scale_state, _ = run_machine("mass_scale", "mass_scale_state", "mass_scale_reason")
-    if scale_state == "point_valid":
-        outputs["sigma_mass_lp_dex"] = eval_formula("(lephare.mass_u68 - lephare.mass_l68) / 2.0")
-        outputs["sigma_mass_cig_dex"] = eval_formula("cigale.mass_err / (cigale.mass * ln10)")
-    else:
-        outputs["sigma_mass_lp_dex"] = None
-        outputs["sigma_mass_cig_dex"] = None
-    outputs["sigma_sys_mass_dex"] = scenario.get("sigma_sys_mass_dex")
-    components = [outputs["sigma_mass_lp_dex"], outputs["sigma_mass_cig_dex"], outputs["sigma_sys_mass_dex"]]
-    if scale_state == "point_valid" and all(c is not None for c in components):
-        scale = sum(c * c for c in components) ** 0.5
-        if scale < 1.0e-12:
-            outputs["score_mass_state"] = "zero_combined_scale"
-            outputs["score_mass"] = None
-        elif outputs["residual_mass_dex"] is not None:
-            outputs["score_mass"] = outputs["residual_mass_dex"] / scale
-            outputs["score_mass_state"] = "point_valid"
-        else:
-            outputs["score_mass"] = None
-            outputs["score_mass_state"] = "unsupported_scale"
-    else:
-        outputs["score_mass"] = None
-        outputs["score_mass_state"] = "unsupported_scale" if scale_state == "point_valid" else scale_state
-
-    for machine, state_name, reason_name, delta_name, formula_key in [
-        ("sfr_inst_point", "sfr_inst_state", "sfr_inst_reason", "delta_sfr_inst_dex", "delta_sfr_inst_dex"),
-        ("sfr_100_point", "sfr_100_state", "sfr_100_reason", "delta_sfr_100_dex", "delta_sfr_100_dex"),
-    ]:
-        state, _ = run_machine(machine, state_name, reason_name)
-        outputs[delta_name] = (
-            eval_formula(declared_formulas[formula_key]) if state == "point_comparable" else None
-        )
-    outputs["pop_sfr_inst"] = bool(outputs["selection_type0"] and outputs["sfr_inst_state"] == "point_comparable")
-    outputs["pop_sfr_100"] = bool(outputs["selection_type0"] and outputs["sfr_100_state"] == "point_comparable")
-    outputs["timescale_caveat_lephare"] = True
-
-    s0 = scenarios.get("SYNTH-S0", scenario)
-    outputs["expected_delta_sfr_inst_dex"] = s0.get("constant_value_inst")
-    outputs["expected_delta_sfr_100_dex"] = s0.get("constant_value_100")
-    outputs["residual_sfr_inst_dex"] = (
-        outputs["delta_sfr_inst_dex"] - s0["constant_value_inst"]
-        if outputs["delta_sfr_inst_dex"] is not None and s0.get("constant_value_inst") is not None
-        else None
-    )
-    outputs["residual_sfr_100_dex"] = (
-        outputs["delta_sfr_100_dex"] - s0["constant_value_100"]
-        if outputs["delta_sfr_100_dex"] is not None and s0.get("constant_value_100") is not None
-        else None
-    )
-    outputs["sigma_sfr_lp_dex"] = eval_formula("(lephare.sfr_u68 - lephare.sfr_l68) / 2.0")
-    outputs["sigma_sfr_cig_inst_dex"] = (
-        eval_formula("cigale.sfr_inst_err / (cigale.sfr_inst * ln10)")
-        if outputs["sfr_inst_state"] == "point_comparable"
-        else None
-    )
-    outputs["sigma_sfr_cig_100_dex"] = (
-        eval_formula("cigale.sfr_100myr_err / (cigale.sfr_100myr * ln10)")
-        if outputs["sfr_100_state"] == "point_comparable"
-        else None
-    )
-    outputs["sigma_sys_sfr_inst_dex"] = scenario.get("sigma_sys_sfr_inst_dex")
-    outputs["sigma_sys_sfr_100_dex"] = scenario.get("sigma_sys_sfr_100_dex")
-    for suffix, delta_name, residual_name, cig_sigma, sys_sigma in [
-        ("inst", "delta_sfr_inst_dex", "residual_sfr_inst_dex", "sigma_sfr_cig_inst_dex", "sigma_sys_sfr_inst_dex"),
-        ("100", "delta_sfr_100_dex", "residual_sfr_100_dex", "sigma_sfr_cig_100_dex", "sigma_sys_sfr_100_dex"),
-    ]:
-        parts = [outputs["sigma_sfr_lp_dex"], outputs[cig_sigma], outputs[sys_sigma]]
-        if outputs[f"sfr_{suffix}_state"] == "point_comparable" and all(p is not None for p in parts):
-            scale = sum(p * p for p in parts) ** 0.5
-            outputs[f"score_sfr_{suffix}"] = (
-                outputs[residual_name] / scale if scale >= 1.0e-12 and outputs[residual_name] is not None else None
-            )
-        else:
-            outputs[f"score_sfr_{suffix}"] = None
-
-    for machine, state_name, reason_name, delta_name, formula_key in [
-        ("ssfr_inst_point", "ssfr_inst_state", "ssfr_inst_reason", "delta_ssfr_inst_dex", "delta_ssfr_inst_dex"),
-        ("ssfr_100_point", "ssfr_100_state", "ssfr_100_reason", "delta_ssfr_100_dex", "delta_ssfr_100_dex"),
-    ]:
-        state, _ = run_machine(machine, state_name, reason_name)
-        outputs[delta_name] = (
-            eval_formula(declared_formulas[formula_key]) if state == "point_valid" else None
-        )
-    outputs["pop_ssfr_inst"] = bool(outputs["selection_type0"] and outputs["ssfr_inst_state"] == "point_valid")
-    outputs["pop_ssfr_100"] = bool(outputs["selection_type0"] and outputs["ssfr_100_state"] == "point_valid")
-    outputs["not_independent_of_mass_and_sfr"] = True
-    # AI NOTE: the sSFR score is unsupported by declared evidence (unknown
-    # mass-SFR error correlation); it stays NULL rather than assuming
-    # independence, per the contract's unsupported_correlated_errors state.
-    outputs["score_ssfr_inst"] = None
-    outputs["score_ssfr_100"] = None
-
-    for output in contract["outputs"]:
-        if output.get("kind") == "context_passthrough" and "source" in output:
-            outputs[output["name"]] = record.get(output["source"])
-    return outputs
 
 
 def compare_expected(case, outputs):
@@ -638,6 +752,53 @@ def check_fit_requests(fixtures):
 # =============================================================================
 
 
+def pop_mass_consistency(contract):
+    """Compare the POP-MASS predicate and echo against input-contract.md (P2R-06a R3).
+
+    The feature contract's predicate and its echo of the input contract's
+    conditions must agree with the POP-MASS row actually present in
+    input-contract.md section 6, so the two artefacts cannot drift apart.
+    """
+    failures = []
+    population = next(
+        (p for p in contract["populations"] if p["id"] == "POP-MASS"), None
+    )
+    if population is None:
+        return ["pop_mass_missing"]
+    predicate = population.get("predicate", "")
+    echo = population.get("input_contract_echo", "")
+    required_dsl = [
+        "lephare.type == 0",
+        "mass_point_state == point_valid",
+        "is_null(cigale.mass_err) == false",
+        "cigale.mass_err >= 0",
+    ]
+    for fragment in required_dsl:
+        if fragment not in predicate:
+            failures.append(f"pop_mass_predicate_condition_missing:{fragment}")
+    if not INPUT_CONTRACT_MD.exists():
+        failures.append("input_contract_absent")
+        return failures
+    text = INPUT_CONTRACT_MD.read_text()
+    row = next(
+        (line for line in text.splitlines() if line.strip().startswith("| `POP-MASS`")),
+        "",
+    )
+    normalized_row = " ".join(row.split())
+    required_shared = [
+        "lephare.type = 0",
+        "point_valid",
+        "> 0",
+        "error present and ≥ 0",
+    ]
+    for fragment in required_shared:
+        if fragment not in normalized_row:
+            failures.append(f"pop_mass_input_contract_condition_missing:{fragment}")
+        if " ".join(fragment.split()) not in " ".join(echo.split()):
+            failures.append(f"pop_mass_echo_drift:{fragment}")
+    return failures
+
+
 def structural_checks(contract, fixtures):
     """Declare-and-verify the contract's own invariants; return failure codes."""
     failures = []
@@ -650,6 +811,23 @@ def structural_checks(contract, fixtures):
         for rule in machines[machine_name]["rules"]:
             if rule["state"] == "upper_limit_supported" and not rule.get("unreachable_on_current_sources"):
                 failures.append("reachable_upper_limit_declared")
+
+    # P2R-06a A1.2: every centered residual and normalized residual output
+    # must declare the population gate that controls its emission, and every
+    # normalized residual must declare the full guard list, so removing a
+    # declared gate from a scratch copy is a structural failure before any
+    # fixture runs.
+    for output in contract["outputs"]:
+        if output.get("kind") in ("centered_residual", "normalized_residual"):
+            if not output.get("population_gate"):
+                failures.append(f"population_gate_missing:{output['name']}")
+        if output.get("kind") == "normalized_residual":
+            guards = output.get("guards") or []
+            for guard in ("population", "point_state", "scale_state", "combined_scale_guard"):
+                if guard not in guards:
+                    failures.append(f"guard_missing:{output['name']}:{guard}")
+
+    failures.extend(pop_mass_consistency(contract))
 
     for output in contract["outputs"]:
         formula = output.get("formula")
@@ -756,6 +934,11 @@ def apply_mutation(contract, identity, action):
     elif kind == "drop_state_rule":
         machine = contract["state_machines"][action["machine"]]
         machine["rules"] = [r for r in machine["rules"] if r["state"] != action["state"]]
+    elif kind == "drop_machine_rule_matching":
+        machine = contract["state_machines"][action["machine"]]
+        machine["rules"] = [
+            r for r in machine["rules"] if action["match"] not in str(r.get("reason", ""))
+        ]
     elif kind == "drop_partition_rule":
         rules = contract["partition_use"]["rules"]
         contract["partition_use"]["rules"] = [r for r in rules if action["match"] not in r]
@@ -765,6 +948,22 @@ def apply_mutation(contract, identity, action):
         identity["tracked_evidence_files"][0]["sha256"] = action["value"]
     elif kind == "add_center_covariate":
         contract["centers"][action["center"]]["comparison_set"][1]["covariates"].append(action["covariate"])
+    elif kind == "edit_population_predicate":
+        population = next(
+            p for p in contract["populations"] if p["id"] == action["population"]
+        )
+        population["predicate"] = action["predicate"]
+    elif kind == "edit_pop_mass_echo":
+        population = next(p for p in contract["populations"] if p["id"] == "POP-MASS")
+        population["input_contract_echo"] = action["echo"]
+    elif kind == "remove_output_field":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output.pop(action["field"], None)
+    elif kind == "edit_output_guards":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output["guards"] = list(action["guards"])
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 

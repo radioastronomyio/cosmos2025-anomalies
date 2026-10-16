@@ -19,13 +19,18 @@
 
 contract:
   id: ta-v2-feature-contract
-  version: 0.1.0-proposed
+  version: 0.2.0-proposed
   status: proposed_not_adopted
   grain: one row per photometry catalog source
   key: [catalog_id]
   input_contract: docs/research/ta-v2-design/input-contract.md
   input_identity: docs/research/ta-v2-design/input-identity.json
   identity_rule: content comparison; a mutated identity in a scratch copy is rejected, never overwritten
+  guard_precedence: >-
+    Declared order for every gated output: population guards first, then
+    point-domain guards, then scale/uncertainty guards, then arithmetic.
+    A zero residual never bypasses an earlier guard; it is evaluated only
+    after population, point and uncertainty validity are established.
 
 declared_constants:
   - {name: ln10, value: 2.302585092994046, kind: mathematical}
@@ -49,9 +54,11 @@ states_vocabulary:
 
 populations:
   - {id: POP-MASS, proposed_not_adopted: true,
-     predicate: "lephare.type == 0 AND mass_point_state == point_valid",
-     requires_sfr_state: false,
-     note: "type 0 is an explicit, recognized LePhare-classification selection; sources of other types are audit-only"}
+      predicate: "lephare.type == 0 AND mass_point_state == point_valid AND is_null(cigale.mass_err) == false AND cigale.mass_err >= 0",
+      requires_sfr_state: false,
+      input_contract_echo: "lephare.type = 0 and mass_med state = point_valid and CIGALE mass state = point_valid (linear mass present, finite, > 0, error present and ≥ 0)",
+      consistency_check: "the validator compares this predicate and echo against the POP-MASS row of input-contract.md section 6 so the two artefacts cannot drift apart (P2R-06a R3)",
+      note: "type 0 is an explicit, recognized LePhare-classification selection; sources of other types are audit-only; the CIGALE mass error must be present and nonnegative for membership (raw delta stays an audit output without it)"}
   - {id: POP-SFR-INST, proposed_not_adopted: true,
      predicate: "lephare.type == 0 AND sfr_inst_state == point_comparable",
      note: independent of POP-MASS membership}
@@ -85,13 +92,17 @@ state_machines:
     precondition: mass_point_state == point_valid
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.mass_l68) OR is_null(lephare.mass_u68) OR is_null(cigale.mass_err)"}
+          when: "is_null(lephare.mass_l68) OR is_null(lephare.mass_u68) OR is_null(cigale.mass_err)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.mass_l68) OR is_nan(lephare.mass_u68) OR is_nan(cigale.mass_err)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.mass_u68 < lephare.mass_l68"}
+          when: "lephare.mass_u68 < lephare.mass_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.mass_l68 > lephare.mass_med OR lephare.mass_u68 < lephare.mass_med"}
       - {state: invalid_or_unsupported, reason: error_negative,
-         when: "cigale.mass_err < 0"}
+          when: "cigale.mass_err < 0"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.mass_err / cigale.mass) > 0.3"}
+          when: "(cigale.mass_err / cigale.mass) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
   sfr_inst_point:
@@ -139,22 +150,30 @@ state_machines:
     precondition: sfr_inst_state == point_comparable
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+          when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.sfr_l68) OR is_nan(lephare.sfr_u68)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.sfr_u68 < lephare.sfr_l68"}
+          when: "lephare.sfr_u68 < lephare.sfr_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.sfr_l68 > lephare.sfr_med OR lephare.sfr_u68 < lephare.sfr_med"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.sfr_inst_err / cigale.sfr_inst) > 0.3"}
+          when: "(cigale.sfr_inst_err / cigale.sfr_inst) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
   sfr_100_scale:
     precondition: sfr_100_state == point_comparable
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+          when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.sfr_l68) OR is_nan(lephare.sfr_u68)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.sfr_u68 < lephare.sfr_l68"}
+          when: "lephare.sfr_u68 < lephare.sfr_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.sfr_l68 > lephare.sfr_med OR lephare.sfr_u68 < lephare.sfr_med"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.sfr_100myr_err / cigale.sfr_100myr) > 0.3"}
+          when: "(cigale.sfr_100myr_err / cigale.sfr_100myr) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
   ssfr_inst_point:
@@ -261,14 +280,20 @@ outputs:
   # population and identity block
   - {name: catalog_id, kind: key, source: photometry_primary.id, rankable: false}
   - {name: selection_type0, kind: recognized_selection, formula: "lephare.type == 0",
-     rankable: false, note: "explicit LePhare classification gate, reported, never hidden"}
+      rankable: false, note: "explicit LePhare classification gate, reported, never hidden"}
   - {name: pop_mass, kind: population_flag, rankable: false}
+  - {name: pop_mass_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_sfr_inst, kind: population_flag, rankable: false}
+  - {name: pop_sfr_inst_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_sfr_100, kind: population_flag, rankable: false}
+  - {name: pop_sfr_100_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_ssfr_inst, kind: population_flag, rankable: false}
   - {name: pop_ssfr_100, kind: population_flag, rankable: false}
   - {name: pop_audit_reasons, kind: reason_list, rankable: false,
-     note: overlapping, never collapsed}
+      note: overlapping, never collapsed}
   - {name: contract_version, kind: identity, rankable: false}
   - {name: center_model_id, kind: identity, rankable: false}
   - {name: scale_model_id, kind: identity, rankable: false}
@@ -293,8 +318,10 @@ outputs:
   - name: residual_mass_dex
     kind: centered_residual
     formula: "delta_mass_dex - expected_delta_mass_dex"
+    population_gate: POP-MASS
     units: dex
     sign: positive means LePhare exceeds the conditional expectation
+    domain: emitted exactly when pop_mass is true and both delta and expected outputs exist; otherwise NULL with pop_mass_reason = not_in_population (P2R-06a R8)
     rankable: primary
     role: primary proposed ranking surface; rare deviations survive normalization because ranking is residual-first and the score is secondary
   - {name: sigma_mass_lp_dex, kind: uncertainty, units: dex, rankable: false}
@@ -307,8 +334,10 @@ outputs:
   - name: score_mass
     kind: normalized_residual
     formula: "residual_mass_dex / sqrt(sigma_mass_lp_dex^2 + sigma_mass_cig_dex^2 + sigma_sys_mass_dex^2)"
+    population_gate: POP-MASS
+    guards: [population, point_state, scale_state, combined_scale_guard]
     units: dimensionless normalized residual
-    domain: emitted exactly when mass_scale_state == point_valid and the zero-scale guard passes
+    domain: "emitted exactly when every declared guard passes (population membership, point validity, mass_scale_state == point_valid, zero-scale guard); precedence per contract.guard_precedence (P2R-06a R2, R8)"
     rankable: secondary
     interpretation_guard: >-
       NOT a calibrated Gaussian significance or n-sigma. Estimator
@@ -318,8 +347,9 @@ outputs:
       scientific-design.md; a calibrated significance claim requires an
       approved validation argument (TA2-Q02).
   - {name: score_mass_state, kind: state,
-     domain: [point_valid, unsupported_scale, approximation_out_of_domain, zero_combined_scale],
-     rankable: false}
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, zero_combined_scale],
+      rankable: false}
+  - {name: score_mass_reason, kind: reason, rankable: false}
 
   # SFR blocks (T in {inst, 100}; separate paths)
   - {name: sfr_inst_state, kind: state, from: sfr_inst_point, rankable: false,
@@ -352,22 +382,42 @@ outputs:
   - {name: expected_delta_sfr_100_dex, kind: center_output, from: centers.sfr_center,
      units: dex, rankable: false, fit_permission: development only}
   - {name: residual_sfr_inst_dex, kind: centered_residual,
-     formula: "delta_sfr_inst_dex - expected_delta_sfr_inst_dex", units: dex, rankable: true}
+      formula: "delta_sfr_inst_dex - expected_delta_sfr_inst_dex",
+      population_gate: POP-SFR-INST, units: dex, rankable: true,
+      domain: emitted exactly when pop_sfr_inst is true and both parent outputs exist; NULL with pop_sfr_inst_reason = not_in_population otherwise}
   - {name: residual_sfr_100_dex, kind: centered_residual,
-     formula: "delta_sfr_100_dex - expected_delta_sfr_100_dex", units: dex, rankable: true}
+      formula: "delta_sfr_100_dex - expected_delta_sfr_100_dex",
+      population_gate: POP-SFR-100, units: dex, rankable: true,
+      domain: emitted exactly when pop_sfr_100 is true and both parent outputs exist; NULL with pop_sfr_100_reason = not_in_population otherwise}
   - {name: sigma_sfr_lp_dex, kind: uncertainty, units: dex, rankable: false}
   - {name: sigma_sfr_cig_inst_dex, kind: uncertainty, units: dex, rankable: false}
   - {name: sigma_sfr_cig_100_dex, kind: uncertainty, units: dex, rankable: false}
   - {name: sfr_inst_scale_state, kind: state, from: sfr_inst_scale, rankable: false}
+  - {name: sfr_inst_scale_reason, kind: reason, rankable: false}
   - {name: sfr_100_scale_state, kind: state, from: sfr_100_scale, rankable: false}
+  - {name: sfr_100_scale_reason, kind: reason, rankable: false}
   - {name: sigma_sys_sfr_inst_dex, kind: uncertainty, units: dex, rankable: false, fit_permission: development only}
   - {name: sigma_sys_sfr_100_dex, kind: uncertainty, units: dex, rankable: false, fit_permission: development only}
   - {name: score_sfr_inst, kind: normalized_residual, rankable: secondary,
-     formula: "residual_sfr_inst_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_inst_dex^2 + sigma_sys_sfr_inst_dex^2)",
-     interpretation_guard: same guard as score_mass}
+      population_gate: POP-SFR-INST,
+      guards: [population, point_state, scale_state, combined_scale_guard],
+      formula: "residual_sfr_inst_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_inst_dex^2 + sigma_sys_sfr_inst_dex^2)",
+      domain: emitted exactly when every declared guard passes for this timescale, independently of POP-MASS membership (P2R-06a R2, R8),
+      interpretation_guard: same guard as score_mass}
+  - {name: score_sfr_inst_state, kind: state,
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, zero_combined_scale],
+      rankable: false}
+  - {name: score_sfr_inst_reason, kind: reason, rankable: false}
   - {name: score_sfr_100, kind: normalized_residual, rankable: secondary,
-     formula: "residual_sfr_100_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_100_dex^2 + sigma_sys_sfr_100_dex^2)",
-     interpretation_guard: same guard as score_mass}
+      population_gate: POP-SFR-100,
+      guards: [population, point_state, scale_state, combined_scale_guard],
+      formula: "residual_sfr_100_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_100_dex^2 + sigma_sys_sfr_100_dex^2)",
+      domain: emitted exactly when every declared guard passes for this timescale, independently of POP-MASS membership (P2R-06a R2, R8),
+      interpretation_guard: same guard as score_mass}
+  - {name: score_sfr_100_state, kind: state,
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, zero_combined_scale],
+      rankable: false}
+  - {name: score_sfr_100_reason, kind: reason, rankable: false}
   - name: upper_limit_path
     kind: unsupported_branch
     state: unsupported_on_this_catalog
