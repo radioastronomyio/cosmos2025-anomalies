@@ -28,7 +28,17 @@
       "global_constant": 0.24,
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
-      "sigma_sys_sfr_100_dex": 0.2
+      "sigma_sys_sfr_100_dex": 0.2,
+      "support_counts": {
+        "0|0": 300,
+        "0|1": 300,
+        "1|0": 300,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 600,
+        "1": 600
+      }
     },
     "SYNTH-C0": {
       "model_kind": "C0-constant",
@@ -46,6 +56,150 @@
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
       "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-C0B": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": -0.21,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-C1C": {
+      "model_kind": "C1-conditional-binned-median",
+      "provenance": "synthetic",
+      "z_bin_edges": [
+        0.0,
+        1.0,
+        6.0
+      ],
+      "mag_bin_edges": [
+        0.0,
+        24.0,
+        40.0
+      ],
+      "cell_values": {
+        "0|0": 0.25,
+        "0|1": 0.25,
+        "1|0": 0.25,
+        "1|1": 0.25
+      },
+      "z_only_values": {
+        "0": 0.25,
+        "1": 0.25
+      },
+      "global_constant": 0.25,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "support_counts": {
+        "0|0": 300,
+        "0|1": 300,
+        "1|0": 300,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 600,
+        "1": 600
+      }
+    },
+    "SYNTH-C1S": {
+      "model_kind": "C1-conditional-binned-median",
+      "provenance": "synthetic",
+      "z_bin_edges": [
+        0.0,
+        1.0,
+        6.0
+      ],
+      "mag_bin_edges": [
+        0.0,
+        24.0,
+        40.0
+      ],
+      "cell_values": {
+        "0|0": 0.2,
+        "0|1": 0.22,
+        "1|0": 0.26,
+        "1|1": 0.28
+      },
+      "z_only_values": {
+        "0": 0.21,
+        "1": 0.27
+      },
+      "global_constant": 0.24,
+      "support_counts": {
+        "0|0": 200,
+        "0|1": 199,
+        "1|0": 199,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 250,
+        "1": 199
+      },
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT1": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-1",
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT2": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-2",
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT3": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-3",
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-J1": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-1",
+        "100": "JOINT-1"
+      }
+    },
+    "SYNTH-J2": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-2",
+        "100": "JOINT-2"
+      }
+    },
+    "SYNTH-J3": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-3",
+        "100": "JOINT-3"
+      }
     }
   },
   "cases": [
@@ -137,7 +291,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 0.5,
-        "photometry_primary.mag_auto_f444w": 21.0
+        "photometry_primary.mag_auto_f444w": 21.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 0.24,
@@ -156,7 +311,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 2.0,
-        "photometry_primary.mag_auto_f444w": 25.0
+        "photometry_primary.mag_auto_f444w": 25.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 0.24,
@@ -173,7 +329,8 @@
         "catalog_id": 900012,
         "lephare.type": 0,
         "lephare.mass_med": 10.0,
-        "cigale.mass": 1000000000.0
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 1.0,
@@ -189,7 +346,8 @@
         "catalog_id": 900013,
         "lephare.type": 0,
         "lephare.mass_med": 14.0,
-        "cigale.mass": 1000000000.0
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "delta_mass_dex": 5.0,
@@ -207,7 +365,8 @@
         "lephare.mass_med": 10.24,
         "cigale.mass": 10000000000.0,
         "lephare.zpdf_med": 0.5,
-        "photometry_primary.mag_auto_f444w": 45.0
+        "photometry_primary.mag_auto_f444w": 45.0,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "expected_delta_mass_dex": 0.24,
@@ -256,10 +415,12 @@
         "delta_mass_dex": 0.04,
         "expected_delta_mass_dex": 0.2,
         "residual_mass_dex": -0.16,
-        "sigma_mass_lp_dex": 0.2,
         "sigma_mass_cig_dex": 0.08685889638065036,
         "sigma_sys_mass_dex": 0.1,
-        "score_mass_state": "point_valid"
+        "score_mass_state": "point_valid",
+        "sigma_mass_lp_lo_dex": 0.24,
+        "sigma_mass_lp_hi_dex": 0.16000000000000014,
+        "score_mass": -0.7702956124344129
       }
     },
     {
@@ -377,7 +538,8 @@
         "lephare.mass_med": 10.0,
         "cigale.mass": 10000000000.0,
         "cigale.sfr_100myr": 0.0,
-        "lephare.sfr_med": 0.5
+        "lephare.sfr_med": 0.5,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -397,7 +559,8 @@
         "cigale.mass": 10000000000.0,
         "cigale.sfr_100myr": 2.0,
         "cigale.sfr_100myr_err": 0.1,
-        "lephare.sfr_med": 0.5
+        "lephare.sfr_med": 0.5,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -413,7 +576,8 @@
         "lephare.type": 0,
         "lephare.mass_med": 10.0,
         "cigale.mass": 10000000000.0,
-        "cigale.sfr_100myr": null
+        "cigale.sfr_100myr": null,
+        "cigale.mass_err": 2000000000.0
       },
       "expect": {
         "pop_mass": true,
@@ -455,15 +619,16 @@
         "delta_sfr_inst_dex": 0.5,
         "expected_delta_sfr_inst_dex": 0.05,
         "residual_sfr_inst_dex": 0.45,
-        "sigma_sfr_lp_dex": 0.2,
         "sigma_sfr_cig_inst_dex": 0.02171472409516259,
         "sigma_sys_sfr_inst_dex": 0.2,
-        "score_sfr_inst": 1.586322143174101
+        "score_sfr_inst": 1.586322143174101,
+        "sigma_sfr_lp_lo_dex": 0.19999999999999998,
+        "sigma_sfr_lp_hi_dex": 0.19999999999999998
       }
     },
     {
       "id": "FX-06a",
-      "description": "sSFR delta emitted with declared algebraic coupling to the mass and SFR deltas",
+      "description": "sSFR component view satisfies the declared algebraic coupling at full precision; the LePhare non-additivity context is emitted alongside",
       "scenario": "SYNTH-S0",
       "record": {
         "catalog_id": 900050,
@@ -477,10 +642,11 @@
       },
       "expect": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "delta_mass_dex": 0.0,
         "delta_sfr_100_dex": 0.1989700043360188,
-        "not_independent_of_mass_and_sfr": true
+        "not_independent_of_mass_and_sfr": true,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.5
       }
     },
     {
@@ -499,7 +665,7 @@
       },
       "expect": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "score_ssfr_100": null
       }
     },
@@ -556,6 +722,971 @@
         "selection_type0": false,
         "pop_mass": false,
         "delta_mass_dex": 1.0
+      }
+    },
+    {
+      "id": "FX-R3a",
+      "description": "R3: type-0 valid masses with NULL CIGALE mass error are outside POP-MASS; raw delta stays a finite audit output, residual and score are NULL",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": null,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R3b",
+      "description": "R3: negative CIGALE mass error also falls outside POP-MASS with the same pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": -100000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8a",
+      "description": "R8: type-1 source with valid masses receives NULL residual and score with not_in_population; the raw delta stays auditable",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911003,
+        "lephare.type": 1,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R8b",
+      "description": "R8: type-2 source, same NULL pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911004,
+        "lephare.type": 2,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8c",
+      "description": "R8: unknown type (99), same NULL pattern",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 911005,
+        "lephare.type": 99,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 1000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R8d",
+      "description": "R8: type-1 SFR source is outside POP-SFR-100; SFR residual and score NULL, raw SFR delta auditable",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911006,
+        "lephare.type": 1,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "pop_sfr_100": false,
+        "pop_sfr_100_reason": "not_in_population",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "residual_sfr_100_dex": null,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-R2a",
+      "description": "R2: SFR relative error 0.31 is outside the declared approximation domain; scale state emitted, score NULL, residual retained",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911007,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.62
+      },
+      "expect": {
+        "sfr_100_state": "point_comparable",
+        "pop_sfr_100": true,
+        "sfr_100_scale_state": "approximation_out_of_domain",
+        "sfr_100_scale_reason": "log_error_approximation_domain_exceeded",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "approximation_out_of_domain"
+      }
+    },
+    {
+      "id": "FX-R2b",
+      "description": "R2 control: relative error 0.29 stays inside the domain with a finite score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911008,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.58
+      },
+      "expect": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.3263071119761467
+      }
+    },
+    {
+      "id": "FX-R2c",
+      "description": "R2 boundary control: relative error exactly 0.30 is inside the inclusive domain with a finite score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911009,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.6
+      },
+      "expect": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.324429488725637
+      }
+    },
+    {
+      "id": "FX-R2d",
+      "description": "R2: reversed SFR quantiles give an invalid scale state with reason; no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911010,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.7,
+        "lephare.sfr_u68": 0.3,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "quantile_order_violation",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R2e",
+      "description": "R2: median outside the otherwise ordered endpoints fails complete quantile containment; no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911011,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.45,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "median_outside_quantile_interval",
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R2f",
+      "description": "R2 control: missing SFR uncertainty stays missing with no score (passes on the baseline too)",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911012,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": null,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "missing",
+        "sfr_100_scale_reason": "missing_uncertainty_input",
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R8e",
+      "description": "R8: SFR population independent of mass membership - nonpositive mass leaves the SFR residual and score intact",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911013,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 0.0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.3,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "pop_mass": false,
+        "residual_mass_dex": null,
+        "pop_sfr_100": true,
+        "pop_sfr_100_reason": "none",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": -0.356146931659015
+      }
+    },
+    {
+      "id": "FX-R2g",
+      "description": "R2: non-finite SFR uncertainty is rejected with an explicit reason and no score",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 911014,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": NaN,
+        "lephare.sfr_u68": 0.7,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "nonfinite_uncertainty_input",
+        "score_sfr_100": null
+      }
+    },
+    {
+      "id": "FX-R9a",
+      "description": "R9: asymmetric posterior (lower 0.05, upper 0.30) with a positive residual selects the lower half-width",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.25,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.3,
+        "residual_mass_dex": 0.09999999999999998,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": 0.891740157358414,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9b",
+      "description": "R9: same asymmetric widths with a negative residual select the upper half-width",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.1,
+        "lephare.mass_l68": 10.05,
+        "lephare.mass_u68": 10.4,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.1,
+        "residual_mass_dex": -0.1,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": -0.31610854496087415,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9c",
+      "description": "R9: raw delta (-0.10) and centered residual (+0.11) of opposite sign; the side follows the residual",
+      "scenario": "SYNTH-C0B",
+      "record": {
+        "catalog_id": 912003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "lephare.mass_l68": 9.95,
+        "lephare.mass_u68": 10.3,
+        "cigale.mass": 12589254117.941668,
+        "cigale.mass_err": 200000000.0
+      },
+      "expect": {
+        "delta_mass_dex": -0.09999999999999964,
+        "expected_delta_mass_dex": -0.21,
+        "residual_mass_dex": 0.11000000000000035,
+        "score_mass": 0.9820018620764585,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9d",
+      "description": "R9: zero-width selected side (med == l68 with positive residual) is degenerate with an explicit reason",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.3,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "sigma_mass_lp_lo_dex": 0.0,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width",
+        "score_mass_reason": "degenerate_quantile_width"
+      }
+    },
+    {
+      "id": "FX-R9e",
+      "description": "R9: zero-width unselected side (med == u68 with positive residual) leaves the score finite",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912005,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "lephare.mass_l68": 10.0,
+        "lephare.mass_u68": 10.3,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "sigma_mass_lp_lo_dex": 0.3,
+        "sigma_mass_lp_hi_dex": 0.0,
+        "score_mass": 0.3161085449608741,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9f",
+      "description": "R9: exactly zero residual with both widths strictly positive gives score zero after validity",
+      "scenario": "SYNTH-C1C",
+      "record": {
+        "catalog_id": 912006,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.55,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "residual_mass_dex": 0.0,
+        "score_mass": 0.0,
+        "score_mass_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R9g",
+      "description": "R9: zero residual with a zero width is degenerate, never a silent zero score",
+      "scenario": "SYNTH-C1C",
+      "record": {
+        "catalog_id": 912007,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 10.25,
+        "lephare.mass_u68": 10.55,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "residual_mass_dex": 0.0,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width"
+      }
+    },
+    {
+      "id": "FX-R9h",
+      "description": "R9: median outside otherwise ordered endpoints fails mass containment; no score, raw delta retained",
+      "scenario": "SYNTH-C1",
+      "record": {
+        "catalog_id": 912008,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.25,
+        "lephare.mass_l68": 9.8,
+        "lephare.mass_u68": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "delta_mass_dex": 0.25,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "median_outside_quantile_interval",
+        "score_mass": null
+      }
+    },
+    {
+      "id": "FX-R9i",
+      "description": "R9: SFR directional width - negative SFR residual selects the upper half-width",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 912009,
+        "lephare.type": 0,
+        "lephare.sfr_med": 0.5,
+        "lephare.sfr_l68": 0.45,
+        "lephare.sfr_u68": 0.8,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "sigma_sfr_lp_lo_dex": 0.05,
+        "sigma_sfr_lp_hi_dex": 0.3,
+        "score_sfr_100": -0.27969999459791833,
+        "score_sfr_100_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R1a",
+      "description": "R1: the inst-timescale component view also satisfies the coupling with a nonzero delta_mass; eligibility never touches native ssfr_med",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "lephare.sfr_l68": 0.45,
+        "lephare.sfr_u68": 0.8
+      },
+      "expect": {
+        "delta_mass_dex": 0.3,
+        "delta_sfr_inst_dex": 0.1989700043360188,
+        "delta_ssfr_inst_dex": -0.10102999566398196,
+        "ssfr_inst_state": "point_valid",
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
+    },
+    {
+      "id": "FX-R1b",
+      "description": "R1: native ssfr_med equal to the component value gives a zero non-additivity context",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": -9.5
+      },
+      "expect": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.0,
+        "ctx_lp_ssfr_point_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R1c",
+      "description": "R1: absent native sSFR nulls only the context; the component view survives",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": null
+      },
+      "expect": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_point_reason": "missing_input",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
+    },
+    {
+      "id": "FX-R1d",
+      "description": "R1: out-of-domain native sSFR nulls only the context; the component view survives",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": 5.0
+      },
+      "expect": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "invalid_or_unsupported",
+        "ctx_lp_ssfr_point_reason": "lephare_value_out_of_domain",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
+    },
+    {
+      "id": "FX-R7a",
+      "description": "R7: a cell at exactly the 200 support threshold resolves as cell",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "0|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.04
+      }
+    },
+    {
+      "id": "FX-R7b",
+      "description": "R7: a cell at 199 support falls back to the z-only estimate at 250",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 25.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "0|1",
+        "expected_delta_mass_dex": 0.21,
+        "residual_mass_dex": 0.030000000000000027
+      }
+    },
+    {
+      "id": "FX-R7c",
+      "description": "R7: z-only support 199 as well falls back to the global constant",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 2.0,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "center_support": "global_fallback",
+        "center_requested_cell": "1|0",
+        "expected_delta_mass_dex": 0.24,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7d",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 12) has zero residual under the forced edge",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.224,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 6.4,
+        "photometry_primary.mag_auto_f444w": 12.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.224,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7e",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 36) has zero residual under the forced edge",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914005,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.176,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 6.9,
+        "photometry_primary.mag_auto_f444w": 36.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|4",
+        "expected_delta_mass_dex": 0.176,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7g",
+      "description": "R7: sparse high-redshift cells fall back to the z-only estimate and retain a known magnitude bias (+0.024)",
+      "scenario": "SYNTH-FIT2",
+      "record": {
+        "catalog_id": 914006,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.224,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 7.4,
+        "photometry_primary.mag_auto_f444w": 12.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.024
+      }
+    },
+    {
+      "id": "FX-R7h",
+      "description": "R7: z exactly 5.5 belongs to the upper bin (left-closed edge), never straddling 5.5",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914007,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 5.5,
+        "photometry_primary.mag_auto_f444w": 24.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7i",
+      "description": "R7: the maximum development-z endpoint is included in the final bin, not out of hull",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914008,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.212,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 7.7,
+        "photometry_primary.mag_auto_f444w": 18.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|1",
+        "expected_delta_mass_dex": 0.212,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7j",
+      "description": "R7: development support wholly below 5.5 inserts no forced edge; duplicate quantile edges collapse to 4 effective z bins",
+      "scenario": "SYNTH-FIT3",
+      "record": {
+        "catalog_id": 914009,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 1.2,
+        "photometry_primary.mag_auto_f444w": 24.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "1|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-J4",
+      "description": "A1.7: joint distance uses the fitted covariance C (not the unit-diagonal correlation); score uses R on standardized residuals",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915001,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "residual_mass_dex": 0.3000000000000004,
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_inst_state": "point_valid",
+        "joint_inst_fallback": "cell",
+        "joint_inst_rho_effective": 0.6,
+        "joint_inst_regularized": false,
+        "joint_inst_support_count": 200,
+        "score_joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J5b",
+      "description": "A1.7: a non-POP-MASS source nulls both joint outputs with not_in_population while the raw mass delta survives",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 2,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915003,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_state": "not_in_population",
+        "joint_residual_distance_100": null,
+        "delta_mass_dex": 0.4
+      }
+    },
+    {
+      "id": "FX-J5c",
+      "description": "A1.7: an out-of-domain SFR scale (relative error 0.31) nulls only the standardized score; the unstandardized distance stays valid",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915004,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.62
+      },
+      "expect": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": null,
+        "score_joint_inst_state": "approximation_out_of_domain",
+        "score_joint_inst_reason": "log_error_approximation_domain_exceeded",
+        "joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J5d",
+      "description": "A1.7: valid instantaneous SFR with censored 100-Myr SFR emits the inst joint surface and nulls the 100 surface",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915005,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "cigale.sfr_100myr": 0.05,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_residual_distance_100": null,
+        "score_joint_100": null,
+        "joint_100_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-J5e",
+      "description": "A1.7: the reverse - valid 100-Myr SFR with censored instantaneous SFR emits only the 100 surface",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915006,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "cigale.sfr_inst": 0.05,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_residual_distance_100": 1.5972042428628905,
+        "score_joint_100": 4.095313877127304,
+        "joint_100_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J6",
+      "description": "A1.7 clamp: a sparse cell falls back to the global fit whose correlation is beyond the clamp; the exact declared post-clamp value 0.95 is used and the regularization flag is recorded",
+      "scenario": "SYNTH-J2",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 1.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915007,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_inst_fallback": "global_fallback",
+        "joint_inst_rho_effective": 0.95,
+        "joint_inst_regularized": true,
+        "joint_inst_state": "point_valid",
+        "score_joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J7",
+      "description": "A1.7 degeneracy: zero marginal covariance spread produces an explicit unsupported state, never an invented covariance",
+      "scenario": "SYNTH-J3",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915008,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_inst_state": "unsupported",
+        "joint_inst_reason": "zero_marginal_spread",
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_fallback": "unsupported"
       }
     }
   ],
@@ -661,6 +1792,23 @@
         }
       ],
       "expect": "accepted"
+    },
+    {
+      "id": "FX-P5",
+      "description": "A training ID with no partition assignment is rejected as unassigned_partition",
+      "training_rows": [
+        {
+          "catalog_id": 42
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 7,
+          "split": "development"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "unassigned_partition"
     }
   ],
   "mutations": {
@@ -749,6 +1897,1811 @@
         "covariate": "analysis.specz_p2r05_sources.eligibility_primary_galaxy"
       },
       "intended_reason": "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+    },
+    "M10_pop_mass_error_clause_removed": {
+      "description": "R3 reintroduced: POP-MASS predicate loses the CIGALE mass-error validity conditions",
+      "action": {
+        "kind": "edit_population_predicate",
+        "population": "POP-MASS",
+        "predicate": "lephare.type == 0 AND mass_point_state == point_valid"
+      },
+      "intended_reason": "case_mismatch:FX-R3a:pop_mass"
+    },
+    "M11_mass_residual_population_gate_removed": {
+      "description": "R8 reintroduced: residual_mass_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_mass_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_mass_dex"
+    },
+    "M12_sfr_score_point_state_only": {
+      "description": "R2 reintroduced: score_sfr_100 drops the scale-state guard and is gated on point state only",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_sfr_100",
+        "guards": [
+          "population",
+          "point_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-R2a:score_sfr_100"
+    },
+    "M13_sfr_population_gate_removed": {
+      "description": "R8 reintroduced: residual_sfr_100_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_sfr_100_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_sfr_100_dex"
+    },
+    "M14_pop_mass_conditions_disagree": {
+      "description": "R3 drift: the feature contract's echo of the input-contract POP-MASS conditions disagrees with input-contract.md",
+      "action": {
+        "kind": "edit_pop_mass_echo",
+        "echo": "lephare.type = 0 and mass_med state = point_valid (no error condition)"
+      },
+      "intended_reason": "pop_mass_echo_drift:error present and \u2265 0"
+    },
+    "M15_median_containment_removed": {
+      "description": "R2 reintroduced: the complete median-containment rule is removed from the SFR-100 scale machine",
+      "action": {
+        "kind": "drop_machine_rule_matching",
+        "machine": "sfr_100_scale",
+        "match": "median_outside_quantile_interval"
+      },
+      "intended_reason": "case_mismatch:FX-R2e:sfr_100_scale_reason"
+    },
+    "M16_symmetric_average_restored": {
+      "description": "R9 reintroduced: the mass width policy symmetrizes (u68 - l68)/2 again",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "symmetric_average"
+      },
+      "intended_reason": "case_mismatch:FX-R9a:score_mass"
+    },
+    "M17_side_by_raw_delta": {
+      "description": "R9 reintroduced: the width side is chosen by the raw delta sign, not the conditionally centered residual",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "directional_by_delta_sign"
+      },
+      "intended_reason": "case_mismatch:FX-R9c:score_mass"
+    },
+    "M18_zero_width_guard_removed": {
+      "description": "R9 reintroduced: score_mass drops the directional width guard, admitting zero selected widths",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_mass",
+        "guards": [
+          "population",
+          "point_state",
+          "scale_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "guard_missing:score_mass:directional_width"
+    },
+    "M19_native_ssfr_reinserted": {
+      "description": "R1 reintroduced: delta_ssfr_100_dex returns to the native ssfr_med formula",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_ssfr_100_dex",
+        "formula": "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+      },
+      "intended_reason": "case_mismatch:FX-06a:delta_ssfr_100_dex"
+    },
+    "M20_false_coupling_declared": {
+      "description": "R1 guard: a scratch contract declares a false algebraic coupling (sum instead of difference)",
+      "action": {
+        "kind": "set_output_coupling",
+        "output": "delta_ssfr_inst_dex",
+        "coupling_expr": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex",
+        "algebraic_coupling": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex (deliberately false)"
+      },
+      "intended_reason": "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a"
+    },
+    "M21_ctx_marked_rankable": {
+      "description": "R1 guard: the LePhare non-additivity context is marked rankable",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "rankable",
+        "value": true
+      },
+      "intended_reason": "context_output_rankable:ctx_lp_ssfr_nonadditivity_dex"
+    },
+    "M22_support_counts_ignored": {
+      "description": "R7 reintroduced: the C1 center stops enforcing minimum support and uses any present cell",
+      "action": {
+        "kind": "set_center_field",
+        "center": "mass_center",
+        "index": 1,
+        "field": "support_enforcement",
+        "value": "none"
+      },
+      "intended_reason": "case_mismatch:FX-R7b:center_support"
+    },
+    "M23_forced_edge_removed": {
+      "description": "R7/decision 3 reintroduced: the forced z = 5.5 edge is removed, letting the top bin straddle the slope reversal",
+      "action": {
+        "kind": "remove_declared_constant",
+        "name": "forced_highz_edge"
+      },
+      "intended_reason": "case_mismatch:FX-R7d:residual_mass_dex"
+    },
+    "M24_authorizing_spec_entry_deleted": {
+      "description": "R5 reintroduced: the required parent authorizing-spec entry is deleted from the identity manifest",
+      "action": {
+        "kind": "remove_identity_spec_entry",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+      },
+      "intended_reason": "authorizing_spec_not_declared:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+    },
+    "M25_authorizing_spec_digest_deleted": {
+      "description": "R5 reintroduced: the parent authorizing-spec digest is altered in the identity manifest",
+      "action": {
+        "kind": "change_identity_spec_digest",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+        "value": "deadbeef"
+      },
+      "intended_reason": "identity_mismatch:authorizing_spec:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+    },
+    "M26_low_correlation_veto": {
+      "description": "A1.7 guard: a low-correlation veto is added to the joint surfaces",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "joint_veto_min_abs_correlation"
+        ],
+        "value": 0.1
+      },
+      "intended_reason": "joint_veto_declared:joint_veto_min_abs_correlation"
+    },
+    "M27_validation_row_in_covariance_fit": {
+      "description": "A1.7 guard: a validation-assigned row enters the covariance fit",
+      "action": {
+        "kind": "inject_joint_fit_row",
+        "fit": "JOINT-1",
+        "timescale": "inst",
+        "row": {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.5,
+          "residual_sfr_T_dex": 0.6
+        },
+        "split": "validation"
+      },
+      "intended_reason": "joint_fit_partition:JOINT-1:inst:validation or holdout catalog_id 999999 in fit request"
+    },
+    "M28_marginal_output_removed": {
+      "description": "A1.7 guard: a marginal output is removed while joint outputs are present",
+      "action": {
+        "kind": "remove_output",
+        "output": "sigma_sfr_cig_100_dex"
+      },
+      "intended_reason": "required_output_missing:sigma_sfr_cig_100_dex"
+    },
+    "M29_joint_population_gate_removed": {
+      "description": "A1.7 guard: joint_residual_distance_inst loses its population gate and is emitted for a non-member",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "joint_residual_distance_inst",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:joint_residual_distance_inst"
+    },
+    "M30_clamp_removed": {
+      "description": "A1.7 guard: the correlation clamp is effectively removed (0.999999)",
+      "action": {
+        "kind": "edit_declared_constant",
+        "name": "joint_rho_clamp",
+        "value": 0.999999
+      },
+      "intended_reason": "joint_fit_check:CLAMP-A"
+    },
+    "M31_distance_uses_correlation": {
+      "description": "A1.7 guard: the distance formula silently substitutes the unit-diagonal correlation for the full covariance",
+      "action": {
+        "kind": "set_joint_matrix_source",
+        "output": "joint_residual_distance_inst",
+        "matrix_source": "correlation"
+      },
+      "intended_reason": "case_mismatch:FX-J4:joint_residual_distance_inst"
+    },
+    "M32_covariance_fit_bypassed": {
+      "description": "A1.7 guard: the estimator is replaced by hand-declared matrices",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "estimator",
+          "id"
+        ],
+        "value": "hand_declared_matrices"
+      },
+      "intended_reason": "joint_estimator_invalid"
+    },
+    "M33_timescales_incorrectly_intersected": {
+      "description": "A1.7 guard: the inst joint surface incorrectly requires the 100-Myr population as well",
+      "action": {
+        "kind": "edit_requires_timescales",
+        "output": "joint_residual_distance_inst",
+        "requires_timescales": [
+          "mass",
+          "inst",
+          "100"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-J5d:joint_residual_distance_inst"
+    },
+    "M34_bimodality_flag_in_description": {
+      "description": "A1.8 guard: the phrase 'bimodality flag' is inserted into an output description",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "description",
+        "value": "bimodality flag for the LePhare posterior"
+      },
+      "intended_reason": "naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal"
     }
-  }
+  },
+  "sigma_sys_solve_checks": [
+    {
+      "id": "SOLVE-1",
+      "description": "Solvable synthetic case: equal scales give an analytic oracle sqrt((1.4826*median|r|)^2 - s^2)",
+      "residuals": [
+        0.2,
+        -0.2,
+        0.3,
+        -0.3
+      ],
+      "scales": [
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "point_valid",
+        "reason": "none",
+        "value": 0.3569053410920044
+      }
+    },
+    {
+      "id": "SOLVE-2",
+      "description": "No admissible solution: residuals already smaller than the quoted scales; no negative floor is fabricated",
+      "residuals": [
+        0.01,
+        -0.01
+      ],
+      "scales": [
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "invalid_or_unsupported",
+        "reason": "no_admissible_systematic_solution",
+        "value": null
+      }
+    },
+    {
+      "id": "SOLVE-3",
+      "description": "Zero spread: identical residuals give MAD zero; unsupported rather than an invented sigma_sys",
+      "residuals": [
+        0.05,
+        0.05,
+        0.05
+      ],
+      "scales": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "expect": {
+        "state": "invalid_or_unsupported",
+        "reason": "zero_residual_spread",
+        "value": null
+      }
+    }
+  ],
+  "mathematical_counterexamples": [
+    {
+      "id": "MATH-1",
+      "description": "Deterministic counterexample to 'median non-additivity implies bimodality': X, Z independent Exp(1), Y = X + Z has joint density exp(-Y) on 0 <= X <= Y, which is unimodal (log-concave); median(X) = median(Y - X) = ln 2; median(Y) = m solves exp(-m)(1+m) = 1/2; the non-additivity 2*ln2 - m is nonzero. Synthetic mathematical illustration, not a model of LePhare's posterior; no sampled data is used.",
+      "median_x": 0.6931471805599453,
+      "median_y": 1.6783469900166605,
+      "expected_nonadditivity": -0.29205262889677,
+      "checks": {
+        "median_y_greater_than_median_x": true,
+        "approx_value": -0.29205
+      }
+    }
+  ],
+  "center_constructions": {
+    "CONSTR-1": {
+      "provenance": "synthetic",
+      "description": "Slope-reversal population: delta depends on magnitude with slope +0.002 below z 5.5 and -0.002 above; the quantile top bin spans roughly z 3 to 8 so the forced 5.5 edge splits it; demo cells carry >= 220 unique sources",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": -0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 950000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        }
+      ]
+    },
+    "CONSTR-2": {
+      "provenance": "synthetic",
+      "description": "Sparse high-redshift population: upper-bin per-cell support 45 falls back to the z-only estimate (225) which retains a known magnitude bias",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": -0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 960000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        }
+      ]
+    },
+    "CONSTR-3": {
+      "provenance": "synthetic",
+      "description": "Support wholly below 5.5 with collapsing duplicate quantile edges: four distinct z values yield three effective bins and the forced edge is not inserted",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": 0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 970000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        }
+      ]
+    }
+  },
+  "binning_demonstrations": [
+    {
+      "id": "DEMO-SLOPE",
+      "construction": "CONSTR-1",
+      "tolerance": 0.005,
+      "adequate_support_declared": "each demonstration cell above z 5.5 carries 220 unique sources, at or above center_min_cell_support",
+      "probes": [
+        {
+          "lephare.zpdf_med": 6.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "delta_mass_dex": 0.224
+        },
+        {
+          "lephare.zpdf_med": 6.9,
+          "photometry_primary.mag_auto_f444w": 36,
+          "delta_mass_dex": 0.17600000000000002
+        }
+      ]
+    }
+  ],
+  "joint_fits": {
+    "JOINT-1": {
+      "provenance": "synthetic",
+      "description": "Known 0.6-correlation population in cell 0|2 with non-unit marginal scales (0.5/0.6 dex patterns); discriminates the covariance from the correlation matrix",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 980000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 20
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 20
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 981000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 20
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 20
+            }
+          ]
+        }
+      }
+    },
+    "JOINT-2": {
+      "provenance": "synthetic",
+      "description": "Clamp population: cell 0|2 carries rho 19996/20000 = 0.9998 (clamped to 0.95); a sparse uncorrelated cell 2|2 falls back to the global fit, which is also beyond the clamp",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 982000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 983000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            }
+          ]
+        }
+      }
+    },
+    "JOINT-3": {
+      "provenance": "synthetic",
+      "description": "Degenerate population: identical rows give zero marginal spread at every level",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 984000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.2,
+              "residual_sfr_T_dex": 0.1,
+              "repeat": 220
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 985000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.2,
+              "residual_sfr_T_dex": 0.1,
+              "repeat": 220
+            }
+          ]
+        }
+      }
+    }
+  },
+  "joint_kernel_checks": [
+    {
+      "id": "KERNEL-1",
+      "type": "distance",
+      "description": "Correlation 0.8, unit scales: the off-pattern source (2.2,-2.2) outranks the on-pattern (3,3)",
+      "matrix": [
+        [
+          1.0,
+          0.8
+        ],
+        [
+          0.8,
+          1.0
+        ]
+      ],
+      "points": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          2.2,
+          -2.2
+        ]
+      ],
+      "expected": [
+        3.1622776601683795,
+        6.957010852370437
+      ]
+    },
+    {
+      "id": "KERNEL-2",
+      "type": "distance",
+      "description": "Correlation 0: the surface is emitted for both points; no veto applies",
+      "matrix": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "points": [
+        [
+          2.5,
+          2.5
+        ],
+        [
+          3.4,
+          0.0
+        ]
+      ],
+      "expected": [
+        3.5355339059327378,
+        3.4
+      ]
+    },
+    {
+      "id": "KERNEL-3",
+      "type": "distance",
+      "description": "Mixture covariance [[3.4,-2.5],[-2.5,3.4]]: C at (4,-4) gives 2.3289 and D at (3,3) gives 4.4721, so the joint surface ranks D above C while C's marginal magnitudes (4) exceed D's (3) - recorded as a known limitation (covariance masking)",
+      "matrix": [
+        [
+          3.4,
+          -2.5
+        ],
+        [
+          -2.5,
+          3.4
+        ]
+      ],
+      "points": [
+        [
+          4.0,
+          -4.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ],
+      "expected": [
+        2.328890038958328,
+        4.4721359549995805
+      ]
+    },
+    {
+      "id": "POOLED-1",
+      "type": "pooled_correlation",
+      "description": "Two bins with internal correlation 0, means (1,-1) and (-1,1), unit variances, equal weights: the pooled correlation is -0.5",
+      "within_correlations": [
+        0.0,
+        0.0
+      ],
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "component_means": [
+        [
+          1.0,
+          -1.0
+        ],
+        [
+          -1.0,
+          1.0
+        ]
+      ],
+      "component_variances": [
+        1.0,
+        1.0
+      ],
+      "expected": -0.5
+    },
+    {
+      "id": "POOLED-2",
+      "type": "pooled_correlation",
+      "description": "Equal zero-mean unit-variance components with correlations -0.7 and 0 in a 50/50 mixture: the pooled correlation is -0.35, not -0.30",
+      "within_correlations": [
+        -0.7,
+        0.0
+      ],
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "component_means": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "component_variances": [
+        1.0,
+        1.0
+      ],
+      "expected": -0.35
+    }
+  ],
+  "joint_fit_requests": [
+    {
+      "id": "FX-JP1",
+      "description": "Duplicate covariance fitting rows are rejected",
+      "row_blocks": [
+        {
+          "catalog_id": 986000,
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 2
+        }
+      ],
+      "base_catalog_id": 986000,
+      "partition_assignment": [
+        {
+          "catalog_id": 986000,
+          "split": "development"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "duplicate training rows"
+    },
+    {
+      "id": "FX-JP2",
+      "description": "A covariance fitting row with no assignment is rejected",
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 1
+        }
+      ],
+      "base_catalog_id": 987000,
+      "partition_assignment": [],
+      "expect": "rejected",
+      "intended_reason": "unassigned_partition"
+    },
+    {
+      "id": "FX-JP3",
+      "description": "A validation-assigned covariance fitting row is rejected",
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 1
+        }
+      ],
+      "base_catalog_id": 988000,
+      "partition_assignment": [
+        {
+          "catalog_id": 988000,
+          "split": "validation"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "validation or holdout"
+    }
+  ],
+  "joint_fit_checks": [
+    {
+      "id": "CORE",
+      "description": "Known core: +-1 patterns with counts 6/2/2/6 give rho exactly 0.5 with no winsorization and no clamp",
+      "pairs": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.5,
+        "rho_effective": 0.5,
+        "regularized": false,
+        "n": 16
+      }
+    },
+    {
+      "id": "CONTAM",
+      "description": "Contamination response: one wild outlier (1000,1000) is winsorized and the estimate moves only boundedly (rho stays near zero versus the unclipped 0.5+offset it would take under a moment estimator)",
+      "pairs": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          1000,
+          1000
+        ]
+      ],
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "regularized": false,
+        "n": 17,
+        "rho_raw": 0.9260373689896785
+      }
+    },
+    {
+      "id": "DEGEN",
+      "description": "Degeneracy: identical rows give zero marginal spread",
+      "pairs": [
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ]
+      ],
+      "expect": {
+        "state": "unsupported",
+        "reason": "zero_marginal_spread"
+      }
+    },
+    {
+      "id": "CLAMP-A",
+      "description": "Supported cell with local correlation 19996/20000 = 0.9998: clamped to exactly 0.95",
+      "fit": "JOINT-2",
+      "timescale": "inst",
+      "level": "cell",
+      "cell": "0|2",
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9998,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20000
+      }
+    },
+    {
+      "id": "CLAMP-G",
+      "description": "The global fit behind the sparse-cell fallback is also beyond the clamp and is clamped",
+      "fit": "JOINT-2",
+      "timescale": "inst",
+      "level": "global",
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9995501436922124,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20010
+      }
+    }
+  ]
 }

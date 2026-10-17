@@ -145,7 +145,17 @@ conventions do).
 - **No CIGALE sSFR column exists in v1.1.** The dictionary contains zero
   `ssfr` rows for `cigale` (the v1-era extraction-time `ssfr_cigale` is not
   a v1.1 field). Any sSFR quantity is derived under a declared algebraic
-  coupling to the mass and SFR quantities (gate 6.2).
+  coupling to the mass and SFR quantities (gate 6.2). P2R-06a decision 1
+  (2026-10-16): the sSFR disagreement is a **component-built derived view**
+  `(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_T) - log10(cigale.mass))`,
+  `rankable: false`, whose domain depends on the component fields, never on
+  native `lephare.ssfr_med`. The native field survives only as the
+  context-only LePhare non-additivity
+  `lephare.ssfr_med - (lephare.sfr_med - lephare.mass_med)` (A1.4), a
+  difference between LePhare summary estimators that establishes no
+  posterior bimodality, degenerate fit, or physical cause; a deterministic
+  unimodal counterexample (fixture MATH-1, independent Exp(1) components)
+  produces a nonzero median non-additivity of about -0.29205.
 
 ### 5.2 Fit-quality and classification context
 

@@ -19,13 +19,29 @@
 
 contract:
   id: ta-v2-feature-contract
-  version: 0.1.0-proposed
+  version: 0.2.0-proposed
   status: proposed_not_adopted
   grain: one row per photometry catalog source
   key: [catalog_id]
   input_contract: docs/research/ta-v2-design/input-contract.md
   input_identity: docs/research/ta-v2-design/input-identity.json
-  identity_rule: content comparison; a mutated identity in a scratch copy is rejected, never overwritten
+  identity_rule: >-
+    Content comparison; a mutated identity in a scratch copy is rejected,
+    never overwritten. Authorizing-spec identities resolve against the
+    repository root (never the working directory, no search-order
+    fallback); a missing file fails as identity_missing:authorizing_spec
+    and a digest mismatch as identity_mismatch:authorizing_spec, with no
+    skip path. The minimum required manifest set below is checked against
+    the identity record on every run: deleting a required entry (or its
+    digest) fails.
+  minimum_required_authorizing_specs:
+    - spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md
+    - spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06a-ta-v2-design-repairs.md
+  guard_precedence: >-
+    Declared order for every gated output: population guards first, then
+    point-domain guards, then scale/uncertainty guards, then arithmetic.
+    A zero residual never bypasses an earlier guard; it is evaluated only
+    after population, point and uncertainty validity are established.
 
 declared_constants:
   - {name: ln10, value: 2.302585092994046, kind: mathematical}
@@ -41,6 +57,30 @@ declared_constants:
   - {name: sfr_floor_k, value: 1.0, kind: declared_domain}
   - {name: center_min_cell_support, value: 200, kind: declared_domain}
   - {name: score_zero_combined_scale_guard, value: 1.0e-12, kind: declared_domain}
+  - {name: sigma_sys_solve_tolerance, value: 1.0e-10, kind: declared_domain}
+  - {name: sigma_sys_max_iterations, value: 200, kind: declared_domain}
+  - {name: sigma_sys_search_upper_dex, value: 10.0, kind: declared_domain}
+  - {name: sigma_sys_interval_tolerance, value: 1.0e-12, kind: declared_domain}
+  - {name: joint_winsor_c, value: 3.0, kind: declared_domain,
+      rationale: "winsorization tuning constant of the proposed robust covariance estimator (A1.7)"}
+  - {name: joint_rho_clamp, value: 0.95, kind: declared_domain,
+      rationale: "finite correlation clamp, 0 < clamp < 1; bounds the condition number of the unit-diagonal correlation matrix at (1+rho)/(1-rho) <= 39 while preserving strong correlations; regularization can change rankings and remains a proposal under TA2-Q07"}
+  - {name: joint_min_cell_support, value: 200, kind: declared_domain}
+  - {name: joint_min_global_support, value: 200, kind: declared_domain}
+  - {name: joint_min_covariance_rows, value: 10, kind: declared_domain}
+  - name: forced_highz_edge
+    value: 5.5
+    kind: declared_domain
+    rationale: >-
+      Coordinator-reported prior finding (2026-07-10 v1 baseline and
+      2026-09-01 sessions, exposure-log.md sections 1.2-1.3; Appendix B of
+      the amendment spec): the conditional mass-disagreement trend reverses
+      above z of about 5.5. This is an approved proposal resting on a
+      labelled prior finding NOT reproduced in this unit; it is not
+      evidence of a physical discontinuity and not a guarantee of adequate
+      resolution at the boundary. The trend was observed against mean mass,
+      not the permitted brightness covariate. Additional fixed edges
+      require a later named change, not builder discretion.
 
 states_vocabulary:
   [point_comparable, point_valid, upper_limit_supported, floor_or_censoring_suspected,
@@ -49,9 +89,11 @@ states_vocabulary:
 
 populations:
   - {id: POP-MASS, proposed_not_adopted: true,
-     predicate: "lephare.type == 0 AND mass_point_state == point_valid",
-     requires_sfr_state: false,
-     note: "type 0 is an explicit, recognized LePhare-classification selection; sources of other types are audit-only"}
+      predicate: "lephare.type == 0 AND mass_point_state == point_valid AND is_null(cigale.mass_err) == false AND cigale.mass_err >= 0",
+      requires_sfr_state: false,
+      input_contract_echo: "lephare.type = 0 and mass_med state = point_valid and CIGALE mass state = point_valid (linear mass present, finite, > 0, error present and ≥ 0)",
+      consistency_check: "the validator compares this predicate and echo against the POP-MASS row of input-contract.md section 6 so the two artefacts cannot drift apart (P2R-06a R3)",
+      note: "type 0 is an explicit, recognized LePhare-classification selection; sources of other types are audit-only; the CIGALE mass error must be present and nonnegative for membership (raw delta stays an audit output without it)"}
   - {id: POP-SFR-INST, proposed_not_adopted: true,
      predicate: "lephare.type == 0 AND sfr_inst_state == point_comparable",
      note: independent of POP-MASS membership}
@@ -85,13 +127,17 @@ state_machines:
     precondition: mass_point_state == point_valid
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.mass_l68) OR is_null(lephare.mass_u68) OR is_null(cigale.mass_err)"}
+          when: "is_null(lephare.mass_l68) OR is_null(lephare.mass_u68) OR is_null(cigale.mass_err)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.mass_l68) OR is_nan(lephare.mass_u68) OR is_nan(cigale.mass_err)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.mass_u68 < lephare.mass_l68"}
+          when: "lephare.mass_u68 < lephare.mass_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.mass_l68 > lephare.mass_med OR lephare.mass_u68 < lephare.mass_med"}
       - {state: invalid_or_unsupported, reason: error_negative,
-         when: "cigale.mass_err < 0"}
+          when: "cigale.mass_err < 0"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.mass_err / cigale.mass) > 0.3"}
+          when: "(cigale.mass_err / cigale.mass) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
   sfr_inst_point:
@@ -139,38 +185,50 @@ state_machines:
     precondition: sfr_inst_state == point_comparable
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+          when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.sfr_l68) OR is_nan(lephare.sfr_u68)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.sfr_u68 < lephare.sfr_l68"}
+          when: "lephare.sfr_u68 < lephare.sfr_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.sfr_l68 > lephare.sfr_med OR lephare.sfr_u68 < lephare.sfr_med"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.sfr_inst_err / cigale.sfr_inst) > 0.3"}
+          when: "(cigale.sfr_inst_err / cigale.sfr_inst) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
   sfr_100_scale:
     precondition: sfr_100_state == point_comparable
     rules:
       - {state: missing, reason: missing_uncertainty_input,
-         when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+          when: "is_null(lephare.sfr_l68) OR is_null(lephare.sfr_u68)"}
+      - {state: invalid_or_unsupported, reason: nonfinite_uncertainty_input,
+          when: "is_nan(lephare.sfr_l68) OR is_nan(lephare.sfr_u68)"}
       - {state: invalid_or_unsupported, reason: quantile_order_violation,
-         when: "lephare.sfr_u68 < lephare.sfr_l68"}
+          when: "lephare.sfr_u68 < lephare.sfr_l68"}
+      - {state: invalid_or_unsupported, reason: median_outside_quantile_interval,
+          when: "lephare.sfr_l68 > lephare.sfr_med OR lephare.sfr_u68 < lephare.sfr_med"}
       - {state: approximation_out_of_domain, reason: log_error_approximation_domain_exceeded,
-         when: "(cigale.sfr_100myr_err / cigale.sfr_100myr) > 0.3"}
+          when: "(cigale.sfr_100myr_err / cigale.sfr_100myr) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
-  ssfr_inst_point:
+  ssfr_inst_view:
     precondition: mass_point_state == point_valid AND sfr_inst_state == point_comparable
     rules:
-      - {state: missing, reason: missing_input, when: "is_null(lephare.ssfr_med)"}
-      - {state: invalid_or_unsupported, reason: lephare_value_out_of_domain,
-         when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0"}
       - {state: point_valid, reason: none, when: "true"}
+    note: component view gate - the domain depends on the component fields, never on native lephare.ssfr_med
 
-  ssfr_100_point:
+  ssfr_100_view:
     precondition: mass_point_state == point_valid AND sfr_100_state == point_comparable
     rules:
-      - {state: missing, reason: missing_input, when: "is_null(lephare.ssfr_med)"}
+      - {state: point_valid, reason: none, when: "true"}
+    note: same component gate for the 100 Myr view
+
+  ctx_lp_ssfr_point:
+    rules:
+      - {state: missing, reason: missing_input,
+          when: "is_null(lephare.ssfr_med) OR is_null(lephare.sfr_med) OR is_null(lephare.mass_med)"}
       - {state: invalid_or_unsupported, reason: lephare_value_out_of_domain,
-         when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0"}
+          when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0 OR lephare.sfr_med < -20.0 OR lephare.sfr_med > 15.0 OR lephare.mass_med < -20.0 OR lephare.mass_med > 15.0"}
       - {state: point_valid, reason: none, when: "true"}
 
 centers:
@@ -185,11 +243,35 @@ centers:
       - id: C1-conditional-binned-median
         family: one declared conditional center
         covariates: [lephare.zpdf_med, photometry_primary.mag_auto_f444w]
-        binning: quantile bin edges computed on development-tile POP-MASS members only; z bins 6, magnitude bins 5
-        cell_estimator: median (L1) of delta_mass_dex within cell
-        support_rule: "cell support >= center_min_cell_support, else shrink to z-only cell (same threshold), else global constant"
-        extrapolation: "covariate missing or outside the development outer edges -> global constant with center_support = out_of_hull"
-        parameters: [z_bin_edges, mag_bin_edges, cell_values, z_only_values, global_constant]
+        z_quantile_bins: 6
+        mag_quantile_bins: 5
+        quantile_method: >-
+          Deterministic linear-interpolation quantiles on the development
+          rows (sorted values, h = (n-1)*q, floor/interpolate); even-count
+          medians average the two middle order statistics.
+        edge_conventions: >-
+          Edges collapse when duplicates occur and the effective bin count
+          is recorded. The forced edge forced_highz_edge is inserted only
+          when strictly inside the development support interval; the hull
+          is never extended and no empty support is manufactured beyond
+          it. Bins are left-closed/right-open except that the final
+          endpoint is included, so z = 5.5 belongs to the upper bin and no
+          resulting cell straddles 5.5. Missing or non-finite covariates
+          are unsupported (out_of_hull with the global-center fallback).
+        binning_fit_data: [development]
+        cell_estimator: median (L1) of delta_mass_dex within cell, over unique eligible source IDs
+        support_enforcement: center_min_cell_support
+        support_rule: >-
+          A cell whose unique-source support count is at or above
+          center_min_cell_support gives cell; otherwise a z-only cell at or
+          above it gives z_fallback; otherwise global_fallback. Duplicated
+          rows do not manufacture support. The requested cell and the
+          fallback actually used are both recorded (center_requested_cell,
+          center_support). Global fallback does not preserve local
+          high-redshift structure, and no test or review claim may say
+          otherwise.
+        extrapolation: "covariate missing, non-finite, or outside the development outer edges -> global constant with center_support = out_of_hull"
+        parameters: [z_bin_edges, mag_bin_edges, cell_values, z_only_values, global_constant, support_counts, z_only_support_counts, forced_edge_inserted, effective_z_bins, effective_mag_bins]
         fit_data: [development]
     recommended: C1-conditional-binned-median
     permitted_covariates:
@@ -215,7 +297,7 @@ centers:
       ~0.24 dex conditional offset motivates a conditional expectation
       model; it is not a globally mandated subtraction, its magnitude fixes
       no universal sign, and it is not a correction to true mass.
-    outputs: [expected_delta_mass_dex, center_model_id, center_support]
+    outputs: [expected_delta_mass_dex, center_model_id, center_support, center_requested_cell]
     center_support_domain: [cell, z_fallback, global_fallback, out_of_hull]
 
   sfr_center:
@@ -236,39 +318,84 @@ centers:
 
 scales:
   mass_scale:
-    sigma_mass_lp_dex:
-      formula: "(lephare.mass_u68 - lephare.mass_l68) / 2.0"
-      meaning: half-width of the LePhare 68% quantile interval; an ordered-quantile summary, not a Gaussian sigma
+    width_selection:
+      policy: directional_by_residual_sign
+      rule: >-
+        The width entering a normalized score is selected by the sign of the
+        conditionally centered residual, never the raw delta: a positive
+        residual (LePhare above its expected value) uses the lower
+        half-width, a negative residual uses the upper, and an exactly zero
+        residual gives score zero only after population, point and
+        uncertainty validity are established. For zero residual both widths
+        must be strictly positive; otherwise the state is
+        degenerate_quantile_width and the score is NULL. For a nonzero
+        residual the selected width must be strictly positive; an unselected
+        zero width is allowed while complete quantile ordering holds.
+        Missing, negative or non-finite widths never produce a score.
+      symmetric_policy_forbidden: symmetrization discards direction and is a caught mutation
+    sigma_mass_lp_lo_dex:
+      formula: "lephare.mass_med - lephare.mass_l68"
+      meaning: lower LePhare 68% quantile half-width; an ordered-quantile summary, not a Gaussian sigma
+    sigma_mass_lp_hi_dex:
+      formula: "lephare.mass_u68 - lephare.mass_med"
+      meaning: upper LePhare 68% quantile half-width
     sigma_mass_cig_dex:
       formula: "cigale.mass_err / (cigale.mass * ln10)"
       meaning: first-order propagation of the symmetric linear CIGALE error inside its declared approximation domain; not a distributional claim
     sigma_sys_mass_dex:
       kind: development_fitted
-      determination_rule: "robust-spread rule: chosen on development-tile POP-MASS residuals so 1.4826 * MAD(residual/scale) == 1; the historical 0.1 dex floor is context, not an approved v2 constant"
-    combined_formula: "sqrt(sigma_mass_lp_dex^2 + sigma_mass_cig_dex^2 + sigma_sys_mass_dex^2)"
+      parameter_domain: finite and nonnegative
+      determination_rule: "robust-spread rule: chosen on development-tile POP-MASS residuals so 1.4826 * MAD(residual / directional scale) == 1; the directional scale uses the side-selected half-width from width_selection; the historical 0.1 dex floor is context, not an approved v2 constant"
+      solve_policy:
+        objective: "g(sigma) = 1.4826 * MAD(residual_i / sqrt(scale_i^2 + sigma^2)) with MAD = median(|x - median(x)|); all ratios share the positive factor scale_i/sqrt(scale_i^2+sigma^2), so g is non-increasing in sigma"
+        median_convention: "even counts average the two middle order statistics"
+        zero_case: "|g(0) - 1| <= sigma_sys_solve_tolerance -> sigma_sys = 0"
+        zero_spread_case: "MAD(residual_i / scale_i) == 0 at sigma = 0 -> unsupported with reason zero_residual_spread"
+        no_solution_case: "g(0) < 1 - sigma_sys_solve_tolerance -> unsupported with reason no_admissible_systematic_solution; a negative floor is never fabricated and the historical constants are not restored"
+        method: "bisection on [0, sigma_sys_search_upper_dex]"
+        iteration_limits: "at most sigma_sys_max_iterations iterations or interval width <= sigma_sys_interval_tolerance, whichever comes first"
+        acceptance: "|g(sigma) - 1| <= sigma_sys_solve_tolerance, else unsupported with reason sigma_sys_solve_failed"
+        proposal_status: proposed_not_adopted, closed by TA2-Q02; no real-data fit occurs in this unit
+    combined_formula: "sqrt(w_selected^2 + sigma_mass_cig_dex^2 + sigma_sys_mass_dex^2) where w_selected is the side-selected half-width"
     zero_scale_guard: "combined scale < 1.0e-12 -> score state invalid_or_unsupported, reason zero_combined_scale"
   sfr_scale:
-    sigma_sfr_lp_dex:
-      formula: "(lephare.sfr_u68 - lephare.sfr_l68) / 2.0"
+    width_selection:
+      policy: directional_by_residual_sign
+      rule: same rule as mass_scale.width_selection, applied per timescale to the SFR residual
+      symmetric_policy_forbidden: symmetrization discards direction and is a caught mutation
+    sigma_sfr_lp_lo_dex:
+      formula: "lephare.sfr_med - lephare.sfr_l68"
+      meaning: lower LePhare 68% SFR quantile half-width
+    sigma_sfr_lp_hi_dex:
+      formula: "lephare.sfr_u68 - lephare.sfr_med"
+      meaning: upper LePhare 68% SFR quantile half-width
     sigma_sfr_cig_T_dex:
       formula: "cigale.sfr_T_err / (cigale.sfr_T * ln10)"
       approximation_domain: same declared domain as mass
     sigma_sys_sfr_T_dex:
       kind: development_fitted
-      determination_rule: "same robust-spread rule on development point_comparable residuals; the historical 0.2 dex floor is context, not an approved v2 constant"
+      parameter_domain: finite and nonnegative
+      determination_rule: "same robust-spread rule on development point_comparable residuals with the directional scale; the historical 0.2 dex floor is context, not an approved v2 constant"
+      solve_policy: same as scales.mass_scale.sigma_sys_mass_dex.solve_policy, applied per timescale
 
 outputs:
   # population and identity block
   - {name: catalog_id, kind: key, source: photometry_primary.id, rankable: false}
   - {name: selection_type0, kind: recognized_selection, formula: "lephare.type == 0",
-     rankable: false, note: "explicit LePhare classification gate, reported, never hidden"}
+      rankable: false, note: "explicit LePhare classification gate, reported, never hidden"}
   - {name: pop_mass, kind: population_flag, rankable: false}
+  - {name: pop_mass_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_sfr_inst, kind: population_flag, rankable: false}
+  - {name: pop_sfr_inst_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_sfr_100, kind: population_flag, rankable: false}
+  - {name: pop_sfr_100_reason, kind: reason, rankable: false,
+      domain: [none, not_in_population]}
   - {name: pop_ssfr_inst, kind: population_flag, rankable: false}
   - {name: pop_ssfr_100, kind: population_flag, rankable: false}
   - {name: pop_audit_reasons, kind: reason_list, rankable: false,
-     note: overlapping, never collapsed}
+      note: overlapping, never collapsed}
   - {name: contract_version, kind: identity, rankable: false}
   - {name: center_model_id, kind: identity, rankable: false}
   - {name: scale_model_id, kind: identity, rankable: false}
@@ -287,28 +414,37 @@ outputs:
     fit_permission: no data fits this output
     hidden_shift_guard: this output equals its declared formula on every record; any constant subtraction baked into the raw delta is a contract violation
   - {name: expected_delta_mass_dex, kind: center_output, from: centers.mass_center,
-     units: dex, rankable: false, fit_permission: development only}
+      units: dex, rankable: false, fit_permission: development only}
   - {name: center_support, kind: support_flag,
-     domain: [cell, z_fallback, global_fallback, out_of_hull], rankable: false}
+      domain: [cell, z_fallback, global_fallback, out_of_hull], rankable: false}
+  - {name: center_requested_cell, kind: support_flag, rankable: false,
+      note: "the z|mag cell requested before fallback resolution; the fallback actually used is center_support"}
   - name: residual_mass_dex
     kind: centered_residual
     formula: "delta_mass_dex - expected_delta_mass_dex"
+    population_gate: POP-MASS
     units: dex
     sign: positive means LePhare exceeds the conditional expectation
+    domain: emitted exactly when pop_mass is true and both delta and expected outputs exist; otherwise NULL with pop_mass_reason = not_in_population (P2R-06a R8)
     rankable: primary
     role: primary proposed ranking surface; rare deviations survive normalization because ranking is residual-first and the score is secondary
-  - {name: sigma_mass_lp_dex, kind: uncertainty, units: dex, rankable: false}
+  - {name: sigma_mass_lp_lo_dex, kind: uncertainty, units: dex, rankable: false,
+      note: "lower half-width med - l68; selected when the conditionally centered residual is positive"}
+  - {name: sigma_mass_lp_hi_dex, kind: uncertainty, units: dex, rankable: false,
+      note: "upper half-width u68 - med; selected when the conditionally centered residual is negative"}
   - {name: sigma_mass_cig_dex, kind: uncertainty, units: dex, rankable: false,
-     note: NULL with reason when the first-order approximation is out of domain}
+      note: NULL with reason when the first-order approximation is out of domain}
   - {name: mass_scale_state, kind: state, from: mass_scale, rankable: false}
   - {name: mass_scale_reason, kind: reason, rankable: false}
   - {name: sigma_sys_mass_dex, kind: uncertainty, units: dex, rankable: false,
      fit_permission: development only, carried with center_model_id and scale_model_id}
   - name: score_mass
     kind: normalized_residual
-    formula: "residual_mass_dex / sqrt(sigma_mass_lp_dex^2 + sigma_mass_cig_dex^2 + sigma_sys_mass_dex^2)"
+    formula: "residual_mass_dex / sqrt(w_mass_selected^2 + sigma_mass_cig_dex^2 + sigma_sys_mass_dex^2)"
+    population_gate: POP-MASS
+    guards: [population, point_state, scale_state, directional_width, combined_scale_guard]
     units: dimensionless normalized residual
-    domain: emitted exactly when mass_scale_state == point_valid and the zero-scale guard passes
+    domain: "emitted exactly when every declared guard passes (population membership, point validity, mass_scale_state == point_valid, zero-scale guard); precedence per contract.guard_precedence (P2R-06a R2, R8)"
     rankable: secondary
     interpretation_guard: >-
       NOT a calibrated Gaussian significance or n-sigma. Estimator
@@ -318,8 +454,9 @@ outputs:
       scientific-design.md; a calibrated significance claim requires an
       approved validation argument (TA2-Q02).
   - {name: score_mass_state, kind: state,
-     domain: [point_valid, unsupported_scale, approximation_out_of_domain, zero_combined_scale],
-     rankable: false}
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, degenerate_quantile_width, zero_combined_scale],
+      rankable: false}
+  - {name: score_mass_reason, kind: reason, rankable: false}
 
   # SFR blocks (T in {inst, 100}; separate paths)
   - {name: sfr_inst_state, kind: state, from: sfr_inst_point, rankable: false,
@@ -352,22 +489,45 @@ outputs:
   - {name: expected_delta_sfr_100_dex, kind: center_output, from: centers.sfr_center,
      units: dex, rankable: false, fit_permission: development only}
   - {name: residual_sfr_inst_dex, kind: centered_residual,
-     formula: "delta_sfr_inst_dex - expected_delta_sfr_inst_dex", units: dex, rankable: true}
+      formula: "delta_sfr_inst_dex - expected_delta_sfr_inst_dex",
+      population_gate: POP-SFR-INST, units: dex, rankable: true,
+      domain: emitted exactly when pop_sfr_inst is true and both parent outputs exist; NULL with pop_sfr_inst_reason = not_in_population otherwise}
   - {name: residual_sfr_100_dex, kind: centered_residual,
-     formula: "delta_sfr_100_dex - expected_delta_sfr_100_dex", units: dex, rankable: true}
-  - {name: sigma_sfr_lp_dex, kind: uncertainty, units: dex, rankable: false}
+      formula: "delta_sfr_100_dex - expected_delta_sfr_100_dex",
+      population_gate: POP-SFR-100, units: dex, rankable: true,
+      domain: emitted exactly when pop_sfr_100 is true and both parent outputs exist; NULL with pop_sfr_100_reason = not_in_population otherwise}
+  - {name: sigma_sfr_lp_lo_dex, kind: uncertainty, units: dex, rankable: false,
+      note: "lower half-width med - l68; selected when the SFR residual is positive"}
+  - {name: sigma_sfr_lp_hi_dex, kind: uncertainty, units: dex, rankable: false,
+      note: "upper half-width u68 - med; selected when the SFR residual is negative"}
   - {name: sigma_sfr_cig_inst_dex, kind: uncertainty, units: dex, rankable: false}
   - {name: sigma_sfr_cig_100_dex, kind: uncertainty, units: dex, rankable: false}
   - {name: sfr_inst_scale_state, kind: state, from: sfr_inst_scale, rankable: false}
+  - {name: sfr_inst_scale_reason, kind: reason, rankable: false}
   - {name: sfr_100_scale_state, kind: state, from: sfr_100_scale, rankable: false}
+  - {name: sfr_100_scale_reason, kind: reason, rankable: false}
   - {name: sigma_sys_sfr_inst_dex, kind: uncertainty, units: dex, rankable: false, fit_permission: development only}
   - {name: sigma_sys_sfr_100_dex, kind: uncertainty, units: dex, rankable: false, fit_permission: development only}
   - {name: score_sfr_inst, kind: normalized_residual, rankable: secondary,
-     formula: "residual_sfr_inst_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_inst_dex^2 + sigma_sys_sfr_inst_dex^2)",
-     interpretation_guard: same guard as score_mass}
+      population_gate: POP-SFR-INST,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      formula: "residual_sfr_inst_dex / sqrt(w_sfr_selected^2 + sigma_sfr_cig_inst_dex^2 + sigma_sys_sfr_inst_dex^2)",
+      domain: emitted exactly when every declared guard passes for this timescale, independently of POP-MASS membership (P2R-06a R2, R8),
+      interpretation_guard: same guard as score_mass}
+  - {name: score_sfr_inst_state, kind: state,
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, degenerate_quantile_width, zero_combined_scale],
+      rankable: false}
+  - {name: score_sfr_inst_reason, kind: reason, rankable: false}
   - {name: score_sfr_100, kind: normalized_residual, rankable: secondary,
-     formula: "residual_sfr_100_dex / sqrt(sigma_sfr_lp_dex^2 + sigma_sfr_cig_100_dex^2 + sigma_sys_sfr_100_dex^2)",
-     interpretation_guard: same guard as score_mass}
+      population_gate: POP-SFR-100,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      formula: "residual_sfr_100_dex / sqrt(w_sfr_selected^2 + sigma_sfr_cig_100_dex^2 + sigma_sys_sfr_100_dex^2)",
+      domain: emitted exactly when every declared guard passes for this timescale, independently of POP-MASS membership (P2R-06a R2, R8),
+      interpretation_guard: same guard as score_mass}
+  - {name: score_sfr_100_state, kind: state,
+      domain: [point_valid, not_in_population, unsupported_scale, approximation_out_of_domain, degenerate_quantile_width, zero_combined_scale],
+      rankable: false}
+  - {name: score_sfr_100_reason, kind: reason, rankable: false}
   - name: upper_limit_path
     kind: unsupported_branch
     state: unsupported_on_this_catalog
@@ -379,31 +539,112 @@ outputs:
       units; until then these paths are unscored/context-only and TA2-Q03
       asks Don whether that reduced scope is acceptable.
 
-  # sSFR blocks
-  - {name: ssfr_inst_state, kind: state, from: ssfr_inst_point, rankable: false}
-  - {name: ssfr_100_state, kind: state, from: ssfr_100_point, rankable: false}
+  # sSFR component views (derived, non-rankable; decision 1, P2R-06a R1)
+  - {name: ssfr_inst_state, kind: state, from: ssfr_inst_view, rankable: false}
+  - {name: ssfr_100_state, kind: state, from: ssfr_100_view, rankable: false}
   - name: delta_ssfr_inst_dex
-    kind: raw_disagreement
-    formula: "lephare.ssfr_med - (log10(cigale.sfr_inst) - log10(cigale.mass))"
+    kind: derived_view
+    formula: "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_inst) - log10(cigale.mass))"
+    coupling_expr: "delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex"
     units: dex
     sign: positive means LePhare reports the larger sSFR
-    domain: emitted exactly when ssfr_inst_state == point_valid
-    rankable: true
-    algebraic_coupling: "delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex whenever both sides are defined; declared, not hidden"
+    domain: emitted exactly when ssfr_inst_state == point_valid (both parent raw-delta states permit); its domain depends on the component fields, never on native lephare.ssfr_med
+    rankable: false
+    algebraic_coupling: >-
+      delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex by
+      construction; checked numerically at absolute tolerance 1e-12 on every
+      fixture where both sides are defined. A failing declared identity is a
+      validation failure.
   - name: delta_ssfr_100_dex
-    kind: raw_disagreement
-    formula: "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+    kind: derived_view
+    formula: "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+    coupling_expr: "delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex"
     units: dex
     sign: positive means LePhare reports the larger sSFR
-    domain: emitted exactly when ssfr_100_state == point_valid
-    rankable: true
-    algebraic_coupling: "delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex whenever both sides are defined"
+    domain: emitted exactly when ssfr_100_state == point_valid; component fields only, never native lephare.ssfr_med
+    rankable: false
+    algebraic_coupling: >-
+      delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex by
+      construction; checked numerically at absolute tolerance 1e-12 on every
+      fixture where both sides are defined.
   - {name: not_independent_of_mass_and_sfr, kind: constant_caveat, value: true, rankable: false,
-     note: sSFR disagreement is NOT an independent confirmation of the same anomaly}
+      note: sSFR disagreement is NOT an independent confirmation of the same anomaly}
+  - name: ctx_lp_ssfr_nonadditivity_dex
+    kind: context_derived
+    formula: "lephare.ssfr_med - (lephare.sfr_med - lephare.mass_med)"
+    units: dex
+    description: "difference between LePhare summary estimators: the native sSFR median versus the component sfr_med minus mass_med"
+    context_only: true
+    rankable: false
+    permitted_predictor: false
+    domain: emitted exactly when ctx_lp_ssfr_point_state == point_valid; missing or out-of-domain native sSFR nulls this context field without nulling the component views
+    interpretation_guard: >-
+      Does not establish posterior bimodality, a degenerate fit, or a
+      physical cause. It is a difference between LePhare summary estimators;
+      a deterministic unimodal counterexample (independent Exp(1) variables,
+      fixture MATH-1) produces a nonzero median non-additivity of about
+      -0.29205, so a nonzero value cannot be read as bimodal evidence.
+  - {name: ctx_lp_ssfr_point_state, kind: state, from: ctx_lp_ssfr_point, rankable: false}
+  - {name: ctx_lp_ssfr_point_reason, kind: reason, rankable: false}
   - {name: score_ssfr_inst, kind: unsupported_output, state: unsupported_correlated_errors,
-     behaviour: NULL on current evidence; the CIGALE log sSFR error needs the unknown mass-SFR error correlation; no independence assumption is fabricated}
+      behaviour: NULL on current evidence; the CIGALE log sSFR error needs the unknown mass-SFR error correlation; no independence assumption is fabricated}
   - {name: score_ssfr_100, kind: unsupported_output, state: unsupported_correlated_errors,
-     behaviour: same as score_ssfr_inst}
+      behaviour: same as score_ssfr_inst}
+
+  # joint mass-SFR candidate pair (A1.7, decision 4; proposed_not_adopted)
+  - name: joint_residual_distance_inst
+    kind: joint_distance
+    formula: "sqrt(r_inst^T C_b,inst^-1 r_inst) with r_inst = (residual_mass_dex, residual_sfr_inst_dex) and C the fitted winsorized covariance"
+    population_gate: POP-MASS
+    requires_timescales: [mass, inst]
+    matrix_source: covariance
+    rankable: false
+    interpretation_guard: "covariance-normalized distance from unstandardized residuals; no chi-square, p-value, significance or probability label; a fitted covariance can absorb a rare population along its major axis"
+  - {name: score_joint_inst, kind: joint_standardized_distance,
+      formula: "sqrt(z_inst^T R_b,inst^-1 z_inst) with z = r / tau and R the fitted winsorized correlation (unit diagonal)",
+      population_gate: POP-MASS, requires_timescales: [mass, inst], matrix_source: correlation,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      rankable: false,
+      interpretation_guard: same guard as joint_residual_distance_inst}
+  - name: joint_residual_distance_100
+    kind: joint_distance
+    formula: "sqrt(r_100^T C_b,100^-1 r_100) with r_100 = (residual_mass_dex, residual_sfr_100_dex)"
+    population_gate: POP-MASS
+    requires_timescales: [mass, 100]
+    matrix_source: covariance
+    rankable: false
+    interpretation_guard: same guard as joint_residual_distance_inst
+  - {name: score_joint_100, kind: joint_standardized_distance,
+      formula: "sqrt(z_100^T R_b,100^-1 z_100)",
+      population_gate: POP-MASS, requires_timescales: [mass, 100], matrix_source: correlation,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      rankable: false,
+      interpretation_guard: same guard as joint_residual_distance_inst}
+  - {name: joint_inst_state, kind: state, rankable: false}
+  - {name: joint_inst_reason, kind: reason, rankable: false}
+  - {name: joint_inst_support_count, kind: support_flag, rankable: false}
+  - {name: joint_inst_fallback, kind: support_flag, rankable: false,
+      domain: [cell, z_fallback, global_fallback, unsupported]}
+  - {name: joint_inst_rho_raw, kind: uncertainty, rankable: false,
+      note: "pre-clamp fitted correlation (synthetic scenarios only)"}
+  - {name: joint_inst_rho_effective, kind: uncertainty, rankable: false,
+      note: "post-clamp correlation actually used"}
+  - {name: joint_inst_regularized, kind: support_flag, rankable: false}
+  - {name: score_joint_inst_state, kind: state, rankable: false}
+  - {name: score_joint_inst_reason, kind: reason, rankable: false}
+  - {name: joint_100_state, kind: state, rankable: false}
+  - {name: joint_100_reason, kind: reason, rankable: false}
+  - {name: joint_100_support_count, kind: support_flag, rankable: false}
+  - {name: joint_100_fallback, kind: support_flag, rankable: false,
+      domain: [cell, z_fallback, global_fallback, unsupported]}
+  - {name: joint_100_rho_raw, kind: uncertainty, rankable: false}
+  - {name: joint_100_rho_effective, kind: uncertainty, rankable: false}
+  - {name: joint_100_regularized, kind: support_flag, rankable: false}
+  - {name: score_joint_100_state, kind: state, rankable: false}
+  - {name: score_joint_100_reason, kind: reason, rankable: false}
+  - {name: joint_covariance_model_id, kind: identity, rankable: false,
+      value: winsorized-median-covariance-v1,
+      note: "identifies the estimator feeding both joint surfaces; inherited center/scale identities are center_model_id and scale_model_id"}
 
   # fit-quality context block (context only; never predictors, never ranked)
   - {name: ctx_chi2_lephare_total, kind: context_passthrough, source: lephare.chi2_best,
@@ -434,22 +675,82 @@ forbidden_dependencies:
   - {id: no-positivity-master-sample,
      description: "POP-MASS requires no SFR state; SFR populations are defined by state machines, not by silently dropping undefined rows"}
   - {id: no-universal-hidden-shift,
-     description: "no universal constant subtracted inside raw delta outputs; centering exists only through expected_delta/residual outputs"}
+      description: "no universal constant subtracted inside raw delta outputs; centering exists only through expected_delta/residual outputs"}
+  - {id: no-native-ssfr-in-rankable,
+      description: "lephare.ssfr_med appears in no rankable output and no raw_disagreement or derived_view formula; it exists only in the context field ctx_lp_ssfr_nonadditivity_dex and its point machine"}
+  - {id: no-joint-veto,
+      description: "no low-correlation veto, selection budget, quota, or automatic disable may gate the joint surfaces; they are comparison candidates only (TA2-Q07)"}
+  - {id: joint-matrices-require-fit,
+      description: "the evaluator consumes covariance/correlation matrices produced by the declared estimator from declared fit rows; hand-declared matrices never reach the per-source evaluator (kernel checks are separate oracle fixtures)"}
+  - {id: joint-surfaces-preserve-marginals,
+      description: "the presence of joint outputs neither removes nor alters any marginal output; the marginal set is structurally required"}
 
 partition_use:
   source: "analysis.specz_p2r05_splits.assigned_split under run 1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c"
-  development: fit preprocessing, centers, scales, supports, hyperparameters
+  development: fit preprocessing, centers, scales, supports, hyperparameters, joint covariance/correlation models
   validation: comparison among declared choices only; tie-breaks fixed before outcomes
   holdout: single evaluation after the contract and artifact identities are frozen
   rules:
     - "a fit request containing any validation or holdout catalog_id is rejected"
+    - "a fitted row with no explicit development assignment is rejected as unassigned_partition"
     - "a catalog_id may not appear in two partitions"
     - "a catalog_id may not appear as multiple independent training rows"
+    - "every synthetic center, scale and covariance fitter applies the same partition guard"
     - "no reroll, no rebalancing, no row-random fallback"
   uncertainty:
     clustered_by: [tile, survey]
     holdout_tiles: [A1, A7, B3, B7]
     upstream_calibration_independence: unestablished
+
+joint_surfaces:
+  proposed_not_adopted: true
+  status: candidate comparison surfaces only (TA2-Q07); no combined ranker, maximum, union, quota, selection budget, low-correlation veto or automatic disable is defined
+  surfaces:
+    - joint_residual_distance_inst
+    - score_joint_inst
+    - joint_residual_distance_100
+    - score_joint_100
+  estimator:
+    id: winsorized-median-covariance-v1
+    procedure: >-
+      One deterministic robust covariance/correlation procedure.
+      Centering: componentwise median of the eligible development residual
+      vectors (covariance centering only; the distance formula keeps the
+      fixed residual origin and no second conditional mean enters it).
+      Marginal scale: MAD_k = 1.4826 * median(|x_k - m_k|), even-count
+      medians averaging the two middle order statistics. Standardize each
+      component by its MAD and winsorize at joint_winsor_c = 3.0. S_w =
+      sample covariance of the winsorized standardized vectors with the
+      (n-1) denominator. Correlation R from S_w normalized to unit
+      diagonal; clamp the off-diagonal to +-joint_rho_clamp = 0.95.
+      Reconstruct C = diag(s) R diag(s) with s_k = sqrt(S_w[kk]) — no
+      absolute floor is applied to dex-squared values; the eigenvalue
+      bound 1 - joint_rho_clamp >= 0.05 lives on the dimensionless
+      correlation matrix only. Pre- and post-clamp correlations and a
+      regularization flag are recorded. No iteration and no seed.
+    minimum_support: "cell and z-only levels at joint_min_cell_support unique eligible sources; global at joint_min_global_support; fewer rows than joint_min_covariance_rows is insufficient_covariance_support"
+    fallback_hierarchy: "supported cell -> z-only cell -> global, each on this timescale's own eligible population, counted separately per timescale; mass-only support is never borrowed and the two SFR timescales never require each other"
+    degeneracy: "zero or non-finite marginal spread, non-finite inputs, or failed estimation produce explicit unsupported states; no covariance is invented"
+    fit_population: "development-only POP-MASS intersected with the per-timescale POP-SFR-T residual population"
+  domain:
+    joint_residual_distance_T: "requires POP-MASS intersected with POP-SFR-T, both residuals, and a supported covariance; dimensionless (residuals in dex, covariance entries in dex squared); a covariance-normalized distance computed from unstandardized residuals, not a distance in dex and not a replacement for the magnitude of a marginal residual"
+    score_joint_T: "additionally requires both valid directional scales (A1.3 widths plus the declared CIGALE/systematic terms); the unit diagonal of R is an estimation convention, not an assertion that every z component has empirical variance one; cross-code and within-code mass-SFR correlations remain unknown"
+  interpretation_guard: >-
+    No chi-square, p-value, significance or probability label attaches to
+    either surface. Cross-code and within-code mass-SFR correlations are
+    unknown; the fitted correlation is an exploratory proposal, and a
+    fitted covariance can absorb a real rare population living along its
+    major axis.
+  centers_and_coexistence: >-
+    The joint surfaces reuse the selected C0/C1 mass center and the S0
+    per-timescale SFR center; conditional covariance does not authorize a
+    conditional SFR mean. The declared cell grid stays fixed by the
+    development-only binning rule even when C0 supplies the mass center.
+    Marginal surfaces remain exactly as repaired by A1.2/A1.3; adding
+    joint outputs changes none of them. The raw full-catalog correlation
+    in exposure-log CQ5 (about -0.30, uncentered, censored regime
+    included) is neither a parameter nor a bound for anything here.
+  protocol: candidates added to the declared comparison set requiring later adoption; criteria separated into mathematical correctness (synthetic), stability (development tile jackknife) and usefulness (validation-tile description including composition by support state, quantile and floor conditions); no criterion rewards elliptical distance by construction; top-K overlap descriptions fix K and tie handling in the approved future protocol; tile jackknife estimates are development-only; absent spectroscopic survey labels cannot become a requirement for the non-spectroscopic sample
 
 specz_diagnostic_interfaces:
   primary_redshift_diagnostic:

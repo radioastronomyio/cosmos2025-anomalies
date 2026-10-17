@@ -4,7 +4,7 @@ description: "Gate checkpoints for the T_A v2 scientific design contract unit"
 author: "Kilo (Claude)"
 date: "2026-10-05"
 version: "1.0"
-status: "in-progress"
+status: "completed"
 tags:
   - type: worklog
   - domain: [astronomy, feature-engineering, sed-fitting, spectroscopy]
@@ -38,7 +38,7 @@ tags:
 
 | Attribute | Value |
 |---|---|
-| Status | In progress; gate checkpoints appended below |
+| Status | Completed 2026-10-05 (status-only correction 2026-10-16 by P2R-06a A1.9; see the amendment worklog) |
 | Agent | Kilo CLI / kilo(zai-coding glm-5.3) |
 | Host | ML01; system Python 3.12.3, pytest via `/opt/agents/venv` |
 | Authorization | Don, Action Registry `rec4acLZWCuN1tJk9` (2026-10-05 09:13/09:15 EDT utterances); dispatched spec P2R-06 v1.0 |

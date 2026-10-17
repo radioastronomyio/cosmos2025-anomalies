@@ -1,20 +1,31 @@
 {
-  "generated_at": "2026-10-05T16:40:31.923136+00:00",
-  "command": "python /opt/agents/repos/cosmos2025-anomalies/docs/src/inspection/validate_ta_v2_design.py",
+  "generated_at": "2026-10-17T00:50:51.741853+00:00",
+  "execution": {
+    "interpreter": "/opt/agents/venv/bin/python3",
+    "argv": [
+      "/opt/agents/repos/cosmos2025-anomalies/src/inspection/validate_ta_v2_design.py"
+    ],
+    "script_repo_relative": "src/inspection/validate_ta_v2_design.py",
+    "script_resolved_from": "repository root (REPO_ROOT derived from this file); paths never depend on the working directory",
+    "command_shell_safe": "/opt/agents/venv/bin/python3 src/inspection/validate_ta_v2_design.py"
+  },
+  "command": "/opt/agents/venv/bin/python3 src/inspection/validate_ta_v2_design.py",
   "mode": "full",
   "validator": "src/inspection/validate_ta_v2_design.py",
-  "contract_sha256": "81fcf301026d8097d6ab921d1c68b713b8696184a711e4f685460c942f0f8df2",
-  "fixtures_sha256": "1fba5c2f952af96344f48ee28d6a2ece59a355c40aca0b98b5d06bf6c20b7e3a",
-  "identity_sha256": "8f4da2df418b1d9c8c6c5bb46857c5e0c4cc52c16032b367f7ba0c6e1661ecdd",
+  "contract_sha256": "2f0f43684f392d3dc37490a1de82d0e399ff6d6fcabe5d25ab138dbe39132dcf",
+  "fixtures_sha256": "6aa271439af99f1afedfb8e5823b52e7fc06377f6906a7bddac5e9c66de6430c",
+  "identity_sha256": "6b788ce9db7a604a40f478544cab6a855126c5469f1f8868f89be48f1c14d146",
   "fixtures_provenance": "synthetic",
   "exit_code": 0,
   "summary": {
-    "cases_total": 28,
-    "cases_passed": 28,
-    "fit_requests_total": 4,
-    "fit_requests_passed": 4,
-    "mutations_total": 9,
-    "mutations_caught": 9,
+    "cases_total": 71,
+    "cases_passed": 71,
+    "fit_requests_total": 5,
+    "fit_requests_passed": 5,
+    "mutations_total": 34,
+    "mutations_caught": 34,
+    "sigma_sys_checks_total": 3,
+    "sigma_sys_checks_passed": 3,
     "failures": []
   },
   "cases": [
@@ -192,19 +203,23 @@
         "delta_mass_dex": 0.04,
         "expected_delta_mass_dex": 0.2,
         "residual_mass_dex": -0.16,
-        "sigma_mass_lp_dex": 0.2,
         "sigma_mass_cig_dex": 0.08685889638065036,
         "sigma_sys_mass_dex": 0.1,
-        "score_mass_state": "point_valid"
+        "score_mass_state": "point_valid",
+        "sigma_mass_lp_lo_dex": 0.24,
+        "sigma_mass_lp_hi_dex": 0.16000000000000014,
+        "score_mass": -0.7702956124344129
       },
       "observed": {
         "delta_mass_dex": 0.03999999999999915,
         "expected_delta_mass_dex": 0.2,
         "residual_mass_dex": -0.16000000000000086,
-        "sigma_mass_lp_dex": 0.1999999999999993,
         "sigma_mass_cig_dex": 0.08685889638065035,
         "sigma_sys_mass_dex": 0.1,
-        "score_mass_state": "point_valid"
+        "score_mass_state": "point_valid",
+        "sigma_mass_lp_lo_dex": 0.23999999999999844,
+        "sigma_mass_lp_hi_dex": 0.16000000000000014,
+        "score_mass": -0.7702956124344129
       },
       "pass": true
     },
@@ -368,39 +383,43 @@
         "delta_sfr_inst_dex": 0.5,
         "expected_delta_sfr_inst_dex": 0.05,
         "residual_sfr_inst_dex": 0.45,
-        "sigma_sfr_lp_dex": 0.2,
         "sigma_sfr_cig_inst_dex": 0.02171472409516259,
         "sigma_sys_sfr_inst_dex": 0.2,
-        "score_sfr_inst": 1.586322143174101
+        "score_sfr_inst": 1.586322143174101,
+        "sigma_sfr_lp_lo_dex": 0.19999999999999998,
+        "sigma_sfr_lp_hi_dex": 0.19999999999999998
       },
       "observed": {
         "sfr_inst_state": "point_comparable",
         "delta_sfr_inst_dex": 0.5,
         "expected_delta_sfr_inst_dex": 0.05,
         "residual_sfr_inst_dex": 0.45,
-        "sigma_sfr_lp_dex": 0.19999999999999998,
         "sigma_sfr_cig_inst_dex": 0.02171472409516259,
         "sigma_sys_sfr_inst_dex": 0.2,
-        "score_sfr_inst": 1.586322143174101
+        "score_sfr_inst": 1.586322143174101,
+        "sigma_sfr_lp_lo_dex": 0.2,
+        "sigma_sfr_lp_hi_dex": 0.19999999999999996
       },
       "pass": true
     },
     {
       "id": "FX-06a",
-      "description": "sSFR delta emitted with declared algebraic coupling to the mass and SFR deltas",
+      "description": "sSFR component view satisfies the declared algebraic coupling at full precision; the LePhare non-additivity context is emitted alongside",
       "expected": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "delta_mass_dex": 0.0,
         "delta_sfr_100_dex": 0.1989700043360188,
-        "not_independent_of_mass_and_sfr": true
+        "not_independent_of_mass_and_sfr": true,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.5
       },
       "observed": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.19897000433601875,
         "delta_mass_dex": 0.0,
         "delta_sfr_100_dex": 0.1989700043360188,
-        "not_independent_of_mass_and_sfr": true
+        "not_independent_of_mass_and_sfr": true,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.5
       },
       "pass": true
     },
@@ -409,12 +428,12 @@
       "description": "sSFR score stays unsupported on correlated-error grounds; the raw delta is still emitted",
       "expected": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "score_ssfr_100": null
       },
       "observed": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.19897000433601875,
         "score_ssfr_100": null
       },
       "pass": true
@@ -465,6 +484,783 @@
         "delta_mass_dex": 1.0
       },
       "pass": true
+    },
+    {
+      "id": "FX-R3a",
+      "description": "R3: type-0 valid masses with NULL CIGALE mass error are outside POP-MASS; raw delta stays a finite audit output, residual and score are NULL",
+      "expected": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      },
+      "observed": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R3b",
+      "description": "R3: negative CIGALE mass error also falls outside POP-MASS with the same pattern",
+      "expected": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "observed": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R8a",
+      "description": "R8: type-1 source with valid masses receives NULL residual and score with not_in_population; the raw delta stays auditable",
+      "expected": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      },
+      "observed": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "delta_mass_dex": 1.0,
+        "residual_mass_dex": null,
+        "score_mass": null,
+        "score_mass_state": "not_in_population"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R8b",
+      "description": "R8: type-2 source, same NULL pattern",
+      "expected": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "observed": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R8c",
+      "description": "R8: unknown type (99), same NULL pattern",
+      "expected": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "observed": {
+        "pop_mass": false,
+        "pop_mass_reason": "not_in_population",
+        "residual_mass_dex": null,
+        "score_mass": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R8d",
+      "description": "R8: type-1 SFR source is outside POP-SFR-100; SFR residual and score NULL, raw SFR delta auditable",
+      "expected": {
+        "pop_sfr_100": false,
+        "pop_sfr_100_reason": "not_in_population",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "residual_sfr_100_dex": null,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "not_in_population"
+      },
+      "observed": {
+        "pop_sfr_100": false,
+        "pop_sfr_100_reason": "not_in_population",
+        "delta_sfr_100_dex": 0.1989700043360188,
+        "residual_sfr_100_dex": null,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "not_in_population"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2a",
+      "description": "R2: SFR relative error 0.31 is outside the declared approximation domain; scale state emitted, score NULL, residual retained",
+      "expected": {
+        "sfr_100_state": "point_comparable",
+        "pop_sfr_100": true,
+        "sfr_100_scale_state": "approximation_out_of_domain",
+        "sfr_100_scale_reason": "log_error_approximation_domain_exceeded",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "approximation_out_of_domain"
+      },
+      "observed": {
+        "sfr_100_state": "point_comparable",
+        "pop_sfr_100": true,
+        "sfr_100_scale_state": "approximation_out_of_domain",
+        "sfr_100_scale_reason": "log_error_approximation_domain_exceeded",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null,
+        "score_sfr_100_state": "approximation_out_of_domain"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2b",
+      "description": "R2 control: relative error 0.29 stays inside the domain with a finite score (passes on the baseline too)",
+      "expected": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.3263071119761467
+      },
+      "observed": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.32630711197614676
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2c",
+      "description": "R2 boundary control: relative error exactly 0.30 is inside the inclusive domain with a finite score (passes on the baseline too)",
+      "expected": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.324429488725637
+      },
+      "observed": {
+        "sfr_100_scale_state": "point_valid",
+        "score_sfr_100": -0.324429488725637
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2d",
+      "description": "R2: reversed SFR quantiles give an invalid scale state with reason; no score",
+      "expected": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "quantile_order_violation",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null
+      },
+      "observed": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "quantile_order_violation",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2e",
+      "description": "R2: median outside the otherwise ordered endpoints fails complete quantile containment; no score",
+      "expected": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "median_outside_quantile_interval",
+        "score_sfr_100": null
+      },
+      "observed": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "median_outside_quantile_interval",
+        "score_sfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2f",
+      "description": "R2 control: missing SFR uncertainty stays missing with no score (passes on the baseline too)",
+      "expected": {
+        "sfr_100_scale_state": "missing",
+        "sfr_100_scale_reason": "missing_uncertainty_input",
+        "score_sfr_100": null
+      },
+      "observed": {
+        "sfr_100_scale_state": "missing",
+        "sfr_100_scale_reason": "missing_uncertainty_input",
+        "score_sfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R8e",
+      "description": "R8: SFR population independent of mass membership - nonpositive mass leaves the SFR residual and score intact",
+      "expected": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "pop_mass": false,
+        "residual_mass_dex": null,
+        "pop_sfr_100": true,
+        "pop_sfr_100_reason": "none",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": -0.356146931659015
+      },
+      "observed": {
+        "mass_point_state": "nonpositive_log_undefined",
+        "pop_mass": false,
+        "residual_mass_dex": null,
+        "pop_sfr_100": true,
+        "pop_sfr_100_reason": "none",
+        "residual_sfr_100_dex": -0.10102999566398119,
+        "score_sfr_100": -0.3561469316590151
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R2g",
+      "description": "R2: non-finite SFR uncertainty is rejected with an explicit reason and no score",
+      "expected": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "nonfinite_uncertainty_input",
+        "score_sfr_100": null
+      },
+      "observed": {
+        "sfr_100_scale_state": "invalid_or_unsupported",
+        "sfr_100_scale_reason": "nonfinite_uncertainty_input",
+        "score_sfr_100": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9a",
+      "description": "R9: asymmetric posterior (lower 0.05, upper 0.30) with a positive residual selects the lower half-width",
+      "expected": {
+        "delta_mass_dex": 0.3,
+        "residual_mass_dex": 0.09999999999999998,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": 0.891740157358414,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "delta_mass_dex": 0.3000000000000007,
+        "residual_mass_dex": 0.1000000000000007,
+        "sigma_mass_lp_lo_dex": 0.05000000000000071,
+        "sigma_mass_lp_hi_dex": 0.29999999999999893,
+        "score_mass": 0.8917401573584179,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9b",
+      "description": "R9: same asymmetric widths with a negative residual select the upper half-width",
+      "expected": {
+        "delta_mass_dex": 0.1,
+        "residual_mass_dex": -0.1,
+        "sigma_mass_lp_lo_dex": 0.05,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": -0.31610854496087415,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "delta_mass_dex": 0.09999999999999964,
+        "residual_mass_dex": -0.10000000000000037,
+        "sigma_mass_lp_lo_dex": 0.049999999999998934,
+        "sigma_mass_lp_hi_dex": 0.3000000000000007,
+        "score_mass": -0.3161085449608746,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9c",
+      "description": "R9: raw delta (-0.10) and centered residual (+0.11) of opposite sign; the side follows the residual",
+      "expected": {
+        "delta_mass_dex": -0.09999999999999964,
+        "expected_delta_mass_dex": -0.21,
+        "residual_mass_dex": 0.11000000000000035,
+        "score_mass": 0.9820018620764585,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "delta_mass_dex": -0.09999999999999964,
+        "expected_delta_mass_dex": -0.21,
+        "residual_mass_dex": 0.11000000000000035,
+        "score_mass": 0.9820018620764557,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9d",
+      "description": "R9: zero-width selected side (med == l68 with positive residual) is degenerate with an explicit reason",
+      "expected": {
+        "sigma_mass_lp_lo_dex": 0.0,
+        "sigma_mass_lp_hi_dex": 0.3,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width",
+        "score_mass_reason": "degenerate_quantile_width"
+      },
+      "observed": {
+        "sigma_mass_lp_lo_dex": 0.0,
+        "sigma_mass_lp_hi_dex": 0.29999999999999893,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width",
+        "score_mass_reason": "degenerate_quantile_width"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9e",
+      "description": "R9: zero-width unselected side (med == u68 with positive residual) leaves the score finite",
+      "expected": {
+        "sigma_mass_lp_lo_dex": 0.3,
+        "sigma_mass_lp_hi_dex": 0.0,
+        "score_mass": 0.3161085449608741,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "sigma_mass_lp_lo_dex": 0.3000000000000007,
+        "sigma_mass_lp_hi_dex": 0.0,
+        "score_mass": 0.31610854496087565,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9f",
+      "description": "R9: exactly zero residual with both widths strictly positive gives score zero after validity",
+      "expected": {
+        "residual_mass_dex": 0.0,
+        "score_mass": 0.0,
+        "score_mass_state": "point_valid"
+      },
+      "observed": {
+        "residual_mass_dex": 0.0,
+        "score_mass": 0.0,
+        "score_mass_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9g",
+      "description": "R9: zero residual with a zero width is degenerate, never a silent zero score",
+      "expected": {
+        "residual_mass_dex": 0.0,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width"
+      },
+      "observed": {
+        "residual_mass_dex": 0.0,
+        "score_mass": null,
+        "score_mass_state": "degenerate_quantile_width"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9h",
+      "description": "R9: median outside otherwise ordered endpoints fails mass containment; no score, raw delta retained",
+      "expected": {
+        "delta_mass_dex": 0.25,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "median_outside_quantile_interval",
+        "score_mass": null
+      },
+      "observed": {
+        "delta_mass_dex": 0.25,
+        "mass_scale_state": "invalid_or_unsupported",
+        "mass_scale_reason": "median_outside_quantile_interval",
+        "score_mass": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R9i",
+      "description": "R9: SFR directional width - negative SFR residual selects the upper half-width",
+      "expected": {
+        "sigma_sfr_lp_lo_dex": 0.05,
+        "sigma_sfr_lp_hi_dex": 0.3,
+        "score_sfr_100": -0.27969999459791833,
+        "score_sfr_100_state": "point_valid"
+      },
+      "observed": {
+        "sigma_sfr_lp_lo_dex": 0.04999999999999999,
+        "sigma_sfr_lp_hi_dex": 0.30000000000000004,
+        "score_sfr_100": -0.2796999945979183,
+        "score_sfr_100_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R1a",
+      "description": "R1: the inst-timescale component view also satisfies the coupling with a nonzero delta_mass; eligibility never touches native ssfr_med",
+      "expected": {
+        "delta_mass_dex": 0.3,
+        "delta_sfr_inst_dex": 0.1989700043360188,
+        "delta_ssfr_inst_dex": -0.10102999566398196,
+        "ssfr_inst_state": "point_valid",
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "observed": {
+        "delta_mass_dex": 0.3000000000000007,
+        "delta_sfr_inst_dex": 0.1989700043360188,
+        "delta_ssfr_inst_dex": -0.10102999566398196,
+        "ssfr_inst_state": "point_valid",
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R1b",
+      "description": "R1: native ssfr_med equal to the component value gives a zero non-additivity context",
+      "expected": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.0,
+        "ctx_lp_ssfr_point_state": "point_valid"
+      },
+      "observed": {
+        "delta_ssfr_100_dex": 0.19897000433601875,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.0,
+        "ctx_lp_ssfr_point_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R1c",
+      "description": "R1: absent native sSFR nulls only the context; the component view survives",
+      "expected": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_point_reason": "missing_input",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "observed": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.19897000433601875,
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_point_reason": "missing_input",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R1d",
+      "description": "R1: out-of-domain native sSFR nulls only the context; the component view survives",
+      "expected": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "invalid_or_unsupported",
+        "ctx_lp_ssfr_point_reason": "lephare_value_out_of_domain",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "observed": {
+        "delta_ssfr_100_dex": 0.19897000433601875,
+        "ctx_lp_ssfr_point_state": "invalid_or_unsupported",
+        "ctx_lp_ssfr_point_reason": "lephare_value_out_of_domain",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7a",
+      "description": "R7: a cell at exactly the 200 support threshold resolves as cell",
+      "expected": {
+        "center_support": "cell",
+        "center_requested_cell": "0|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.04
+      },
+      "observed": {
+        "center_support": "cell",
+        "center_requested_cell": "0|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0400000000000002
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7b",
+      "description": "R7: a cell at 199 support falls back to the z-only estimate at 250",
+      "expected": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "0|1",
+        "expected_delta_mass_dex": 0.21,
+        "residual_mass_dex": 0.030000000000000027
+      },
+      "observed": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "0|1",
+        "expected_delta_mass_dex": 0.21,
+        "residual_mass_dex": 0.03000000000000022
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7c",
+      "description": "R7: z-only support 199 as well falls back to the global constant",
+      "expected": {
+        "center_support": "global_fallback",
+        "center_requested_cell": "1|0",
+        "expected_delta_mass_dex": 0.24,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "global_fallback",
+        "center_requested_cell": "1|0",
+        "expected_delta_mass_dex": 0.24,
+        "residual_mass_dex": 2.220446049250313e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7d",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 12) has zero residual under the forced edge",
+      "expected": {
+        "center_support": "cell",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.224,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "cell",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.224,
+        "residual_mass_dex": 1.942890293094024e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7e",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 36) has zero residual under the forced edge",
+      "expected": {
+        "center_support": "cell",
+        "center_requested_cell": "6|4",
+        "expected_delta_mass_dex": 0.176,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "cell",
+        "center_requested_cell": "6|4",
+        "expected_delta_mass_dex": 0.17600000000000002,
+        "residual_mass_dex": 1.3877787807814457e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7g",
+      "description": "R7: sparse high-redshift cells fall back to the z-only estimate and retain a known magnitude bias (+0.024)",
+      "expected": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.024
+      },
+      "observed": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.024000000000000188
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7h",
+      "description": "R7: z exactly 5.5 belongs to the upper bin (left-closed edge), never straddling 5.5",
+      "expected": {
+        "center_support": "cell",
+        "center_requested_cell": "6|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "cell",
+        "center_requested_cell": "6|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": -7.216449660063518e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7i",
+      "description": "R7: the maximum development-z endpoint is included in the final bin, not out of hull",
+      "expected": {
+        "center_support": "cell",
+        "center_requested_cell": "6|1",
+        "expected_delta_mass_dex": 0.212,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "cell",
+        "center_requested_cell": "6|1",
+        "expected_delta_mass_dex": 0.21200000000000002,
+        "residual_mass_dex": -2.7755575615628914e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-R7j",
+      "description": "R7: development support wholly below 5.5 inserts no forced edge; duplicate quantile edges collapse to 4 effective z bins",
+      "expected": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "1|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      },
+      "observed": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "1|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": -7.216449660063518e-16
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J4",
+      "description": "A1.7: joint distance uses the fitted covariance C (not the unit-diagonal correlation); score uses R on standardized residuals",
+      "expected": {
+        "residual_mass_dex": 0.3000000000000004,
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_inst_state": "point_valid",
+        "joint_inst_fallback": "cell",
+        "joint_inst_rho_effective": 0.6,
+        "joint_inst_regularized": false,
+        "joint_inst_support_count": 200,
+        "score_joint_inst_state": "point_valid"
+      },
+      "observed": {
+        "residual_mass_dex": 0.3000000000000004,
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_inst_state": "point_valid",
+        "joint_inst_fallback": "cell",
+        "joint_inst_rho_effective": 0.6,
+        "joint_inst_regularized": false,
+        "joint_inst_support_count": 200,
+        "score_joint_inst_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J5b",
+      "description": "A1.7: a non-POP-MASS source nulls both joint outputs with not_in_population while the raw mass delta survives",
+      "expected": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_state": "not_in_population",
+        "joint_residual_distance_100": null,
+        "delta_mass_dex": 0.4
+      },
+      "observed": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_state": "not_in_population",
+        "joint_residual_distance_100": null,
+        "delta_mass_dex": 0.40000000000000036
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J5c",
+      "description": "A1.7: an out-of-domain SFR scale (relative error 0.31) nulls only the standardized score; the unstandardized distance stays valid",
+      "expected": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": null,
+        "score_joint_inst_state": "approximation_out_of_domain",
+        "score_joint_inst_reason": "log_error_approximation_domain_exceeded",
+        "joint_inst_state": "point_valid"
+      },
+      "observed": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": null,
+        "score_joint_inst_state": "approximation_out_of_domain",
+        "score_joint_inst_reason": "log_error_approximation_domain_exceeded",
+        "joint_inst_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J5d",
+      "description": "A1.7: valid instantaneous SFR with censored 100-Myr SFR emits the inst joint surface and nulls the 100 surface",
+      "expected": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_residual_distance_100": null,
+        "score_joint_100": null,
+        "joint_100_state": "not_in_population"
+      },
+      "observed": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_residual_distance_100": null,
+        "score_joint_100": null,
+        "joint_100_state": "not_in_population"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J5e",
+      "description": "A1.7: the reverse - valid 100-Myr SFR with censored instantaneous SFR emits only the 100 surface",
+      "expected": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_residual_distance_100": 1.5972042428628905,
+        "score_joint_100": 4.095313877127304,
+        "joint_100_state": "point_valid"
+      },
+      "observed": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_residual_distance_100": 1.5972042428628905,
+        "score_joint_100": 4.095313877127304,
+        "joint_100_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J6",
+      "description": "A1.7 clamp: a sparse cell falls back to the global fit whose correlation is beyond the clamp; the exact declared post-clamp value 0.95 is used and the regularization flag is recorded",
+      "expected": {
+        "joint_inst_fallback": "global_fallback",
+        "joint_inst_rho_effective": 0.95,
+        "joint_inst_regularized": true,
+        "joint_inst_state": "point_valid",
+        "score_joint_inst_state": "point_valid"
+      },
+      "observed": {
+        "joint_inst_fallback": "global_fallback",
+        "joint_inst_rho_effective": 0.95,
+        "joint_inst_regularized": true,
+        "joint_inst_state": "point_valid",
+        "score_joint_inst_state": "point_valid"
+      },
+      "pass": true
+    },
+    {
+      "id": "FX-J7",
+      "description": "A1.7 degeneracy: zero marginal covariance spread produces an explicit unsupported state, never an invented covariance",
+      "expected": {
+        "joint_inst_state": "unsupported",
+        "joint_inst_reason": "zero_marginal_spread",
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_fallback": "unsupported"
+      },
+      "observed": {
+        "joint_inst_state": "unsupported",
+        "joint_inst_reason": "zero_marginal_spread",
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_fallback": "unsupported"
+      },
+      "pass": true
     }
   ],
   "fit_requests": [
@@ -505,6 +1301,373 @@
         "accepted"
       ],
       "pass": true
+    },
+    {
+      "id": "FX-P5",
+      "description": "A training ID with no partition assignment is rejected as unassigned_partition",
+      "expected": "rejected",
+      "observed": [
+        "unassigned_partition catalog_id 42"
+      ],
+      "pass": true
+    }
+  ],
+  "sigma_sys_solve_checks": [
+    {
+      "id": "SOLVE-1",
+      "description": "Solvable synthetic case: equal scales give an analytic oracle sqrt((1.4826*median|r|)^2 - s^2)",
+      "expected": {
+        "state": "point_valid",
+        "reason": "none",
+        "value": 0.3569053410920044
+      },
+      "observed": {
+        "state": "point_valid",
+        "value": 0.35690534109193095,
+        "reason": "none"
+      },
+      "pass": true
+    },
+    {
+      "id": "SOLVE-2",
+      "description": "No admissible solution: residuals already smaller than the quoted scales; no negative floor is fabricated",
+      "expected": {
+        "state": "invalid_or_unsupported",
+        "reason": "no_admissible_systematic_solution",
+        "value": null
+      },
+      "observed": {
+        "state": "invalid_or_unsupported",
+        "value": null,
+        "reason": "no_admissible_systematic_solution"
+      },
+      "pass": true
+    },
+    {
+      "id": "SOLVE-3",
+      "description": "Zero spread: identical residuals give MAD zero; unsupported rather than an invented sigma_sys",
+      "expected": {
+        "state": "invalid_or_unsupported",
+        "reason": "zero_residual_spread",
+        "value": null
+      },
+      "observed": {
+        "state": "invalid_or_unsupported",
+        "value": null,
+        "reason": "zero_residual_spread"
+      },
+      "pass": true
+    }
+  ],
+  "mathematical_counterexamples": [
+    {
+      "id": "MATH-1",
+      "description": "Deterministic counterexample to 'median non-additivity implies bimodality': X, Z independent Exp(1), Y = X + Z has joint density exp(-Y) on 0 <= X <= Y, which is unimodal (log-concave); median(X) = median(Y - X) = ln 2; median(Y) = m solves exp(-m)(1+m) = 1/2; the non-additivity 2*ln2 - m is nonzero. Synthetic mathematical illustration, not a model of LePhare's posterior; no sampled data is used.",
+      "expected_nonadditivity": -0.29205262889677,
+      "observed_nonadditivity": -0.29205262889677,
+      "median_y": 1.6783469900166605,
+      "median_x": 0.6931471805599453,
+      "pass": true
+    }
+  ],
+  "binning_demonstrations": [
+    {
+      "id": "DEMO-SLOPE",
+      "tolerance": 0.005,
+      "max_abs_residual_with_edge": 0.0,
+      "min_abs_residual_without_edge": 0.04799999999999999,
+      "adequate_support_declared": "each demonstration cell above z 5.5 carries 220 unique sources, at or above center_min_cell_support",
+      "pass": true
+    }
+  ],
+  "joint_kernel_checks": [
+    {
+      "id": "KERNEL-1",
+      "observed": [
+        3.1622776601683795,
+        6.957010852370437
+      ],
+      "expected": [
+        3.1622776601683795,
+        6.957010852370437
+      ],
+      "pass": true
+    },
+    {
+      "id": "KERNEL-2",
+      "observed": [
+        3.5355339059327378,
+        3.4
+      ],
+      "expected": [
+        3.5355339059327378,
+        3.4
+      ],
+      "pass": true
+    },
+    {
+      "id": "KERNEL-3",
+      "observed": [
+        2.328890038958328,
+        4.4721359549995805
+      ],
+      "expected": [
+        2.328890038958328,
+        4.4721359549995805
+      ],
+      "pass": true
+    },
+    {
+      "id": "POOLED-1",
+      "observed": -0.5,
+      "expected": -0.5,
+      "pass": true
+    },
+    {
+      "id": "POOLED-2",
+      "observed": -0.35,
+      "expected": -0.35,
+      "pass": true
+    }
+  ],
+  "joint_fit_checks": [
+    {
+      "id": "CORE",
+      "description": "Known core: +-1 patterns with counts 6/2/2/6 give rho exactly 0.5 with no winsorization and no clamp",
+      "expected": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.5,
+        "rho_effective": 0.5,
+        "regularized": false,
+        "n": 16
+      },
+      "observed": {
+        "state": "ok",
+        "reason": "none",
+        "n": 16,
+        "rho_raw": 0.5,
+        "rho_effective": 0.5,
+        "regularized": false,
+        "R": [
+          [
+            1.0,
+            0.5
+          ],
+          [
+            0.5,
+            1.0
+          ]
+        ],
+        "C": [
+          [
+            0.48526697026060184,
+            0.24263348513030092
+          ],
+          [
+            0.24263348513030092,
+            0.48526697026060184
+          ]
+        ],
+        "marginal_scales": [
+          0.6966110609663055,
+          0.6966110609663055
+        ],
+        "covariance_center": [
+          0.0,
+          0.0
+        ]
+      },
+      "pass": true
+    },
+    {
+      "id": "CONTAM",
+      "description": "Contamination response: one wild outlier (1000,1000) is winsorized and the estimate moves only boundedly (rho stays near zero versus the unclipped 0.5+offset it would take under a moment estimator)",
+      "expected": {
+        "state": "ok",
+        "reason": "none",
+        "regularized": false,
+        "n": 17,
+        "rho_raw": 0.9260373689896785
+      },
+      "observed": {
+        "state": "ok",
+        "reason": "none",
+        "n": 17,
+        "rho_raw": 0.9260373689896785,
+        "rho_effective": 0.9260373689896785,
+        "regularized": false,
+        "R": [
+          [
+            1.0,
+            0.9260373689896785
+          ],
+          [
+            0.9260373689896785,
+            1.0
+          ]
+        ],
+        "C": [
+          [
+            0.7688642534833352,
+            0.711997030405921
+          ],
+          [
+            0.711997030405921,
+            0.7688642534833352
+          ]
+        ],
+        "marginal_scales": [
+          0.8768490482878654,
+          0.8768490482878654
+        ],
+        "covariance_center": [
+          1,
+          1
+        ]
+      },
+      "pass": true
+    },
+    {
+      "id": "DEGEN",
+      "description": "Degeneracy: identical rows give zero marginal spread",
+      "expected": {
+        "state": "unsupported",
+        "reason": "zero_marginal_spread"
+      },
+      "observed": {
+        "state": "unsupported",
+        "reason": "zero_marginal_spread",
+        "n": 12
+      },
+      "pass": true
+    },
+    {
+      "id": "CLAMP-A",
+      "description": "Supported cell with local correlation 19996/20000 = 0.9998: clamped to exactly 0.95",
+      "expected": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9998,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20000
+      },
+      "observed": {
+        "state": "ok",
+        "reason": "none",
+        "n": 20000,
+        "rho_raw": 0.9998,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "R": [
+          [
+            1.0,
+            0.95
+          ],
+          [
+            0.95,
+            1.0
+          ]
+        ],
+        "C": [
+          [
+            0.45496053264594655,
+            0.4322125060136492
+          ],
+          [
+            0.4322125060136492,
+            0.45496053264594655
+          ]
+        ],
+        "marginal_scales": [
+          0.6745076223779436,
+          0.6745076223779436
+        ],
+        "covariance_center": [
+          0.0,
+          0.0
+        ]
+      },
+      "pass": true
+    },
+    {
+      "id": "CLAMP-G",
+      "description": "The global fit behind the sparse-cell fallback is also beyond the clamp and is clamped",
+      "expected": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9995501436922124,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20010
+      },
+      "observed": {
+        "state": "ok",
+        "reason": "none",
+        "n": 20010,
+        "rho_raw": 0.9995501436922124,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "R": [
+          [
+            1.0,
+            0.95
+          ],
+          [
+            0.95,
+            1.0
+          ]
+        ],
+        "C": [
+          [
+            0.45496052127704917,
+            0.43210448259243894
+          ],
+          [
+            0.43210448259243894,
+            0.4547331546996994
+          ]
+        ],
+        "marginal_scales": [
+          0.6745076139503906,
+          0.6743390502556554
+        ],
+        "covariance_center": [
+          0.0,
+          0.0
+        ]
+      },
+      "pass": true
+    }
+  ],
+  "joint_fit_requests": [
+    {
+      "id": "FX-JP1",
+      "description": "Duplicate covariance fitting rows are rejected",
+      "expected": "rejected",
+      "observed": [
+        "duplicate training rows for catalog_id 986000"
+      ],
+      "pass": true
+    },
+    {
+      "id": "FX-JP2",
+      "description": "A covariance fitting row with no assignment is rejected",
+      "expected": "rejected",
+      "observed": [
+        "unassigned_partition catalog_id 987000"
+      ],
+      "pass": true
+    },
+    {
+      "id": "FX-JP3",
+      "description": "A validation-assigned covariance fitting row is rejected",
+      "expected": "rejected",
+      "observed": [
+        "validation or holdout catalog_id 988000 in fit request"
+      ],
+      "pass": true
     }
   ],
   "mutations": {
@@ -518,6 +1681,21 @@
       },
       "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
       "observed_reasons": [
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-04b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06a",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5e",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1c",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J4",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5c",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J6",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J7",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a",
         "case_mismatch:FX-01a:delta_mass_dex",
         "case_mismatch:FX-01c:delta_mass_dex",
         "case_mismatch:FX-02a:delta_mass_dex",
@@ -531,11 +1709,54 @@
         "case_mismatch:FX-02e:delta_mass_dex",
         "case_mismatch:FX-02f:delta_mass_dex",
         "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-02f:score_mass",
         "case_mismatch:FX-04a:delta_mass_dex",
         "case_mismatch:FX-04b:delta_mass_dex",
         "case_mismatch:FX-04c:delta_mass_dex",
         "case_mismatch:FX-06a:delta_mass_dex",
         "case_mismatch:FX-08a:delta_mass_dex",
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J4:residual_mass_dex",
+        "case_mismatch:FX-J4:score_joint_inst",
+        "case_mismatch:FX-J5b:delta_mass_dex",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:score_joint_inst",
+        "case_mismatch:FX-J5e:joint_residual_distance_100",
+        "case_mismatch:FX-J5e:score_joint_100",
+        "case_mismatch:FX-R1a:delta_mass_dex",
+        "case_mismatch:FX-R3a:delta_mass_dex",
+        "case_mismatch:FX-R3b:delta_mass_dex",
+        "case_mismatch:FX-R7a:residual_mass_dex",
+        "case_mismatch:FX-R7b:residual_mass_dex",
+        "case_mismatch:FX-R7c:residual_mass_dex",
+        "case_mismatch:FX-R7d:residual_mass_dex",
+        "case_mismatch:FX-R7e:residual_mass_dex",
+        "case_mismatch:FX-R7g:residual_mass_dex",
+        "case_mismatch:FX-R7h:residual_mass_dex",
+        "case_mismatch:FX-R7i:residual_mass_dex",
+        "case_mismatch:FX-R7j:residual_mass_dex",
+        "case_mismatch:FX-R8a:delta_mass_dex",
+        "case_mismatch:FX-R9a:delta_mass_dex",
+        "case_mismatch:FX-R9a:residual_mass_dex",
+        "case_mismatch:FX-R9a:score_mass",
+        "case_mismatch:FX-R9b:delta_mass_dex",
+        "case_mismatch:FX-R9b:residual_mass_dex",
+        "case_mismatch:FX-R9b:score_mass",
+        "case_mismatch:FX-R9c:delta_mass_dex",
+        "case_mismatch:FX-R9c:residual_mass_dex",
+        "case_mismatch:FX-R9c:score_mass",
+        "case_mismatch:FX-R9d:score_mass",
+        "case_mismatch:FX-R9d:score_mass_reason",
+        "case_mismatch:FX-R9d:score_mass_state",
+        "case_mismatch:FX-R9e:score_mass",
+        "case_mismatch:FX-R9e:score_mass_state",
+        "case_mismatch:FX-R9f:residual_mass_dex",
+        "case_mismatch:FX-R9f:score_mass",
+        "case_mismatch:FX-R9g:residual_mass_dex",
+        "case_mismatch:FX-R9g:score_mass",
+        "case_mismatch:FX-R9g:score_mass_state",
+        "case_mismatch:FX-R9h:delta_mass_dex",
         "delta_formula_identity:delta_mass_dex"
       ],
       "exit_code": 1,
@@ -557,6 +1778,8 @@
         "case_mismatch:FX-06c:delta_ssfr_100_dex",
         "case_mismatch:FX-06c:ssfr_100_reason",
         "case_mismatch:FX-06c:ssfr_100_state",
+        "case_mismatch:FX-J5d:joint_100_state",
+        "case_mismatch:FX-J5d:joint_residual_distance_100",
         "required_state_missing:floor_or_censoring_suspected"
       ],
       "exit_code": 1,
@@ -622,6 +1845,21 @@
       },
       "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
       "observed_reasons": [
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-04b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06a",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5e",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1c",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J4",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5c",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J6",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J7",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a",
         "case_mismatch:FX-01a:delta_mass_dex",
         "case_mismatch:FX-01c:delta_mass_dex",
         "case_mismatch:FX-02a:delta_mass_dex",
@@ -635,11 +1873,54 @@
         "case_mismatch:FX-02e:delta_mass_dex",
         "case_mismatch:FX-02f:delta_mass_dex",
         "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-02f:score_mass",
         "case_mismatch:FX-04a:delta_mass_dex",
         "case_mismatch:FX-04b:delta_mass_dex",
         "case_mismatch:FX-04c:delta_mass_dex",
         "case_mismatch:FX-06a:delta_mass_dex",
         "case_mismatch:FX-08a:delta_mass_dex",
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J4:residual_mass_dex",
+        "case_mismatch:FX-J4:score_joint_inst",
+        "case_mismatch:FX-J5b:delta_mass_dex",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:score_joint_inst",
+        "case_mismatch:FX-J5e:joint_residual_distance_100",
+        "case_mismatch:FX-J5e:score_joint_100",
+        "case_mismatch:FX-R1a:delta_mass_dex",
+        "case_mismatch:FX-R3a:delta_mass_dex",
+        "case_mismatch:FX-R3b:delta_mass_dex",
+        "case_mismatch:FX-R7a:residual_mass_dex",
+        "case_mismatch:FX-R7b:residual_mass_dex",
+        "case_mismatch:FX-R7c:residual_mass_dex",
+        "case_mismatch:FX-R7d:residual_mass_dex",
+        "case_mismatch:FX-R7e:residual_mass_dex",
+        "case_mismatch:FX-R7g:residual_mass_dex",
+        "case_mismatch:FX-R7h:residual_mass_dex",
+        "case_mismatch:FX-R7i:residual_mass_dex",
+        "case_mismatch:FX-R7j:residual_mass_dex",
+        "case_mismatch:FX-R8a:delta_mass_dex",
+        "case_mismatch:FX-R9a:delta_mass_dex",
+        "case_mismatch:FX-R9a:residual_mass_dex",
+        "case_mismatch:FX-R9a:score_mass",
+        "case_mismatch:FX-R9b:delta_mass_dex",
+        "case_mismatch:FX-R9b:residual_mass_dex",
+        "case_mismatch:FX-R9b:score_mass",
+        "case_mismatch:FX-R9c:delta_mass_dex",
+        "case_mismatch:FX-R9c:residual_mass_dex",
+        "case_mismatch:FX-R9c:score_mass",
+        "case_mismatch:FX-R9d:score_mass",
+        "case_mismatch:FX-R9d:score_mass_reason",
+        "case_mismatch:FX-R9d:score_mass_state",
+        "case_mismatch:FX-R9e:score_mass",
+        "case_mismatch:FX-R9e:score_mass_state",
+        "case_mismatch:FX-R9f:residual_mass_dex",
+        "case_mismatch:FX-R9f:score_mass",
+        "case_mismatch:FX-R9g:residual_mass_dex",
+        "case_mismatch:FX-R9g:score_mass",
+        "case_mismatch:FX-R9g:score_mass_state",
+        "case_mismatch:FX-R9h:delta_mass_dex",
         "delta_formula_identity:delta_mass_dex"
       ],
       "exit_code": 1,
@@ -655,6 +1936,15 @@
       },
       "intended_reason": "case_mismatch:FX-01a:delta_mass_dex",
       "observed_reasons": [
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-J5e",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J4",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5c",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J6",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J7",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a",
         "case_mismatch:FX-01a:delta_mass_dex",
         "case_mismatch:FX-02a:delta_mass_dex",
         "case_mismatch:FX-02a:residual_mass_dex",
@@ -667,7 +1957,50 @@
         "case_mismatch:FX-02e:delta_mass_dex",
         "case_mismatch:FX-02f:delta_mass_dex",
         "case_mismatch:FX-02f:residual_mass_dex",
+        "case_mismatch:FX-02f:score_mass",
         "case_mismatch:FX-08a:delta_mass_dex",
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J4:residual_mass_dex",
+        "case_mismatch:FX-J4:score_joint_inst",
+        "case_mismatch:FX-J5b:delta_mass_dex",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:score_joint_inst",
+        "case_mismatch:FX-J5e:joint_residual_distance_100",
+        "case_mismatch:FX-J5e:score_joint_100",
+        "case_mismatch:FX-R1a:delta_mass_dex",
+        "case_mismatch:FX-R3a:delta_mass_dex",
+        "case_mismatch:FX-R3b:delta_mass_dex",
+        "case_mismatch:FX-R7a:residual_mass_dex",
+        "case_mismatch:FX-R7b:residual_mass_dex",
+        "case_mismatch:FX-R7c:residual_mass_dex",
+        "case_mismatch:FX-R7d:residual_mass_dex",
+        "case_mismatch:FX-R7e:residual_mass_dex",
+        "case_mismatch:FX-R7g:residual_mass_dex",
+        "case_mismatch:FX-R7h:residual_mass_dex",
+        "case_mismatch:FX-R7i:residual_mass_dex",
+        "case_mismatch:FX-R7j:residual_mass_dex",
+        "case_mismatch:FX-R8a:delta_mass_dex",
+        "case_mismatch:FX-R9a:delta_mass_dex",
+        "case_mismatch:FX-R9a:residual_mass_dex",
+        "case_mismatch:FX-R9a:score_mass",
+        "case_mismatch:FX-R9b:delta_mass_dex",
+        "case_mismatch:FX-R9b:residual_mass_dex",
+        "case_mismatch:FX-R9b:score_mass",
+        "case_mismatch:FX-R9c:delta_mass_dex",
+        "case_mismatch:FX-R9c:residual_mass_dex",
+        "case_mismatch:FX-R9c:score_mass",
+        "case_mismatch:FX-R9d:score_mass",
+        "case_mismatch:FX-R9d:score_mass_reason",
+        "case_mismatch:FX-R9d:score_mass_state",
+        "case_mismatch:FX-R9e:score_mass",
+        "case_mismatch:FX-R9e:score_mass_state",
+        "case_mismatch:FX-R9f:residual_mass_dex",
+        "case_mismatch:FX-R9f:score_mass",
+        "case_mismatch:FX-R9g:residual_mass_dex",
+        "case_mismatch:FX-R9g:score_mass",
+        "case_mismatch:FX-R9g:score_mass_state",
+        "case_mismatch:FX-R9h:delta_mass_dex",
         "delta_formula_identity:delta_mass_dex"
       ],
       "exit_code": 1,
@@ -699,6 +2032,521 @@
       "intended_reason": "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy",
       "observed_reasons": [
         "forbidden_covariate:analysis.specz_p2r05_sources.eligibility_primary_galaxy"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M10_pop_mass_error_clause_removed": {
+      "applied": true,
+      "description": "R3 reintroduced: POP-MASS predicate loses the CIGALE mass-error validity conditions",
+      "action": {
+        "kind": "edit_population_predicate",
+        "population": "POP-MASS",
+        "predicate": "lephare.type == 0 AND mass_point_state == point_valid"
+      },
+      "intended_reason": "case_mismatch:FX-R3a:pop_mass",
+      "observed_reasons": [
+        "case_mismatch:FX-R3a:pop_mass",
+        "case_mismatch:FX-R3a:pop_mass_reason",
+        "case_mismatch:FX-R3a:residual_mass_dex",
+        "case_mismatch:FX-R3a:score_mass_state",
+        "case_mismatch:FX-R3b:pop_mass",
+        "case_mismatch:FX-R3b:pop_mass_reason",
+        "case_mismatch:FX-R3b:residual_mass_dex",
+        "pop_mass_predicate_condition_missing:cigale.mass_err >= 0",
+        "pop_mass_predicate_condition_missing:is_null(cigale.mass_err) == false"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M11_mass_residual_population_gate_removed": {
+      "applied": true,
+      "description": "R8 reintroduced: residual_mass_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_mass_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_mass_dex",
+      "observed_reasons": [
+        "case_mismatch:FX-R3a:residual_mass_dex",
+        "case_mismatch:FX-R3b:residual_mass_dex",
+        "case_mismatch:FX-R8a:residual_mass_dex",
+        "case_mismatch:FX-R8b:residual_mass_dex",
+        "case_mismatch:FX-R8c:residual_mass_dex",
+        "population_gate_missing:residual_mass_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M12_sfr_score_point_state_only": {
+      "applied": true,
+      "description": "R2 reintroduced: score_sfr_100 drops the scale-state guard and is gated on point state only",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_sfr_100",
+        "guards": [
+          "population",
+          "point_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-R2a:score_sfr_100",
+      "observed_reasons": [
+        "case_mismatch:FX-R2a:score_sfr_100",
+        "case_mismatch:FX-R2a:score_sfr_100_state",
+        "case_mismatch:FX-R2d:score_sfr_100",
+        "case_mismatch:FX-R2e:score_sfr_100",
+        "case_mismatch:FX-R2f:score_sfr_100",
+        "case_mismatch:FX-R2g:score_sfr_100",
+        "guard_missing:score_sfr_100:directional_width",
+        "guard_missing:score_sfr_100:scale_state"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M13_sfr_population_gate_removed": {
+      "applied": true,
+      "description": "R8 reintroduced: residual_sfr_100_dex loses its declared population gate",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "residual_sfr_100_dex",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:residual_sfr_100_dex",
+      "observed_reasons": [
+        "population_gate_missing:residual_sfr_100_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M14_pop_mass_conditions_disagree": {
+      "applied": true,
+      "description": "R3 drift: the feature contract's echo of the input-contract POP-MASS conditions disagrees with input-contract.md",
+      "action": {
+        "kind": "edit_pop_mass_echo",
+        "echo": "lephare.type = 0 and mass_med state = point_valid (no error condition)"
+      },
+      "intended_reason": "pop_mass_echo_drift:error present and \u2265 0",
+      "observed_reasons": [
+        "pop_mass_echo_drift:> 0",
+        "pop_mass_echo_drift:error present and \u2265 0"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M15_median_containment_removed": {
+      "applied": true,
+      "description": "R2 reintroduced: the complete median-containment rule is removed from the SFR-100 scale machine",
+      "action": {
+        "kind": "drop_machine_rule_matching",
+        "machine": "sfr_100_scale",
+        "match": "median_outside_quantile_interval"
+      },
+      "intended_reason": "case_mismatch:FX-R2e:sfr_100_scale_reason",
+      "observed_reasons": [
+        "case_mismatch:FX-R2e:sfr_100_scale_reason",
+        "case_mismatch:FX-R2e:sfr_100_scale_state"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M16_symmetric_average_restored": {
+      "applied": true,
+      "description": "R9 reintroduced: the mass width policy symmetrizes (u68 - l68)/2 again",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "symmetric_average"
+      },
+      "intended_reason": "case_mismatch:FX-R9a:score_mass",
+      "observed_reasons": [
+        "case_mismatch:FX-02f:score_mass",
+        "case_mismatch:FX-R9a:score_mass",
+        "case_mismatch:FX-R9b:score_mass",
+        "case_mismatch:FX-R9c:score_mass",
+        "case_mismatch:FX-R9d:score_mass",
+        "case_mismatch:FX-R9d:score_mass_reason",
+        "case_mismatch:FX-R9d:score_mass_state",
+        "case_mismatch:FX-R9e:score_mass",
+        "case_mismatch:FX-R9g:score_mass",
+        "case_mismatch:FX-R9g:score_mass_state"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M17_side_by_raw_delta": {
+      "applied": true,
+      "description": "R9 reintroduced: the width side is chosen by the raw delta sign, not the conditionally centered residual",
+      "action": {
+        "kind": "edit_scales_policy",
+        "scale": "mass_scale",
+        "policy": "directional_by_delta_sign"
+      },
+      "intended_reason": "case_mismatch:FX-R9c:score_mass",
+      "observed_reasons": [
+        "case_mismatch:FX-02f:score_mass",
+        "case_mismatch:FX-R9b:score_mass",
+        "case_mismatch:FX-R9c:score_mass"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M18_zero_width_guard_removed": {
+      "applied": true,
+      "description": "R9 reintroduced: score_mass drops the directional width guard, admitting zero selected widths",
+      "action": {
+        "kind": "edit_output_guards",
+        "output": "score_mass",
+        "guards": [
+          "population",
+          "point_state",
+          "scale_state",
+          "combined_scale_guard"
+        ]
+      },
+      "intended_reason": "guard_missing:score_mass:directional_width",
+      "observed_reasons": [
+        "case_mismatch:FX-R9d:score_mass",
+        "case_mismatch:FX-R9d:score_mass_reason",
+        "case_mismatch:FX-R9d:score_mass_state",
+        "case_mismatch:FX-R9g:score_mass",
+        "case_mismatch:FX-R9g:score_mass_state",
+        "guard_missing:score_mass:directional_width"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M19_native_ssfr_reinserted": {
+      "applied": true,
+      "description": "R1 reintroduced: delta_ssfr_100_dex returns to the native ssfr_med formula",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_ssfr_100_dex",
+        "formula": "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+      },
+      "intended_reason": "case_mismatch:FX-06a:delta_ssfr_100_dex",
+      "observed_reasons": [
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06a",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-06b",
+        "algebraic_coupling_violated:delta_ssfr_100_dex:FX-R1d",
+        "case_mismatch:FX-06a:delta_ssfr_100_dex",
+        "case_mismatch:FX-06b:delta_ssfr_100_dex",
+        "case_mismatch:FX-R1c:delta_ssfr_100_dex",
+        "case_mismatch:FX-R1d:delta_ssfr_100_dex",
+        "delta_formula_identity:delta_ssfr_100_dex",
+        "native_ssfr_in_delta_formula:delta_ssfr_100_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M20_false_coupling_declared": {
+      "applied": true,
+      "description": "R1 guard: a scratch contract declares a false algebraic coupling (sum instead of difference)",
+      "action": {
+        "kind": "set_output_coupling",
+        "output": "delta_ssfr_inst_dex",
+        "coupling_expr": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex",
+        "algebraic_coupling": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex (deliberately false)"
+      },
+      "intended_reason": "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a",
+      "observed_reasons": [
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J4",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5b",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5c",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J5d",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J6",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-J7",
+        "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M21_ctx_marked_rankable": {
+      "applied": true,
+      "description": "R1 guard: the LePhare non-additivity context is marked rankable",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "rankable",
+        "value": true
+      },
+      "intended_reason": "context_output_rankable:ctx_lp_ssfr_nonadditivity_dex",
+      "observed_reasons": [
+        "context_output_rankable:ctx_lp_ssfr_nonadditivity_dex",
+        "native_ssfr_in_rankable_formula:ctx_lp_ssfr_nonadditivity_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M22_support_counts_ignored": {
+      "applied": true,
+      "description": "R7 reintroduced: the C1 center stops enforcing minimum support and uses any present cell",
+      "action": {
+        "kind": "set_center_field",
+        "center": "mass_center",
+        "index": 1,
+        "field": "support_enforcement",
+        "value": "none"
+      },
+      "intended_reason": "case_mismatch:FX-R7b:center_support",
+      "observed_reasons": [
+        "case_mismatch:FX-R7b:center_support",
+        "case_mismatch:FX-R7b:expected_delta_mass_dex",
+        "case_mismatch:FX-R7b:residual_mass_dex",
+        "case_mismatch:FX-R7c:center_support",
+        "case_mismatch:FX-R7c:expected_delta_mass_dex",
+        "case_mismatch:FX-R7c:residual_mass_dex",
+        "support_enforcement_missing"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M23_forced_edge_removed": {
+      "applied": true,
+      "description": "R7/decision 3 reintroduced: the forced z = 5.5 edge is removed, letting the top bin straddle the slope reversal",
+      "action": {
+        "kind": "remove_declared_constant",
+        "name": "forced_highz_edge"
+      },
+      "intended_reason": "case_mismatch:FX-R7d:residual_mass_dex",
+      "observed_reasons": [
+        "binning_demonstration:DEMO-SLOPE",
+        "case_mismatch:FX-R7d:center_requested_cell",
+        "case_mismatch:FX-R7d:expected_delta_mass_dex",
+        "case_mismatch:FX-R7d:residual_mass_dex",
+        "case_mismatch:FX-R7e:center_requested_cell",
+        "case_mismatch:FX-R7e:expected_delta_mass_dex",
+        "case_mismatch:FX-R7e:residual_mass_dex",
+        "case_mismatch:FX-R7g:center_requested_cell",
+        "case_mismatch:FX-R7g:center_support",
+        "case_mismatch:FX-R7g:expected_delta_mass_dex",
+        "case_mismatch:FX-R7g:residual_mass_dex",
+        "case_mismatch:FX-R7h:center_requested_cell",
+        "case_mismatch:FX-R7i:center_requested_cell",
+        "case_mismatch:FX-R7i:expected_delta_mass_dex",
+        "case_mismatch:FX-R7i:residual_mass_dex",
+        "declared_constant_missing:forced_highz_edge"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M24_authorizing_spec_entry_deleted": {
+      "applied": true,
+      "description": "R5 reintroduced: the required parent authorizing-spec entry is deleted from the identity manifest",
+      "action": {
+        "kind": "remove_identity_spec_entry",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+      },
+      "intended_reason": "authorizing_spec_not_declared:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+      "observed_reasons": [
+        "authorizing_spec_not_declared:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M25_authorizing_spec_digest_deleted": {
+      "applied": true,
+      "description": "R5 reintroduced: the parent authorizing-spec digest is altered in the identity manifest",
+      "action": {
+        "kind": "change_identity_spec_digest",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+        "value": "deadbeef"
+      },
+      "intended_reason": "identity_mismatch:authorizing_spec:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+      "observed_reasons": [
+        "identity_mismatch:authorizing_spec:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M26_low_correlation_veto": {
+      "applied": true,
+      "description": "A1.7 guard: a low-correlation veto is added to the joint surfaces",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "joint_veto_min_abs_correlation"
+        ],
+        "value": 0.1
+      },
+      "intended_reason": "joint_veto_declared:joint_veto_min_abs_correlation",
+      "observed_reasons": [
+        "joint_veto_declared:joint_veto_min_abs_correlation"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M27_validation_row_in_covariance_fit": {
+      "applied": true,
+      "description": "A1.7 guard: a validation-assigned row enters the covariance fit",
+      "action": {
+        "kind": "inject_joint_fit_row",
+        "fit": "JOINT-1",
+        "timescale": "inst",
+        "row": {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.5,
+          "residual_sfr_T_dex": 0.6
+        },
+        "split": "validation"
+      },
+      "intended_reason": "joint_fit_partition:JOINT-1:inst:validation or holdout catalog_id 999999 in fit request",
+      "observed_reasons": [
+        "case_mismatch:FX-J4:joint_inst_fallback",
+        "case_mismatch:FX-J4:joint_inst_rho_effective",
+        "case_mismatch:FX-J4:joint_inst_state",
+        "case_mismatch:FX-J4:joint_inst_support_count",
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J4:score_joint_inst",
+        "case_mismatch:FX-J4:score_joint_inst_state",
+        "case_mismatch:FX-J5c:joint_inst_state",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5c:score_joint_inst_reason",
+        "case_mismatch:FX-J5c:score_joint_inst_state",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:score_joint_inst",
+        "joint_fit_partition:JOINT-1:inst:validation or holdout catalog_id 999999 in fit request"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M28_marginal_output_removed": {
+      "applied": true,
+      "description": "A1.7 guard: a marginal output is removed while joint outputs are present",
+      "action": {
+        "kind": "remove_output",
+        "output": "sigma_sfr_cig_100_dex"
+      },
+      "intended_reason": "required_output_missing:sigma_sfr_cig_100_dex",
+      "observed_reasons": [
+        "required_output_missing:sigma_sfr_cig_100_dex"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M29_joint_population_gate_removed": {
+      "applied": true,
+      "description": "A1.7 guard: joint_residual_distance_inst loses its population gate and is emitted for a non-member",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "joint_residual_distance_inst",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:joint_residual_distance_inst",
+      "observed_reasons": [
+        "population_gate_missing:joint_residual_distance_inst"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M30_clamp_removed": {
+      "applied": true,
+      "description": "A1.7 guard: the correlation clamp is effectively removed (0.999999)",
+      "action": {
+        "kind": "edit_declared_constant",
+        "name": "joint_rho_clamp",
+        "value": 0.999999
+      },
+      "intended_reason": "joint_fit_check:CLAMP-A",
+      "observed_reasons": [
+        "case_mismatch:FX-J6:joint_inst_regularized",
+        "case_mismatch:FX-J6:joint_inst_rho_effective",
+        "joint_fit_check:CLAMP-A",
+        "joint_fit_check:CLAMP-G"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M31_distance_uses_correlation": {
+      "applied": true,
+      "description": "A1.7 guard: the distance formula silently substitutes the unit-diagonal correlation for the full covariance",
+      "action": {
+        "kind": "set_joint_matrix_source",
+        "output": "joint_residual_distance_inst",
+        "matrix_source": "correlation"
+      },
+      "intended_reason": "case_mismatch:FX-J4:joint_residual_distance_inst",
+      "observed_reasons": [
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M32_covariance_fit_bypassed": {
+      "applied": true,
+      "description": "A1.7 guard: the estimator is replaced by hand-declared matrices",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "estimator",
+          "id"
+        ],
+        "value": "hand_declared_matrices"
+      },
+      "intended_reason": "joint_estimator_invalid",
+      "observed_reasons": [
+        "joint_estimator_invalid"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M33_timescales_incorrectly_intersected": {
+      "applied": true,
+      "description": "A1.7 guard: the inst joint surface incorrectly requires the 100-Myr population as well",
+      "action": {
+        "kind": "edit_requires_timescales",
+        "output": "joint_residual_distance_inst",
+        "requires_timescales": [
+          "mass",
+          "inst",
+          "100"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-J5d:joint_residual_distance_inst",
+      "observed_reasons": [
+        "case_mismatch:FX-J4:joint_inst_fallback",
+        "case_mismatch:FX-J4:joint_inst_rho_effective",
+        "case_mismatch:FX-J4:joint_inst_state",
+        "case_mismatch:FX-J4:joint_inst_support_count",
+        "case_mismatch:FX-J4:joint_residual_distance_inst",
+        "case_mismatch:FX-J4:score_joint_inst",
+        "case_mismatch:FX-J4:score_joint_inst_state",
+        "case_mismatch:FX-J5c:joint_inst_state",
+        "case_mismatch:FX-J5c:joint_residual_distance_inst",
+        "case_mismatch:FX-J5c:score_joint_inst_reason",
+        "case_mismatch:FX-J5c:score_joint_inst_state",
+        "case_mismatch:FX-J5d:joint_residual_distance_inst",
+        "case_mismatch:FX-J5d:score_joint_inst",
+        "case_mismatch:FX-J6:joint_inst_fallback",
+        "case_mismatch:FX-J6:joint_inst_regularized",
+        "case_mismatch:FX-J6:joint_inst_rho_effective",
+        "case_mismatch:FX-J6:joint_inst_state",
+        "case_mismatch:FX-J6:score_joint_inst_state",
+        "case_mismatch:FX-J7:joint_inst_fallback",
+        "case_mismatch:FX-J7:joint_inst_reason",
+        "case_mismatch:FX-J7:joint_inst_state"
+      ],
+      "exit_code": 1,
+      "caught": true
+    },
+    "M34_bimodality_flag_in_description": {
+      "applied": true,
+      "description": "A1.8 guard: the phrase 'bimodality flag' is inserted into an output description",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "description",
+        "value": "bimodality flag for the LePhare posterior"
+      },
+      "intended_reason": "naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal",
+      "observed_reasons": [
+        "naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal"
       ],
       "exit_code": 1,
       "caught": true

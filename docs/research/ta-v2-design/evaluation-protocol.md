@@ -22,8 +22,14 @@ related_documents:
 
 Preregistered before any implementation, fitting, or outcome computation.
 **No outcome metric is computed in this unit**, and nothing below may be
-read as a result. This protocol distinguishes two surfaces that must never
-share a denominator:
+read as a result. The design-stage data exposure that precedes this
+protocol is disclosed in [exposure-log.md](exposure-log.md) (P2R-06a gate
+A1.1): design was informed by full-catalog summaries containing holdout
+information, so the eventual holdout assessment below is **not an
+untouched test of feature-family selection**, and no claim in this
+protocol asserts an unexposed holdout or zero historical outcome-derived
+exposure. Future parameters are fitted on development only. This protocol
+distinguishes two surfaces that must never share a denominator:
 
 1. **Non-spectroscopic disagreement characterization** (POP-MASS,
    POP-SFR-*): cross-code behaviour over the photometric catalog.
@@ -60,9 +66,23 @@ The implementation unit may compare exactly:
 - mass center: `C0-constant` vs `C1-conditional-binned-median`
   (covariates, binning, support rule, and extrapolation as declared in
   feature-contract.yaml `centers.mass_center`; no other covariate set);
-- SFR centers: `S0-constant` per timescale;
+- SFR centers: `S0-constant` per timecale;
 - scales: the declared quadrature with `sigma_sys_*` set by the
   robust-spread rule on development residuals;
+- joint mass-SFR candidate pair (P2R-06a A1.7, decision 4): for each
+  timescale T, `joint_residual_distance_T` (fitted winsorized covariance
+  `C_b,T`) and `score_joint_T` (fitted correlation `R_b,T` on
+  standardized residuals), both under the
+  `winsorized-median-covariance-v1` estimator with the
+  `joint_rho_clamp` regularization — **declared comparison candidates
+  requiring later adoption (TA2-Q07), not automatic candidate-selection
+  channels**. No combined ranker, maximum, union, quota, selection
+  budget, low-correlation veto or automatic disable exists, and none may
+  be added without a new approval. The marginal surfaces (A1.2/A1.3)
+  are unchanged by the pair's presence. The raw full-catalog
+  correlation in exposure-log CQ5 (about -0.30, uncentered, censored
+  regime included) is neither a parameter nor a bound for anything in
+  this protocol;
 - state-machine constants (`sfr_floor_k = 1.0`, approximation domain 0.3,
   log-domain bounds): **not** choices — they are contract constants whose
   alteration is an approval question (TA2-Q02/Q03), not a tuned
@@ -151,10 +171,42 @@ modelling by default.
 | Sensitivity variants (section 5) | descriptive only |
 | Separate-labelled diagnostics (section 8) | descriptive only |
 | C0 vs C1 center selection (section 2) | **model-affecting** (development fit, validation selection, holdout once) |
+| Joint candidate pair adoption (sections 2, 10) | **approval-gated** (TA2-Q07); criteria predeclared, no automatic selection |
 | `sigma_sys_*` determination | **model-affecting** (development only) |
 | Any state-machine constant | approval-gated, never tuned |
 
-## 10. Holdout freeze checklist (before the single holdout evaluation)
+## 10. Joint-candidate evaluation criteria (predeclared, A1.7)
+
+The joint mass-SFR pair is evaluated on three separated criteria, fully
+specified here before any validation data are read:
+
+1. **Mathematical correctness (synthetic).** Proven by the gate-A1.7
+   kernel checks, estimator fit checks, and evaluator fixtures; already
+   green in `validation-results.json`.
+2. **Stability (development tile jackknife).** For each timescale, the
+   development tiles are dropped one at a time; the reported summaries
+   are the per-tile changes in the fitted cell correlations, the count
+   of cells crossing the clamp or falling to a fallback level, and the
+   fraction of development sources whose support level changes. Tile
+   jackknife estimates are development-only.
+3. **Usefulness (validation-tile description).** On validation tiles,
+   the joint surfaces are described compositionally: what the pair adds
+   beyond the marginal surfaces, including composition by support state,
+   quantile, and floor conditions, and coverage (the fraction of
+   POP-MASS ∩ POP-SFR-T members with a finite surface). Description
+   only; no selection occurs at this level.
+
+No criterion may reward elliptical distance by construction. For any
+top-K overlap description between joint and marginal rankings, K and the
+tie handling (lexicographic by catalog_id) are fixed in the approved
+future protocol before any ranking is viewed; no budget or quota is
+adopted here. Absent spectroscopic survey labels cannot become a
+requirement for the non-spectroscopic sample. Evidence against adoption
+(covariance masking of rare populations living along the fitted major
+axis — fixture KERNEL-3; pooled-correlation distortion — POOLED-1/2) is
+stated for Don's review rather than resolved by an automatic threshold.
+
+## 11. Holdout freeze checklist (before the single holdout evaluation)
 
 1. This protocol and feature-contract.yaml bytes frozen (SHA-256 recorded).
 2. `center_model_id` and `scale_model_id` selected on development and
@@ -165,7 +217,7 @@ modelling by default.
 5. Holdout tiles read once, for the predeclared metric set only; results
    published as-is, including unsupported strata.
 
-## 11. Non-goals
+## 12. Non-goals
 
 No production calibration, database installation, candidate list, release,
 or upstream contact occurs under this protocol; each is a separate named
