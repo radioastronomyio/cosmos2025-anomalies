@@ -232,13 +232,36 @@ broaden scientific authorization.
 
 ### 4.3 sSFR
 
-`delta_ssfr_T_dex` is emitted only when both parent states permit, with the
-algebraic coupling `delta_ssfr = delta_sfr − delta_mass` declared on the
-output and `not_independent_of_mass_and_sfr = true`: sSFR disagreement is
-not an independent confirmation of the same anomaly. The CIGALE log sSFR
-error needs the unknown mass–SFR error correlation, so `score_ssfr_T` is
-`unsupported_correlated_errors` (NULL) on current evidence rather than an
-independence assumption.
+P2R-06a decision 1 (2026-10-16) rebuilt the sSFR surface as a
+**component-built, non-rankable derived view**:
+`delta_ssfr_T_dex = (lephare.sfr_med - lephare.mass_med) -
+(log10(cigale.sfr_T) - log10(cigale.mass))`, equal to
+`delta_sfr_T_dex - delta_mass_dex` **by construction**, and the validator
+now enforces every declared `coupling_expr` numerically at absolute
+tolerance 1e-12 on every fixture where both sides are defined (the
+d4bc1a2 contract declared the coupling while its native-`ssfr_med`
+formula violated it by 0.5 dex on its own FX-06a fixture — R1). The
+view's domain depends on the component fields only, so missing or
+out-of-domain native `lephare.ssfr_med` nulls the context without
+nulling the view. `score_ssfr_T` stays NULL with
+`unsupported_correlated_errors`: the CIGALE log sSFR error needs the
+unknown mass-SFR error correlation, and no independence assumption is
+fabricated. The native field survives only as
+`ctx_lp_ssfr_nonadditivity_dex`, a context-only difference between
+LePhare summary estimators whose interpretation guard states it does not
+establish posterior bimodality, a degenerate fit, or a physical cause.
+That guard is not prose alone: the deterministic counterexample MATH-1
+(independent Exp(1) X and Z with Y = X + Z; joint density exp(-Y) on
+0 <= X <= Y is unimodal and log-concave; median(X) = median(Y - X) =
+ln 2; median(Y) solves exp(-m)(1+m) = 1/2 at m = 1.6783469900166605;
+non-additivity 2*ln2 - m = -0.29205262889677) proves a nonzero median
+non-additivity arises in a provably unimodal distribution, so a nonzero
+value cannot be read as bimodal evidence. The CQ2 catalog sizing of the
+native gap (mean -0.015 dex; 29,190 of 758,304 type-0 sources above
+0.1 dex absolute) is recorded exposure context in the exposure log, not
+a parameter here. `not_independent_of_mass_and_sfr = true` is retained:
+sSFR disagreement is not an independent confirmation of the same
+anomaly.
 
 **Approval.** TA2-Q03.
 

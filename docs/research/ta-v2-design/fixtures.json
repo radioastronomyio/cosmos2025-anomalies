@@ -510,7 +510,7 @@
     },
     {
       "id": "FX-06a",
-      "description": "sSFR delta emitted with declared algebraic coupling to the mass and SFR deltas",
+      "description": "sSFR component view satisfies the declared algebraic coupling at full precision; the LePhare non-additivity context is emitted alongside",
       "scenario": "SYNTH-S0",
       "record": {
         "catalog_id": 900050,
@@ -524,10 +524,11 @@
       },
       "expect": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "delta_mass_dex": 0.0,
         "delta_sfr_100_dex": 0.1989700043360188,
-        "not_independent_of_mass_and_sfr": true
+        "not_independent_of_mass_and_sfr": true,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.5
       }
     },
     {
@@ -546,7 +547,7 @@
       },
       "expect": {
         "ssfr_100_state": "point_valid",
-        "delta_ssfr_100_dex": 0.6989700043360187,
+        "delta_ssfr_100_dex": 0.1989700043360188,
         "score_ssfr_100": null
       }
     },
@@ -1096,6 +1097,93 @@
         "score_sfr_100": -0.27969999459791833,
         "score_sfr_100_state": "point_valid"
       }
+    },
+    {
+      "id": "FX-R1a",
+      "description": "R1: the inst-timescale component view also satisfies the coupling with a nonzero delta_mass; eligibility never touches native ssfr_med",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.3,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "lephare.sfr_l68": 0.45,
+        "lephare.sfr_u68": 0.8
+      },
+      "expect": {
+        "delta_mass_dex": 0.3,
+        "delta_sfr_inst_dex": 0.1989700043360188,
+        "delta_ssfr_inst_dex": -0.10102999566398196,
+        "ssfr_inst_state": "point_valid",
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
+    },
+    {
+      "id": "FX-R1b",
+      "description": "R1: native ssfr_med equal to the component value gives a zero non-additivity context",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": -9.5
+      },
+      "expect": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_nonadditivity_dex": 0.0,
+        "ctx_lp_ssfr_point_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-R1c",
+      "description": "R1: absent native sSFR nulls only the context; the component view survives",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": null
+      },
+      "expect": {
+        "ssfr_100_state": "point_valid",
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "missing",
+        "ctx_lp_ssfr_point_reason": "missing_input",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
+    },
+    {
+      "id": "FX-R1d",
+      "description": "R1: out-of-domain native sSFR nulls only the context; the component view survives",
+      "scenario": "SYNTH-S0",
+      "record": {
+        "catalog_id": 913004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.0,
+        "cigale.mass": 10000000000.0,
+        "lephare.sfr_med": 0.5,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "lephare.ssfr_med": 5.0
+      },
+      "expect": {
+        "delta_ssfr_100_dex": 0.1989700043360188,
+        "ctx_lp_ssfr_point_state": "invalid_or_unsupported",
+        "ctx_lp_ssfr_point_reason": "lephare_value_out_of_domain",
+        "ctx_lp_ssfr_nonadditivity_dex": null
+      }
     }
   ],
   "fit_requests": [
@@ -1377,6 +1465,35 @@
         ]
       },
       "intended_reason": "guard_missing:score_mass:directional_width"
+    },
+    "M19_native_ssfr_reinserted": {
+      "description": "R1 reintroduced: delta_ssfr_100_dex returns to the native ssfr_med formula",
+      "action": {
+        "kind": "set_output_formula",
+        "output": "delta_ssfr_100_dex",
+        "formula": "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+      },
+      "intended_reason": "case_mismatch:FX-06a:delta_ssfr_100_dex"
+    },
+    "M20_false_coupling_declared": {
+      "description": "R1 guard: a scratch contract declares a false algebraic coupling (sum instead of difference)",
+      "action": {
+        "kind": "set_output_coupling",
+        "output": "delta_ssfr_inst_dex",
+        "coupling_expr": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex",
+        "algebraic_coupling": "delta_ssfr_inst_dex == delta_sfr_inst_dex + delta_mass_dex (deliberately false)"
+      },
+      "intended_reason": "algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a"
+    },
+    "M21_ctx_marked_rankable": {
+      "description": "R1 guard: the LePhare non-additivity context is marked rankable",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "rankable",
+        "value": true
+      },
+      "intended_reason": "context_output_rankable:ctx_lp_ssfr_nonadditivity_dex"
     }
   },
   "sigma_sys_solve_checks": [
@@ -1435,6 +1552,19 @@
         "state": "invalid_or_unsupported",
         "reason": "zero_residual_spread",
         "value": null
+      }
+    }
+  ],
+  "mathematical_counterexamples": [
+    {
+      "id": "MATH-1",
+      "description": "Deterministic counterexample to 'median non-additivity implies bimodality': X, Z independent Exp(1), Y = X + Z has joint density exp(-Y) on 0 <= X <= Y, which is unimodal (log-concave); median(X) = median(Y - X) = ln 2; median(Y) = m solves exp(-m)(1+m) = 1/2; the non-additivity 2*ln2 - m is nonzero. Synthetic mathematical illustration, not a model of LePhare's posterior; no sampled data is used.",
+      "median_x": 0.6931471805599453,
+      "median_y": 1.6783469900166605,
+      "expected_nonadditivity": -0.29205262889677,
+      "checks": {
+        "median_y_greater_than_median_x": true,
+        "approx_value": -0.29205
       }
     }
   ]

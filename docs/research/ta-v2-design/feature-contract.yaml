@@ -180,20 +180,24 @@ state_machines:
           when: "(cigale.sfr_100myr_err / cigale.sfr_100myr) > 0.3"}
       - {state: point_valid, reason: none, when: "true"}
 
-  ssfr_inst_point:
+  ssfr_inst_view:
     precondition: mass_point_state == point_valid AND sfr_inst_state == point_comparable
     rules:
-      - {state: missing, reason: missing_input, when: "is_null(lephare.ssfr_med)"}
-      - {state: invalid_or_unsupported, reason: lephare_value_out_of_domain,
-         when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0"}
       - {state: point_valid, reason: none, when: "true"}
+    note: component view gate - the domain depends on the component fields, never on native lephare.ssfr_med
 
-  ssfr_100_point:
+  ssfr_100_view:
     precondition: mass_point_state == point_valid AND sfr_100_state == point_comparable
     rules:
-      - {state: missing, reason: missing_input, when: "is_null(lephare.ssfr_med)"}
+      - {state: point_valid, reason: none, when: "true"}
+    note: same component gate for the 100 Myr view
+
+  ctx_lp_ssfr_point:
+    rules:
+      - {state: missing, reason: missing_input,
+          when: "is_null(lephare.ssfr_med) OR is_null(lephare.sfr_med) OR is_null(lephare.mass_med)"}
       - {state: invalid_or_unsupported, reason: lephare_value_out_of_domain,
-         when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0"}
+          when: "lephare.ssfr_med < -20.0 OR lephare.ssfr_med > 0.0 OR lephare.sfr_med < -20.0 OR lephare.sfr_med > 15.0 OR lephare.mass_med < -20.0 OR lephare.mass_med > 15.0"}
       - {state: point_valid, reason: none, when: "true"}
 
 centers:
@@ -478,31 +482,57 @@ outputs:
       units; until then these paths are unscored/context-only and TA2-Q03
       asks Don whether that reduced scope is acceptable.
 
-  # sSFR blocks
-  - {name: ssfr_inst_state, kind: state, from: ssfr_inst_point, rankable: false}
-  - {name: ssfr_100_state, kind: state, from: ssfr_100_point, rankable: false}
+  # sSFR component views (derived, non-rankable; decision 1, P2R-06a R1)
+  - {name: ssfr_inst_state, kind: state, from: ssfr_inst_view, rankable: false}
+  - {name: ssfr_100_state, kind: state, from: ssfr_100_view, rankable: false}
   - name: delta_ssfr_inst_dex
-    kind: raw_disagreement
-    formula: "lephare.ssfr_med - (log10(cigale.sfr_inst) - log10(cigale.mass))"
+    kind: derived_view
+    formula: "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_inst) - log10(cigale.mass))"
+    coupling_expr: "delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex"
     units: dex
     sign: positive means LePhare reports the larger sSFR
-    domain: emitted exactly when ssfr_inst_state == point_valid
-    rankable: true
-    algebraic_coupling: "delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex whenever both sides are defined; declared, not hidden"
+    domain: emitted exactly when ssfr_inst_state == point_valid (both parent raw-delta states permit); its domain depends on the component fields, never on native lephare.ssfr_med
+    rankable: false
+    algebraic_coupling: >-
+      delta_ssfr_inst_dex == delta_sfr_inst_dex - delta_mass_dex by
+      construction; checked numerically at absolute tolerance 1e-12 on every
+      fixture where both sides are defined. A failing declared identity is a
+      validation failure.
   - name: delta_ssfr_100_dex
-    kind: raw_disagreement
-    formula: "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+    kind: derived_view
+    formula: "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_100myr) - log10(cigale.mass))"
+    coupling_expr: "delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex"
     units: dex
     sign: positive means LePhare reports the larger sSFR
-    domain: emitted exactly when ssfr_100_state == point_valid
-    rankable: true
-    algebraic_coupling: "delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex whenever both sides are defined"
+    domain: emitted exactly when ssfr_100_state == point_valid; component fields only, never native lephare.ssfr_med
+    rankable: false
+    algebraic_coupling: >-
+      delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex by
+      construction; checked numerically at absolute tolerance 1e-12 on every
+      fixture where both sides are defined.
   - {name: not_independent_of_mass_and_sfr, kind: constant_caveat, value: true, rankable: false,
-     note: sSFR disagreement is NOT an independent confirmation of the same anomaly}
+      note: sSFR disagreement is NOT an independent confirmation of the same anomaly}
+  - name: ctx_lp_ssfr_nonadditivity_dex
+    kind: context_derived
+    formula: "lephare.ssfr_med - (lephare.sfr_med - lephare.mass_med)"
+    units: dex
+    description: "difference between LePhare summary estimators: the native sSFR median versus the component sfr_med minus mass_med"
+    context_only: true
+    rankable: false
+    permitted_predictor: false
+    domain: emitted exactly when ctx_lp_ssfr_point_state == point_valid; missing or out-of-domain native sSFR nulls this context field without nulling the component views
+    interpretation_guard: >-
+      Does not establish posterior bimodality, a degenerate fit, or a
+      physical cause. It is a difference between LePhare summary estimators;
+      a deterministic unimodal counterexample (independent Exp(1) variables,
+      fixture MATH-1) produces a nonzero median non-additivity of about
+      -0.29205, so a nonzero value cannot be read as bimodal evidence.
+  - {name: ctx_lp_ssfr_point_state, kind: state, from: ctx_lp_ssfr_point, rankable: false}
+  - {name: ctx_lp_ssfr_point_reason, kind: reason, rankable: false}
   - {name: score_ssfr_inst, kind: unsupported_output, state: unsupported_correlated_errors,
-     behaviour: NULL on current evidence; the CIGALE log sSFR error needs the unknown mass-SFR error correlation; no independence assumption is fabricated}
+      behaviour: NULL on current evidence; the CIGALE log sSFR error needs the unknown mass-SFR error correlation; no independence assumption is fabricated}
   - {name: score_ssfr_100, kind: unsupported_output, state: unsupported_correlated_errors,
-     behaviour: same as score_ssfr_inst}
+      behaviour: same as score_ssfr_inst}
 
   # fit-quality context block (context only; never predictors, never ranked)
   - {name: ctx_chi2_lephare_total, kind: context_passthrough, source: lephare.chi2_best,
@@ -533,7 +563,9 @@ forbidden_dependencies:
   - {id: no-positivity-master-sample,
      description: "POP-MASS requires no SFR state; SFR populations are defined by state machines, not by silently dropping undefined rows"}
   - {id: no-universal-hidden-shift,
-     description: "no universal constant subtracted inside raw delta outputs; centering exists only through expected_delta/residual outputs"}
+      description: "no universal constant subtracted inside raw delta outputs; centering exists only through expected_delta/residual outputs"}
+  - {id: no-native-ssfr-in-rankable,
+      description: "lephare.ssfr_med appears in no rankable output and no raw_disagreement or derived_view formula; it exists only in the context field ctx_lp_ssfr_nonadditivity_dex and its point machine"}
 
 partition_use:
   source: "analysis.specz_p2r05_splits.assigned_split under run 1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c"

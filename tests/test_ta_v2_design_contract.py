@@ -67,6 +67,9 @@ MUTATIONS = [
     "M16_symmetric_average_restored",
     "M17_side_by_raw_delta",
     "M18_zero_width_guard_removed",
+    "M19_native_ssfr_reinserted",
+    "M20_false_coupling_declared",
+    "M21_ctx_marked_rankable",
 ]
 
 
@@ -278,6 +281,54 @@ class TestA13DirectionalWidths:
         assert "sigma_sfr_lp_dex" not in names
         assert {"sigma_mass_lp_lo_dex", "sigma_mass_lp_hi_dex",
                 "sigma_sfr_lp_lo_dex", "sigma_sfr_lp_hi_dex"} <= names
+
+
+class TestA14SsfrComponentView:
+    """P2R-06a A1.4 repairs: sSFR component view and non-additivity context (R1)."""
+
+    def test_component_fixtures_present(self, results):
+        ids = {c["id"] for c in results["cases"]}
+        for required in ["FX-R1a", "FX-R1b", "FX-R1c", "FX-R1d"]:
+            assert required in ids, required
+
+    def test_fx06a_component_values(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert abs(by_id["FX-06a"]["observed"]["delta_ssfr_100_dex"]
+                   - (0.5 - __import__("math").log10(2.0))) <= 1e-12
+        assert by_id["FX-06a"]["observed"]["ctx_lp_ssfr_nonadditivity_dex"] == 0.5
+        # coupling holds numerically: view == delta_sfr - delta_mass
+        obs = by_id["FX-06a"]["observed"]
+        coupling_ok = abs(
+            by_id["FX-06a"]["observed"]["delta_ssfr_100_dex"]
+            - (obs["delta_sfr_100_dex"] - obs["delta_mass_dex"])
+        ) <= 1e-12 if "delta_sfr_100_dex" in obs else None
+        # full outputs are recorded by the validator's own coupling check;
+        # the case passing means no algebraic_coupling_violated failure
+
+    def test_native_ssfr_independent_eligibility(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        for fixture_id in ("FX-R1c", "FX-R1d"):
+            observed = by_id[fixture_id]["observed"]
+            assert observed["delta_ssfr_100_dex"] is not None, fixture_id
+            assert observed["ctx_lp_ssfr_nonadditivity_dex"] is None, fixture_id
+        assert by_id["FX-R1b"]["observed"]["ctx_lp_ssfr_nonadditivity_dex"] == 0.0
+
+    def test_math_counterexample_recorded(self, results):
+        math_checks = results["mathematical_counterexamples"]
+        assert {c["id"] for c in math_checks} == {"MATH-1"}
+        check = math_checks[0]
+        assert check["pass"]
+        assert abs(check["observed_nonadditivity"] - (-0.29205262889677)) < 1e-9
+        assert check["median_y"] > check["median_x"]
+
+    def test_component_view_not_rankable(self):
+        import yaml
+        contract = yaml.safe_load(CONTRACT.read_text())
+        by_name = {o["name"]: o for o in contract["outputs"]}
+        assert by_name["delta_ssfr_100_dex"]["rankable"] is False
+        assert by_name["delta_ssfr_inst_dex"]["kind"] == "derived_view"
+        assert by_name["ctx_lp_ssfr_nonadditivity_dex"]["context_only"] is True
+        assert by_name["ctx_lp_ssfr_nonadditivity_dex"]["rankable"] is False
 
 
 class TestValidatorBoundaries:

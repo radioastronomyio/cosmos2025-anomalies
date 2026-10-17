@@ -316,3 +316,75 @@ Full run: cases 51/51, fit requests 4/4, sigma_sys checks 3/3, mutations
 caught 18/18, exit 0. `pytest`: 46/46 passed.
 
 Gate A1.3 checkpoint: this commit.
+
+## Gate A1.4: sSFR component view and non-additivity context (R1; decision 1)
+
+Old-behaviour evidence (adapter
+`staging/2026-10-16-p2r06a-execution/regression/adapter_a14_r1.py`): on
+the unchanged FX-06a record d4bc1a2 emits
+`delta_ssfr_100_dex = 0.6989700043360187` while its own declared coupling
+`delta_ssfr_100_dex == delta_sfr_100_dex - delta_mass_dex` requires
+`0.1989700043360188`; gap `0.49999999999999994` dex, and no check
+enforced the coupling. After repair the same record gives
+`0.1989700043360188` (== `0.5 - log10(2)`, matching the coupling to
+<= 1e-12) plus `ctx_lp_ssfr_nonadditivity_dex = 0.5` (= -9.0 - (0.5 -
+10.0)), with `score_ssfr_100` still NULL.
+
+Repairs:
+
+- `feature-contract.yaml`: `delta_ssfr_T_dex` rewritten to the component
+  formula `(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_T) -
+  log10(cigale.mass))`, kind `derived_view`, `rankable: false`, emitted on
+  the parent raw-delta states (`ssfr_inst_view`/`ssfr_100_view` machines
+  replace the native-sSFR-keyed gates); machine-readable `coupling_expr`
+  per view; new context output `ctx_lp_ssfr_nonadditivity_dex`
+  (`context_only`, never a predictor/ranking input, description states it
+  is a difference between LePhare summary estimators, interpretation guard
+  denies bimodality/degenerate-fit/physical-cause claims) with its own
+  `ctx_lp_ssfr_point` machine; `pop_ssfr_*` driven by parent states;
+  forbidden dependency `no-native-ssfr-in-rankable`.
+- `validate_ta_v2_design.py`: `check_algebraic_couplings` evaluates every
+  declared `coupling_expr` on every fixture where both sides are defined at
+  absolute tolerance 1e-12 (split at the `==` node; exact-equality or
+  numeric tolerance); `run_math_counterexamples` implements MATH-1
+  (bisection solve of exp(-m)(1+m) = 1/2; median non-additivity
+  2*ln2 - m = -0.29205262889677 for the unimodal log-concave Exp(1)
+  construction); structural checks `context_output_rankable`,
+  `native_ssfr_in_rankable_formula`, `native_ssfr_in_delta_formula`;
+  CANONICAL_DELTA_FORMULAS updated to the component formulas; mutation
+  kinds `set_output_coupling`, `set_output_field`.
+- `fixtures.json`: FX-06a/FX-06b expectations rewritten to the component
+  values; FX-R1a (inst view with nonzero delta_mass: view = -0.10102999566398196
+  = 0.1989700043360188 - 0.3, discriminating the false-coupling mutation),
+  FX-R1b (native equals component → context 0), FX-R1c (absent native →
+  context NULL, view survives), FX-R1d (out-of-domain native → same);
+  MATH-1 counterexample (m = 1.6783469900166605, non-additivity
+  -0.29205262889677, analytic, no sampled data); mutations M19
+  (native formula reinserted), M20 (false coupling: sum instead of
+  difference, caught on FX-R1a), M21 (ctx marked rankable).
+- `input-contract.md`: row-7 semantics note — the component view and the
+  context-only role of `lephare.ssfr_med`, with the MATH-1 result inline.
+- `scientific-design.md` section 4.3 rewritten: rationale, the enforced
+  coupling, the context field's guard, the deterministic unimodal
+  counterexample, and the CQ2 exposure-context qualifier.
+- `tests/test_ta_v2_design_contract.py`: `TestA14SsfrComponentView`
+  (5 tests) + MUTATIONS extended to M21.
+
+Validation (gate A1.4 checklist):
+
+- [x] The rewritten FX-06a passes at full precision; the original
+  native-sSFR formula on the unchanged record violates the coupling
+  numerically (adapter: gap 0.5 dex on d4bc1a2 outputs); the repaired
+  component formula agrees to 1e-12. Both timescales tested (FX-R1a inst;
+  FX-06a/b 100) and native-sSFR-independent eligibility (FX-R1c/d).
+- [x] Mutations caught: native `ssfr_med` reinserted (M19 →
+  case_mismatch:FX-06a:delta_ssfr_100_dex, plus
+  delta_formula_identity and native_ssfr_in_delta_formula); false
+  coupling declared (M20 → algebraic_coupling_violated:delta_ssfr_inst_dex:FX-R1a);
+  ctx marked rankable (M21 → context_output_rankable:ctx_lp_ssfr_nonadditivity_dex).
+
+Full run: cases 55/55, fit requests 4/4, sigma_sys checks 3/3, math
+counterexamples 1/1, mutations caught 21/21, exit 0. `pytest`: 54/54
+passed.
+
+Gate A1.4 checkpoint: this commit.

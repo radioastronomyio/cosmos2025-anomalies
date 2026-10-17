@@ -71,8 +71,8 @@ CANONICAL_DELTA_FORMULAS = {
     "delta_mass_dex": "lephare.mass_med - log10(cigale.mass)",
     "delta_sfr_inst_dex": "lephare.sfr_med - log10(cigale.sfr_inst)",
     "delta_sfr_100_dex": "lephare.sfr_med - log10(cigale.sfr_100myr)",
-    "delta_ssfr_inst_dex": "lephare.ssfr_med - (log10(cigale.sfr_inst) - log10(cigale.mass))",
-    "delta_ssfr_100_dex": "lephare.ssfr_med - (log10(cigale.sfr_100myr) - log10(cigale.mass))",
+    "delta_ssfr_inst_dex": "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_inst) - log10(cigale.mass))",
+    "delta_ssfr_100_dex": "(lephare.sfr_med - lephare.mass_med) - (log10(cigale.sfr_100myr) - log10(cigale.mass))",
 }
 
 CHI2_IDENTIFIERS = {"lephare.chi2_best", "cigale.chi2_best_fit", "cigale.chi2_red_best_fit"}
@@ -85,6 +85,7 @@ REQUIRED_SFR_STATES = {
     "invalid_or_unsupported",
 }
 FIT_REQUEST_RULE_SUBSTRING = "validation or holdout catalog_id is rejected"
+ALGEBRAIC_COUPLING_TOLERANCE = 1e-12
 NUMERIC_TOLERANCE = 1e-9
 
 # =============================================================================
@@ -722,17 +723,25 @@ def evaluate_case(contract, case, scenarios):
             outputs[f"{score_name}_state"] = score_state
             outputs[f"{score_name}_reason"] = score_reason
 
-    for machine, state_name, reason_name, delta_name, formula_key in [
-        ("ssfr_inst_point", "ssfr_inst_state", "ssfr_inst_reason", "delta_ssfr_inst_dex", "delta_ssfr_inst_dex"),
-        ("ssfr_100_point", "ssfr_100_state", "ssfr_100_reason", "delta_ssfr_100_dex", "delta_ssfr_100_dex"),
+    for machine, state_name, reason_name, delta_name in [
+        ("ssfr_inst_view", "ssfr_inst_state", "ssfr_inst_reason", "delta_ssfr_inst_dex"),
+        ("ssfr_100_view", "ssfr_100_state", "ssfr_100_reason", "delta_ssfr_100_dex"),
     ]:
         state, _ = run_machine(machine, state_name, reason_name)
         outputs[delta_name] = (
-            eval_formula(declared_formulas[formula_key]) if state == "point_valid" else None
+            eval_formula(declared_formulas[delta_name]) if state == "point_valid" else None
         )
     outputs["pop_ssfr_inst"] = bool(outputs["selection_type0"] and outputs["ssfr_inst_state"] == "point_valid")
     outputs["pop_ssfr_100"] = bool(outputs["selection_type0"] and outputs["ssfr_100_state"] == "point_valid")
     outputs["not_independent_of_mass_and_sfr"] = True
+
+    run_machine("ctx_lp_ssfr_point", "ctx_lp_ssfr_point_state", "ctx_lp_ssfr_point_reason")
+    ctx_decl = output_decl(contract, "ctx_lp_ssfr_nonadditivity_dex") or {}
+    outputs["ctx_lp_ssfr_nonadditivity_dex"] = (
+        eval_formula(ctx_decl.get("formula", "lephare.ssfr_med - (lephare.sfr_med - lephare.mass_med)"))
+        if outputs["ctx_lp_ssfr_point_state"] == "point_valid"
+        else None
+    )
     # AI NOTE: the sSFR score is unsupported by declared evidence (unknown
     # mass-SFR error correlation); it stays NULL rather than assuming
     # independence, per the contract's unsupported_correlated_errors state.
@@ -872,6 +881,99 @@ def check_fit_requests(fixtures):
 # =============================================================================
 
 
+def run_math_counterexamples(fixtures):
+    """Check the declared deterministic mathematical counterexamples (A1.4).
+
+    MATH-1 solves the median of Y = X + Z for independent Exp(1) X, Z by
+    bisection (exp(-m)(1+m) = 1/2) and verifies the median non-additivity
+    2*ln2 - m against the declared expected value: a provably unimodal
+    (log-concave) distribution with nonzero median non-additivity. No
+    sampled data is involved; the check is analytic and deterministic.
+    """
+    import math
+
+    results = []
+    failures = []
+    for check in fixtures.get("mathematical_counterexamples", []):
+        if check["id"] != "MATH-1":
+            continue
+        low, high = 0.0, 5.0
+        f = lambda m: math.exp(-m) * (1.0 + m) - 0.5  # noqa: E731
+        for _ in range(200):
+            mid = (low + high) / 2.0
+            if f(mid) > 0:
+                low = mid
+            else:
+                high = mid
+        median_y = (low + high) / 2.0
+        median_x = math.log(2.0)
+        observed = 2.0 * median_x - median_y
+        expected = check["expected_nonadditivity"]
+        ok = (
+            abs(observed - expected) <= 1e-9
+            and median_y > median_x
+            and abs(observed - check["checks"]["approx_value"]) < 1e-4
+        )
+        if not ok:
+            failures.append(f"math_counterexample:{check['id']}")
+        results.append({
+            "id": check["id"], "description": check["description"],
+            "expected_nonadditivity": expected, "observed_nonadditivity": observed,
+            "median_y": median_y, "median_x": median_x, "pass": ok,
+        })
+    return failures, results
+
+
+def check_algebraic_couplings(contract, outputs, case_id):
+    """Numerically enforce every declared algebraic coupling (A1.4, R1).
+
+    Each output carrying ``coupling_expr`` has that expression evaluated
+    against the computed outputs; where both sides are defined the identity
+    must hold to absolute tolerance 1e-12 on full-precision values. A
+    declared identity that fails is a validation failure, never prose.
+    """
+    failures = []
+
+    def resolver(name):
+        return outputs.get(name)
+
+    for output in contract["outputs"]:
+        expression = output.get("coupling_expr")
+        if not expression:
+            continue
+        try:
+            tree = parse_expression(expression)
+        except ExpressionError as exc:
+            failures.append(f"coupling_unparsable:{output['name']}:{exc}")
+            continue
+        if not isinstance(tree, tuple) or tree[0] != "cmp" or tree[1] != "==":
+            failures.append(f"coupling_malformed:{output['name']}")
+            continue
+        identifiers = collect_identifiers(tree, set())
+        if any(outputs.get(name) is None for name in identifiers):
+            continue  # checked only where both sides are defined
+        try:
+            left = eval_node(tree[2], resolver)
+            right = eval_node(tree[3], resolver)
+        except ExpressionError:
+            left = right = None
+        held = (
+            left is not None
+            and right is not None
+            and (
+                left == right
+                or (
+                    isinstance(left, (int, float))
+                    and isinstance(right, (int, float))
+                    and abs(left - right) <= ALGEBRAIC_COUPLING_TOLERANCE
+                )
+            )
+        )
+        if not held:
+            failures.append(f"algebraic_coupling_violated:{output['name']}:{case_id}")
+    return failures
+
+
 def pop_mass_consistency(contract):
     """Compare the POP-MASS predicate and echo against input-contract.md (P2R-06a R3).
 
@@ -952,6 +1054,28 @@ def structural_checks(contract, fixtures):
         if output.get("kind") in ("uncertainty",) and output["name"].startswith("sigma_"):
             if "_lp_dex" in output["name"]:
                 failures.append(f"symmetric_lp_output_present:{output['name']}")
+        # P2R-06a A1.4: context outputs are never rankable, and native
+        # lephare.ssfr_med appears in no rankable output and no
+        # raw_disagreement/derived_view formula.
+        if output.get("context_only") and output.get("rankable") is not False:
+            failures.append(f"context_output_rankable:{output['name']}")
+        if output.get("rankable") is True or output.get("rankable") in ("primary", "secondary"):
+            identifiers = set()
+            if output.get("formula"):
+                try:
+                    collect_identifiers(parse_expression(output["formula"]), identifiers)
+                except ExpressionError:
+                    identifiers = set()
+            if "lephare.ssfr_med" in identifiers:
+                failures.append(f"native_ssfr_in_rankable_formula:{output['name']}")
+        if output.get("kind") in ("raw_disagreement", "derived_view") and output.get("formula"):
+            identifiers = set()
+            try:
+                collect_identifiers(parse_expression(output["formula"]), identifiers)
+            except ExpressionError:
+                identifiers = set()
+            if "lephare.ssfr_med" in identifiers:
+                failures.append(f"native_ssfr_in_delta_formula:{output['name']}")
 
     failures.extend(pop_mass_consistency(contract))
 
@@ -1092,6 +1216,17 @@ def apply_mutation(contract, identity, action):
                 output["guards"] = list(action["guards"])
     elif kind == "edit_scales_policy":
         contract["scales"][action["scale"]]["width_selection"]["policy"] = action["policy"]
+    elif kind == "set_output_coupling":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output["coupling_expr"] = action["coupling_expr"]
+                output["algebraic_coupling"] = action.get(
+                    "algebraic_coupling", output.get("algebraic_coupling")
+                )
+    elif kind == "set_output_field":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output[action["field"]] = action["value"]
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 
@@ -1114,6 +1249,7 @@ def run_validation(contract, fixtures, identity, paths):
         mismatches = compare_expected(case, outputs)
         for key in mismatches:
             failures.append(f"case_mismatch:{case['id']}:{key}")
+        failures.extend(check_algebraic_couplings(contract, outputs, case["id"]))
         observed = {key: outputs.get(key) for key in case["expect"]}
         case_results.append(
             {"id": case["id"], "description": case["description"], "expected": case["expect"],
@@ -1146,9 +1282,11 @@ def run_validation(contract, fixtures, identity, paths):
             {"id": check["id"], "description": check["description"],
              "expected": expected, "observed": outcome, "pass": ok}
         )
+    math_failures, math_results = run_math_counterexamples(fixtures)
+    failures.extend(math_failures)
     failures.extend(structural_checks(contract, fixtures))
     failures.extend(identity_checks(identity, *paths))
-    return failures, case_results, fit_results, solve_results
+    return failures, case_results, fit_results, solve_results, math_results
 
 
 # =============================================================================
@@ -1198,7 +1336,7 @@ def main(argv=None):
             mutated_identity = copy.deepcopy(identity)
             apply_mutation(mutated_contract, mutated_identity, record["action"])
             action, description, intended = record["action"], record["description"], record["intended_reason"]
-        failures, case_results, fit_results, solve_results = run_validation(
+        failures, case_results, fit_results, solve_results, math_results = run_validation(
             mutated_contract, fixtures, mutated_identity,
             (contract_path, fixtures_path, identity_path),
         )
@@ -1223,7 +1361,7 @@ def main(argv=None):
                 print("  no invariant failed (mutation not caught)")
             return exit_code
 
-    failures, case_results, fit_results, solve_results = run_validation(
+    failures, case_results, fit_results, solve_results, math_results = run_validation(
         contract, fixtures, identity, (contract_path, fixtures_path, identity_path)
     )
     exit_code = 1 if failures else 0
@@ -1255,6 +1393,7 @@ def main(argv=None):
         "cases": case_results,
         "fit_requests": fit_results,
         "sigma_sys_solve_checks": solve_results,
+        "mathematical_counterexamples": math_results,
         "mutations": mutation_records,
         "failures": sorted(set(failures)),
     }
