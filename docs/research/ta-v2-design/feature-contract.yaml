@@ -50,6 +50,19 @@ declared_constants:
   - {name: sigma_sys_max_iterations, value: 200, kind: declared_domain}
   - {name: sigma_sys_search_upper_dex, value: 10.0, kind: declared_domain}
   - {name: sigma_sys_interval_tolerance, value: 1.0e-12, kind: declared_domain}
+  - name: forced_highz_edge
+    value: 5.5
+    kind: declared_domain
+    rationale: >-
+      Coordinator-reported prior finding (2026-07-10 v1 baseline and
+      2026-09-01 sessions, exposure-log.md sections 1.2-1.3; Appendix B of
+      the amendment spec): the conditional mass-disagreement trend reverses
+      above z of about 5.5. This is an approved proposal resting on a
+      labelled prior finding NOT reproduced in this unit; it is not
+      evidence of a physical discontinuity and not a guarantee of adequate
+      resolution at the boundary. The trend was observed against mean mass,
+      not the permitted brightness covariate. Additional fixed edges
+      require a later named change, not builder discretion.
 
 states_vocabulary:
   [point_comparable, point_valid, upper_limit_supported, floor_or_censoring_suspected,
@@ -212,11 +225,35 @@ centers:
       - id: C1-conditional-binned-median
         family: one declared conditional center
         covariates: [lephare.zpdf_med, photometry_primary.mag_auto_f444w]
-        binning: quantile bin edges computed on development-tile POP-MASS members only; z bins 6, magnitude bins 5
-        cell_estimator: median (L1) of delta_mass_dex within cell
-        support_rule: "cell support >= center_min_cell_support, else shrink to z-only cell (same threshold), else global constant"
-        extrapolation: "covariate missing or outside the development outer edges -> global constant with center_support = out_of_hull"
-        parameters: [z_bin_edges, mag_bin_edges, cell_values, z_only_values, global_constant]
+        z_quantile_bins: 6
+        mag_quantile_bins: 5
+        quantile_method: >-
+          Deterministic linear-interpolation quantiles on the development
+          rows (sorted values, h = (n-1)*q, floor/interpolate); even-count
+          medians average the two middle order statistics.
+        edge_conventions: >-
+          Edges collapse when duplicates occur and the effective bin count
+          is recorded. The forced edge forced_highz_edge is inserted only
+          when strictly inside the development support interval; the hull
+          is never extended and no empty support is manufactured beyond
+          it. Bins are left-closed/right-open except that the final
+          endpoint is included, so z = 5.5 belongs to the upper bin and no
+          resulting cell straddles 5.5. Missing or non-finite covariates
+          are unsupported (out_of_hull with the global-center fallback).
+        binning_fit_data: [development]
+        cell_estimator: median (L1) of delta_mass_dex within cell, over unique eligible source IDs
+        support_enforcement: center_min_cell_support
+        support_rule: >-
+          A cell whose unique-source support count is at or above
+          center_min_cell_support gives cell; otherwise a z-only cell at or
+          above it gives z_fallback; otherwise global_fallback. Duplicated
+          rows do not manufacture support. The requested cell and the
+          fallback actually used are both recorded (center_requested_cell,
+          center_support). Global fallback does not preserve local
+          high-redshift structure, and no test or review claim may say
+          otherwise.
+        extrapolation: "covariate missing, non-finite, or outside the development outer edges -> global constant with center_support = out_of_hull"
+        parameters: [z_bin_edges, mag_bin_edges, cell_values, z_only_values, global_constant, support_counts, z_only_support_counts, forced_edge_inserted, effective_z_bins, effective_mag_bins]
         fit_data: [development]
     recommended: C1-conditional-binned-median
     permitted_covariates:
@@ -242,7 +279,7 @@ centers:
       ~0.24 dex conditional offset motivates a conditional expectation
       model; it is not a globally mandated subtraction, its magnitude fixes
       no universal sign, and it is not a correction to true mass.
-    outputs: [expected_delta_mass_dex, center_model_id, center_support]
+    outputs: [expected_delta_mass_dex, center_model_id, center_support, center_requested_cell]
     center_support_domain: [cell, z_fallback, global_fallback, out_of_hull]
 
   sfr_center:
@@ -359,9 +396,11 @@ outputs:
     fit_permission: no data fits this output
     hidden_shift_guard: this output equals its declared formula on every record; any constant subtraction baked into the raw delta is a contract violation
   - {name: expected_delta_mass_dex, kind: center_output, from: centers.mass_center,
-     units: dex, rankable: false, fit_permission: development only}
+      units: dex, rankable: false, fit_permission: development only}
   - {name: center_support, kind: support_flag,
-     domain: [cell, z_fallback, global_fallback, out_of_hull], rankable: false}
+      domain: [cell, z_fallback, global_fallback, out_of_hull], rankable: false}
+  - {name: center_requested_cell, kind: support_flag, rankable: false,
+      note: "the z|mag cell requested before fallback resolution; the fallback actually used is center_support"}
   - name: residual_mass_dex
     kind: centered_residual
     formula: "delta_mass_dex - expected_delta_mass_dex"

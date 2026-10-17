@@ -70,6 +70,8 @@ MUTATIONS = [
     "M19_native_ssfr_reinserted",
     "M20_false_coupling_declared",
     "M21_ctx_marked_rankable",
+    "M22_support_counts_ignored",
+    "M23_forced_edge_removed",
 ]
 
 
@@ -329,6 +331,66 @@ class TestA14SsfrComponentView:
         assert by_name["delta_ssfr_inst_dex"]["kind"] == "derived_view"
         assert by_name["ctx_lp_ssfr_nonadditivity_dex"]["context_only"] is True
         assert by_name["ctx_lp_ssfr_nonadditivity_dex"]["rankable"] is False
+
+
+class TestA15BinningAndSupport:
+    """P2R-06a A1.5 repairs: C1 binning rule and center support (R7, decision 3)."""
+
+    def test_support_fixtures_present(self, results):
+        ids = {c["id"] for c in results["cases"]}
+        for required in [
+            "FX-R7a", "FX-R7b", "FX-R7c", "FX-R7d", "FX-R7e",
+            "FX-R7g", "FX-R7h", "FX-R7i", "FX-R7j",
+        ]:
+            assert required in ids, required
+
+    def test_support_boundary_hierarchy(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        assert by_id["FX-R7a"]["observed"]["center_support"] == "cell"
+        assert by_id["FX-R7b"]["observed"]["center_support"] == "z_fallback"
+        assert by_id["FX-R7b"]["observed"]["center_requested_cell"] == "0|1"
+        assert by_id["FX-R7c"]["observed"]["center_support"] == "global_fallback"
+        assert by_id["FX-R7c"]["observed"]["center_requested_cell"] == "1|0"
+
+    def test_slope_reversal_demonstration(self, results):
+        demos = results["binning_demonstrations"]
+        assert {d["id"] for d in demos} == {"DEMO-SLOPE"}
+        demo = demos[0]
+        assert demo["pass"]
+        assert demo["max_abs_residual_with_edge"] <= demo["tolerance"]
+        assert demo["min_abs_residual_without_edge"] > demo["tolerance"]
+
+    def test_forced_edge_split_and_conventions(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        # z exactly 5.5 lands in the upper bin, never straddling the edge
+        assert by_id["FX-R7h"]["observed"]["center_requested_cell"] == "6|2"
+        assert by_id["FX-R7h"]["observed"]["center_support"] == "cell"
+        # the maximum development endpoint is inside the hull
+        assert by_id["FX-R7i"]["observed"]["center_requested_cell"] == "6|1"
+        assert by_id["FX-R7i"]["observed"]["center_support"] == "cell"
+        # sparse high-redshift support falls back with a retained bias
+        assert by_id["FX-R7g"]["observed"]["center_support"] == "z_fallback"
+        assert abs(by_id["FX-R7g"]["observed"]["residual_mass_dex"] - 0.024) < 1e-9
+
+    def test_construction_partition_guards_apply(self):
+        """The synthetic center fitter enforces the partition guards."""
+        import sys
+        sys.path.insert(0, str(REPO_ROOT / "src" / "inspection"))
+        import validate_ta_v2_design as validator
+        import yaml
+        contract = yaml.safe_load(CONTRACT.read_text())
+        rows = [{"catalog_id": 1, "lephare.zpdf_med": 0.5,
+                 "photometry_primary.mag_auto_f444w": 24.0, "delta_mass_dex": 0.2}]
+        reasons = validator.partition_guard(rows, [])
+        assert any("unassigned_partition" in r for r in reasons)
+        reasons = validator.partition_guard(
+            rows, [{"catalog_id": 1, "split": "validation"}]
+        )
+        assert any("validation or holdout" in r for r in reasons)
+        reasons = validator.partition_guard(
+            rows + [dict(rows[0])], [{"catalog_id": 1, "split": "development"}]
+        )
+        assert any("duplicate training rows" in r for r in reasons)
 
 
 class TestValidatorBoundaries:

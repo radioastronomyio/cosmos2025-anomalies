@@ -1,7 +1,7 @@
 <!--
 ---
 title: "T_A v2 Exposure Log"
-description: "Design-stage data-exposure record for the proposed T_A v2 design: pre-partition diagnostics history, the 2026-10-16 coordinator queries transcribed verbatim, and the prospective development-only query rule (P2R-06a gate A1.1)"
+description: "Design-stage data-exposure record for the proposed T_A v2 design: pre-partition diagnostics history, the 2026-10-16 coordinator queries transcribed verbatim, the prospective development-only query rule, and the single A1.5 development-only support count (P2R-06a gates A1.1/A1.5)"
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-10-16"
 version: "1.0"
@@ -286,7 +286,82 @@ reviewers and executors from the adoption of this record forward.
    permitted database read is the optional A1.5 development-only support
    count under its stated constraints.
 
-## 4. Consequences recorded elsewhere
+## 4. A1.5 optional development-only support count (executed once)
+
+The single database read P2R-06a authorizes was executed on 2026-10-16 by
+the amendment executor through the analyst handoff
+(`internal-files/cosmos2025-v11.env`, role `cosmos2025_v11_ro`), under
+these constraints, all satisfied:
+
+- **Role/session verification (read-only, no source estimates returned):**
+  `current_user` = `cosmos2025_v11_ro` on database `cosmos2025_v11`;
+  `rolsuper` f, `rolcreatedb` f; `has_table_privilege`:
+  `source.lephare` SELECT t, INSERT f, UPDATE f;
+  `analysis.specz_p2r05_splits` SELECT t, INSERT f. The session parameter
+  `transaction_read_only` reported `off`; read-only is enforced by role
+  privileges, not by the session parameter. No write was attempted.
+- **Assignment integrity:** 0 `catalog_id` appears more than once under
+  run `1e604a81...` with `assigned_split = 'development'`; the join
+  binds `s.catalog_id = l.id`, the exact `run_id`, and
+  `assigned_split = 'development'` only.
+- **Declared-before-query fixed audit bins** (these are not fitted
+  quantile cells; real-data quantile edges remain outside P2R-06a):
+  redshift [null], [0,1), [1,3), [3,5.5), [5.5,8), [8,inf); magnitude
+  [null], [0,21), [21,24), [24,27), [27,50), [50,inf).
+- **Predicates:** the exact repaired `POP-MASS` point/error conditions
+  only — `l.type = 0`, `l.mass_med BETWEEN -20.0 AND 15.0` (declared
+  LePhare log domain), `c.mass > 0`, `c.mass_err IS NOT NULL AND
+  c.mass_err >= 0`. Mass and error columns appear only inside these
+  single-code validity predicates; no SFR selection, no cross-code
+  arithmetic, no estimates, averages, or quantiles are returned; the
+  sole aggregate is `count(DISTINCT l.id)`.
+
+```sql
+SELECT CASE WHEN l.zpdf_med IS NULL THEN '0_znull'
+            WHEN l.zpdf_med < 1 THEN 'a_z0-1'
+            WHEN l.zpdf_med < 3 THEN 'b_z1-3'
+            WHEN l.zpdf_med < 5.5 THEN 'c_z3-5.5'
+            WHEN l.zpdf_med < 8 THEN 'd_z5.5-8'
+            ELSE 'e_z8+' END AS zband,
+       CASE WHEN p.mag_auto_f444w IS NULL THEN '0_mnull'
+            WHEN p.mag_auto_f444w < 21 THEN '1_m<21'
+            WHEN p.mag_auto_f444w < 24 THEN '2_m21-24'
+            WHEN p.mag_auto_f444w < 27 THEN '3_m24-27'
+            WHEN p.mag_auto_f444w < 50 THEN '4_m27-50'
+            ELSE '5_m50+' END AS magband,
+       count(DISTINCT l.id) AS n
+FROM source.lephare l
+JOIN source.cigale c ON c.id = l.id
+JOIN source.photometry_primary p ON p.id = l.id
+JOIN analysis.specz_p2r05_splits s ON s.catalog_id = l.id
+WHERE s.run_id = '1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c'
+  AND s.assigned_split = 'development'
+  AND l.type = 0
+  AND l.mass_med >= -20.0 AND l.mass_med <= 15.0
+  AND c.mass > 0
+  AND c.mass_err IS NOT NULL AND c.mass_err >= 0
+GROUP BY 1, 2 ORDER BY 1, 2;
+```
+
+Result (development split only, distinct catalog IDs):
+
+```text
+a_z0-1|0_mnull|2883        b_z1-3|0_mnull|1183       c_z3-5.5|0_mnull|1629     d_z5.5-8|0_mnull|265      e_z8+|0_mnull|129
+a_z0-1|1_m<21|3425         b_z1-3|1_m<21|2694        c_z3-5.5|1_m<21|40        d_z5.5-8|1_m<21|0         e_z8+|1_m<21|0
+a_z0-1|2_m21-24|13784      b_z1-3|2_m21-24|26323     c_z3-5.5|2_m21-24|3474    d_z5.5-8|2_m21-24|98      e_z8+|2_m21-24|23
+a_z0-1|3_m24-27|57835      b_z1-3|3_m24-27|94633     c_z3-5.5|3_m24-27|23024   d_z5.5-8|3_m24-27|3005    e_z8+|3_m24-27|492
+a_z0-1|4_m27-50|85346      b_z1-3|4_m27-50|48092     c_z3-5.5|4_m27-50|14985   d_z5.5-8|4_m27-50|3913    e_z8+|4_m27-50|1032
+```
+
+(Zeros for absent row combinations: `d_z5.5-8|1_m<21` and `e_z8+|1_m<21`
+returned no rows.) These are coarse audit-bin counts with no influence on
+any bin edge or threshold in this unit. **Actual fitted-cell support
+remains unknown until P2R-07** whether or not this count ran: the audit
+bins are not the development quantile cells, and the sparse [5.5,8) band
+(98 sources in m21-24) already shows that per-cell support above the
+forced edge will be an evaluation-time concern, not a design-time fact.
+
+## 5. Consequences recorded elsewhere
 
 - `evaluation-protocol.md` links this record and states that design was
   informed by full-catalog summaries containing holdout information; the

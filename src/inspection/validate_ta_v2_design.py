@@ -574,16 +574,18 @@ def evaluate_case(contract, case, scenarios):
     outputs["pop_mass"] = evaluate_population(contract, "POP-MASS", record, constants, states)
     outputs["pop_mass_reason"] = "none" if outputs["pop_mass"] else "not_in_population"
 
+    requested_cell = None
     if scenario["model_kind"] == "S0-constant":
         # AI NOTE: S0 scenarios declare only the per-timescale SFR constants;
         # mass-center outputs stay absent rather than being fabricated.
         expected_delta, support = None, None
     else:
-        expected_delta, support = evaluate_center(scenario, record)
+        expected_delta, support, requested_cell = evaluate_center(scenario, record, contract)
     outputs["expected_delta_mass_dex"] = (
         expected_delta if outputs["pop_mass"] else None
     )
     outputs["center_support"] = support if outputs["pop_mass"] else None
+    outputs["center_requested_cell"] = requested_cell if outputs["pop_mass"] else None
     member_mass, mass_reason = population_gate_ok("residual_mass_dex")
     outputs["residual_mass_dex"] = (
         outputs["delta_mass_dex"] - expected_delta
@@ -783,36 +785,53 @@ def precondition_ok(text, states):
     return True
 
 
-def evaluate_center(scenario, record):
-    """Evaluate a synthetic center scenario; returns (expected_delta, support)."""
+def evaluate_center(scenario, record, contract=None):
+    """Evaluate a synthetic center scenario; returns (expected_delta, support, requested).
+
+    Declared C1 scenarios carry synthetic support counts; when the contract
+    declares ``support_enforcement: center_min_cell_support`` the counts
+    drive the cell/z_fallback/global_fallback hierarchy (A1.5). Scenarios
+    of kind C1-fitted resolve through a model built from synthetic rows by
+    ``build_center_from_rows`` under the same hierarchy.
+    """
     kind = scenario["model_kind"]
     if kind == "C0-constant":
-        return scenario["constant_value"], "global_fallback"
+        return scenario["constant_value"], "global_fallback", None
     if kind == "S0-constant":
         raise ExpressionError("S0 scenarios are read per-timescale, not through this path")
-    if kind == "C1-conditional-binned-median":
+    if kind in ("C1-conditional-binned-median", "C1-fitted"):
         z = record.get("lephare.zpdf_med")
         mag = record.get("photometry_primary.mag_auto_f444w")
+        enforce = False
+        min_support = 0
+        if contract is not None:
+            c1 = contract["centers"]["mass_center"]["comparison_set"][1]
+            enforce = c1.get("support_enforcement") == "center_min_cell_support"
+            min_support = int(
+                {c["name"]: c["value"] for c in contract["declared_constants"]}[
+                    "center_min_cell_support"
+                ]
+            )
+        if kind == "C1-fitted":
+            model = scenario["_built_model"]
+            return resolve_center_model(model, z, mag, min_support)
         if z is None or mag is None:
-            return scenario["global_constant"], "out_of_hull"
+            return scenario["global_constant"], "out_of_hull", None
         z_edges, mag_edges = scenario["z_bin_edges"], scenario["mag_bin_edges"]
 
-        def bin_index(value, edges):
-            for index in range(len(edges) - 1):
-                if edges[index] <= value < edges[index + 1]:
-                    return index
-            return None
-
-        zi, mi = bin_index(z, z_edges), bin_index(mag, mag_edges)
+        zi, mi = _bin_index(z, z_edges), _bin_index(mag, mag_edges)
         if zi is None or mi is None:
-            return scenario["global_constant"], "out_of_hull"
-        cell = scenario["cell_values"].get(f"{zi}|{mi}")
-        if cell is not None:
-            return cell, "cell"
+            return scenario["global_constant"], "out_of_hull", None
+        requested = f"{zi}|{mi}"
+        cell = scenario["cell_values"].get(requested)
+        count = scenario.get("support_counts", {}).get(requested, 0)
+        if cell is not None and ((enforce and count >= min_support) or not enforce):
+            return cell, "cell", requested
         z_only = scenario["z_only_values"].get(str(zi))
-        if z_only is not None:
-            return z_only, "z_fallback"
-        return scenario["global_constant"], "global_fallback"
+        zc = scenario.get("z_only_support_counts", {}).get(str(zi), 0)
+        if z_only is not None and ((enforce and zc >= min_support) or not enforce):
+            return z_only, "z_fallback", requested
+        return scenario["global_constant"], "global_fallback", requested
     raise ExpressionError(f"unknown scenario kind {kind!r}")
 
 
@@ -835,6 +854,231 @@ def compare_expected(case, outputs):
         elif observed != expected:
             mismatches.append(key)
     return mismatches
+
+
+def _median(values):
+    """Deterministic median: even counts average the two middle order statistics."""
+    ordered = sorted(values)
+    n = len(ordered)
+    mid = n // 2
+    return ordered[mid] if n % 2 else (ordered[mid - 1] + ordered[mid]) / 2.0
+
+
+def _quantile(sorted_values, q):
+    """Deterministic linear-interpolation quantile on pre-sorted values."""
+    import math
+
+    n = len(sorted_values)
+    if n == 1:
+        return sorted_values[0]
+    h = (n - 1) * q
+    lo = math.floor(h)
+    hi = min(lo + 1, n - 1)
+    frac = h - lo
+    return sorted_values[lo] + frac * (sorted_values[hi] - sorted_values[lo])
+
+
+def _collapse_edges(edges):
+    """Drop duplicate/non-increasing edges; record effective bins via length."""
+    collapsed = []
+    for edge in edges:
+        if not collapsed or edge > collapsed[-1]:
+            collapsed.append(edge)
+    return collapsed
+
+
+def _bin_index(value, edges):
+    """Left-closed/right-open bin lookup; the final endpoint is included."""
+    for index in range(len(edges) - 1):
+        if edges[index] <= value < edges[index + 1]:
+            return index
+    if value == edges[-1]:
+        return len(edges) - 2
+    return None
+
+
+def partition_guard(rows, assignment_rows):
+    """Shared partition/duplicate guards for every synthetic fitter (A1.5/A1.6).
+
+    Every fitted row needs an explicit, valid ``development`` assignment;
+    missing assignments reject as unassigned_partition, unknown labels,
+    conflicting assignments and duplicate training IDs reject, and any
+    validation/holdout ID in the request rejects.
+    """
+    reasons = []
+    assignment = {}
+    for entry in assignment_rows:
+        cid = entry["catalog_id"]
+        if cid in assignment and assignment[cid] != entry["split"]:
+            reasons.append(f"catalog_id {cid} appears in two partitions")
+        assignment[cid] = entry["split"]
+    for cid, split in sorted(assignment.items()):
+        if split not in ("development", "validation", "holdout"):
+            reasons.append(f"unknown partition label {split} for catalog_id {cid}")
+    seen = set()
+    for row in rows:
+        cid = row["catalog_id"]
+        if cid in seen:
+            reasons.append(f"duplicate training rows for catalog_id {cid}")
+        seen.add(cid)
+    for cid in sorted(seen):
+        if cid not in assignment:
+            reasons.append(f"unassigned_partition catalog_id {cid}")
+        elif assignment[cid] in ("validation", "holdout"):
+            reasons.append(f"validation or holdout catalog_id {cid} in fit request")
+    return reasons
+
+
+def build_center_from_rows(construction, contract, force_no_edge=False):
+    """Pure synthetic construction of a C1 center model (A1.5).
+
+    Builds quantile edges (plus the forced high-redshift edge when strictly
+    inside the development support), cell medians, z-only medians, global
+    constant, and unique-source support counts from synthetic fixture rows
+    only. Reads declared contract parameters (z/mag bin counts, forced
+    edge, min support) rather than hardcoded mirrors; has no database
+    path. Returns (model, guard_reasons).
+    """
+    import math
+
+    constants = {c["name"]: c["value"] for c in contract["declared_constants"]}
+    c1 = contract["centers"]["mass_center"]["comparison_set"][1]
+    z_bins = int(c1["z_quantile_bins"])
+    mag_bins = int(c1["mag_quantile_bins"])
+    forced = constants.get("forced_highz_edge")
+    if force_no_edge:
+        forced = None
+
+    rows = expand_construction_rows(construction)
+    guard_reasons = partition_guard(rows, construction["partition_assignment"])
+
+    points = []
+    for row in rows:
+        z = row.get("lephare.zpdf_med")
+        mag = row.get("photometry_primary.mag_auto_f444w")
+        if z is None or mag is None or not math.isfinite(z) or not math.isfinite(mag):
+            return {"state": "invalid", "reason": "nonfinite_or_missing_covariate"}, guard_reasons
+        points.append((z, mag, row["delta_mass_dex"], row["catalog_id"]))
+
+    zs = sorted(p[0] for p in points)
+    mags = sorted(p[1] for p in points)
+    z_edges = _collapse_edges([_quantile(zs, k / z_bins) for k in range(z_bins + 1)])
+    mag_edges = _collapse_edges([_quantile(mags, k / mag_bins) for k in range(mag_bins + 1)])
+    forced_inserted = False
+    if forced is not None and zs[0] < forced < zs[-1]:
+        z_edges = _collapse_edges(sorted(z_edges + [float(forced)]))
+        forced_inserted = True
+
+    cells, z_only = {}, {}
+    for z, mag, delta, cid in points:
+        zi = _bin_index(z, z_edges)
+        mi = _bin_index(mag, mag_edges)
+        if zi is None or mi is None:
+            return {"state": "invalid", "reason": "covariate_outside_support"}, guard_reasons
+        cells.setdefault(f"{zi}|{mi}", {}).setdefault(cid, delta)
+        z_only.setdefault(str(zi), {}).setdefault(cid, delta)
+
+    model = {
+        "state": "ok",
+        "z_bin_edges": z_edges,
+        "mag_bin_edges": mag_edges,
+        "effective_z_bins": len(z_edges) - 1,
+        "effective_mag_bins": len(mag_edges) - 1,
+        "forced_edge_inserted": forced_inserted,
+        "cell_values": {key: _median(list(members.values())) for key, members in cells.items()},
+        "support_counts": {key: len(members) for key, members in cells.items()},
+        "z_only_values": {key: _median(list(members.values())) for key, members in z_only.items()},
+        "z_only_support_counts": {key: len(members) for key, members in z_only.items()},
+        "global_constant": _median([p[2] for p in points]),
+        "n_rows": len(points),
+    }
+    return model, guard_reasons
+
+
+def expand_construction_rows(construction):
+    """Expand the declared deterministic row blocks into concrete rows."""
+    rule = construction.get("delta_rule", {})
+    base_id = int(construction.get("base_catalog_id", 950000))
+    rows = []
+    next_id = base_id
+    for block in construction["row_blocks"]:
+        repeat = int(block.get("repeat", 1))
+        z = block["lephare.zpdf_med"]
+        mag = block["photometry_primary.mag_auto_f444w"]
+        slope = rule.get("slope_below", 0.0) if z < rule.get("z_boundary", 5.5) else rule.get(
+            "slope_above", 0.0
+        )
+        delta = rule.get("intercept", 0.0) + slope * (mag - rule.get("pivot_mag", 24.0))
+        for _ in range(repeat):
+            rows.append({
+                "catalog_id": next_id,
+                "lephare.zpdf_med": z,
+                "photometry_primary.mag_auto_f444w": mag,
+                "delta_mass_dex": delta,
+            })
+            next_id += 1
+    assignment = [{"catalog_id": r["catalog_id"], "split": "development"} for r in rows]
+    construction["partition_assignment"] = construction.get("partition_assignment", assignment)
+    return rows
+
+
+def resolve_center_model(model, z, mag, min_support):
+    """Resolve a fitted center model with the support hierarchy (A1.5)."""
+    if z is None or mag is None:
+        return model["global_constant"], "out_of_hull", None
+    zi = _bin_index(z, model["z_bin_edges"])
+    mi = _bin_index(mag, model["mag_bin_edges"])
+    if zi is None or mi is None:
+        return model["global_constant"], "out_of_hull", None
+    requested = f"{zi}|{mi}"
+    count = model["support_counts"].get(requested, 0)
+    if count >= min_support:
+        return model["cell_values"][requested], "cell", requested
+    zc = model["z_only_support_counts"].get(str(zi), 0)
+    if zc >= min_support:
+        return model["z_only_values"][str(zi)], "z_fallback", requested
+    return model["global_constant"], "global_fallback", requested
+
+
+def run_binning_demonstrations(fixtures, contract, built_models):
+    """Slope-reversal demonstration: with vs without the forced edge (A1.5)."""
+    import math
+
+    results = []
+    failures = []
+    for demo in fixtures.get("binning_demonstrations", []):
+        construction = fixtures["center_constructions"][demo["construction"]]
+        model_with, _ = built_models[demo["construction"]], None
+        model_without, _ = build_center_from_rows(construction, contract, force_no_edge=True)
+        tolerance = float(demo["tolerance"])
+        with_residuals, without_residuals = [], []
+        for probe in demo["probes"]:
+            min_support = int(
+                {c["name"]: c["value"] for c in contract["declared_constants"]}[
+                    "center_min_cell_support"
+                ]
+            )
+            value_with, support_with, _ = resolve_center_model(
+                model_with, probe["lephare.zpdf_med"], probe["photometry_primary.mag_auto_f444w"], min_support
+            )
+            value_without, _, _ = resolve_center_model(
+                model_without, probe["lephare.zpdf_med"], probe["photometry_primary.mag_auto_f444w"], min_support
+            )
+            with_residuals.append(abs(probe["delta_mass_dex"] - value_with))
+            without_residuals.append(abs(probe["delta_mass_dex"] - value_without))
+        max_with = max(with_residuals)
+        min_without = min(without_residuals)
+        ok = max_with <= tolerance and min_without > tolerance
+        if not ok:
+            failures.append(f"binning_demonstration:{demo['id']}")
+        results.append({
+            "id": demo["id"], "tolerance": tolerance,
+            "max_abs_residual_with_edge": max_with,
+            "min_abs_residual_without_edge": min_without,
+            "adequate_support_declared": demo.get("adequate_support_declared"),
+            "pass": ok,
+        })
+    return failures, results
 
 
 def check_fit_requests(fixtures):
@@ -1079,6 +1323,18 @@ def structural_checks(contract, fixtures):
 
     failures.extend(pop_mass_consistency(contract))
 
+    # P2R-06a A1.5: the C1 center must declare support enforcement against
+    # center_min_cell_support and the forced high-redshift edge must exist
+    # as a declared constant with its rationale.
+    c1_entry = contract["centers"]["mass_center"]["comparison_set"][1]
+    if c1_entry.get("support_enforcement") != "center_min_cell_support":
+        failures.append("support_enforcement_missing")
+    constant_names = {c["name"] for c in contract["declared_constants"]}
+    if "forced_highz_edge" not in constant_names:
+        failures.append("declared_constant_missing:forced_highz_edge")
+    if not c1_entry.get("z_quantile_bins") or not c1_entry.get("mag_quantile_bins"):
+        failures.append("binning_parameters_missing")
+
     for output in contract["outputs"]:
         formula = output.get("formula")
         if not formula:
@@ -1227,6 +1483,13 @@ def apply_mutation(contract, identity, action):
         for output in contract["outputs"]:
             if output["name"] == action["output"]:
                 output[action["field"]] = action["value"]
+    elif kind == "set_center_field":
+        entry = contract["centers"][action["center"]]["comparison_set"][action["index"]]
+        entry[action["field"]] = action["value"]
+    elif kind == "remove_declared_constant":
+        contract["declared_constants"] = [
+            c for c in contract["declared_constants"] if c["name"] != action["name"]
+        ]
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 
@@ -1235,6 +1498,17 @@ def run_validation(contract, fixtures, identity, paths):
     """Run cases, fit requests, structural and identity checks; return failure codes and details."""
     failures = []
     scenarios = fixtures["declared_center_scenarios"]
+    built_models = {}
+    for name, construction in fixtures.get("center_constructions", {}).items():
+        model, guard_reasons = build_center_from_rows(construction, contract)
+        built_models[name] = model
+        for reason in guard_reasons:
+            failures.append(f"construction_partition:{name}:{reason}")
+        if model.get("state") != "ok":
+            failures.append(f"construction_invalid:{name}:{model.get('reason')}")
+    for scenario in scenarios.values():
+        if scenario.get("model_kind") == "C1-fitted":
+            scenario["_built_model"] = built_models[scenario["construction"]]
     case_results = []
     for case in fixtures.get("cases", []):
         try:
@@ -1284,9 +1558,11 @@ def run_validation(contract, fixtures, identity, paths):
         )
     math_failures, math_results = run_math_counterexamples(fixtures)
     failures.extend(math_failures)
+    demo_failures, demo_results = run_binning_demonstrations(fixtures, contract, built_models)
+    failures.extend(demo_failures)
     failures.extend(structural_checks(contract, fixtures))
     failures.extend(identity_checks(identity, *paths))
-    return failures, case_results, fit_results, solve_results, math_results
+    return failures, case_results, fit_results, solve_results, math_results, demo_results
 
 
 # =============================================================================
@@ -1336,7 +1612,7 @@ def main(argv=None):
             mutated_identity = copy.deepcopy(identity)
             apply_mutation(mutated_contract, mutated_identity, record["action"])
             action, description, intended = record["action"], record["description"], record["intended_reason"]
-        failures, case_results, fit_results, solve_results, math_results = run_validation(
+        failures, case_results, fit_results, solve_results, math_results, demo_results = run_validation(
             mutated_contract, fixtures, mutated_identity,
             (contract_path, fixtures_path, identity_path),
         )
@@ -1361,7 +1637,7 @@ def main(argv=None):
                 print("  no invariant failed (mutation not caught)")
             return exit_code
 
-    failures, case_results, fit_results, solve_results, math_results = run_validation(
+    failures, case_results, fit_results, solve_results, math_results, demo_results = run_validation(
         contract, fixtures, identity, (contract_path, fixtures_path, identity_path)
     )
     exit_code = 1 if failures else 0
@@ -1394,6 +1670,7 @@ def main(argv=None):
         "fit_requests": fit_results,
         "sigma_sys_solve_checks": solve_results,
         "mathematical_counterexamples": math_results,
+        "binning_demonstrations": demo_results,
         "mutations": mutation_records,
         "failures": sorted(set(failures)),
     }

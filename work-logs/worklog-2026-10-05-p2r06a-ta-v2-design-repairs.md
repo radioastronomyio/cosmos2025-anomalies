@@ -388,3 +388,101 @@ counterexamples 1/1, mutations caught 21/21, exit 0. `pytest`: 54/54
 passed.
 
 Gate A1.4 checkpoint: this commit.
+
+## Gate A1.5: C1 binning and center support (R7; decision 3)
+
+Old-behaviour evidence (adapter
+`staging/2026-10-16-p2r06a-execution/regression/adapter_a15_r7.py`):
+with support counts grafted onto a scratch scenario, d4bc1a2 returns
+`center_support = "cell"` whenever a cell value is present — a 199-support
+cell and a 199-support z-only bin both resolve as `cell`; support counts
+do not exist anywhere in the old contract. After repair: 200 → `cell`,
+199 → `z_fallback` (z-only 250), z-only 199 → `global_fallback`, with
+`center_requested_cell` recorded (`0|1`, `1|0`).
+
+Repairs:
+
+- `feature-contract.yaml`: new declared constant `forced_highz_edge = 5.5`
+  (`kind: declared_domain`; rationale cites the coordinator-reported
+  slope reversal as a labelled prior finding NOT reproduced in this unit,
+  observed against mean mass not the brightness covariate; additional
+  fixed edges need a later named change); C1 entry gains machine-readable
+  `z_quantile_bins: 6`, `mag_quantile_bins: 5`, the deterministic
+  linear-interpolation `quantile_method`, `edge_conventions`
+  (duplicate-edge collapse with effective-bin counts; forced edge only
+  strictly inside the development support; hull never extended;
+  left-closed/right-open with the final endpoint included so z = 5.5 is
+  upper-bin and no cell straddles 5.5; missing/non-finite covariates
+  unsupported), `support_enforcement: center_min_cell_support`, and the
+  rewritten `support_rule` (unique-source counts; duplicated rows
+  manufacture no support; requested cell + fallback both recorded; global
+  fallback preserves no local high-z structure); new output
+  `center_requested_cell`.
+- `validate_ta_v2_design.py`: pure functions `_median`/`_quantile`/
+  `_collapse_edges`/`_bin_index`; `partition_guard` (shared by every
+  synthetic fitter: explicit development assignment, unassigned_partition,
+  unknown labels, conflicts, duplicates, validation/holdout rejection);
+  `build_center_from_rows` (reads declared contract parameters, no
+  database path; expands deterministic synthetic row blocks); 
+  `resolve_center_model` (support hierarchy); `evaluate_center` rewritten
+  (support enforcement for declared scenarios; fitted-model resolution;
+  requested-cell return); `run_binning_demonstrations` (with/without the
+  forced edge); structural requirements `support_enforcement_missing`,
+  `declared_constant_missing:forced_highz_edge`,
+  `binning_parameters_missing`; mutation kinds `set_center_field`,
+  `remove_declared_constant`.
+- `fixtures.json`: legacy C1 scenarios carry declared support counts;
+  `SYNTH-C1S` boundary scenario (200/199/199 + z-only 250/199);
+  constructions CONSTR-1 (slope reversal: 11,520 below-3 rows, 1,200 in
+  [3,5.5), 1,100 above with 220 per demo cell; quantile top bin [2.8, 7.7]
+  split by the forced edge into [2.8,5.5)/[5.5,7.7]), CONSTR-2 (sparse
+  high-z: 45/cell, z-only 225 → fallback with retained +0.024 bias),
+  CONSTR-3 (support wholly below 5.5; duplicate edges collapse 6 → 4
+  effective z bins; forced edge not inserted); `DEMO-SLOPE` demonstration
+  (tolerance 0.005 declared before construction; with-edge max residual
+  0.0 <= 0.005; without-edge min residual 0.048 > 0.005); cases FX-R7a-e,
+  g-j (z exactly 5.5 → upper bin 6|2; max endpoint 7.7 included → cell;
+  duplicate-edge fallback); mutations M22 (support counts ignored) and
+  M23 (forced edge removed).
+- **Optional support evidence (executed once):** the A1.5 development-only
+  count ran through the analyst handoff. Role/session verification:
+  `cosmos2025_v11_ro` on `cosmos2025_v11`; rolsuper f, rolcreatedb f;
+  has_table_privilege source.lephare SELECT t / INSERT f / UPDATE f;
+  analysis.specz_p2r05_splits SELECT t / INSERT f; session
+  `transaction_read_only` reported `off` — read-only is enforced by role
+  privileges, honestly recorded. 0 duplicate development assignments
+  under run `1e604a81...`. Fixed audit bins declared in the SQL before
+  execution (z: null/[0,1)/[1,3)/[3,5.5)/[5.5,8)/[8,inf); mag:
+  null/[0,21)/[21,24)/[24,27)/[27,50)/[50,inf)); exact repaired POP-MASS
+  point/error predicates only; sole aggregate `count(DISTINCT l.id)`.
+  Counts (16 non-empty cells; e.g. d_z5.5-8|3_m24-27 = 3,005;
+  d_z5.5-8|2_m21-24 = 98; full table in the exposure log section 4 and
+  staging `support-audit/counts.txt`). No SFR column, no cross-code
+  arithmetic, no estimate of any kind returned. One pre-execution
+  connection error (unqualified table name) returned no data. The read
+  influenced no bin edge or threshold; actual fitted-cell support remains
+  unknown until P2R-07.
+- `exposure-log.md` section 4 added with the SQL and counts verbatim;
+  `tests/test_ta_v2_design_contract.py`: `TestA15BinningAndSupport`
+  (5 tests, including direct partition-guard unit tests) + MUTATIONS to
+  M23.
+
+Validation (gate A1.5 checklist):
+
+- [x] Mutations caught: support counts ignored (M22 →
+  case_mismatch:FX-R7b:center_support + support_enforcement_missing);
+  forced edge removed (M23 → case_mismatch:FX-R7d:residual_mass_dex +
+  binning_demonstration:DEMO-SLOPE +
+  declared_constant_missing:forced_highz_edge).
+- [x] The support-boundary fixture fails against d4bc1a2 (adapter:
+  199-support cells observed as `cell`) and passes after repair.
+- [x] The optional query ran; its text and counts are in the exposure log
+  and every listed constraint is satisfied by inspection, recorded above
+  and in the worklog (single-code validity predicates only; fixed
+  pre-declared bins; development-only join with run/split binding;
+  distinct-ID counting; no estimates).
+
+Full run: cases 64/64, fit requests 4/4, sigma_sys 3/3, math 1/1, demo
+1/1, mutations caught 23/23, exit 0. `pytest`: 61/61 passed.
+
+Gate A1.5 checkpoint: this commit.

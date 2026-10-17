@@ -28,7 +28,17 @@
       "global_constant": 0.24,
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
-      "sigma_sys_sfr_100_dex": 0.2
+      "sigma_sys_sfr_100_dex": 0.2,
+      "support_counts": {
+        "0|0": 300,
+        "0|1": 300,
+        "1|0": 300,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 600,
+        "1": 600
+      }
     },
     "SYNTH-C0": {
       "model_kind": "C0-constant",
@@ -79,6 +89,78 @@
         "1": 0.25
       },
       "global_constant": 0.25,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "support_counts": {
+        "0|0": 300,
+        "0|1": 300,
+        "1|0": 300,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 600,
+        "1": 600
+      }
+    },
+    "SYNTH-C1S": {
+      "model_kind": "C1-conditional-binned-median",
+      "provenance": "synthetic",
+      "z_bin_edges": [
+        0.0,
+        1.0,
+        6.0
+      ],
+      "mag_bin_edges": [
+        0.0,
+        24.0,
+        40.0
+      ],
+      "cell_values": {
+        "0|0": 0.2,
+        "0|1": 0.22,
+        "1|0": 0.26,
+        "1|1": 0.28
+      },
+      "z_only_values": {
+        "0": 0.21,
+        "1": 0.27
+      },
+      "global_constant": 0.24,
+      "support_counts": {
+        "0|0": 200,
+        "0|1": 199,
+        "1|0": 199,
+        "1|1": 300
+      },
+      "z_only_support_counts": {
+        "0": 250,
+        "1": 199
+      },
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT1": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-1",
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT2": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-2",
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-FIT3": {
+      "model_kind": "C1-fitted",
+      "provenance": "synthetic",
+      "construction": "CONSTR-3",
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
       "sigma_sys_sfr_100_dex": 0.2
@@ -1184,6 +1266,186 @@
         "ctx_lp_ssfr_point_reason": "lephare_value_out_of_domain",
         "ctx_lp_ssfr_nonadditivity_dex": null
       }
+    },
+    {
+      "id": "FX-R7a",
+      "description": "R7: a cell at exactly the 200 support threshold resolves as cell",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914001,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "0|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.04
+      }
+    },
+    {
+      "id": "FX-R7b",
+      "description": "R7: a cell at 199 support falls back to the z-only estimate at 250",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914002,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 25.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "0|1",
+        "expected_delta_mass_dex": 0.21,
+        "residual_mass_dex": 0.030000000000000027
+      }
+    },
+    {
+      "id": "FX-R7c",
+      "description": "R7: z-only support 199 as well falls back to the global constant",
+      "scenario": "SYNTH-C1S",
+      "record": {
+        "catalog_id": 914003,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.24,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 2000000000.0,
+        "lephare.zpdf_med": 2.0,
+        "photometry_primary.mag_auto_f444w": 21.0
+      },
+      "expect": {
+        "center_support": "global_fallback",
+        "center_requested_cell": "1|0",
+        "expected_delta_mass_dex": 0.24,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7d",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 12) has zero residual under the forced edge",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914004,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.224,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 6.4,
+        "photometry_primary.mag_auto_f444w": 12.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.224,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7e",
+      "description": "R7 slope demo: on-trend source above 5.5 (mag 36) has zero residual under the forced edge",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914005,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.176,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 6.9,
+        "photometry_primary.mag_auto_f444w": 36.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|4",
+        "expected_delta_mass_dex": 0.176,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7g",
+      "description": "R7: sparse high-redshift cells fall back to the z-only estimate and retain a known magnitude bias (+0.024)",
+      "scenario": "SYNTH-FIT2",
+      "record": {
+        "catalog_id": 914006,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.224,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 7.4,
+        "photometry_primary.mag_auto_f444w": 12.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "6|0",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.024
+      }
+    },
+    {
+      "id": "FX-R7h",
+      "description": "R7: z exactly 5.5 belongs to the upper bin (left-closed edge), never straddling 5.5",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914007,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 5.5,
+        "photometry_primary.mag_auto_f444w": 24.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7i",
+      "description": "R7: the maximum development-z endpoint is included in the final bin, not out of hull",
+      "scenario": "SYNTH-FIT1",
+      "record": {
+        "catalog_id": 914008,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.212,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 7.7,
+        "photometry_primary.mag_auto_f444w": 18.0
+      },
+      "expect": {
+        "center_support": "cell",
+        "center_requested_cell": "6|1",
+        "expected_delta_mass_dex": 0.212,
+        "residual_mass_dex": 0.0
+      }
+    },
+    {
+      "id": "FX-R7j",
+      "description": "R7: development support wholly below 5.5 inserts no forced edge; duplicate quantile edges collapse to 4 effective z bins",
+      "scenario": "SYNTH-FIT3",
+      "record": {
+        "catalog_id": 914009,
+        "lephare.type": 0,
+        "lephare.mass_med": 10.2,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.zpdf_med": 1.2,
+        "photometry_primary.mag_auto_f444w": 24.0
+      },
+      "expect": {
+        "center_support": "z_fallback",
+        "center_requested_cell": "1|2",
+        "expected_delta_mass_dex": 0.2,
+        "residual_mass_dex": 0.0
+      }
     }
   ],
   "fit_requests": [
@@ -1494,6 +1756,25 @@
         "value": true
       },
       "intended_reason": "context_output_rankable:ctx_lp_ssfr_nonadditivity_dex"
+    },
+    "M22_support_counts_ignored": {
+      "description": "R7 reintroduced: the C1 center stops enforcing minimum support and uses any present cell",
+      "action": {
+        "kind": "set_center_field",
+        "center": "mass_center",
+        "index": 1,
+        "field": "support_enforcement",
+        "value": "none"
+      },
+      "intended_reason": "case_mismatch:FX-R7b:center_support"
+    },
+    "M23_forced_edge_removed": {
+      "description": "R7/decision 3 reintroduced: the forced z = 5.5 edge is removed, letting the top bin straddle the slope reversal",
+      "action": {
+        "kind": "remove_declared_constant",
+        "name": "forced_highz_edge"
+      },
+      "intended_reason": "case_mismatch:FX-R7d:residual_mass_dex"
     }
   },
   "sigma_sys_solve_checks": [
@@ -1566,6 +1847,820 @@
         "median_y_greater_than_median_x": true,
         "approx_value": -0.29205
       }
+    }
+  ],
+  "center_constructions": {
+    "CONSTR-1": {
+      "provenance": "synthetic",
+      "description": "Slope-reversal population: delta depends on magnitude with slope +0.002 below z 5.5 and -0.002 above; the quantile top bin spans roughly z 3 to 8 so the forced 5.5 edge splits it; demo cells carry >= 220 unique sources",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": -0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 950000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 44
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 44
+        }
+      ]
+    },
+    "CONSTR-2": {
+      "provenance": "synthetic",
+      "description": "Sparse high-redshift population: upper-bin per-cell support 45 falls back to the z-only estimate (225) which retains a known magnitude bias",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": -0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 960000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 0.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 1.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.3,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 2.8,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 384
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 3.4,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 4.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 120
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 5.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 6.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.2,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 9
+        },
+        {
+          "lephare.zpdf_med": 7.7,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 9
+        }
+      ]
+    },
+    "CONSTR-3": {
+      "provenance": "synthetic",
+      "description": "Support wholly below 5.5 with collapsing duplicate quantile edges: four distinct z values yield three effective bins and the forced edge is not inserted",
+      "delta_rule": {
+        "intercept": 0.2,
+        "slope_below": 0.002,
+        "slope_above": 0.002,
+        "pivot_mag": 24.0,
+        "z_boundary": 5.5
+      },
+      "base_catalog_id": 970000,
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.0,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 1.5,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 12,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 18,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 24,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 30,
+          "repeat": 50
+        },
+        {
+          "lephare.zpdf_med": 2.0,
+          "photometry_primary.mag_auto_f444w": 36,
+          "repeat": 50
+        }
+      ]
+    }
+  },
+  "binning_demonstrations": [
+    {
+      "id": "DEMO-SLOPE",
+      "construction": "CONSTR-1",
+      "tolerance": 0.005,
+      "adequate_support_declared": "each demonstration cell above z 5.5 carries 220 unique sources, at or above center_min_cell_support",
+      "probes": [
+        {
+          "lephare.zpdf_med": 6.4,
+          "photometry_primary.mag_auto_f444w": 12,
+          "delta_mass_dex": 0.224
+        },
+        {
+          "lephare.zpdf_med": 6.9,
+          "photometry_primary.mag_auto_f444w": 36,
+          "delta_mass_dex": 0.17600000000000002
+        }
+      ]
     }
   ]
 }
