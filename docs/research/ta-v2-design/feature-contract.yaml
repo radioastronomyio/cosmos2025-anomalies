@@ -25,7 +25,17 @@ contract:
   key: [catalog_id]
   input_contract: docs/research/ta-v2-design/input-contract.md
   input_identity: docs/research/ta-v2-design/input-identity.json
-  identity_rule: content comparison; a mutated identity in a scratch copy is rejected, never overwritten
+  identity_rule: >-
+    Content comparison; a mutated identity in a scratch copy is rejected,
+    never overwritten. Authorizing-spec identities resolve against the
+    repository root (never the working directory, no search-order
+    fallback); a missing file fails as identity_missing:authorizing_spec
+    and a digest mismatch as identity_mismatch:authorizing_spec, with no
+    skip path. The minimum required manifest set below is checked against
+    the identity record on every run: deleting a required entry (or its
+    digest) fails.
+  minimum_required_authorizing_specs:
+    - spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md
   guard_precedence: >-
     Declared order for every gated output: population guards first, then
     point-domain guards, then scale/uncertainty guards, then arithmetic.

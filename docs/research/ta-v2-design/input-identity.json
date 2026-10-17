@@ -4,15 +4,23 @@
   "status": "proposed_not_adopted",
   "recorded_at": "2026-10-05",
   "base_commit": "01f28ee06383a4db9b44d8e6ef7125ea6ed722d9",
-  "authorizing_spec": {
-    "path": "/opt/agents/repos/spec/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
-    "sha256": "04bb896050114207491603f7fc08971b59be274501454532e5c7ed6e5f42ecf0",
-    "version": "1.0",
-    "action_registry": "rec4acLZWCuN1tJk9",
-    "utterances_edt": [
-      "2026-10-05 09:13 I dont see anything in your responses to veto.",
-      "2026-10-05 09:15 Approved to execute."
-    ]
+  "authorizing_specs": [
+    {
+      "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+      "sha256": "04bb896050114207491603f7fc08971b59be274501454532e5c7ed6e5f42ecf0",
+      "version": "1.0",
+      "required": true,
+      "action_registry": "rec4acLZWCuN1tJk9",
+      "utterances_edt": [
+        "2026-10-05 09:13 I dont see anything in your responses to veto.",
+        "2026-10-05 09:15 Approved to execute."
+      ],
+      "note": "repository-relative path resolved against the repository root; the central archive copy is provenance only (P2R-06a A1.6); a missing file fails identity_missing, a digest mismatch fails identity_mismatch, and no skip path exists"
+    }
+  ],
+  "amendment_pending": {
+    "note": "The P2R-06a amendment spec becomes a required manifest entry at gate A1.9 once its in-repo archive copy exists; the transition is recorded in the amendment worklog and the contract's minimum_required_authorizing_specs so final validation cannot silently revert to parent-only checking.",
+    "expected_archive_path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06a-ta-v2-design-repairs.md"
   },
   "s5_answers": {
     "authority_document": "docs/research/specz-science-p2r05/review.md",

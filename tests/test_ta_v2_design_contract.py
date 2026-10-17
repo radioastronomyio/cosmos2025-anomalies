@@ -72,6 +72,8 @@ MUTATIONS = [
     "M21_ctx_marked_rankable",
     "M22_support_counts_ignored",
     "M23_forced_edge_removed",
+    "M24_authorizing_spec_entry_deleted",
+    "M25_authorizing_spec_digest_deleted",
 ]
 
 
@@ -391,6 +393,82 @@ class TestA15BinningAndSupport:
             rows + [dict(rows[0])], [{"catalog_id": 1, "split": "development"}]
         )
         assert any("duplicate training rows" in r for r in reasons)
+
+
+class TestA16PartitionAndIdentity:
+    """P2R-06a A1.6 repairs: partition and identity fail-closed (R4, R5, R6)."""
+
+    def test_fx_p5_unassigned_rejected(self, results):
+        fit = {f["id"]: f for f in results["fit_requests"]}
+        assert "FX-P5" in fit
+        assert fit["FX-P5"]["pass"]
+        assert any("unassigned_partition" in r for r in fit["FX-P5"]["observed"])
+
+    def test_scratch_identity_missing_spec_fails_closed(self, tmp_path):
+        data = json.loads(IDENTITY.read_text())
+        data["authorizing_specs"][0]["path"] = "spec/2026-10/nonexistent-spec.md"
+        scratch = tmp_path / "input-identity.json"
+        scratch.write_text(json.dumps(data))
+        proc = run_validator("--identity", str(scratch), tmp_path=tmp_path)
+        assert proc.returncode != 0
+        assert "identity_missing:authorizing_spec" in proc.stdout + proc.stderr
+
+    def test_required_manifest_entry_deletion_fails(self, tmp_path):
+        data = json.loads(IDENTITY.read_text())
+        data["authorizing_specs"] = []
+        scratch = tmp_path / "input-identity.json"
+        scratch.write_text(json.dumps(data))
+        proc = run_validator("--identity", str(scratch), tmp_path=tmp_path)
+        assert proc.returncode != 0
+        assert "authorizing_spec_not_declared" in proc.stdout + proc.stderr
+
+    def test_command_resolves_from_repository_root(self, results):
+        execution = results["execution"]
+        script = Path(execution["argv"][0])
+        assert script.exists()
+        assert script == (REPO_ROOT / "src" / "inspection" / "validate_ta_v2_design.py")
+        assert execution["script_repo_relative"] == "src/inspection/validate_ta_v2_design.py"
+        assert "docs/src" not in results["command"]
+
+    def test_recorded_command_reexecutes_semantically(self, results, tmp_path):
+        """The recorded argv re-executes into a scratch file with the same results.
+
+        Compares exit code, case/mutation outcomes, input hashes and the
+        semantic payload; excludes generation time and the output-path
+        difference. The argv is parsed as recorded JSON, never as shell text.
+        """
+        scratch_out = tmp_path / "reproduction.json"
+        argv = [results["execution"]["interpreter"]] + list(results["execution"]["argv"])
+        proc = subprocess.run(argv + ["--results", str(scratch_out)],
+                               capture_output=True, text=True, cwd=REPO_ROOT)
+        assert proc.returncode == results["exit_code"]
+        replay = json.loads(scratch_out.read_text())
+        assert replay["contract_sha256"] == results["contract_sha256"]
+        assert replay["fixtures_sha256"] == results["fixtures_sha256"]
+        assert replay["identity_sha256"] == results["identity_sha256"]
+        assert replay["summary"]["cases_passed"] == results["summary"]["cases_passed"]
+        assert replay["summary"]["mutations_caught"] == results["summary"]["mutations_caught"]
+        assert replay["failures"] == results["failures"]
+        assert [c["pass"] for c in replay["cases"]] == [c["pass"] for c in results["cases"]]
+        assert [c["observed"] for c in replay["cases"]] == [c["observed"] for c in results["cases"]]
+
+    def test_committed_results_bytes_unchanged_by_reproduction(self, tmp_path):
+        """Reproductions redirect output; the committed results file stays byte-identical."""
+        before = RESULTS.read_bytes()
+        proc = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--results", str(tmp_path / "out.json")],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        assert proc.returncode == 0
+        assert RESULTS.read_bytes() == before
+
+    def test_non_root_working_directory_resolves_identities(self, tmp_path):
+        proc = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--results", str(tmp_path / "out.json")],
+            capture_output=True, text=True, cwd=tmp_path,
+        )
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "identity_missing" not in proc.stdout
 
 
 class TestValidatorBoundaries:

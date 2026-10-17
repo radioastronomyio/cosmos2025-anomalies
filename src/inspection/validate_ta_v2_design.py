@@ -46,6 +46,7 @@ import copy
 import hashlib
 import json
 import re
+import shlex
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1082,25 +1083,17 @@ def run_binning_demonstrations(fixtures, contract, built_models):
 
 
 def check_fit_requests(fixtures):
-    """Enforce the partition-use rules on the synthetic fit requests."""
+    """Enforce the partition-use rules on the synthetic fit requests (A1.6).
+
+    Delegates to the shared ``partition_guard`` used by every synthetic
+    fitter: every fitted row needs an explicit, valid development
+    assignment; missing assignments reject as ``unassigned_partition``;
+    unknown labels, conflicting assignments, duplicate training IDs, and
+    validation/holdout IDs all reject.
+    """
     results = []
     for request in fixtures.get("fit_requests", []):
-        reasons = []
-        assignment = {}
-        for entry in request["partition_assignment"]:
-            cid = entry["catalog_id"]
-            if cid in assignment and assignment[cid] != entry["split"]:
-                reasons.append(f"catalog_id {cid} appears in two partitions")
-            assignment[cid] = entry["split"]
-        seen = set()
-        for row in request["training_rows"]:
-            cid = row["catalog_id"]
-            if cid in seen:
-                reasons.append(f"duplicate training rows for catalog_id {cid}")
-            seen.add(cid)
-        for cid in seen:
-            if assignment.get(cid) in ("validation", "holdout"):
-                reasons.append(f"validation or holdout catalog_id {cid} in fit request")
+        reasons = partition_guard(request["training_rows"], request["partition_assignment"])
         expected = request["expect"]
         ok = (not reasons) if expected == "accepted" else bool(reasons)
         if expected == "rejected" and request.get("intended_reason") and not any(
@@ -1404,8 +1397,17 @@ def structural_checks(contract, fixtures):
     return failures
 
 
-def identity_checks(identity, contract_path, fixtures_path, identity_path):
-    """Compare recorded identities by content; never regenerate or overwrite."""
+def identity_checks(identity, contract_path, fixtures_path, identity_path, contract=None):
+    """Compare recorded identities by content; never regenerate or overwrite.
+
+    P2R-06a A1.6 (R5): authorizing-spec identities form an explicit
+    manifest. Every entry resolves against the repository root (never the
+    working directory; no search-order fallback); a missing file fails as
+    ``identity_missing:authorizing_spec`` and a digest mismatch as
+    ``identity_mismatch:authorizing_spec``. No skip path exists. The
+    contract declares the minimum required manifest set, so deleting an
+    entry (or its digest) from a scratch identity fails against it.
+    """
     failures = []
 
     def sha256_file(path):
@@ -1417,10 +1419,29 @@ def identity_checks(identity, contract_path, fixtures_path, identity_path):
             failures.append(f"identity_file_absent:{entry['path']}")
         elif sha256_file(path) != entry["sha256"]:
             failures.append("identity_content_mismatch")
-    spec = identity.get("authorizing_spec", {})
-    spec_path = Path(spec.get("path", ""))
-    if spec_path.exists() and sha256_file(spec_path) != spec.get("sha256"):
-        failures.append("identity_mismatch:authorizing_spec")
+
+    specs = identity.get("authorizing_specs")
+    if not isinstance(specs, list) or not specs:
+        failures.append("identity_manifest_missing:authorizing_specs")
+        specs = []
+    for entry in specs:
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str) \
+                or not isinstance(entry.get("sha256"), str):
+            failures.append("identity_manifest_schema:authorizing_specs")
+            continue
+        path = REPO_ROOT / entry["path"]
+        if not path.exists():
+            failures.append(f"identity_missing:authorizing_spec:{entry['path']}")
+        elif sha256_file(path) != entry["sha256"]:
+            failures.append(f"identity_mismatch:authorizing_spec:{entry['path']}")
+
+    if contract is not None:
+        minimum = contract.get("contract", {}).get("minimum_required_authorizing_specs", [])
+        declared = {entry.get("path") for entry in specs if isinstance(entry, dict)}
+        for required_path in minimum:
+            if required_path not in declared:
+                failures.append(f"authorizing_spec_not_declared:{required_path}")
+
     if INPUT_CONTRACT_MD.exists():
         text = INPUT_CONTRACT_MD.read_text()
         product = identity.get("p2r05_product", {})
@@ -1490,6 +1511,15 @@ def apply_mutation(contract, identity, action):
         contract["declared_constants"] = [
             c for c in contract["declared_constants"] if c["name"] != action["name"]
         ]
+    elif kind == "remove_identity_spec_entry":
+        identity["authorizing_specs"] = [
+            e for e in identity.get("authorizing_specs", [])
+            if e.get("path") != action["path"]
+        ]
+    elif kind == "change_identity_spec_digest":
+        for entry in identity.get("authorizing_specs", []):
+            if entry.get("path") == action["path"]:
+                entry["sha256"] = action["value"]
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 
@@ -1561,7 +1591,7 @@ def run_validation(contract, fixtures, identity, paths):
     demo_failures, demo_results = run_binning_demonstrations(fixtures, contract, built_models)
     failures.extend(demo_failures)
     failures.extend(structural_checks(contract, fixtures))
-    failures.extend(identity_checks(identity, *paths))
+    failures.extend(identity_checks(identity, *paths, contract=contract))
     return failures, case_results, fit_results, solve_results, math_results, demo_results
 
 
@@ -1647,7 +1677,21 @@ def main(argv=None):
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "command": " ".join(["python", str(contract_path.parent.parent.parent / "src" / "inspection" / "validate_ta_v2_design.py")] + sys.argv[1:]),
+        "execution": {
+            "interpreter": sys.executable,
+            "argv": [str(Path(__file__).resolve())]
+            + (["--mutation", str(args.mutation)] if args.mutation else []),
+            "script_repo_relative": "src/inspection/validate_ta_v2_design.py",
+            "script_resolved_from": "repository root (REPO_ROOT derived from this file); paths never depend on the working directory",
+            "command_shell_safe": " ".join(
+                [shlex.quote(sys.executable), "src/inspection/validate_ta_v2_design.py"]
+                + ([shlex.quote("--mutation"), shlex.quote(str(args.mutation))] if args.mutation else [])
+            ),
+        },
+        "command": " ".join(
+            [shlex.quote(sys.executable), "src/inspection/validate_ta_v2_design.py"]
+            + ([shlex.quote("--mutation"), shlex.quote(str(args.mutation))] if args.mutation else [])
+        ),
         "mode": args.mutation or "full",
         "validator": "src/inspection/validate_ta_v2_design.py",
         "contract_sha256": hashlib.sha256(contract_path.read_bytes()).hexdigest(),

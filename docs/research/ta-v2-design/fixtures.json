@@ -1550,6 +1550,23 @@
         }
       ],
       "expect": "accepted"
+    },
+    {
+      "id": "FX-P5",
+      "description": "A training ID with no partition assignment is rejected as unassigned_partition",
+      "training_rows": [
+        {
+          "catalog_id": 42
+        }
+      ],
+      "partition_assignment": [
+        {
+          "catalog_id": 7,
+          "split": "development"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "unassigned_partition"
     }
   ],
   "mutations": {
@@ -1775,6 +1792,23 @@
         "name": "forced_highz_edge"
       },
       "intended_reason": "case_mismatch:FX-R7d:residual_mass_dex"
+    },
+    "M24_authorizing_spec_entry_deleted": {
+      "description": "R5 reintroduced: the required parent authorizing-spec entry is deleted from the identity manifest",
+      "action": {
+        "kind": "remove_identity_spec_entry",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+      },
+      "intended_reason": "authorizing_spec_not_declared:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+    },
+    "M25_authorizing_spec_digest_deleted": {
+      "description": "R5 reintroduced: the parent authorizing-spec digest is altered in the identity manifest",
+      "action": {
+        "kind": "change_identity_spec_digest",
+        "path": "spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md",
+        "value": "deadbeef"
+      },
+      "intended_reason": "identity_mismatch:authorizing_spec:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
     }
   },
   "sigma_sys_solve_checks": [

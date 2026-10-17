@@ -486,3 +486,85 @@ Full run: cases 64/64, fit requests 4/4, sigma_sys 3/3, math 1/1, demo
 1/1, mutations caught 23/23, exit 0. `pytest`: 61/61 passed.
 
 Gate A1.5 checkpoint: this commit.
+
+## Gate A1.6: partition and identity fail-closed (R4, R5, R6)
+
+Old-behaviour evidence (adapter
+`staging/2026-10-16-p2r06a-execution/regression/adapter_a16_r4r5r6.py`):
+
+- **R4:** on a training row whose catalog_id has no partition assignment,
+  d4bc1a2 produces no rejection reason at all — the fixture's own
+  `intended reason absent: unassigned_partition` note is the only text
+  (the request itself is accepted; `assignment.get(cid)` returns None,
+  not a blocked split). Repair: the shared `partition_guard` rejects with
+  `unassigned_partition catalog_id 42`; FX-P5 added and passes.
+- **R5:** a scratch identity whose authorizing-spec path does not exist
+  produces zero authorizing-spec failures on d4bc1a2 (the `exists()`
+  guard skips the comparison), and the live recorded central-queue path
+  is absent after the parent closeout move, so the skip was live.
+  Repair: `identity_missing:authorizing_spec:<path>` for the nonexistent
+  path; a one-byte change to a referenced copy fails
+  `identity_mismatch:authorizing_spec:<path>`.
+- **R6:** the d4bc1a2 recorded command is
+  `python /opt/agents/repos/cosmos2025-anomalies/docs/src/inspection/validate_ta_v2_design.py`
+  — a `docs/src/` path that does not exist. Repair: results record the
+  actual interpreter (`sys.executable`), the argv (JSON list, script
+  resolved from the repository root), a shell-safe rendering, and the
+  repo-relative script identity; `docs/src` no longer appears.
+
+Repairs:
+
+- `input-identity.json`: `authorizing_spec` (absolute central-queue
+  path) replaced by the `authorizing_specs` manifest — the parent entry
+  now references the in-repo archive copy by repository-relative path
+  `spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md`
+  (SHA-256 `04bb896050114207491603f7fc08971b59be274501454532e5c7ed6e5f42ecf0`,
+  unchanged from the recorded digest since the archive copy is
+  byte-identical to the hashed queue file); an `amendment_pending` block
+  records that the amendment becomes a required entry at A1.9 once its
+  archive copy exists, so final validation cannot silently revert to
+  parent-only checking.
+- `feature-contract.yaml`: `identity_rule` rewritten (repository-root
+  resolution, no working-directory dependence, no search-order fallback,
+  no skip path) and `minimum_required_authorizing_specs` declared
+  (parent path today; the amendment path is added at A1.9 with the
+  transition recorded here and in the worklog).
+- `validate_ta_v2_design.py`: `check_fit_requests` delegates to the
+  shared `partition_guard` (the same guard every synthetic center, scale
+  and covariance fitter uses); `identity_checks` rewritten for the
+  manifest (schema validation, root-resolved paths,
+  missing/mismatch/no-skip, contract-declared minimum checked against
+  the identity so deleting a required entry or its digest fails);
+  execution recording (interpreter/argv/shell-safe command).
+- `fixtures.json`: FX-P5 (unassigned training ID, rejected with
+  `unassigned_partition`); mutations M24 (required manifest entry
+  deleted → `authorizing_spec_not_declared:spec/2026-10/...p2r-06...md`)
+  and M25 (spec digest altered →
+  `identity_mismatch:authorizing_spec:spec/2026-10/...p2r-06...md`).
+- `tests/test_ta_v2_design_contract.py`: `TestA16PartitionAndIdentity`
+  (7 tests): FX-P5 rejection; scratch identity with nonexistent spec
+  path fails closed; required-entry deletion fails; command resolves
+  from the repository root; **the recorded argv re-executes into a
+  distinct scratch file with the same exit code, input hashes, case and
+  mutation outcomes and semantic payload** (argv parsed as recorded
+  JSON, never as shell text); the committed results bytes stay unchanged
+  by reproduction runs; a non-root working directory still resolves
+  identities. MUTATIONS extended to M25.
+
+Validation (gate A1.6 checklist):
+
+- [x] FX-P5 (training ID with no assignment) rejected.
+- [x] Against d4bc1a2, a scratch identity whose spec path does not exist
+  passes (zero authorizing-spec failures, adapter); after repair it
+  fails with `identity_missing`, and a one-byte change to the referenced
+  copy fails with `identity_mismatch`.
+- [x] The recorded command re-executes into a different scratch output
+  with the same semantic results; committed result bytes stay unchanged
+  (test). Missing/altered files and deleted required manifest entries
+  each fail (mutations M5/M24/M25 and the scratch-identity tests); a
+  non-root working directory still resolves identities correctly (test).
+
+Full run: cases 64/64, fit requests 5/5, sigma_sys 3/3, math 1/1, demo
+1/1, mutations caught 25/25, exit 0. `pytest`: 70/70 passed.
+
+Gate A1.6 checkpoint: this commit.
