@@ -304,3 +304,34 @@ truth; it does not invent limits, likelihood equivalence, or an independent
 CIGALE photo-z; and it does not widen the unit's write-free boundary. Every
 authorization beyond this document's proposal status belongs to TA2-Q01
 through TA2-Q06 or a later named approval.
+
+## 9. Declared limitations (P2R-06a A1.8)
+
+Four limitations are declared here explicitly and separately in the
+review surface; each is a property of the design, not a defect to fix in
+passing.
+
+1. **Shared-redshift dependence.** T_A is conditional on LePhare's
+   redshift: CIGALE redshifts are fixed to LePhare solutions in the
+   published methodology, so every disagreement surface inherits the
+   photo-z it was handed. No T_A output independently validates that
+   redshift.
+2. **No low-T_z redshift guarantee.** A confident catastrophic photo-z
+   can produce a large T_A at low T_z: the redshift-assessment tension
+   and the mass/SFR disagreement tensions are different quantities, and
+   a small redshift-assessment tension does not establish that the
+   redshift is correct. The diagnostic for catastrophic photo-z is
+   spectroscopic comparison under the S5 conditions (POP-SPECZ-PRIMARY),
+   never a T_A threshold.
+3. **Covariance masking.** A fitted joint covariance can absorb a real
+   rare population living along its major axis: fixture KERNEL-3 shows a
+   source with larger marginal magnitudes receiving a smaller joint
+   distance than an off-axis source. The joint pair is a candidate
+   surface with this limitation recorded, not a replacement for the
+   marginals.
+4. **Median non-additivity is not bimodality.** The LePhare
+   non-additivity context is a difference between summary estimators; a
+   deterministic unimodal (log-concave) construction produces a nonzero
+   median non-additivity of about -0.292 (fixture MATH-1), so no nonzero
+   value can be read as evidence of a bimodal posterior, a degenerate
+   fit, or a physical cause.

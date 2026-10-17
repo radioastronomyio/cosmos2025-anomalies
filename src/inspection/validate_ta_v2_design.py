@@ -86,6 +86,8 @@ REQUIRED_SFR_STATES = {
     "invalid_or_unsupported",
 }
 FIT_REQUEST_RULE_SUBSTRING = "validation or holdout catalog_id is rejected"
+BANNED_OUTPUT_PHRASES = ("bimodal", "multimodal", "secure redshift",
+                         "true anomaly", "significance")
 REQUIRED_MARGINAL_OUTPUTS = frozenset({
     "delta_mass_dex", "expected_delta_mass_dex", "center_support",
     "center_requested_cell", "residual_mass_dex", "score_mass",
@@ -1675,6 +1677,20 @@ def structural_checks(contract, fixtures):
     for required in REQUIRED_MARGINAL_OUTPUTS:
         if required not in declared_names:
             failures.append(f"required_output_missing:{required}")
+
+    # P2R-06a A1.8: naming restraint. Output names and description fields
+    # carry none of the banned interpretive phrases; interpretation_guard
+    # fields, which state what an output does not establish, are exempt.
+    for output in contract["outputs"]:
+        for field in ("name", "description"):
+            value = output.get(field)
+            if not isinstance(value, str):
+                continue
+            for phrase in BANNED_OUTPUT_PHRASES:
+                if phrase in value.lower():
+                    failures.append(
+                        f"naming_restraint:{output.get('name', '?')}:{field}:{phrase}"
+                    )
 
     # P2R-06a A1.5: the C1 center must declare support enforcement against
     # center_min_cell_support and the forced high-redshift edge must exist

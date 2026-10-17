@@ -665,3 +665,38 @@ sigma_sys 3/3, math 1/1, demo 1/1, kernel 5/5, joint fit checks 5/5,
 mutations caught 33/33, exit 0. `pytest`: 84/84 passed.
 
 Gate A1.7 checkpoint: this commit.
+
+## Gate A1.8: naming restraint and declared limitations
+
+- Structural naming restraint in the validator: output `name` and
+  `description` fields may not contain "bimodal", "multimodal", "secure
+  redshift", "true anomaly", or "significance"; `interpretation_guard`
+  fields (which state what an output does **not** establish) are exempt.
+  Current contract scanned clean: zero violations.
+- Mutation M34 ("bimodality flag" inserted into the non-additivity
+  context's description) caught with
+  `naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal`;
+  34/34 mutations caught.
+- `scientific-design.md` section 9 and `review.md` "Declared limitations"
+  added, each stating the four claims separately: shared-redshift
+  dependence (T_A conditional on LePhare's redshift); no low-T_z
+  redshift guarantee (a confident catastrophic photo-z can produce large
+  T_A at low T_z; spec-z under the S5 conditions is the diagnostic);
+  covariance masking (a fitted joint covariance can absorb a real rare
+  population — KERNEL-3); median non-additivity is not bimodality
+  (MATH-1's unimodal counterexample, non-additivity about -0.292).
+- Tests: `TestA18NamingAndLimitations` checks the mutation, the guard
+  exemption, and each limitation claim in both documents in context.
+
+Validation (gate A1.8 checklist):
+
+- [x] Mutation caught: "bimodality flag" inserted into a description
+  (M34, naming_restraint failure; also asserted directly by test).
+- [x] Both documents separately state all four claims; each checked in
+  context by test (fragment-level assertions against both files), not by
+  counting phrases.
+
+Full run: cases 71/71, mutations caught 34/34, exit 0. `pytest`: 88/88
+passed.
+
+Gate A1.8 checkpoint: this commit.

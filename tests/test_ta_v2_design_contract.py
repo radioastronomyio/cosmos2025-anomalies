@@ -82,6 +82,7 @@ MUTATIONS = [
     "M31_distance_uses_correlation",
     "M32_covariance_fit_bypassed",
     "M33_timescales_incorrectly_intersected",
+    "M34_bimodality_flag_in_description",
 ]
 
 
@@ -545,6 +546,45 @@ class TestA17JointCandidatePair:
         # FX-R9a (same contract, joint outputs declared) keeps its marginal score
         r9a = by_id["FX-R9a"]["observed"]
         assert abs(r9a["score_mass"] - 0.891740157358414) < 1e-9
+
+
+class TestA18NamingAndLimitations:
+    """P2R-06a A1.8: naming restraint and declared limitations."""
+
+    def test_naming_restraint_catches_banned_description(self):
+        import yaml
+        import sys
+        sys.path.insert(0, str(REPO_ROOT / "src" / "inspection"))
+        import validate_ta_v2_design as validator
+        import copy
+        contract = yaml.safe_load(CONTRACT.read_text())
+        mutated = copy.deepcopy(contract)
+        for output in mutated["outputs"]:
+            if output["name"] == "ctx_lp_ssfr_nonadditivity_dex":
+                output["description"] = "bimodality flag for the LePhare posterior"
+        failures = validator.structural_checks(mutated, json.loads(FIXTURES.read_text()))
+        assert "naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal" in failures
+
+    def test_interpretation_guards_are_exempt(self):
+        import yaml
+        contract = yaml.safe_load(CONTRACT.read_text())
+        guards = [o["interpretation_guard"] for o in contract["outputs"]
+                  if o.get("interpretation_guard")]
+        assert guards  # guards exist and may legitimately use restricted words
+
+    def test_declared_limitations_in_both_documents(self):
+        design = (REPO_ROOT / "docs/research/ta-v2-design/scientific-design.md").read_text()
+        review = (REPO_ROOT / "docs/research/ta-v2-design/review.md").read_text()
+        claims = {
+            "shared-redshift dependence": ["Shared-redshift dependence", "conditional on LePhare"],
+            "no low-T_z guarantee": ["catastrophic photo-z", "does not establish"],
+            "covariance masking": ["absorb a real", "rare population"],
+            "median non-additivity is not bimodality": ["unimodal", "MATH-1"],
+        }
+        for label, fragments in claims.items():
+            for fragment in fragments:
+                assert fragment in design, (label, fragment, "design")
+                assert fragment in review, (label, fragment, "review")
 
 
 class TestValidatorBoundaries:

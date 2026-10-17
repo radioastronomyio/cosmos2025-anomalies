@@ -183,6 +183,30 @@ or re-voted. *Recommendation:* acknowledge the mapping. *Limitation:* the
 responses are proposals until TA2-Q01..Q06 are answered.
 *Closed question: TA2-Q01..Q06.*
 
+## Declared limitations (P2R-06a A1.8)
+
+Stated separately from the findings above and mirrored in
+scientific-design.md section 9; each is checked in context, not by
+counting phrases.
+
+1. **Shared-redshift dependence.** T_A is conditional on LePhare's
+   redshift (CIGALE is fixed to LePhare solutions); no T_A output
+   independently validates that redshift.
+2. **No low-T_z redshift guarantee.** A confident catastrophic photo-z
+   can produce a large T_A at low T_z; low T_z does not establish a
+   correct redshift, and the diagnostic for catastrophic photo-z is
+   spec-z under the S5 conditions (POP-SPECZ-PRIMARY), never a T_A
+   threshold.
+3. **Covariance masking.** A fitted joint covariance can absorb a real
+   rare population living along its major axis (fixture KERNEL-3: larger
+   marginals, smaller joint distance). The joint pair is a candidate
+   surface with this limitation recorded.
+4. **Median non-additivity is not bimodality.** The context field
+   `ctx_lp_ssfr_nonadditivity_dex` does not establish posterior
+   bimodality, a degenerate fit, or a physical cause; the deterministic
+   unimodal counterexample MATH-1 (non-additivity about -0.292) proves a
+   nonzero value can arise without any bimodality.
+
 ## Closed approval questions
 
 These questions are put to Don. They are not answered here.

@@ -2140,6 +2140,16 @@
         ]
       },
       "intended_reason": "case_mismatch:FX-J5d:joint_residual_distance_inst"
+    },
+    "M34_bimodality_flag_in_description": {
+      "description": "A1.8 guard: the phrase 'bimodality flag' is inserted into an output description",
+      "action": {
+        "kind": "set_output_field",
+        "output": "ctx_lp_ssfr_nonadditivity_dex",
+        "field": "description",
+        "value": "bimodality flag for the LePhare posterior"
+      },
+      "intended_reason": "naming_restraint:ctx_lp_ssfr_nonadditivity_dex:description:bimodal"
     }
   },
   "sigma_sys_solve_checks": [
