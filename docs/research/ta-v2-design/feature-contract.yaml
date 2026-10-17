@@ -60,6 +60,13 @@ declared_constants:
   - {name: sigma_sys_max_iterations, value: 200, kind: declared_domain}
   - {name: sigma_sys_search_upper_dex, value: 10.0, kind: declared_domain}
   - {name: sigma_sys_interval_tolerance, value: 1.0e-12, kind: declared_domain}
+  - {name: joint_winsor_c, value: 3.0, kind: declared_domain,
+      rationale: "winsorization tuning constant of the proposed robust covariance estimator (A1.7)"}
+  - {name: joint_rho_clamp, value: 0.95, kind: declared_domain,
+      rationale: "finite correlation clamp, 0 < clamp < 1; bounds the condition number of the unit-diagonal correlation matrix at (1+rho)/(1-rho) <= 39 while preserving strong correlations; regularization can change rankings and remains a proposal under TA2-Q07"}
+  - {name: joint_min_cell_support, value: 200, kind: declared_domain}
+  - {name: joint_min_global_support, value: 200, kind: declared_domain}
+  - {name: joint_min_covariance_rows, value: 10, kind: declared_domain}
   - name: forced_highz_edge
     value: 5.5
     kind: declared_domain
@@ -583,6 +590,61 @@ outputs:
   - {name: score_ssfr_100, kind: unsupported_output, state: unsupported_correlated_errors,
       behaviour: same as score_ssfr_inst}
 
+  # joint mass-SFR candidate pair (A1.7, decision 4; proposed_not_adopted)
+  - name: joint_residual_distance_inst
+    kind: joint_distance
+    formula: "sqrt(r_inst^T C_b,inst^-1 r_inst) with r_inst = (residual_mass_dex, residual_sfr_inst_dex) and C the fitted winsorized covariance"
+    population_gate: POP-MASS
+    requires_timescales: [mass, inst]
+    matrix_source: covariance
+    rankable: false
+    interpretation_guard: "covariance-normalized distance from unstandardized residuals; no chi-square, p-value, significance or probability label; a fitted covariance can absorb a rare population along its major axis"
+  - {name: score_joint_inst, kind: joint_standardized_distance,
+      formula: "sqrt(z_inst^T R_b,inst^-1 z_inst) with z = r / tau and R the fitted winsorized correlation (unit diagonal)",
+      population_gate: POP-MASS, requires_timescales: [mass, inst], matrix_source: correlation,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      rankable: false,
+      interpretation_guard: same guard as joint_residual_distance_inst}
+  - name: joint_residual_distance_100
+    kind: joint_distance
+    formula: "sqrt(r_100^T C_b,100^-1 r_100) with r_100 = (residual_mass_dex, residual_sfr_100_dex)"
+    population_gate: POP-MASS
+    requires_timescales: [mass, 100]
+    matrix_source: covariance
+    rankable: false
+    interpretation_guard: same guard as joint_residual_distance_inst
+  - {name: score_joint_100, kind: joint_standardized_distance,
+      formula: "sqrt(z_100^T R_b,100^-1 z_100)",
+      population_gate: POP-MASS, requires_timescales: [mass, 100], matrix_source: correlation,
+      guards: [population, point_state, scale_state, directional_width, combined_scale_guard],
+      rankable: false,
+      interpretation_guard: same guard as joint_residual_distance_inst}
+  - {name: joint_inst_state, kind: state, rankable: false}
+  - {name: joint_inst_reason, kind: reason, rankable: false}
+  - {name: joint_inst_support_count, kind: support_flag, rankable: false}
+  - {name: joint_inst_fallback, kind: support_flag, rankable: false,
+      domain: [cell, z_fallback, global_fallback, unsupported]}
+  - {name: joint_inst_rho_raw, kind: uncertainty, rankable: false,
+      note: "pre-clamp fitted correlation (synthetic scenarios only)"}
+  - {name: joint_inst_rho_effective, kind: uncertainty, rankable: false,
+      note: "post-clamp correlation actually used"}
+  - {name: joint_inst_regularized, kind: support_flag, rankable: false}
+  - {name: score_joint_inst_state, kind: state, rankable: false}
+  - {name: score_joint_inst_reason, kind: reason, rankable: false}
+  - {name: joint_100_state, kind: state, rankable: false}
+  - {name: joint_100_reason, kind: reason, rankable: false}
+  - {name: joint_100_support_count, kind: support_flag, rankable: false}
+  - {name: joint_100_fallback, kind: support_flag, rankable: false,
+      domain: [cell, z_fallback, global_fallback, unsupported]}
+  - {name: joint_100_rho_raw, kind: uncertainty, rankable: false}
+  - {name: joint_100_rho_effective, kind: uncertainty, rankable: false}
+  - {name: joint_100_regularized, kind: support_flag, rankable: false}
+  - {name: score_joint_100_state, kind: state, rankable: false}
+  - {name: score_joint_100_reason, kind: reason, rankable: false}
+  - {name: joint_covariance_model_id, kind: identity, rankable: false,
+      value: winsorized-median-covariance-v1,
+      note: "identifies the estimator feeding both joint surfaces; inherited center/scale identities are center_model_id and scale_model_id"}
+
   # fit-quality context block (context only; never predictors, never ranked)
   - {name: ctx_chi2_lephare_total, kind: context_passthrough, source: lephare.chi2_best,
      context_only: true, rankable: false, permitted_predictor: false}
@@ -615,21 +677,79 @@ forbidden_dependencies:
       description: "no universal constant subtracted inside raw delta outputs; centering exists only through expected_delta/residual outputs"}
   - {id: no-native-ssfr-in-rankable,
       description: "lephare.ssfr_med appears in no rankable output and no raw_disagreement or derived_view formula; it exists only in the context field ctx_lp_ssfr_nonadditivity_dex and its point machine"}
+  - {id: no-joint-veto,
+      description: "no low-correlation veto, selection budget, quota, or automatic disable may gate the joint surfaces; they are comparison candidates only (TA2-Q07)"}
+  - {id: joint-matrices-require-fit,
+      description: "the evaluator consumes covariance/correlation matrices produced by the declared estimator from declared fit rows; hand-declared matrices never reach the per-source evaluator (kernel checks are separate oracle fixtures)"}
+  - {id: joint-surfaces-preserve-marginals,
+      description: "the presence of joint outputs neither removes nor alters any marginal output; the marginal set is structurally required"}
 
 partition_use:
   source: "analysis.specz_p2r05_splits.assigned_split under run 1e604a8131d3b26228818e39262f5137c5909efa9b31dfa3d772c413dcc67c4c"
-  development: fit preprocessing, centers, scales, supports, hyperparameters
+  development: fit preprocessing, centers, scales, supports, hyperparameters, joint covariance/correlation models
   validation: comparison among declared choices only; tie-breaks fixed before outcomes
   holdout: single evaluation after the contract and artifact identities are frozen
   rules:
     - "a fit request containing any validation or holdout catalog_id is rejected"
+    - "a fitted row with no explicit development assignment is rejected as unassigned_partition"
     - "a catalog_id may not appear in two partitions"
     - "a catalog_id may not appear as multiple independent training rows"
+    - "every synthetic center, scale and covariance fitter applies the same partition guard"
     - "no reroll, no rebalancing, no row-random fallback"
   uncertainty:
     clustered_by: [tile, survey]
     holdout_tiles: [A1, A7, B3, B7]
     upstream_calibration_independence: unestablished
+
+joint_surfaces:
+  proposed_not_adopted: true
+  status: candidate comparison surfaces only (TA2-Q07); no combined ranker, maximum, union, quota, selection budget, low-correlation veto or automatic disable is defined
+  surfaces:
+    - joint_residual_distance_inst
+    - score_joint_inst
+    - joint_residual_distance_100
+    - score_joint_100
+  estimator:
+    id: winsorized-median-covariance-v1
+    procedure: >-
+      One deterministic robust covariance/correlation procedure.
+      Centering: componentwise median of the eligible development residual
+      vectors (covariance centering only; the distance formula keeps the
+      fixed residual origin and no second conditional mean enters it).
+      Marginal scale: MAD_k = 1.4826 * median(|x_k - m_k|), even-count
+      medians averaging the two middle order statistics. Standardize each
+      component by its MAD and winsorize at joint_winsor_c = 3.0. S_w =
+      sample covariance of the winsorized standardized vectors with the
+      (n-1) denominator. Correlation R from S_w normalized to unit
+      diagonal; clamp the off-diagonal to +-joint_rho_clamp = 0.95.
+      Reconstruct C = diag(s) R diag(s) with s_k = sqrt(S_w[kk]) — no
+      absolute floor is applied to dex-squared values; the eigenvalue
+      bound 1 - joint_rho_clamp >= 0.05 lives on the dimensionless
+      correlation matrix only. Pre- and post-clamp correlations and a
+      regularization flag are recorded. No iteration and no seed.
+    minimum_support: "cell and z-only levels at joint_min_cell_support unique eligible sources; global at joint_min_global_support; fewer rows than joint_min_covariance_rows is insufficient_covariance_support"
+    fallback_hierarchy: "supported cell -> z-only cell -> global, each on this timescale's own eligible population, counted separately per timescale; mass-only support is never borrowed and the two SFR timescales never require each other"
+    degeneracy: "zero or non-finite marginal spread, non-finite inputs, or failed estimation produce explicit unsupported states; no covariance is invented"
+    fit_population: "development-only POP-MASS intersected with the per-timescale POP-SFR-T residual population"
+  domain:
+    joint_residual_distance_T: "requires POP-MASS intersected with POP-SFR-T, both residuals, and a supported covariance; dimensionless (residuals in dex, covariance entries in dex squared); a covariance-normalized distance computed from unstandardized residuals, not a distance in dex and not a replacement for the magnitude of a marginal residual"
+    score_joint_T: "additionally requires both valid directional scales (A1.3 widths plus the declared CIGALE/systematic terms); the unit diagonal of R is an estimation convention, not an assertion that every z component has empirical variance one; cross-code and within-code mass-SFR correlations remain unknown"
+  interpretation_guard: >-
+    No chi-square, p-value, significance or probability label attaches to
+    either surface. Cross-code and within-code mass-SFR correlations are
+    unknown; the fitted correlation is an exploratory proposal, and a
+    fitted covariance can absorb a real rare population living along its
+    major axis.
+  centers_and_coexistence: >-
+    The joint surfaces reuse the selected C0/C1 mass center and the S0
+    per-timescale SFR center; conditional covariance does not authorize a
+    conditional SFR mean. The declared cell grid stays fixed by the
+    development-only binning rule even when C0 supplies the mass center.
+    Marginal surfaces remain exactly as repaired by A1.2/A1.3; adding
+    joint outputs changes none of them. The raw full-catalog correlation
+    in exposure-log CQ5 (about -0.30, uncentered, censored regime
+    included) is neither a parameter nor a bound for anything here.
+  protocol: candidates added to the declared comparison set requiring later adoption; criteria separated into mathematical correctness (synthetic), stability (development tile jackknife) and usefulness (validation-tile description including composition by support state, quantile and floor conditions); no criterion rewards elliptical distance by construction; top-K overlap descriptions fix K and tie handling in the approved future protocol; tile jackknife estimates are development-only; absent spectroscopic survey labels cannot become a requirement for the non-spectroscopic sample
 
 specz_diagnostic_interfaces:
   primary_redshift_diagnostic:

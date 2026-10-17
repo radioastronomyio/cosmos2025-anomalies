@@ -568,3 +568,100 @@ Full run: cases 64/64, fit requests 5/5, sigma_sys 3/3, math 1/1, demo
 1/1, mutations caught 25/25, exit 0. `pytest`: 70/70 passed.
 
 Gate A1.6 checkpoint: this commit.
+
+## Gate A1.7: joint mass-SFR candidate pair (decision 4)
+
+New capability (no d4bc1a2 counterpart, so per spec section 6 the
+discriminators are independent numerical oracles plus deliberately wrong
+variants, not baseline API comparisons):
+
+- **Kernel checks on stated matrices** (oracle fixtures, never feeding
+  the per-source evaluator): correlation 0.8 gives (3,3) →
+  3.1622776601683795 and (2.2,−2.2) → 6.957010852370437 (the off-pattern
+  source outranks the on-pattern one); correlation 0 gives 3.5355339059327378
+  and 3.4 with the surface emitted and no veto; mixture covariance
+  [[3.4,−2.5],[−2.5,3.4]] gives (4,−4) → 2.328890038958328 and (3,3) →
+  4.4721359549995805, recorded as the covariance-masking limitation
+  (D outranks C on the joint surface while C's marginals exceed D's).
+- **Analytic pooled-moment demonstrations:** two bins with internal
+  correlation 0, means (1,−1)/(−1,1), unit variances, equal weights →
+  pooled correlation −0.5; equal zero-mean unit-variance components with
+  correlations −0.7 and 0 in a 50/50 mixture → −0.35, not −0.30.
+- **Estimator (`winsorized-median-covariance-v1`, fully specified in the
+  contract):** componentwise-median centering (spread estimation only;
+  the distance keeps the fixed residual origin — disclosed), MAD
+  marginals, winsorization at joint_winsor_c = 3.0, (n−1) covariance of
+  the winsorized standardized vectors, correlation clamped to
+  joint_rho_clamp = 0.95, C = diag(s)·R·diag(s) with no absolute
+  dex-squared floor. Checks: CORE rho exactly 0.5 from ±1 patterns
+  (counts 6/2/2/6); CONTAM (one (1000,1000) outlier) moves rho only to
+  0.9260373689896785 (winsorized; a moment estimator would exceed 0.99);
+  DEGEN (identical rows) → zero_marginal_spread; CLAMP-A: a supported
+  cell with rho 19996/20000 = 0.9998 clamps to **exactly 0.95**;
+  CLAMP-G: the global fit behind the sparse-cell fallback
+  (rho_raw 0.9995501436922124) also clamps. Support hierarchy per
+  timescale: cell/z-only at 200, global at 200, minimum 10 rows.
+- **Evaluator (fits actually feed the scores):** FX-J4 under a fitted
+  0.6-correlation, non-unit-scale cell: distance 1.1603624332797386
+  (using C; using R instead — the M31 wrong variant — would give
+  0.7846177413237612), score 3.075614166692078, fallback cell, support
+  200, rho_effective 0.6, regularized false. FX-J5b (type-2): both joint
+  outputs NULL not_in_population, raw mass delta survives. FX-J5c
+  (relative error 0.31): distance stays valid, score NULL with
+  log_error_approximation_domain_exceeded. FX-J5d/FX-J5e: valid
+  inst/censored 100 and the reverse — each timescale independent, the
+  valid surface emitted, the invalid one NULL. FX-J6: sparse cell →
+  global fallback, rho_effective 0.95, regularized true, support 20010.
+  FX-J7: zero spread → unsupported, never an invented covariance.
+  FX-JP1/2/3: covariance fit requests with duplicate, unassigned, and
+  validation-assigned rows all rejected by the shared partition guard.
+- **Mutations M26-M33 caught 33/33:** low-correlation veto
+  (joint_veto_declared); validation row in the covariance fit
+  (joint_fit_partition:JOINT-1:inst:...999999...); marginal output
+  removed (required_output_missing:sigma_sfr_cig_100_dex); joint
+  population gate removed (population_gate_missing); clamp removed
+  (joint_fit_check:CLAMP-A — the exact 0.95 assertion fails at 0.9998);
+  full covariance replaced by unit-diagonal correlation
+  (case_mismatch:FX-J4 — 0.7846 vs 1.160); estimator bypassed
+  (joint_estimator_invalid); timescales incorrectly intersected
+  (case_mismatch:FX-J5d).
+
+Contract: `joint_surfaces` section (estimator, minimum support,
+fallback hierarchy, degeneracy, fit population, interpretation guard
+denying chi-square/p-value/significance/probability labels,
+centers-and-coexistence disclosure including the CQ5 non-bound
+statement, protocol status); four joint outputs + 16 state/reason/
+support/fallback/rho/regularization outputs + `joint_covariance_model_id`;
+forbidden dependencies `no-joint-veto`, `joint-matrices-require-fit`,
+`joint-surfaces-preserve-marginals`; constants joint_winsor_c,
+joint_rho_clamp, joint_min_cell_support, joint_min_global_support,
+joint_min_covariance_rows; partition_use rules extended to the
+covariance fitter. Protocol (evaluation-protocol.md): the pair added to
+the declared comparison set as candidates requiring TA2-Q07 adoption;
+section 10 predeclares the three separated criteria (synthetic
+correctness; development-tile jackknife summaries; validation-tile
+compositional description), forbids criteria rewarding elliptical
+distance by construction, fixes top-K overlap mechanics (K and
+lexicographic tie handling) in the approved future protocol, keeps tile
+jackknife development-only, and records the evidence against adoption
+(KERNEL-3 masking; POOLED-1/2 distortion) instead of inventing
+thresholds.
+
+Validation (gate A1.7 checklist):
+
+- [x] All six fixture families pass with full-precision independent
+  formula/moment oracles (1e-3 only for the spec's rounded examples
+  3.162/6.957/3.536/3.400/2.329/4.472); fitter fixtures separately check
+  a known core (rho exactly 0.5), contamination response (bounded),
+  support fallback (CLAMP-G/FX-J6) and degeneracy (DEGEN/FX-J7);
+  documentation claims no proof of robustness for arbitrary mixtures.
+- [x] Mutations caught with their intended reasons (list above), 33/33.
+- [x] Marginal outputs unchanged with joint outputs present (FX-J4
+  residual identical; FX-R9a marginal score identical under the same
+  contract).
+
+Full run: cases 71/71, fit requests 5/5, joint fit requests 3/3,
+sigma_sys 3/3, math 1/1, demo 1/1, kernel 5/5, joint fit checks 5/5,
+mutations caught 33/33, exit 0. `pytest`: 84/84 passed.
+
+Gate A1.7 checkpoint: this commit.

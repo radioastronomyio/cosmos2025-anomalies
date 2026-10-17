@@ -74,6 +74,14 @@ MUTATIONS = [
     "M23_forced_edge_removed",
     "M24_authorizing_spec_entry_deleted",
     "M25_authorizing_spec_digest_deleted",
+    "M26_low_correlation_veto",
+    "M27_validation_row_in_covariance_fit",
+    "M28_marginal_output_removed",
+    "M29_joint_population_gate_removed",
+    "M30_clamp_removed",
+    "M31_distance_uses_correlation",
+    "M32_covariance_fit_bypassed",
+    "M33_timescales_incorrectly_intersected",
 ]
 
 
@@ -469,6 +477,74 @@ class TestA16PartitionAndIdentity:
         )
         assert proc.returncode == 0, proc.stdout + proc.stderr
         assert "identity_missing" not in proc.stdout
+
+
+class TestA17JointCandidatePair:
+    """P2R-06a A1.7: joint mass-SFR candidate pair (decision 4)."""
+
+    def test_joint_fixtures_present(self, results):
+        ids = {c["id"] for c in results["cases"]}
+        for required in ["FX-J4", "FX-J5b", "FX-J5c", "FX-J5d", "FX-J5e", "FX-J6", "FX-J7"]:
+            assert required in ids, required
+
+    def test_kernel_checks_pass(self, results):
+        kernel = {k["id"]: k for k in results["joint_kernel_checks"]}
+        assert set(kernel) == {"KERNEL-1", "KERNEL-2", "KERNEL-3", "POOLED-1", "POOLED-2"}
+        assert all(k["pass"] for k in kernel.values())
+        # off-pattern outranks on-pattern at correlation 0.8
+        assert kernel["KERNEL-1"]["observed"][1] > kernel["KERNEL-1"]["observed"][0]
+        # covariance masking: D outranks C on the joint surface
+        assert kernel["KERNEL-3"]["observed"][1] > kernel["KERNEL-3"]["observed"][0]
+        assert abs(kernel["POOLED-2"]["observed"] - (-0.35)) <= 1e-12
+
+    def test_estimator_fit_checks(self, results):
+        checks = {c["id"]: c for c in results["joint_fit_checks"]}
+        assert set(checks) == {"CORE", "CONTAM", "DEGEN", "CLAMP-A", "CLAMP-G"}
+        assert all(c["pass"] for c in checks.values())
+        assert checks["CORE"]["observed"]["rho_raw"] == 0.5
+        # clamp asserts the exact declared post-clamp value
+        assert checks["CLAMP-A"]["observed"]["rho_effective"] == 0.95
+        assert checks["CLAMP-A"]["observed"]["rho_raw"] == 0.9998
+        assert checks["DEGEN"]["observed"]["reason"] == "zero_marginal_spread"
+
+    def test_evaluator_domain_behaviour(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        j4 = by_id["FX-J4"]["observed"]
+        assert abs(j4["joint_residual_distance_inst"] - 1.1603624332797386) < 1e-9
+        assert abs(j4["score_joint_inst"] - 3.075614166692078) < 1e-9
+        assert j4["joint_inst_rho_effective"] == 0.6
+        assert by_id["FX-J5b"]["observed"]["joint_inst_state"] == "not_in_population"
+        j5c = by_id["FX-J5c"]["observed"]
+        assert j5c["joint_residual_distance_inst"] is not None
+        assert j5c["score_joint_inst"] is None
+        assert j5c["score_joint_inst_reason"] == "log_error_approximation_domain_exceeded"
+        j5d = by_id["FX-J5d"]["observed"]
+        assert j5d["joint_residual_distance_inst"] is not None
+        assert j5d["joint_residual_distance_100"] is None
+        j5e = by_id["FX-J5e"]["observed"]
+        assert j5e["joint_residual_distance_100"] is not None
+        assert j5e["joint_residual_distance_inst"] is None
+        j6 = by_id["FX-J6"]["observed"]
+        assert j6["joint_inst_rho_effective"] == 0.95
+        assert j6["joint_inst_regularized"] is True
+        assert j6["joint_inst_fallback"] == "global_fallback"
+        assert by_id["FX-J7"]["observed"]["joint_inst_reason"] == "zero_marginal_spread"
+
+    def test_joint_fit_request_guards(self, results):
+        requests = {r["id"]: r for r in results["joint_fit_requests"]}
+        assert set(requests) == {"FX-JP1", "FX-JP2", "FX-JP3"}
+        assert all(r["pass"] for r in requests.values())
+        assert any("duplicate" in o for o in requests["FX-JP1"]["observed"])
+        assert any("unassigned_partition" in o for o in requests["FX-JP2"]["observed"])
+        assert any("validation or holdout" in o for o in requests["FX-JP3"]["observed"])
+
+    def test_marginals_unchanged_with_joint_present(self, results):
+        by_id = {c["id"]: c for c in results["cases"]}
+        j4 = by_id["FX-J4"]["observed"]
+        assert abs(j4["residual_mass_dex"] - 0.3000000000000004) < 1e-12
+        # FX-R9a (same contract, joint outputs declared) keeps its marginal score
+        r9a = by_id["FX-R9a"]["observed"]
+        assert abs(r9a["score_mass"] - 0.891740157358414) < 1e-9
 
 
 class TestValidatorBoundaries:

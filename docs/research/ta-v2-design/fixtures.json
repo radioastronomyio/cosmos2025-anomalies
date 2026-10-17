@@ -164,6 +164,42 @@
       "sigma_sys_mass_dex": 0.1,
       "sigma_sys_sfr_inst_dex": 0.2,
       "sigma_sys_sfr_100_dex": 0.2
+    },
+    "SYNTH-J1": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-1",
+        "100": "JOINT-1"
+      }
+    },
+    "SYNTH-J2": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-2",
+        "100": "JOINT-2"
+      }
+    },
+    "SYNTH-J3": {
+      "model_kind": "C0-constant",
+      "provenance": "synthetic",
+      "constant_value": 0.1,
+      "sigma_sys_mass_dex": 0.1,
+      "sigma_sys_sfr_inst_dex": 0.2,
+      "sigma_sys_sfr_100_dex": 0.2,
+      "joint_fits": {
+        "inst": "JOINT-3",
+        "100": "JOINT-3"
+      }
     }
   },
   "cases": [
@@ -1446,6 +1482,212 @@
         "expected_delta_mass_dex": 0.2,
         "residual_mass_dex": 0.0
       }
+    },
+    {
+      "id": "FX-J4",
+      "description": "A1.7: joint distance uses the fitted covariance C (not the unit-diagonal correlation); score uses R on standardized residuals",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915001,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "residual_mass_dex": 0.3000000000000004,
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_inst_state": "point_valid",
+        "joint_inst_fallback": "cell",
+        "joint_inst_rho_effective": 0.6,
+        "joint_inst_regularized": false,
+        "joint_inst_support_count": 200,
+        "score_joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J5b",
+      "description": "A1.7: a non-POP-MASS source nulls both joint outputs with not_in_population while the raw mass delta survives",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 2,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915003,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_state": "not_in_population",
+        "joint_residual_distance_100": null,
+        "delta_mass_dex": 0.4
+      }
+    },
+    {
+      "id": "FX-J5c",
+      "description": "A1.7: an out-of-domain SFR scale (relative error 0.31) nulls only the standardized score; the unstandardized distance stays valid",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915004,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.62
+      },
+      "expect": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": null,
+        "score_joint_inst_state": "approximation_out_of_domain",
+        "score_joint_inst_reason": "log_error_approximation_domain_exceeded",
+        "joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J5d",
+      "description": "A1.7: valid instantaneous SFR with censored 100-Myr SFR emits the inst joint surface and nulls the 100 surface",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915005,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1,
+        "cigale.sfr_100myr": 0.05,
+        "cigale.sfr_100myr_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": 1.1603624332797386,
+        "score_joint_inst": 3.075614166692078,
+        "joint_residual_distance_100": null,
+        "score_joint_100": null,
+        "joint_100_state": "not_in_population"
+      }
+    },
+    {
+      "id": "FX-J5e",
+      "description": "A1.7: the reverse - valid 100-Myr SFR with censored instantaneous SFR emits only the 100 surface",
+      "scenario": "SYNTH-J1",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915006,
+        "cigale.sfr_100myr": 2.0,
+        "cigale.sfr_100myr_err": 0.1,
+        "cigale.sfr_inst": 0.05,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_residual_distance_100": 1.5972042428628905,
+        "score_joint_100": 4.095313877127304,
+        "joint_100_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J6",
+      "description": "A1.7 clamp: a sparse cell falls back to the global fit whose correlation is beyond the clamp; the exact declared post-clamp value 0.95 is used and the regularization flag is recorded",
+      "scenario": "SYNTH-J2",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 1.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915007,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_inst_fallback": "global_fallback",
+        "joint_inst_rho_effective": 0.95,
+        "joint_inst_regularized": true,
+        "joint_inst_state": "point_valid",
+        "score_joint_inst_state": "point_valid"
+      }
+    },
+    {
+      "id": "FX-J7",
+      "description": "A1.7 degeneracy: zero marginal covariance spread produces an explicit unsupported state, never an invented covariance",
+      "scenario": "SYNTH-J3",
+      "record": {
+        "lephare.type": 0,
+        "lephare.mass_med": 10.4,
+        "lephare.mass_l68": 10.2,
+        "lephare.mass_u68": 10.6,
+        "cigale.mass": 10000000000.0,
+        "cigale.mass_err": 200000000.0,
+        "lephare.sfr_med": -0.04897000433601878,
+        "lephare.sfr_l68": -0.2489700043360188,
+        "lephare.sfr_u68": 0.15102999566398123,
+        "lephare.zpdf_med": 0.5,
+        "photometry_primary.mag_auto_f444w": 24.0,
+        "catalog_id": 915008,
+        "cigale.sfr_inst": 2.0,
+        "cigale.sfr_inst_err": 0.1
+      },
+      "expect": {
+        "joint_inst_state": "unsupported",
+        "joint_inst_reason": "zero_marginal_spread",
+        "joint_residual_distance_inst": null,
+        "score_joint_inst": null,
+        "joint_inst_fallback": "unsupported"
+      }
     }
   ],
   "fit_requests": [
@@ -1809,6 +2051,95 @@
         "value": "deadbeef"
       },
       "intended_reason": "identity_mismatch:authorizing_spec:spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md"
+    },
+    "M26_low_correlation_veto": {
+      "description": "A1.7 guard: a low-correlation veto is added to the joint surfaces",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "joint_veto_min_abs_correlation"
+        ],
+        "value": 0.1
+      },
+      "intended_reason": "joint_veto_declared:joint_veto_min_abs_correlation"
+    },
+    "M27_validation_row_in_covariance_fit": {
+      "description": "A1.7 guard: a validation-assigned row enters the covariance fit",
+      "action": {
+        "kind": "inject_joint_fit_row",
+        "fit": "JOINT-1",
+        "timescale": "inst",
+        "row": {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.5,
+          "residual_sfr_T_dex": 0.6
+        },
+        "split": "validation"
+      },
+      "intended_reason": "joint_fit_partition:JOINT-1:inst:validation or holdout catalog_id 999999 in fit request"
+    },
+    "M28_marginal_output_removed": {
+      "description": "A1.7 guard: a marginal output is removed while joint outputs are present",
+      "action": {
+        "kind": "remove_output",
+        "output": "sigma_sfr_cig_100_dex"
+      },
+      "intended_reason": "required_output_missing:sigma_sfr_cig_100_dex"
+    },
+    "M29_joint_population_gate_removed": {
+      "description": "A1.7 guard: joint_residual_distance_inst loses its population gate and is emitted for a non-member",
+      "action": {
+        "kind": "remove_output_field",
+        "output": "joint_residual_distance_inst",
+        "field": "population_gate"
+      },
+      "intended_reason": "population_gate_missing:joint_residual_distance_inst"
+    },
+    "M30_clamp_removed": {
+      "description": "A1.7 guard: the correlation clamp is effectively removed (0.999999)",
+      "action": {
+        "kind": "edit_declared_constant",
+        "name": "joint_rho_clamp",
+        "value": 0.999999
+      },
+      "intended_reason": "joint_fit_check:CLAMP-A"
+    },
+    "M31_distance_uses_correlation": {
+      "description": "A1.7 guard: the distance formula silently substitutes the unit-diagonal correlation for the full covariance",
+      "action": {
+        "kind": "set_joint_matrix_source",
+        "output": "joint_residual_distance_inst",
+        "matrix_source": "correlation"
+      },
+      "intended_reason": "case_mismatch:FX-J4:joint_residual_distance_inst"
+    },
+    "M32_covariance_fit_bypassed": {
+      "description": "A1.7 guard: the estimator is replaced by hand-declared matrices",
+      "action": {
+        "kind": "add_contract_field",
+        "path": [
+          "joint_surfaces",
+          "estimator",
+          "id"
+        ],
+        "value": "hand_declared_matrices"
+      },
+      "intended_reason": "joint_estimator_invalid"
+    },
+    "M33_timescales_incorrectly_intersected": {
+      "description": "A1.7 guard: the inst joint surface incorrectly requires the 100-Myr population as well",
+      "action": {
+        "kind": "edit_requires_timescales",
+        "output": "joint_residual_distance_inst",
+        "requires_timescales": [
+          "mass",
+          "inst",
+          "100"
+        ]
+      },
+      "intended_reason": "case_mismatch:FX-J5d:joint_residual_distance_inst"
     }
   },
   "sigma_sys_solve_checks": [
@@ -2695,6 +3026,672 @@
           "delta_mass_dex": 0.17600000000000002
         }
       ]
+    }
+  ],
+  "joint_fits": {
+    "JOINT-1": {
+      "provenance": "synthetic",
+      "description": "Known 0.6-correlation population in cell 0|2 with non-unit marginal scales (0.5/0.6 dex patterns); discriminates the covariance from the correlation matrix",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 980000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 20
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 20
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 981000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 20
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": -0.6,
+              "repeat": 80
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -0.5,
+              "residual_sfr_T_dex": 0.6,
+              "repeat": 20
+            }
+          ]
+        }
+      }
+    },
+    "JOINT-2": {
+      "provenance": "synthetic",
+      "description": "Clamp population: cell 0|2 carries rho 19996/20000 = 0.9998 (clamped to 0.95); a sparse uncorrelated cell 2|2 falls back to the global fit, which is also beyond the clamp",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 982000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 983000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 9999
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": -1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 1.0,
+              "repeat": 1
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            },
+            {
+              "lephare.zpdf_med": 1.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": -1.0,
+              "residual_sfr_T_dex": 0.0,
+              "repeat": 5
+            }
+          ]
+        }
+      }
+    },
+    "JOINT-3": {
+      "provenance": "synthetic",
+      "description": "Degenerate population: identical rows give zero marginal spread at every level",
+      "grid_from": "CONSTR-1",
+      "per_timescale": {
+        "inst": {
+          "base_catalog_id": 984000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.2,
+              "residual_sfr_T_dex": 0.1,
+              "repeat": 220
+            }
+          ]
+        },
+        "100": {
+          "base_catalog_id": 985000,
+          "row_blocks": [
+            {
+              "lephare.zpdf_med": 0.5,
+              "photometry_primary.mag_auto_f444w": 24.0,
+              "residual_mass_dex": 0.2,
+              "residual_sfr_T_dex": 0.1,
+              "repeat": 220
+            }
+          ]
+        }
+      }
+    }
+  },
+  "joint_kernel_checks": [
+    {
+      "id": "KERNEL-1",
+      "type": "distance",
+      "description": "Correlation 0.8, unit scales: the off-pattern source (2.2,-2.2) outranks the on-pattern (3,3)",
+      "matrix": [
+        [
+          1.0,
+          0.8
+        ],
+        [
+          0.8,
+          1.0
+        ]
+      ],
+      "points": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          2.2,
+          -2.2
+        ]
+      ],
+      "expected": [
+        3.1622776601683795,
+        6.957010852370437
+      ]
+    },
+    {
+      "id": "KERNEL-2",
+      "type": "distance",
+      "description": "Correlation 0: the surface is emitted for both points; no veto applies",
+      "matrix": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "points": [
+        [
+          2.5,
+          2.5
+        ],
+        [
+          3.4,
+          0.0
+        ]
+      ],
+      "expected": [
+        3.5355339059327378,
+        3.4
+      ]
+    },
+    {
+      "id": "KERNEL-3",
+      "type": "distance",
+      "description": "Mixture covariance [[3.4,-2.5],[-2.5,3.4]]: C at (4,-4) gives 2.3289 and D at (3,3) gives 4.4721, so the joint surface ranks D above C while C's marginal magnitudes (4) exceed D's (3) - recorded as a known limitation (covariance masking)",
+      "matrix": [
+        [
+          3.4,
+          -2.5
+        ],
+        [
+          -2.5,
+          3.4
+        ]
+      ],
+      "points": [
+        [
+          4.0,
+          -4.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ],
+      "expected": [
+        2.328890038958328,
+        4.4721359549995805
+      ]
+    },
+    {
+      "id": "POOLED-1",
+      "type": "pooled_correlation",
+      "description": "Two bins with internal correlation 0, means (1,-1) and (-1,1), unit variances, equal weights: the pooled correlation is -0.5",
+      "within_correlations": [
+        0.0,
+        0.0
+      ],
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "component_means": [
+        [
+          1.0,
+          -1.0
+        ],
+        [
+          -1.0,
+          1.0
+        ]
+      ],
+      "component_variances": [
+        1.0,
+        1.0
+      ],
+      "expected": -0.5
+    },
+    {
+      "id": "POOLED-2",
+      "type": "pooled_correlation",
+      "description": "Equal zero-mean unit-variance components with correlations -0.7 and 0 in a 50/50 mixture: the pooled correlation is -0.35, not -0.30",
+      "within_correlations": [
+        -0.7,
+        0.0
+      ],
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "component_means": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "component_variances": [
+        1.0,
+        1.0
+      ],
+      "expected": -0.35
+    }
+  ],
+  "joint_fit_requests": [
+    {
+      "id": "FX-JP1",
+      "description": "Duplicate covariance fitting rows are rejected",
+      "row_blocks": [
+        {
+          "catalog_id": 986000,
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 2
+        }
+      ],
+      "base_catalog_id": 986000,
+      "partition_assignment": [
+        {
+          "catalog_id": 986000,
+          "split": "development"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "duplicate training rows"
+    },
+    {
+      "id": "FX-JP2",
+      "description": "A covariance fitting row with no assignment is rejected",
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 1
+        }
+      ],
+      "base_catalog_id": 987000,
+      "partition_assignment": [],
+      "expect": "rejected",
+      "intended_reason": "unassigned_partition"
+    },
+    {
+      "id": "FX-JP3",
+      "description": "A validation-assigned covariance fitting row is rejected",
+      "row_blocks": [
+        {
+          "lephare.zpdf_med": 0.5,
+          "photometry_primary.mag_auto_f444w": 24.0,
+          "residual_mass_dex": 0.2,
+          "residual_sfr_T_dex": 0.1,
+          "repeat": 1
+        }
+      ],
+      "base_catalog_id": 988000,
+      "partition_assignment": [
+        {
+          "catalog_id": 988000,
+          "split": "validation"
+        }
+      ],
+      "expect": "rejected",
+      "intended_reason": "validation or holdout"
+    }
+  ],
+  "joint_fit_checks": [
+    {
+      "id": "CORE",
+      "description": "Known core: +-1 patterns with counts 6/2/2/6 give rho exactly 0.5 with no winsorization and no clamp",
+      "pairs": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.5,
+        "rho_effective": 0.5,
+        "regularized": false,
+        "n": 16
+      }
+    },
+    {
+      "id": "CONTAM",
+      "description": "Contamination response: one wild outlier (1000,1000) is winsorized and the estimate moves only boundedly (rho stays near zero versus the unclipped 0.5+offset it would take under a moment estimator)",
+      "pairs": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          1000,
+          1000
+        ]
+      ],
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "regularized": false,
+        "n": 17,
+        "rho_raw": 0.9260373689896785
+      }
+    },
+    {
+      "id": "DEGEN",
+      "description": "Degeneracy: identical rows give zero marginal spread",
+      "pairs": [
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ],
+        [
+          0.2,
+          0.1
+        ]
+      ],
+      "expect": {
+        "state": "unsupported",
+        "reason": "zero_marginal_spread"
+      }
+    },
+    {
+      "id": "CLAMP-A",
+      "description": "Supported cell with local correlation 19996/20000 = 0.9998: clamped to exactly 0.95",
+      "fit": "JOINT-2",
+      "timescale": "inst",
+      "level": "cell",
+      "cell": "0|2",
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9998,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20000
+      }
+    },
+    {
+      "id": "CLAMP-G",
+      "description": "The global fit behind the sparse-cell fallback is also beyond the clamp and is clamped",
+      "fit": "JOINT-2",
+      "timescale": "inst",
+      "level": "global",
+      "expect": {
+        "state": "ok",
+        "reason": "none",
+        "rho_raw": 0.9995501436922124,
+        "rho_effective": 0.95,
+        "regularized": true,
+        "n": 20010
+      }
     }
   ]
 }

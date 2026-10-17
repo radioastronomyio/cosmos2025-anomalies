@@ -86,6 +86,15 @@ REQUIRED_SFR_STATES = {
     "invalid_or_unsupported",
 }
 FIT_REQUEST_RULE_SUBSTRING = "validation or holdout catalog_id is rejected"
+REQUIRED_MARGINAL_OUTPUTS = frozenset({
+    "delta_mass_dex", "expected_delta_mass_dex", "center_support",
+    "center_requested_cell", "residual_mass_dex", "score_mass",
+    "sigma_mass_lp_lo_dex", "sigma_mass_lp_hi_dex", "sigma_mass_cig_dex",
+    "delta_sfr_inst_dex", "delta_sfr_100_dex", "residual_sfr_inst_dex",
+    "residual_sfr_100_dex", "score_sfr_inst", "score_sfr_100",
+    "sigma_sfr_lp_lo_dex", "sigma_sfr_lp_hi_dex",
+    "sigma_sfr_cig_inst_dex", "sigma_sfr_cig_100_dex",
+})
 ALGEBRAIC_COUPLING_TOLERANCE = 1e-12
 NUMERIC_TOLERANCE = 1e-9
 
@@ -409,12 +418,11 @@ def select_width(policy, residual, delta, lo, hi):
     return (lo if reference > 0 else hi), False
 
 
-def evaluate_directional_score(residual, delta, lo, hi, cig, sys_sigma, guards, policy):
-    """Compute a normalized score under the declared width policy (A1.3).
+def directional_scale(residual, delta, lo, hi, cig, sys_sigma, guards, policy):
+    """Combined directional scale entering a normalized quantity (A1.3/A1.7).
 
-    Returns (score, state, reason). Guards evaluate in the contract's
-    declared precedence; a zero residual never bypasses them. Missing,
-    negative or non-finite widths never produce a score.
+    Returns (scale, state, reason) under the declared width policy and
+    guards; a zero residual never bypasses an earlier guard.
     """
     import math
 
@@ -438,6 +446,16 @@ def evaluate_directional_score(residual, delta, lo, hi, cig, sys_sigma, guards, 
     scale = math.sqrt(width * width + cig * cig + sys_sigma * sys_sigma)
     if "combined_scale_guard" in guards and scale < 1.0e-12:
         return None, "zero_combined_scale", "zero_combined_scale"
+    return scale, "point_valid", "none"
+
+
+def evaluate_directional_score(residual, delta, lo, hi, cig, sys_sigma, guards, policy):
+    """Compute a normalized score under the declared width policy (A1.3)."""
+    scale, state, reason = directional_scale(
+        residual, delta, lo, hi, cig, sys_sigma, guards, policy
+    )
+    if scale is None or residual is None:
+        return None, state, reason
     return residual / scale, "point_valid", "none"
 
 
@@ -745,6 +763,114 @@ def evaluate_case(contract, case, scenarios):
         if outputs["ctx_lp_ssfr_point_state"] == "point_valid"
         else None
     )
+
+    # --- joint mass-SFR candidate pair (A1.7, decision 4) ---------------
+    # Proposed surfaces: joint_residual_distance_T uses the fitted covariance
+    # C_b,T; score_joint_T uses the fitted correlation R_b,T on standardized
+    # residuals. The two matrices are distinct; substituting one for the
+    # other is a caught mutation. Marginal surfaces are untouched.
+    joint_models = scenario.get("_joint_models") or {}
+    tau_mass, tau_mass_state, _ = directional_scale(
+        outputs["residual_mass_dex"], outputs["delta_mass_dex"],
+        outputs["sigma_mass_lp_lo_dex"], outputs["sigma_mass_lp_hi_dex"],
+        outputs["sigma_mass_cig_dex"], outputs["sigma_sys_mass_dex"],
+        ["directional_width"], mass_policy,
+    )
+    taus = {}
+    for suffix, residual_sfr_name, delta_sfr_name in [
+        ("inst", "residual_sfr_inst_dex", "delta_sfr_inst_dex"),
+        ("100", "residual_sfr_100_dex", "delta_sfr_100_dex"),
+    ]:
+        taus[suffix] = directional_scale(
+            outputs[residual_sfr_name], outputs[delta_sfr_name],
+            outputs["sigma_sfr_lp_lo_dex"], outputs["sigma_sfr_lp_hi_dex"],
+            outputs[f"sigma_sfr_cig_{suffix}_dex"], outputs[f"sigma_sys_sfr_{suffix}_dex"],
+            ["directional_width"], sfr_policy,
+        )
+
+    for suffix, residual_sfr_name in [
+        ("inst", "residual_sfr_inst_dex"),
+        ("100", "residual_sfr_100_dex"),
+    ]:
+        distance_name = f"joint_residual_distance_{suffix}"
+        score_name = f"score_joint_{suffix}"
+        decl_distance = output_decl(contract, distance_name) or {}
+        requires = decl_distance.get("requires_timescales") or ["mass", suffix]
+        member = outputs["pop_mass"] and all(
+            outputs.get(f"pop_sfr_{t}") for t in requires if t != "mass"
+        )
+        model = joint_models.get(suffix)
+        r = (outputs.get("residual_mass_dex"), outputs.get(residual_sfr_name))
+        distance_value, score_value = None, None
+        support_count = fallback_label = rho_raw = rho_eff = regularized = None
+        score_state = score_reason = None
+        requested = None
+        if not member:
+            state, reason = "not_in_population", "not_in_population"
+        elif r[0] is None or r[1] is None:
+            state, reason = "unsupported", "residual_unavailable"
+        elif not model:
+            state, reason = "unsupported", "covariance_model_absent"
+        else:
+            z_rec = record.get("lephare.zpdf_med")
+            mag_rec = record.get("photometry_primary.mag_auto_f444w")
+            zi = _bin_index(z_rec, model["z_bin_edges"]) if z_rec is not None else None
+            mi = _bin_index(mag_rec, model["mag_bin_edges"]) if mag_rec is not None else None
+            requested = f"{zi}|{mi}" if zi is not None and mi is not None else None
+            cell_fit = model["cells"].get(requested) if requested else None
+            z_fit = model["z_only"].get(str(zi)) if zi is not None else None
+            if cell_fit and cell_fit.get("state") == "ok":
+                fit, fallback_label = cell_fit, "cell"
+            elif z_fit and z_fit.get("state") == "ok":
+                fit, fallback_label = z_fit, "z_fallback"
+            elif model["global"].get("state") == "ok":
+                fit, fallback_label = model["global"], "global_fallback"
+            else:
+                fit, fallback_label = None, "unsupported"
+            if not fit:
+                state, reason = "unsupported", model["global"].get(
+                    "reason", "covariance_model_unsupported"
+                )
+            else:
+                matrix = fit["R"] if decl_distance.get("matrix_source") == "correlation" else fit["C"]
+                distance_value = mahalanobis(r, matrix)
+                if distance_value is None:
+                    state, reason = "unsupported", "singular_covariance"
+                else:
+                    state, reason = "point_valid", "none"
+                    support_count = fit.get("n")
+                    rho_raw = fit.get("rho_raw")
+                    rho_eff = fit.get("rho_effective")
+                    regularized = fit.get("regularized")
+                    tau_sfr = taus[suffix][0]
+                    if outputs["mass_scale_state"] != "point_valid":
+                        score_state = outputs["mass_scale_state"]
+                        score_reason = outputs["mass_scale_reason"]
+                    elif outputs[f"sfr_{suffix}_scale_state"] != "point_valid":
+                        score_state = outputs[f"sfr_{suffix}_scale_state"]
+                        score_reason = outputs[f"sfr_{suffix}_scale_reason"]
+                    elif tau_mass is None or tau_sfr is None or tau_mass_state != "point_valid" \
+                            or taus[suffix][1] != "point_valid":
+                        score_state, score_reason = "unsupported_scale", "directional_scale_unavailable"
+                    else:
+                        z_vec = (r[0] / tau_mass, r[1] / tau_sfr)
+                        score_value = mahalanobis(z_vec, fit["R"])
+                        if score_value is None:
+                            score_state, score_reason = "unsupported", "singular_correlation"
+                        else:
+                            score_state, score_reason = "point_valid", "none"
+        outputs[distance_name] = distance_value
+        outputs[score_name] = score_value
+        outputs[f"joint_{suffix}_state"] = state if score_state is None else state
+        outputs[f"joint_{suffix}_reason"] = reason
+        outputs[f"joint_{suffix}_support_count"] = support_count
+        outputs[f"joint_{suffix}_fallback"] = fallback_label
+        outputs[f"joint_{suffix}_rho_raw"] = rho_raw
+        outputs[f"joint_{suffix}_rho_effective"] = rho_eff
+        outputs[f"joint_{suffix}_regularized"] = regularized
+        outputs[f"score_joint_{suffix}_state"] = score_state if score_state is not None else state
+        outputs[f"score_joint_{suffix}_reason"] = score_reason if score_reason is not None else reason
+        outputs[f"joint_{suffix}_requested_cell"] = requested
     # AI NOTE: the sSFR score is unsupported by declared evidence (unknown
     # mass-SFR error correlation); it stays NULL rather than assuming
     # independence, per the contract's unsupported_correlated_errors state.
@@ -1082,6 +1208,210 @@ def run_binning_demonstrations(fixtures, contract, built_models):
     return failures, results
 
 
+def _mat_inv2(m):
+    """Explicit 2x2 inverse (None if singular)."""
+    (a, b), (c, d) = m
+    det = a * d - b * c
+    if det == 0:
+        return None
+    return [[d / det, -b / det], [-b / det, a / det]]
+
+
+def mahalanobis(r, m):
+    """sqrt(r^T M^-1 r) for a 2x2 matrix; None if singular or non-finite."""
+    import math
+
+    inv = _mat_inv2(m)
+    if inv is None:
+        return None
+    x, y = r
+    quad = inv[0][0] * x * x + 2 * inv[0][1] * x * y + inv[1][1] * y * y
+    if quad < 0 or not math.isfinite(quad):
+        return None
+    return math.sqrt(quad)
+
+
+def winsorized_covariance(pairs, constants):
+    """The one declared robust covariance/correlation estimator (A1.7).
+
+    Complete procedure (winsorized-median-covariance-v1): componentwise
+    median centering; marginal scale MAD_k = 1.4826 * median(|x_k - m_k|);
+    standardize, winsorize at joint_winsor_c; S_w = sample covariance
+    (n-1 denominator) of the winsorized standardized vectors; correlation
+    R from S_w normalized to unit diagonal with the off-diagonal clamped
+    to +-joint_rho_clamp; C = diag(s) R diag(s) with s_k = sqrt(S_w[kk]).
+    Covariance centering is the componentwise median for spread estimation
+    ONLY; the distance formula keeps the fixed residual origin and no
+    second conditional mean enters it. No iteration, no seed; medians
+    average the two middle order statistics for even counts.
+    """
+    import math
+
+    winsor_c = float(constants.get("joint_winsor_c", 3.0))
+    rho_clamp = float(constants.get("joint_rho_clamp", 0.95))
+    min_rows = int(constants.get("joint_min_covariance_rows", 10))
+
+    if len(pairs) < min_rows:
+        return {"state": "unsupported", "reason": "insufficient_covariance_support", "n": len(pairs)}
+    xs = [p[0] for p in pairs]
+    ys = [p[1] for p in pairs]
+    if not all(math.isfinite(v) for v in xs + ys):
+        return {"state": "unsupported", "reason": "nonfinite_covariance_input", "n": len(pairs)}
+    mx, my = _median(xs), _median(ys)
+    mad_x = 1.4826 * _median([abs(x - mx) for x in xs])
+    mad_y = 1.4826 * _median([abs(y - my) for y in ys])
+    if mad_x <= 0 or mad_y <= 0:
+        return {"state": "unsupported", "reason": "zero_marginal_spread", "n": len(pairs)}
+
+    def clip(v):
+        return max(-winsor_c, min(winsor_c, v))
+
+    wx = [clip((x - mx) / mad_x) for x in xs]
+    wy = [clip((y - my) / mad_y) for y in ys]
+    n = len(pairs)
+    mean_x, mean_y = sum(wx) / n, sum(wy) / n
+    sxx = sum((v - mean_x) ** 2 for v in wx) / (n - 1)
+    syy = sum((v - mean_y) ** 2 for v in wy) / (n - 1)
+    sxy = sum((a - mean_x) * (b - mean_y) for a, b in zip(wx, wy)) / (n - 1)
+    if sxx <= 0 or syy <= 0:
+        return {"state": "unsupported", "reason": "zero_marginal_spread", "n": n}
+    rho_raw = sxy / math.sqrt(sxx * syy)
+    if not math.isfinite(rho_raw):
+        return {"state": "unsupported", "reason": "nonfinite_covariance_input", "n": n}
+    rho_eff = math.copysign(min(abs(rho_raw), rho_clamp), rho_raw)
+    s0, s1 = math.sqrt(sxx), math.sqrt(syy)
+    return {
+        "state": "ok",
+        "reason": "none",
+        "n": n,
+        "rho_raw": rho_raw,
+        "rho_effective": rho_eff,
+        "regularized": rho_eff != rho_raw,
+        "R": [[1.0, rho_eff], [rho_eff, 1.0]],
+        "C": [[s0 * s0, rho_eff * s0 * s1], [rho_eff * s0 * s1, s1 * s1]],
+        "marginal_scales": [s0, s1],
+        "covariance_center": [mx, my],
+    }
+
+
+def expand_joint_rows(spec):
+    """Expand declared deterministic joint-fit row blocks into concrete rows."""
+    base_id = int(spec.get("base_catalog_id", 980000))
+    rows = []
+    next_id = base_id
+    for block in spec["row_blocks"]:
+        repeat = int(block.get("repeat", 1))
+        for _ in range(repeat):
+            rows.append({
+                "catalog_id": block.get("catalog_id", next_id),
+                "lephare.zpdf_med": block["lephare.zpdf_med"],
+                "photometry_primary.mag_auto_f444w": block["photometry_primary.mag_auto_f444w"],
+                "residual_mass_dex": block["residual_mass_dex"],
+                "residual_sfr_T_dex": block["residual_sfr_T_dex"],
+            })
+            next_id += 1
+    if "partition_assignment" not in spec:
+        spec["partition_assignment"] = [
+            {"catalog_id": r["catalog_id"], "split": "development"} for r in rows
+        ]
+    return rows
+
+
+_JOINT_FIT_INJECTIONS = []
+
+
+def fit_joint_model(fit_spec, grid, constants, fit_name=None, timescale=None):
+    """Fit the per-timescale joint model on synthetic rows under the grid.
+
+    The declared cell grid comes from the development-only binning rule
+    (the referenced construction's edges); support is counted on this
+    timescale's own eligible rows; the hierarchy is cell -> z-only ->
+    global, each at joint_min_cell_support / joint_min_global_support.
+    """
+    min_cell = int(constants.get("joint_min_cell_support", 200))
+    min_global = int(constants.get("joint_min_global_support", 200))
+    rows = expand_joint_rows(fit_spec)
+    for injection in _JOINT_FIT_INJECTIONS:
+        if injection.get("fit") == fit_name and injection.get("timescale") == timescale:
+            injected = dict(injection["row"])
+            injected["catalog_id"] = 999999
+            rows.append(injected)
+            fit_spec.setdefault("partition_assignment", []).append(
+                {"catalog_id": 999999, "split": injection["split"]}
+            )
+    guard_reasons = partition_guard(rows, fit_spec.get("partition_assignment", []))
+    z_edges = grid["z_bin_edges"]
+    mag_edges = grid["mag_bin_edges"]
+    cells, z_only = {}, {}
+    for row in rows:
+        zi = _bin_index(row["lephare.zpdf_med"], z_edges)
+        mi = _bin_index(row["photometry_primary.mag_auto_f444w"], mag_edges)
+        if zi is None or mi is None:
+            continue
+        pair = (row["residual_mass_dex"], row["residual_sfr_T_dex"])
+        cells.setdefault(f"{zi}|{mi}", {})[row["catalog_id"]] = pair
+        z_only.setdefault(str(zi), {})[row["catalog_id"]] = pair
+    global_pairs = list({r["catalog_id"]: (r["residual_mass_dex"], r["residual_sfr_T_dex"])
+                         for r in rows}.values())
+    global_fit = winsorized_covariance(global_pairs, constants) if len(global_pairs) >= min_global else {
+        "state": "unsupported", "reason": "insufficient_global_support", "n": len(global_pairs)}
+    model = {
+        "state": "ok", "cells": {}, "z_only": {}, "global": global_fit,
+        "n_rows": len(rows), "guard_reasons": guard_reasons,
+        "z_bin_edges": z_edges, "mag_bin_edges": mag_edges,
+    }
+    for key, members in cells.items():
+        if len(members) >= min_cell:
+            model["cells"][key] = winsorized_covariance(list(members.values()), constants)
+        else:
+            model["cells"][key] = {"state": "unsupported", "reason": "insufficient_cell_support",
+                                   "n": len(members)}
+    for key, members in z_only.items():
+        if len(members) >= min_cell:
+            model["z_only"][key] = winsorized_covariance(list(members.values()), constants)
+        else:
+            model["z_only"][key] = {"state": "unsupported", "reason": "insufficient_cell_support",
+                                    "n": len(members)}
+    return model
+
+
+def check_joint_kernel_checks(fixtures):
+    """Kernel checks on stated matrices and analytic pooled moments (A1.7)."""
+    failures = []
+    results = []
+    for check in fixtures.get("joint_kernel_checks", []):
+        if check["type"] == "distance":
+            observed = [mahalanobis(r, check["matrix"]) for r in check["points"]]
+            ok = all(
+                abs(o - e) <= 1e-3 * max(1.0, abs(e))
+                for o, e in zip(observed, check["expected"])
+                if o is not None
+            ) and all(o is not None for o in observed)
+            results.append({"id": check["id"], "observed": observed,
+                            "expected": check["expected"], "pass": ok})
+        elif check["type"] == "pooled_correlation":
+            # Analytic pooled moment from declared means, variances, weights.
+            within = check["within_correlations"]
+            weights = check["weights"]
+            means = check["component_means"]
+            variances = check["component_variances"]
+            pooled_var = sum(w * v for w, v in zip(weights, variances)) + sum(
+                w * (m[0] ** 2) for w, m in zip(weights, means)
+            )
+            pooled_cross = sum(w * rho * v for w, rho, v in zip(weights, within, variances)) + sum(
+                w * (m[0] * m[1]) for w, m in zip(weights, means)
+            )
+            observed = pooled_cross / pooled_var
+            ok = abs(observed - check["expected"]) <= 1e-12
+            results.append({"id": check["id"], "observed": observed,
+                            "expected": check["expected"], "pass": ok})
+        else:
+            continue
+        if not results[-1]["pass"]:
+            failures.append(f"joint_kernel:{check['id']}")
+    return failures, results
+
+
 def check_fit_requests(fixtures):
     """Enforce the partition-use rules on the synthetic fit requests (A1.6).
 
@@ -1316,6 +1646,36 @@ def structural_checks(contract, fixtures):
 
     failures.extend(pop_mass_consistency(contract))
 
+    # P2R-06a A1.7: the joint candidate pair must declare its gates, matrix
+    # sources and estimator identity; no veto/budget/quota may appear; the
+    # marginal output set is structurally required so joint outputs cannot
+    # remove or alter marginals.
+    joint_decl = contract.get("joint_surfaces", {})
+    estimator = joint_decl.get("estimator", {})
+    if estimator.get("id") != "winsorized-median-covariance-v1":
+        failures.append("joint_estimator_invalid")
+    veto_keys = [k for k in joint_decl if "veto" in k or "budget" in k or "quota" in k]
+    for key in veto_keys:
+        failures.append(f"joint_veto_declared:{key}")
+    for output in contract["outputs"]:
+        if output.get("kind") in ("joint_distance", "joint_standardized_distance"):
+            if not output.get("population_gate"):
+                failures.append(f"population_gate_missing:{output['name']}")
+            if not output.get("requires_timescales"):
+                failures.append(f"joint_timescales_missing:{output['name']}")
+            if not output.get("matrix_source"):
+                failures.append(f"joint_matrix_source_missing:{output['name']}")
+        if output.get("kind") == "joint_standardized_distance":
+            guards = output.get("guards") or []
+            for guard in ("population", "point_state", "scale_state", "directional_width",
+                          "combined_scale_guard"):
+                if guard not in guards:
+                    failures.append(f"guard_missing:{output['name']}:{guard}")
+    declared_names = {o["name"] for o in contract["outputs"]}
+    for required in REQUIRED_MARGINAL_OUTPUTS:
+        if required not in declared_names:
+            failures.append(f"required_output_missing:{required}")
+
     # P2R-06a A1.5: the C1 center must declare support enforcement against
     # center_min_cell_support and the forced high-redshift edge must exist
     # as a declared constant with its rationale.
@@ -1337,6 +1697,10 @@ def structural_checks(contract, fixtures):
             CANONICAL_DELTA_FORMULAS[name]
         ):
             failures.append(f"delta_formula_identity:{name}")
+        if output.get("kind") in ("joint_distance", "joint_standardized_distance"):
+            if any(identifier in formula for identifier in CHI2_IDENTIFIERS):
+                failures.append(f"chi2_predictor:{name}")
+            continue
         try:
             tree = parse_expression(formula)
         except ExpressionError as exc:
@@ -1520,6 +1884,28 @@ def apply_mutation(contract, identity, action):
         for entry in identity.get("authorizing_specs", []):
             if entry.get("path") == action["path"]:
                 entry["sha256"] = action["value"]
+    elif kind == "add_contract_field":
+        container = contract
+        for key in action["path"][:-1]:
+            container = container[key]
+        container[action["path"][-1]] = action["value"]
+    elif kind == "remove_output":
+        contract["outputs"] = [o for o in contract["outputs"] if o["name"] != action["output"]]
+    elif kind == "edit_declared_constant":
+        for c in contract["declared_constants"]:
+            if c["name"] == action["name"]:
+                c["value"] = action["value"]
+    elif kind == "set_joint_matrix_source":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output["matrix_source"] = action["matrix_source"]
+    elif kind == "edit_requires_timescales":
+        for output in contract["outputs"]:
+            if output["name"] == action["output"]:
+                output["requires_timescales"] = list(action["requires_timescales"])
+    elif kind == "inject_joint_fit_row":
+        global _JOINT_FIT_INJECTIONS
+        _JOINT_FIT_INJECTIONS.append(action)
     else:
         raise ValueError(f"unknown mutation kind {kind!r}")
 
@@ -1539,6 +1925,21 @@ def run_validation(contract, fixtures, identity, paths):
     for scenario in scenarios.values():
         if scenario.get("model_kind") == "C1-fitted":
             scenario["_built_model"] = built_models[scenario["construction"]]
+    constants_all = {c["name"]: c["value"] for c in contract["declared_constants"]}
+    joint_models = {}
+    for name, fit in fixtures.get("joint_fits", {}).items():
+        grid = built_models[fit["grid_from"]]
+        for timescale, spec in fit["per_timescale"].items():
+            model = fit_joint_model(spec, grid, constants_all, fit_name=name, timescale=timescale)
+            joint_models[(name, timescale)] = model
+            for reason in model.get("guard_reasons", []):
+                failures.append(f"joint_fit_partition:{name}:{timescale}:{reason}")
+    for scenario in scenarios.values():
+        if scenario.get("joint_fits"):
+            scenario["_joint_models"] = {
+                timescale: joint_models[(fit_id, timescale)]
+                for timescale, fit_id in scenario["joint_fits"].items()
+            }
     case_results = []
     for case in fixtures.get("cases", []):
         try:
@@ -1588,11 +1989,63 @@ def run_validation(contract, fixtures, identity, paths):
         )
     math_failures, math_results = run_math_counterexamples(fixtures)
     failures.extend(math_failures)
+    joint_fit_request_results = []
+    for request in fixtures.get("joint_fit_requests", []):
+        rows = expand_joint_rows(request)
+        reasons = partition_guard(rows, request["partition_assignment"])
+        expected = request["expect"]
+        ok = (not reasons) if expected == "accepted" else bool(reasons)
+        if expected == "rejected" and request.get("intended_reason") and not any(
+            request["intended_reason"] in r for r in reasons
+        ):
+            ok = False
+            reasons.append(f"intended reason absent: {request['intended_reason']}")
+        if not ok:
+            failures.append(f"joint_fit_request:{request['id']}")
+        joint_fit_request_results.append({
+            "id": request["id"], "description": request["description"],
+            "expected": expected, "observed": reasons or ["accepted"], "pass": ok,
+        })
+    joint_fit_check_results = []
+    for check in fixtures.get("joint_fit_checks", []):
+        if "pairs" in check:
+            outcome = winsorized_covariance(
+                [tuple(p) for p in check["pairs"]], constants_all
+            )
+        else:
+            model = joint_models[(check["fit"], check["timescale"])]
+            level = check["level"]
+            if level == "global":
+                outcome = model["global"]
+            elif level == "cell":
+                outcome = model["cells"][check["cell"]]
+            else:
+                outcome = model["z_only"][check["z_bin"]]
+        expected = check["expect"]
+        ok = outcome.get("state") == expected.get("state") and all(
+            (expected.get(k) is None)
+            or (
+                outcome.get(k) is not None
+                and abs(outcome[k] - expected[k]) <= 1e-9 * max(1.0, abs(expected[k]))
+            )
+            for k in ("rho_raw", "rho_effective", "n")
+        ) and outcome.get("reason", "none") == expected.get("reason", "none") \
+            and outcome.get("regularized") == expected.get("regularized")
+        if not ok:
+            failures.append(f"joint_fit_check:{check['id']}")
+        joint_fit_check_results.append({
+            "id": check["id"], "description": check["description"],
+            "expected": expected, "observed": outcome, "pass": ok,
+        })
+    kernel_failures, kernel_results = check_joint_kernel_checks(fixtures)
+    failures.extend(kernel_failures)
     demo_failures, demo_results = run_binning_demonstrations(fixtures, contract, built_models)
     failures.extend(demo_failures)
     failures.extend(structural_checks(contract, fixtures))
     failures.extend(identity_checks(identity, *paths, contract=contract))
-    return failures, case_results, fit_results, solve_results, math_results, demo_results
+    del _JOINT_FIT_INJECTIONS[:]
+    return (failures, case_results, fit_results, solve_results, math_results,
+            demo_results, kernel_results, joint_fit_check_results, joint_fit_request_results)
 
 
 # =============================================================================
@@ -1642,7 +2095,9 @@ def main(argv=None):
             mutated_identity = copy.deepcopy(identity)
             apply_mutation(mutated_contract, mutated_identity, record["action"])
             action, description, intended = record["action"], record["description"], record["intended_reason"]
-        failures, case_results, fit_results, solve_results, math_results, demo_results = run_validation(
+        (failures, case_results, fit_results, solve_results, math_results,
+         demo_results, kernel_results, joint_fit_check_results,
+         joint_fit_request_results) = run_validation(
             mutated_contract, fixtures, mutated_identity,
             (contract_path, fixtures_path, identity_path),
         )
@@ -1667,7 +2122,9 @@ def main(argv=None):
                 print("  no invariant failed (mutation not caught)")
             return exit_code
 
-    failures, case_results, fit_results, solve_results, math_results, demo_results = run_validation(
+    (failures, case_results, fit_results, solve_results, math_results,
+     demo_results, kernel_results, joint_fit_check_results,
+     joint_fit_request_results) = run_validation(
         contract, fixtures, identity, (contract_path, fixtures_path, identity_path)
     )
     exit_code = 1 if failures else 0
@@ -1715,6 +2172,9 @@ def main(argv=None):
         "sigma_sys_solve_checks": solve_results,
         "mathematical_counterexamples": math_results,
         "binning_demonstrations": demo_results,
+        "joint_kernel_checks": kernel_results,
+        "joint_fit_checks": joint_fit_check_results,
+        "joint_fit_requests": joint_fit_request_results,
         "mutations": mutation_records,
         "failures": sorted(set(failures)),
     }
