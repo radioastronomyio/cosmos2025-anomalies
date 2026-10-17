@@ -36,6 +36,7 @@ contract:
     digest) fails.
   minimum_required_authorizing_specs:
     - spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06-ta-v2-design.md
+    - spec/2026-10/2026-10-05-cosmos2025-spec-p2r-06a-ta-v2-design-repairs.md
   guard_precedence: >-
     Declared order for every gated output: population guards first, then
     point-domain guards, then scale/uncertainty guards, then arithmetic.

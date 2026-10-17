@@ -35,6 +35,7 @@ Chronological execution logs documenting what was done, what failed, and what wa
 | [worklog-2026-10-04-p2r05-errata.md](worklog-2026-10-04-p2r05-errata.md) | P2R-05 errata gates 0 through 4: sensitivity totals, verifier modes, numerical errata and upstream draft; sealed product unchanged |
 | [worklog-2026-10-05-p2r05-adoption-answers.md](worklog-2026-10-05-p2r05-adoption-answers.md) | PR #2 merge verification and operator answers for P2R-05 S5-Q01 through S5-Q05; sealed database unchanged |
 | [worklog-2026-10-05-p2r06-ta-v2-design.md](worklog-2026-10-05-p2r06-ta-v2-design.md) | P2R-06 gates 6.1 through 6.5: T_A v2 proposed design contract, synthetic validation, evaluation protocol, review surface TA2-Q01..Q06; issues #4/#5 closed; nothing fitted or adopted |
+| [worklog-2026-10-05-p2r06a-ta-v2-design-repairs.md](worklog-2026-10-05-p2r06a-ta-v2-design-repairs.md) | P2R-06a gates A1.1 through A1.9: nine PR #6 findings repaired (R1-R9), five 2026-10-16 design decisions bound as proposed material, exposure log recorded, joint candidate pair added, review surface extended to TA2-Q08; nothing fitted or adopted |
 
 ---
 

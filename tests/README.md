@@ -18,11 +18,12 @@ related_documents:
 
 # Repository Test Suites
 
-## T_A v2 design contract (P2R-06)
+## T_A v2 design contract (P2R-06, repaired by P2R-06a)
 
 `test_ta_v2_design_contract.py` proves the gate 6.3 contract for the proposed
-T_A v2 design. Everything is synthetic; nothing connects to a database,
-imports an installer, or generates catalog features.
+T_A v2 design and the P2R-06a repairs (gates A1.2-A1.9). Everything is
+synthetic; nothing connects to a database, imports an installer, or generates
+catalog features.
 
 - the validator exits 0 on the complete proposed contract with all synthetic
   fixture cases within tolerance, and records stable FX- case IDs with
